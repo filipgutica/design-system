@@ -1,0 +1,11 @@
+{
+  "syntaxSource": "Microsoft Visual Studio Code",
+  "version": "1.140.0",
+  "themes": [
+    "light_vs.json",
+    "light_plus.json",
+    "dark_vs.json",
+    "dark_plus.json"
+  ],
+  "includesFlattened": true
+}

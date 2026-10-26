@@ -1,0 +1,198 @@
+/*
+ * Design language tokens. Generated from themes/graphite-indigo.json in
+ * @filipgutica/ui; edit that file and run `pnpm themes:build`. Values live there.
+ * DESIGN.md names these tokens; it never repeats their values.
+ *
+ * Standalone HTML: import or inline this file.
+ * Inline visuals: inherit the host font and theme variables; see DESIGN.md.
+ * Repos: map these names onto the repository's own token system.
+ *
+ * Theme states: bare :root is light. prefers-color-scheme picks dark unless
+ * data-theme="light" is set. data-theme="dark" forces dark.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Cool graphite neutrals. */
+  --bg: #f4f5f8;
+  --surface: #e7e8ec;
+  --surface-raised: #ffffff;
+  --surface-hover: #e4e6eb;
+  --surface-selected: #dde0e6;
+  --row-hover: #dfe1e7;
+  --row-selected: #ffffff;
+  --border-subtle: #d8dbe2;
+  --border: #777d88;
+  --text: #222326;
+  --text-muted: #5d626c;
+  --text-faint: #626772;
+
+  /* Primary actions, links, and focus have separate roles. */
+  --accent: #6359a7;
+  --accent-text: #ffffff;
+  --accent-hover: #554b94;
+  --link: #075fc7;
+  --focus: #075fc7;
+
+  /* Status: only for state, never for decoration. */
+  --success: #1f8a5b;
+  --warning: #86532e;
+  --danger: #c7372d;
+  --info: #175cd3;
+  --success-soft: color-mix(in srgb, var(--success) 11%, var(--bg));
+  --warning-soft: color-mix(in srgb, var(--warning) 12%, var(--bg));
+  --danger-soft: color-mix(in srgb, var(--danger) 10%, var(--bg));
+  --info-soft: color-mix(in srgb, var(--info) 10%, var(--bg));
+
+  /* Code */
+  --code-bg: var(--surface);
+  --code-text: var(--text);
+  --code-key: #715b42;
+  --code-string: #346347;
+  --code-number: #86532e;
+  --code-comment: var(--text-faint);
+
+  /* Type: system faces, no font loading. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+  --text-reading: 16px;
+  --text-display: 56px;
+  --text-display-sm: 38px;
+  --leading-tight: 1.25;
+  --leading: 1.5;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --tracking-tight: -0.01em;
+
+  /* Space: 4px rhythm. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Size */
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-lg: 44px;
+  --row: 36px;
+  --measure: 68ch;
+  --page-max: 960px;
+  --page-wide: 1120px;
+  --sidebar: 224px;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-pill: 999px;
+
+  /* Elevation: floating layers only (menus, popovers, dialogs). */
+  --shadow-popover: 0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px var(--border-subtle);
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration: 180ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Focus */
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--focus);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #151619;
+    --surface: #191a1d;
+    --surface-raised: #212226;
+    --surface-hover: #303238;
+    --surface-selected: #34373e;
+    --row-hover: #25272d;
+    --row-selected: #38334f;
+    --border-subtle: #3b3e45;
+    --border: #818894;
+    --text: #f4f5f8;
+    --text-muted: #b0b5bf;
+    --text-faint: #a0a6b1;
+    --accent: #a99ce2;
+    --accent-text: #151619;
+    --accent-hover: #b7ace9;
+    --link: #58a6ff;
+    --focus: #58a6ff;
+    --success: #4cc38a;
+    --warning: #e2a54b;
+    --danger: #f0776c;
+    --info: #84adff;
+    --code-key: #d8c2a5;
+    --code-string: #a8bd9c;
+    --code-number: #d5b98c;
+    --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #151619;
+  --surface: #191a1d;
+  --surface-raised: #212226;
+  --surface-hover: #303238;
+  --surface-selected: #34373e;
+  --row-hover: #25272d;
+  --row-selected: #38334f;
+  --border-subtle: #3b3e45;
+  --border: #818894;
+  --text: #f4f5f8;
+  --text-muted: #b0b5bf;
+  --text-faint: #a0a6b1;
+  --accent: #a99ce2;
+  --accent-text: #151619;
+  --accent-hover: #b7ace9;
+  --link: #58a6ff;
+  --focus: #58a6ff;
+  --success: #4cc38a;
+  --warning: #e2a54b;
+  --danger: #f0776c;
+  --info: #84adff;
+  --code-key: #d8c2a5;
+  --code-string: #a8bd9c;
+  --code-number: #d5b98c;
+  --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border);
+}
+
+/* Minimal base. Component styles live in reference.html. */
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, p { margin: 0; }
+h1, h2, h3, h4 { font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); text-wrap: balance; }
+code, kbd, pre { font-family: var(--font-mono); }
+table, .num { font-variant-numeric: tabular-nums; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+p a, dd a { text-decoration: underline; text-underline-offset: 0.18em; }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-sm); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; scroll-behavior: auto !important; }
+}

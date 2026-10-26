@@ -1,0 +1,40 @@
+{
+  "name": "graphite-indigo",
+  "displayName": "Graphite Indigo",
+  "description": "A cool graphite theme with indigo actions and VS Code Light+ / Dark+ syntax colors.",
+  "version": "0.1.4",
+  "publisher": "filipgutica",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "files": [
+    "LICENSE",
+    "themes/*.json",
+    "graphite-indigo.t3-theme.json",
+    "SOURCE.json",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "keywords": [
+    "theme",
+    "graphite",
+    "indigo"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Graphite Indigo Light",
+        "uiTheme": "vs",
+        "path": "./themes/graphite-indigo-light-color-theme.json"
+      },
+      {
+        "label": "Graphite Indigo Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/graphite-indigo-dark-color-theme.json"
+      }
+    ]
+  }
+}
