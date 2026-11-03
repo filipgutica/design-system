@@ -18,6 +18,7 @@ Choose the format before styling. A public product page and an application scree
 | --- | --- | --- |
 | Product page | Centered wide frame, compact top navigation, expressive heading, left-aligned copy | Product purpose, one primary action, real product image |
 | Documentation or CLI tool | Centered frame containing navigation and article; compact heading and readable prose | Setup command or the information needed for the task |
+| Lesson or long-form article | Documentation frame; prose at `--measure`, figures may use the full article width | The question the lesson answers, a short contents list, then the first idea |
 | Application | Task-sized navigation and content panes; compact controls and rows | Working content and its relevant actions |
 | Inline visualization | Fit the conversation width and inherit the host appearance | The comparison, explanation, or interaction itself |
 
@@ -80,6 +81,7 @@ For standalone HTML, import or inline `tokens.css` and copy the matching example
 - Lists and properties: align short labels, values, and metadata. Use definition lists for terms and short meanings; use tables for actual comparisons.
 - Tabs: underline or segmented controls, with a clear current state and keyboard support. A screenshot opens at full size when clicked; use a native accessible trigger and restore its focus on close.
 - Callouts: short text plus an icon where useful. Status surfaces communicate a real caveat, not decorative emphasis.
+- Figures: one quiet plate (`--surface`, subtle border, `--radius-lg`) with the caption below it in `--text-sm` muted text. Number a figure only when the prose refers to it. Show the figure before the paragraph that explains it, and let wide figures scroll inside the plate.
 
 ## Interaction and motion
 
@@ -89,6 +91,7 @@ For standalone HTML, import or inline `tokens.css` and copy the matching example
 - Personal Pages share the built-in System/Light/Dark choice. An explicitly selected custom gallery theme overrides that choice until the reader selects a built-in appearance. Preserve installed themes.
 - Use `--duration-fast` for hover/press and `--duration` for menus/panels. Animate opacity or transform only where it explains a state change.
 - Keep content visible without reveal effects, entrance sequences, or continuous decorative animation. Honor reduced motion, including anchor scrolling.
+- An interactive figure first renders as complete static content, so it reads the same without JavaScript; enhancement adds controls, not information. Give each state a text label and announce live results politely. A lesson needs one interactive figure at most; keep the rest static.
 - Data views account for loading, empty, error, and recovery states. Heuristics guide design; browser evidence validates the result.
 
 ## Copy and density
