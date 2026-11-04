@@ -48,34 +48,39 @@ footer { padding-block: var(--space-6); border-top: 1px solid var(--border-subtl
 </div>
 <script>
 // Marks the section the reader is in: the last section whose top has reached the top of the
-// viewport, or the last section once the page is scrolled to the end. A section the reader
-// jumped to (a link or a deep link) stays current while any of it is in view, because a short
-// page cannot scroll it to the top. Without JavaScript the links still work; only the marker is missing.
+// viewport, or the last section once the page is scrolled to the end. After a jump (a link or a
+// deep link) the target stays current until the reader scrolls, because a short page cannot
+// scroll the target to the top. Without JavaScript the links still work; only the marker is missing.
 const sectionLinks = [...document.querySelectorAll('.sidebar a[href^="#"]')];
 const sections = sectionLinks.map((link) => document.getElementById(link.hash.slice(1)));
 let jumped = -1;
+let jumpY;
 let frame;
-const inView = (section) => { const { top, bottom } = section.getBoundingClientRect(); return top < innerHeight && bottom > 0; };
 const markLocation = () => {
  frame = undefined;
+ // The first frame after a jump records where it landed; scrolling away from there ends the jump.
+ if (jumped >= 0 && jumpY === undefined) jumpY = scrollY;
+ else if (jumped >= 0 && Math.abs(scrollY - jumpY) > 2) jumped = -1;
  const root = document.documentElement;
  let current = 0;
  sections.forEach((section, index) => { if (section.getBoundingClientRect().top <= 1) current = index; });
  if (scrollY > 0 && scrollY + innerHeight >= root.scrollHeight - 2) current = sections.length - 1;
- if (jumped >= 0 && inView(sections[jumped])) current = jumped; else jumped = -1;
+ if (jumped >= 0) current = jumped;
  sectionLinks.forEach((link, index) => {
   if (index === current) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current');
  });
 };
 const scheduleMark = () => { frame ??= requestAnimationFrame(markLocation); };
-const followHash = () => { jumped = sectionLinks.findIndex((link) => link.hash === location.hash); scheduleMark(); };
-// Scrolling back to the top returns the marker to the first section.
-addEventListener('scroll', () => { if (scrollY === 0) jumped = -1; scheduleMark(); }, { passive: true });
+const jumpTo = (index) => { jumped = index; jumpY = undefined; scheduleMark(); };
+const followHash = () => jumpTo(sectionLinks.findIndex((link) => link.hash === location.hash));
+addEventListener('scroll', scheduleMark, { passive: true });
 addEventListener('resize', scheduleMark);
 addEventListener('hashchange', followHash);
-// A second click on the same link changes no hash, so clicks set the jump too.
-sectionLinks.forEach((link, index) => link.addEventListener('click', () => { jumped = index; scheduleMark(); }));
-followHash();
+// A second click on the same link changes no hash, so clicks start the jump too.
+sectionLinks.forEach((link, index) => link.addEventListener('click', () => jumpTo(index)));
+// A deep link scrolls to its target only as the page finishes loading, so start that jump on load.
+scheduleMark();
+addEventListener('load', followHash, { once: true });
 
 document.getElementById('copy').addEventListener('click', async () => {
  const status = document.getElementById('copy-status');
