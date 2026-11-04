@@ -6,6 +6,9 @@
  * Standalone HTML: import or inline this file.
  * Inline visuals: inherit the host font and theme variables; see DESIGN.md.
  * Repos: map these names onto the repository's own token system.
+ * Sites on @filipgutica/ui: use the variable named in each line's "ui:" comment.
+ * When a line names several, use the first; the others are component roles with the same value.
+ * "ui: none" means the library has no variable for that token.
  *
  * Theme states: bare :root is light. prefers-color-scheme picks dark unless
  * data-theme="light" is set. data-theme="dark" forces dark.
@@ -15,111 +18,108 @@
   color-scheme: light;
 
   /* Cool graphite neutrals. */
-  --bg: #f4f5f8;
-  --surface: #e7e8ec;
-  --surface-raised: #ffffff;
-  --surface-hover: #e4e6eb;
-  --surface-selected: #dde0e6;
-  --row-hover: #dfe1e7;
-  --row-selected: #ffffff;
-  --border-subtle: #d8dbe2;
-  --border: #777d88;
-  --text: #222326;
-  --text-muted: #5d626c;
-  --text-faint: #626772;
+  --bg: #f4f5f8; /* ui: --color-bg */
+  --surface: #e7e8ec; /* ui: --color-surface */
+  --surface-raised: #ffffff; /* ui: --color-surface-raised, --color-input-bg */
+  --surface-hover: #e4e6eb; /* ui: --color-surface-muted */
+  --surface-selected: #dde0e6; /* ui: none */
+  --row-hover: #dfe1e7; /* ui: --color-row-hover */
+  --row-selected: #ffffff; /* ui: --color-row-selected */
+  --border-subtle: #d8dbe2; /* ui: --color-border-subtle */
+  --border: #777d88; /* ui: --color-border, --color-input-border */
+  --text: #222326; /* ui: --color-text, --color-input-text, --color-row-selected-text, --color-status-text */
+  --text-muted: #5d626c; /* ui: --color-muted, --color-input-placeholder, --color-syntax-operator, --color-syntax-punctuation */
+  --text-faint: #626772; /* ui: none */
 
   /* Primary actions, links, and focus have separate roles. */
-  --accent: #6359a7;
-  --accent-text: #ffffff;
-  --accent-hover: #554b94;
-  --link: #075fc7;
-  --focus: #075fc7;
+  --accent: #6359a7; /* ui: --color-accent, --color-button-bg, --color-progress */
+  --accent-text: #ffffff; /* ui: --color-button-text */
+  --accent-hover: #554b94; /* ui: --color-button-hover */
+  --link: #075fc7; /* ui: --color-link */
+  --focus: #075fc7; /* ui: --color-focus */
 
   /* Status: only for state, never for decoration. */
-  --success: #1f8a5b;
-  --warning: #86532e;
-  --danger: #c7372d;
-  --info: #175cd3;
-  --success-soft: color-mix(in srgb, var(--success) 11%, var(--bg));
-  --warning-soft: color-mix(in srgb, var(--warning) 12%, var(--bg));
-  --danger-soft: color-mix(in srgb, var(--danger) 10%, var(--bg));
-  --info-soft: color-mix(in srgb, var(--info) 10%, var(--bg));
+  --success: #157249; /* ui: --color-success */
+  --warning: #86532e; /* ui: --color-warning */
+  --danger: #c7372d; /* ui: --color-error */
+  --info: #175cd3; /* ui: --color-info */
+  --success-soft: color-mix(in srgb, var(--success) 11%, var(--bg)); /* ui: --color-success-surface */
+  --warning-soft: color-mix(in srgb, var(--warning) 12%, var(--bg)); /* ui: --color-warning-surface */
+  --danger-soft: color-mix(in srgb, var(--danger) 10%, var(--bg)); /* ui: --color-error-surface */
+  --info-soft: color-mix(in srgb, var(--info) 10%, var(--bg)); /* ui: --color-info-surface */
 
   /* Code */
-  --code-bg: var(--surface);
-  --code-text: var(--text);
-  --code-key: #715b42;
-  --code-string: #346347;
-  --code-number: #86532e;
-  --code-comment: var(--text-faint);
+  --code-bg: var(--surface); /* ui: --color-code */
+  --code-text: var(--text); /* ui: --color-code-text, --color-syntax-variable */
+  --code-key: #715b42; /* ui: --color-syntax-keyword, --color-syntax-function, --color-syntax-tag */
+  --code-string: #346347; /* ui: --color-syntax-string */
+  --code-number: #86532e; /* ui: --color-syntax-number, --color-syntax-type, --color-syntax-attribute */
+  --code-comment: var(--text-faint); /* ui: --color-syntax-comment */
 
   /* Type: system faces, no font loading. */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
-  --text-xs: 12px;
-  --text-sm: 13px;
-  --text-md: 14px;
-  --text-lg: 16px;
-  --text-xl: 20px;
-  --text-2xl: 24px;
-  --text-3xl: 32px;
-  --text-reading: 16px;
-  --text-display: 56px;
-  --text-display-sm: 38px;
-  --leading-tight: 1.25;
-  --leading: 1.5;
-  --weight-regular: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-  --tracking-tight: -0.01em;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif; /* ui: --font-ui */
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; /* ui: --font-mono */
+  --text-xs: 12px; /* ui: --text-xs */
+  --text-sm: 13px; /* ui: --text-sm */
+  --text-md: 14px; /* ui: --text-md */
+  --text-lg: 16px; /* ui: --text-lg */
+  --text-xl: 20px; /* ui: --text-xl */
+  --text-2xl: 24px; /* ui: --text-2xl */
+  --text-3xl: 32px; /* ui: --text-3xl */
+  --text-reading: 16px; /* ui: --text-reading */
+  --text-display: 56px; /* ui: --text-display */
+  --text-display-sm: 38px; /* ui: --text-display-sm */
+  --leading-tight: 1.25; /* ui: --leading-tight */
+  --leading: 1.5; /* ui: --leading */
+  --weight-regular: 400; /* ui: --weight-regular */
+  --weight-medium: 500; /* ui: --weight-medium */
+  --weight-semibold: 600; /* ui: --weight-semibold */
+  --tracking-tight: -0.01em; /* ui: --tracking-tight */
 
   /* Space: 4px rhythm. */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-12: 48px;
-  --space-16: 64px;
-  --space-20: 80px;
-  --space-24: 96px;
+  --space-1: 4px; /* ui: --space-1 */
+  --space-2: 8px; /* ui: --space-2 */
+  --space-3: 12px; /* ui: --space-3 */
+  --space-4: 16px; /* ui: --space-4 */
+  --space-5: 20px; /* ui: --space-5 */
+  --space-6: 24px; /* ui: --space-6 */
+  --space-8: 32px; /* ui: --space-8 */
+  --space-12: 48px; /* ui: --space-12 */
+  --space-16: 64px; /* ui: --space-16 */
+  --space-20: 80px; /* ui: --space-20 */
+  --space-24: 96px; /* ui: --space-24 */
 
   /* Size */
-  --control-sm: 32px;
-  --control-md: 36px;
-  --control-lg: 44px;
-  --row: 36px;
-  --measure: 68ch;
-  --page-max: 960px;
-  --page-wide: 1120px;
-  --sidebar: 224px;
+  --control-sm: 32px; /* ui: --control-sm */
+  --control-md: 36px; /* ui: --control-md */
+  --control-lg: 44px; /* ui: --control-lg */
+  --row: 36px; /* ui: --row */
+  --measure: 68ch; /* ui: --measure */
+  --page-max: 960px; /* ui: --page-max */
+  --page-wide: 1120px; /* ui: --page-wide */
+  --sidebar: 224px; /* ui: --sidebar */
 
   /* Shape */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --radius-pill: 999px;
+  --radius-sm: 4px; /* ui: --radius-inline */
+  --radius-md: 6px; /* ui: --radius-control */
+  --radius-lg: 8px; /* ui: --radius-panel */
+  --radius-xl: 12px; /* ui: none */
+  --radius-pill: 999px; /* ui: --radius-pill */
 
   /* Elevation: floating layers only (menus, popovers, dialogs). */
-  --shadow-popover: 0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px var(--border-subtle);
+  --shadow-popover: 0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px var(--border-subtle); /* ui: --shadow-dialog */
 
   /* Motion */
-  --duration-fast: 120ms;
-  --duration: 180ms;
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
-
-  /* Focus */
-  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--focus);
+  --duration-fast: 120ms; /* ui: --duration-fast */
+  --duration: 180ms; /* ui: --duration */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1); /* ui: --ease-out */
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #151619;
-    --surface: #191a1d;
+    --surface: #0e0f12;
     --surface-raised: #212226;
     --surface-hover: #303238;
     --surface-selected: #34373e;
@@ -149,7 +149,7 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #151619;
-  --surface: #191a1d;
+  --surface: #0e0f12;
   --surface-raised: #212226;
   --surface-hover: #303238;
   --surface-selected: #34373e;
@@ -192,7 +192,7 @@ table, .num { font-variant-numeric: tabular-nums; }
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
 p a, dd a { text-decoration: underline; text-underline-offset: 0.18em; }
-:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-sm); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; scroll-behavior: auto !important; }
 }
