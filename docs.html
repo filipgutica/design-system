@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Design language · Documentation example</title>
+<title>Documentation example</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
 .frame { width: min(calc(var(--page-max) + var(--sidebar)), calc(100% - var(--space-12))); margin-inline: auto; }
@@ -14,6 +14,8 @@
 .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
 .sidebar { position: sticky; top: var(--space-6); align-self: start; display: grid; gap: var(--space-1); padding-block: var(--space-6); }
 .sidebar a { display: flex; align-items: center; min-height: var(--control-lg); padding-inline: var(--space-3); color: var(--text-muted); border-radius: var(--radius-md); font-size: var(--text-sm); }
+/* In-page location: stronger text only. The accent bar marks the current page, not a section. */
+.sidebar a[aria-current="location"] { color: var(--text); font-weight: var(--weight-medium); }
 main { min-width: 0; display: grid; gap: var(--space-12); padding-block: var(--space-8) var(--space-16); }
 section { display: grid; gap: var(--space-4); min-width: 0; }
 h1 { font-size: var(--text-3xl); max-width: 24ch; }
@@ -45,6 +47,36 @@ footer { padding-block: var(--space-6); border-top: 1px solid var(--border-subtl
 <footer>Design language reference. Content and package name are illustrative.</footer>
 </div>
 <script>
+// Marks the section the reader is in: the last section whose top has reached the top of the
+// viewport, or the last section once the page is scrolled to the end. A section the reader
+// jumped to (a link or a deep link) stays current while any of it is in view, because a short
+// page cannot scroll it to the top. Without JavaScript the links still work; only the marker is missing.
+const sectionLinks = [...document.querySelectorAll('.sidebar a[href^="#"]')];
+const sections = sectionLinks.map((link) => document.getElementById(link.hash.slice(1)));
+let jumped = -1;
+let frame;
+const inView = (section) => { const { top, bottom } = section.getBoundingClientRect(); return top < innerHeight && bottom > 0; };
+const markLocation = () => {
+ frame = undefined;
+ const root = document.documentElement;
+ let current = 0;
+ sections.forEach((section, index) => { if (section.getBoundingClientRect().top <= 1) current = index; });
+ if (scrollY > 0 && scrollY + innerHeight >= root.scrollHeight - 2) current = sections.length - 1;
+ if (jumped >= 0 && inView(sections[jumped])) current = jumped; else jumped = -1;
+ sectionLinks.forEach((link, index) => {
+  if (index === current) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current');
+ });
+};
+const scheduleMark = () => { frame ??= requestAnimationFrame(markLocation); };
+const followHash = () => { jumped = sectionLinks.findIndex((link) => link.hash === location.hash); scheduleMark(); };
+// Scrolling back to the top returns the marker to the first section.
+addEventListener('scroll', () => { if (scrollY === 0) jumped = -1; scheduleMark(); }, { passive: true });
+addEventListener('resize', scheduleMark);
+addEventListener('hashchange', followHash);
+// A second click on the same link changes no hash, so clicks set the jump too.
+sectionLinks.forEach((link, index) => link.addEventListener('click', () => { jumped = index; scheduleMark(); }));
+followHash();
+
 document.getElementById('copy').addEventListener('click', async () => {
  const status = document.getElementById('copy-status');
  try { await navigator.clipboard.writeText(document.getElementById('command').textContent); status.textContent = 'Command copied.'; }

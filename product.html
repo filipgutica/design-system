@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Design language · Product page example</title>
+<title>Product page example</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
 .frame { width: min(var(--page-wide), calc(100% - var(--space-12))); margin-inline: auto; }
@@ -20,25 +20,34 @@ h1 { max-width: 18ch; font-size: var(--text-display); letter-spacing: var(--trac
 .action:hover { background: var(--accent-hover); color: var(--accent-text); text-decoration: none; }
 .actions > a { min-height: var(--control-lg); display: inline-flex; align-items: center; }
 figure { margin: 0; min-width: 0; }
-.product-view { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; }
+/* Product evidence sits in a well: one quiet frame, no frame around it. */
+.product-view { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; }
 .view-header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--space-6); border-bottom: 1px solid var(--border-subtle); font-size: var(--text-sm); }
 .view-header span { color: var(--text-muted); }
 .board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); padding: var(--space-6); }
 .board section { min-width: 0; }
 .board h2 { font-size: var(--text-sm); color: var(--text-muted); padding-bottom: var(--space-3); }
-.task { padding-block: var(--space-4); border-top: 1px solid var(--border); display: grid; gap: var(--space-2); }
+.task { padding-block: var(--space-4); border-top: 1px solid var(--border-subtle); display: grid; gap: var(--space-2); }
 .task code { font-size: var(--text-xs); color: var(--text-muted); }
 .task p { font-size: var(--text-sm); }
 figcaption { margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-muted); }
 .workflow { display: grid; gap: var(--space-6); padding-block: var(--space-12); border-top: 1px solid var(--border-subtle); }
 .workflow > h2 { max-width: 24ch; font-size: var(--text-3xl); }
 .workflow > p { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-reading); }
-.details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-8); }
-.details div { display: grid; gap: var(--space-2); padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
-.details h3 { font-size: var(--text-lg); }
-.details p { color: var(--text-muted); font-size: var(--text-reading); }
+.evidence { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-8); align-items: start; }
+.checks { margin: 0; padding: var(--space-2) var(--space-6); list-style: none; font-size: var(--text-sm); }
+.checks li { display: grid; grid-template-columns: 16px 64px minmax(0, 1fr); align-items: center; gap: var(--space-3); min-height: var(--row); padding-block: var(--space-2); }
+.checks li + li { border-top: 1px solid var(--border-subtle); }
+.checks code { font-size: var(--text-xs); color: var(--text-muted); }
+/* Status color goes on the icon; the text label carries the meaning. */
+.checks svg { width: 16px; height: 16px; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.checks .fail svg { stroke: var(--danger); }
+.checks .pass svg { stroke: var(--success); }
+.evidence-copy { display: grid; gap: var(--space-2); }
+.evidence-copy h3 { font-size: var(--text-lg); }
+.evidence-copy p { color: var(--text-muted); font-size: var(--text-reading); }
 footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); padding-block: var(--space-6); border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: var(--text-sm); }
-@media (max-width: 760px) { h1 { font-size: var(--text-display-sm); } .workflow > h2 { font-size: var(--text-2xl); } .hero { padding-block: var(--space-8); } .board { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding: var(--space-4); } .details { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); } .workflow { padding-block: var(--space-8); } .view-header { padding: var(--space-4); } }
+@media (max-width: 760px) { h1 { font-size: var(--text-display-sm); } .workflow > h2 { font-size: var(--text-2xl); } .hero { padding-block: var(--space-8); } .board { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding: var(--space-4); } .evidence { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); } .checks { padding-inline: var(--space-4); } .workflow { padding-block: var(--space-8); } .view-header { padding: var(--space-4); } }
 @media (max-width: 640px) { .frame { width: calc(100% - var(--space-8)); } }
 </style>
 </head>
@@ -49,7 +58,7 @@ footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: s
 <section class="hero"><div class="copy"><h1>Keep the whole project in view.</h1><p class="lead">A clear introduction, one useful next step, and product evidence. Give the reader enough context to decide where to go.</p><div class="actions"><a class="action" href="#workflow">Explore the workflow</a><a href="docs.html">Read the documentation</a></div></div>
 <figure><div class="product-view"><div class="view-header"><strong>Example workspace</strong><span>Demo board</span></div><div class="board"><section><h2>Planned</h2><div class="task"><code>DEMO-12</code><p>Make setup easier to follow</p></div><div class="task"><code>DEMO-14</code><p>Align the reference pages</p></div></section><section><h2>In progress</h2><div class="task"><code>DEMO-09</code><p>Check the mobile workflow</p></div></section><section><h2>Ready for review</h2><div class="task"><code>DEMO-07</code><p>Improve reading contrast</p></div></section></div></div><figcaption>Illustrative product evidence. Production pages should show their actual interface.</figcaption></figure>
 </section>
-<section class="workflow" id="workflow"><h2>Show the work before listing features.</h2><p>A few meaningful sections can explain a product more clearly than a large grid of claims. Keep details grounded in what the product does.</p><div class="details"><div><h3>Orient</h3><p>Explain the purpose and place the next action nearby.</p></div><div><h3>Demonstrate</h3><p>Show a relevant image or working example with a useful caption.</p></div><div><h3>Explain</h3><p>Keep constraints, setup, and supporting documentation easy to reach.</p></div></div></section>
+<section class="workflow" id="workflow"><h2>Show the work before listing features.</h2><p>One worked example explains a product more clearly than a grid of claims. Show what the product did, then say what it proves.</p><div class="evidence"><figure><div class="product-view"><div class="view-header"><strong>Check the mobile workflow</strong><span>DEMO-09</span></div><ul class="checks"><li class="fail"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M6 6l4 4M10 6l-4 4"/></svg><code>390 px</code><span>Fails: the table scrolls the page</span></li><li class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M5.8 8.2l1.5 1.5 2.9-3"/></svg><code>720 px</code><span>Passes: no horizontal overflow</span></li><li class="pass"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M5.8 8.2l1.5 1.5 2.9-3"/></svg><code>1280 px</code><span>Passes: no horizontal overflow</span></li></ul></div><figcaption>Illustrative check results for one task.</figcaption></figure><div class="evidence-copy"><h3>What the capture proves</h3><p>The check ran at three widths and named the one that failed. A reader can see the result and the cause before reading any claim about the product.</p></div></div></section>
 </main>
 <footer><span>Design language reference. This product and its data are illustrative.</span><a href="docs.html">Documentation example</a></footer>
 </div>
