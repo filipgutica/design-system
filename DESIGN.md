@@ -58,7 +58,7 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 - Use `--font-sans` for UI and prose; `--font-mono` for code, identifiers, values, and keys. Use system fonts unless the project's system supplies a font.
 - Controls and dense application content use `--text-md`; secondary text uses `--text-sm`. Paragraphs and substantial article text use `--text-reading` with `--leading`. Bound reading text with `--measure` and introductory copy to a slightly shorter line.
 - Documentation titles use `--text-3xl`; section headings use `--text-xl` or `--text-2xl` according to their role. Application titles use `--text-2xl` or smaller.
-- Product pages may use `--text-display`, stepping down to `--text-display-sm` on phones. Keep a short heading measure and place supporting copy and the primary action nearby. The first product image should enter the initial desktop viewport.
+- Product pages may use `--text-display`, stepping down to `--text-display-sm` at tablet width. Keep a short heading measure and place supporting copy and the primary action nearby. The first product image should enter the initial desktop viewport.
 - Use `--weight-regular`, `--weight-medium`, and `--weight-semibold`. Sentence case and restrained tracking make hierarchy easier to scan.
 - Use `--text-muted` for secondary information and metadata, and `--text` for essential labels and instructions.
 
@@ -73,10 +73,18 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 
 ## Layout and spacing
 
-- Use the `--space-*` rhythm and flex/grid `gap`. Use smaller gaps within a group and larger gaps between groups. Documentation sections use `--space-12`, stepping down to `--space-8` on phones. Product sections use `--space-24` total separation, stepping down to `--space-16` on phones. Give each section gap one owner so adjoining padding does not double it.
+- Use the `--space-*` rhythm and flex/grid `gap`. Use smaller gaps within a group and larger gaps between groups. Documentation sections use `--space-12`, stepping down to `--space-8` on phones. Product sections use `--space-24` total separation, stepping down to `--space-16` at tablet width. Give each section gap one owner so adjoining padding does not double it.
 - Product pages use `--page-wide`; documentation uses `--page-max`, optionally combined with a thin navigation column. Center the combined shell, not only the article inside an edge-pinned sidebar.
 - Tool and docs introductions stay compact. Preserve the direct route to install commands and useful captures.
-- Use `--space-6` side gutters on desktop and tablet. On phones, use `--space-4` side gutters and one content column. Navigation can become a drawer or a native scrolling section strip. Keep wide code, tables, and charts scrolling inside their containers.
+- Use two named breakpoints. Write desktop styles first, then override them at these widths:
+
+  | Name | Media query | What changes |
+  | --- | --- | --- |
+  | Tablet | `@media (max-width: 800px)` | Multi-column layouts become one content column. Side navigation becomes a drawer or a native scrolling section strip. Touch controls use `--control-lg`. |
+  | Phone | `@media (max-width: 640px)` | Side gutters drop from `--space-6` to `--space-4`, and section gaps take their phone step. |
+
+  Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. Add no other viewport breakpoint. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.
+- Keep wide code, tables, and charts scrolling inside their containers.
 - Keep main headings, actions, and product evidence visible on load. Scrolling should reveal more content without being required to make existing content appear.
 
 ## Surfaces and components
@@ -102,6 +110,28 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 - Callouts: short text plus an icon where useful. Status surfaces communicate a real caveat, not decorative emphasis.
 - Figures: one quiet plate (`--surface`, subtle border, `--radius-lg`) with the caption below it in `--text-sm` muted text. Number figures when the prose refers to any of them, and then number them all. Place a figure beside the paragraph that explains it, once the terms it uses have been introduced. Let wide figures scroll inside the plate.
 
+## Forms
+
+- Lay out a form as one column of fields, no wider than `--measure`. Give short values, such as a port or a count, a narrower control.
+- Each field stacks a visible label, the control, then one line below it for help or an error. On a library site, wrap `UiInput` or `UiSelect` in `UiField` with `label`, `controlId`, and optional `description` and `error`. `UiField` connects the label, help, and error to the control with `for`, `aria-describedby`, `aria-errormessage`, and `aria-invalid`. Standalone pages build the same anatomy with `<label for>`, a help `<p>`, and those attributes.
+- Labels are short sentence-case nouns without a colon. Placeholder text is never the only label. Mark optional fields "(optional)" instead of marking required ones.
+- Group checkboxes and radio choices in a `<fieldset>` with a `<legend>`. `UiCheckbox` and `UiRadioCard` carry their own labels and do not join a `UiField`. Use `UiRadioCardGroup` for two to four choices that each need a description; use a select for a longer list.
+- Validate a field when it loses focus and again on submit, not on each keystroke. The error replaces the help line. It says what to do, such as "Enter a project name", in `--danger` text. On submit, keep what the reader entered and move focus to the first invalid field. Clear the error once the value is valid.
+- Give each form one primary action (`UiButton variant="primary"`, or an `--accent` button), placed after the last field and aligned with the fields' leading edge. Put Cancel or Reset beside it as a secondary or ghost button. Use `type="submit"` so Enter submits. Keep the primary action enabled and let submit reveal the errors. While saving, set `loading` (or `aria-busy`) and keep the label. Confirm success in text next to the action, such as "Saved".
+
+## Data views
+
+- Use a `<table>` when readers compare rows across columns; use a list or definition list otherwise. The library has no table component, so library and standalone pages both copy the table in `reference.html`. On a library site, rename its variables to the library names in the token context table above.
+- Table anatomy: an optional toolbar above it with the title, a row count, filters, and at most one primary action; a header row in `--text-muted` medium weight; rows separated by `--border-subtle` dividers, with no zebra stripes or vertical rules. Put the table in the page or one panel, inside a wrapper that scrolls horizontally when the table is wide.
+- Left-align text. Right-align numbers, sizes, durations, and counts, with their header aligned to match, and set `font-variant-numeric: tabular-nums`. Keep one unit and precision down a column, and write the unit in the header, such as "Size (MB)", or in every cell.
+- A selected row uses the list and table selection recipe in Theme and color. A status cell uses a text label with its status icon, as Theme and color describes.
+- Show loading, empty, and error states in place of the rows. Keep the toolbar and header row so the layout does not jump:
+  - **Loading:** placeholder rows at the real row height, or one "Loading worktrees…" row. Set `aria-busy="true"` on the table region. Use `UiProgress` only when the total is known.
+  - **Empty:** one short centered message that names what is missing and the next step, such as "No worktrees yet. Create one from the toolbar." When a filter caused it, say so and offer Clear filters.
+  - **Error:** a danger callout (`UiAlert tone="danger"`, or a `--danger-soft` callout with an icon) that says what failed in plain words and offers Retry. Put raw error detail behind a disclosure. When a refresh fails, keep the last rows visible and show the callout above them.
+  - **Recovery:** Retry returns to the loading state. Announce the result politely.
+- State copy names the object, uses sentence case, and has no apology or exclamation mark.
+
 ## Interaction and motion
 
 - Show visible focus and accessible names. A visual simplification must preserve useful controls, caveats, and keyboard paths.
@@ -112,7 +142,7 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 - Use `--duration-fast` for hover/press and `--duration` for menus/panels. Animate opacity or transform only where it explains a state change.
 - Keep content visible without reveal effects, entrance sequences, or continuous decorative animation. Honor reduced motion, including anchor scrolling.
 - An interactive figure first renders as complete static content, so it reads the same without JavaScript; enhancement adds controls, not information. Give each state a text label and announce live results politely. A lesson needs one interactive figure at most; keep the rest static.
-- Data views account for loading, empty, error, and recovery states. Heuristics guide design; browser evidence validates the result.
+- Heuristics guide design; browser evidence validates the result.
 
 ## Copy and density
 
@@ -138,6 +168,7 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 - [ ] Typography distinguishes title, section, body, and metadata without competing focal points.
 - [ ] Product evidence is real or clearly illustrative; factual caveats and attribution remain present.
 - [ ] Both supported themes are readable, with theme controls only where useful.
-- [ ] Phone, intermediate tablet, and wide desktop widths have no horizontal page scroll.
+- [ ] At 390, 720, and 1280 px wide there is no horizontal page scroll, and viewport media queries use only 640px and 800px.
+- [ ] Forms follow the field anatomy with one primary action; data views show loading, empty, and error states in place.
 - [ ] Keyboard, focus, touch, deep links, and reduced motion work across relevant states.
 - [ ] Controls and spacing use the owning system's tokens; each panel and visual effect has a purpose.
