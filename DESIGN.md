@@ -26,7 +26,7 @@ Center the **container**, not every sentence. Align header, content, images, and
 
 ## Files and examples
 
-- `tokens.css`: generated standalone snapshot of the Graphite Indigo values owned by `@filipgutica/ui`. Regenerate it when the package values change.
+- `tokens.css`: generated standalone snapshot of the Graphite Indigo values owned by `@filipgutica/ui`. Each line's `ui:` comment names the library variable for that token. Regenerate it when the package values change.
 - `reference.html`: application components and token inspection.
 - `docs.html`: a balanced documentation shell and compact setup command.
 - `product.html`: a restrained product-page hierarchy with illustrative product evidence.
@@ -34,7 +34,16 @@ Center the **container**, not every sentence. Align header, content, images, and
 
 Personal sites import `@filipgutica/ui/themes/graphite-indigo.css` and the shared site helpers. The UI package owns the values and generation procedure.
 
-For standalone HTML, import or inline `tokens.css` and copy the matching example's component styles. In a repository, map these roles to its existing token and component system. For inline visuals, use the host's supplied CSS variables and font; avoid introducing a separate page shell.
+Token names depend on where the page runs. This file uses the `tokens.css` names.
+
+| Context | Variable names to write |
+| --- | --- |
+| Standalone HTML | The `tokens.css` names. Import or inline `tokens.css` and copy the matching example's component styles. |
+| Site on `@filipgutica/ui` | The library variable in the `ui:` comment beside each `tokens.css` line, such as `--color-muted` for `--text-muted`. When a comment names several, use the first. Never write a `tokens.css` name on a library site: it is undefined there, and `var()` falls back without an error. |
+| Other repository | That repository's own tokens and components, matched to these roles by meaning. |
+| Inline visual | The host's supplied CSS variables and font, with no separate page shell. |
+
+`tokens.css` still defines `--text-faint`, `--surface-selected`, and `--radius-xl`, marked `ui: none`. Do not use them.
 
 ## Character
 
@@ -51,7 +60,7 @@ For standalone HTML, import or inline `tokens.css` and copy the matching example
 - Documentation titles use `--text-3xl`; section headings use `--text-xl` or `--text-2xl` according to their role. Application titles use `--text-2xl` or smaller.
 - Product pages may use `--text-display`, stepping down to `--text-display-sm` on phones. Keep a short heading measure and place supporting copy and the primary action nearby. The first product image should enter the initial desktop viewport.
 - Use `--weight-regular`, `--weight-medium`, and `--weight-semibold`. Sentence case and restrained tracking make hierarchy easier to scan.
-- Use `--text-muted` for secondary information. Reserve `--text-faint` for nonessential metadata; essential labels and instructions must remain readable.
+- Use `--text-muted` for secondary information and metadata, and `--text` for essential labels and instructions.
 
 ## Theme and color
 
@@ -59,7 +68,7 @@ For standalone HTML, import or inline `tokens.css` and copy the matching example
 - Standalone pages follow the OS by default. A visible theme control is optional: include it when the user requests one, the product already has one, or choosing/comparing themes serves the task. Token inspection and UI-library documentation are valid uses; a simple chart or explainer usually is not.
 - Existing products retain their theme preferences and persistence contracts. Where a standalone choice is needed, System removes the override and explicit Light/Dark choices set it. Wrap storage access in try/catch.
 - Use cool graphite `--bg`, `--surface`, and `--surface-raised` with a cool off-white light canvas to separate regions. Use `--text` and `--text-muted` for the main hierarchy.
-- Use indigo primary actions through `--accent`, `--accent-text`, and `--accent-hover`. Blue `--link` and `--focus` identify links and keyboard focus. Underline prose links. Navigation rows use neutral `--row-hover` and persistent `--row-selected`: white in light mode and a restrained indigo tint in dark mode. Mark the current destination with a 2px inset indigo bar and medium text weight. Put the bar on the left of vertical route lists and below horizontal project strips. In-page location links use a quieter text or underline treatment. Hover on the current destination retains its selected fill. Keep raised-control hover (`--surface-hover`), text selection (`--surface-selected`), and keyboard focus separate from navigation states. Keep restrained syntax colors separate from the action palette. Status colors mean state and have a text or icon label. Small status labels use the normal text foreground over their colored fills; reserve status foreground colors for icons when text contrast is insufficient.
+- Use indigo primary actions through `--accent`, `--accent-text`, and `--accent-hover`. Blue `--link` and `--focus` identify links and keyboard focus. Underline prose links. Navigation rows use neutral `--row-hover` and persistent `--row-selected`: white in light mode and a restrained indigo tint in dark mode. Mark the current destination with a 2px inset indigo bar and medium text weight. Put the bar on the left of vertical route lists and below horizontal project strips. In-page location links use a quieter text or underline treatment. Hover on the current destination retains its selected fill. List and table selection uses the same recipe: `--row-selected` fill plus the 2px accent bar on the leading edge. Checked and selected states use `--accent`; `--link` and `--focus` never mark a checked choice. Keep raised-control hover (`--surface-hover`) and keyboard focus separate from navigation and selection states. Keep restrained syntax colors separate from the action palette. Status colors mean state and have a text or icon label. Small status labels use the normal text foreground over their colored fills. Status foreground colors go on icons; numbers and labels beside them stay in `--text` or `--text-muted`.
 - Verify light and dark appearance where supported, regardless of whether a switch is visible. Check text contrast rather than assuming a muted token is accessible at every size.
 
 ## Layout and spacing
@@ -72,9 +81,19 @@ For standalone HTML, import or inline `tokens.css` and copy the matching example
 
 ## Surfaces and components
 
-- Start with headings, content, and whitespace. Use a faint divider where it clarifies a boundary.
-- Panels are for standalone code, images, forms, charts, or detail views. Use `--radius-lg` and subtle borders; avoid nesting panels.
-- Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
+- Start with headings, content, and whitespace. Use a `--border-subtle` divider where it clarifies a boundary.
+- Each surface role has one recipe:
+
+  | Role | Use for | Fill | Border | Radius | Shadow |
+  | --- | --- | --- | --- | --- | --- |
+  | Page | The canvas | `--bg` | None | None | None |
+  | Well | Code, captures, figures, and inset previews | `--surface` | `--border-subtle` | `--radius-lg` | None |
+  | Panel | Cards, forms, charts, and detail views | `--surface-raised` | `--border-subtle` | `--radius-lg` | None |
+  | Floating layer | Menus, popovers, pickers, and dialogs | `--surface-raised` | Included in the shadow | `--radius-lg` | `--shadow-popover` |
+
+- `--border` is for control edges only: buttons, inputs, and selects. Panels, wells, and dividers use `--border-subtle`.
+- Radii: `--radius-sm` for inline elements such as keys and segmented-control thumbs; `--radius-md` for controls and rows; `--radius-lg` for wells, panels, callouts, and floating layers; `--radius-pill` for badges.
+- Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
 - Shadows belong to floating layers. Modest radii and stable hover states keep normal content quiet.
 - Buttons: one clearly primary action per visible decision group; secondary actions are quieter. Touch controls use `--control-lg`.
 - Code: multiline samples may have a small descriptive header and Copy action. Short commands use a headerless compact row with an accessible Copy control. Put useful setup context above the row; omit repeated language labels.
@@ -86,6 +105,7 @@ For standalone HTML, import or inline `tokens.css` and copy the matching example
 ## Interaction and motion
 
 - Show visible focus and accessible names. A visual simplification must preserve useful controls, caveats, and keyboard paths.
+- Draw keyboard focus as `outline: 2px solid var(--focus); outline-offset: 2px`; the `tokens.css` base sets it. Use an inset offset (`-2px`) only where a scrolling or clipping parent would cut the ring, and add a comment that names that parent. Do not draw focus with `box-shadow`: forced-colors mode removes it. Pointer hover changes the fill only; the outline appears only for `:focus-visible`.
 - Personal product sites share a compact static header with identity, a project switcher, useful page links, and appearance controls. Use the shared project registry for names, order, and destinations. Keep a gallery's existing application navigation structure.
 - Keep product navigation distinct from in-page section links. Current-page and current-section indicators serve different purposes. Open sibling project links in the same tab; indicate a new tab only when the link opens one.
 - Personal Pages share the built-in System/Light/Dark choice. An explicitly selected custom gallery theme overrides that choice until the reader selects a built-in appearance. Preserve installed themes.
