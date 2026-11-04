@@ -52,7 +52,7 @@
   /* Input */
   .search { display: flex; align-items: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--text-muted); min-width: 0; }
   /* The field draws the focus ring, so the input inside it does not. */
-  .search:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .search:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
   .search input { border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--text-sm); width: 180px; min-width: 0; }
   .search input::placeholder { color: var(--text-muted); }
   kbd { font-size: var(--text-xs); color: var(--text-muted); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 var(--space-1); line-height: 18px; background: var(--surface-raised); }
@@ -112,7 +112,7 @@
   /* Time-series chart */
   .chart-wrap { margin: 0; display: grid; gap: var(--space-2); }
   .chart { width: 100%; height: auto; display: block; overflow: visible; }
-  .chart text { font: var(--text-xs) var(--font-mono); fill: var(--text-muted); font-size: 10px; }
+  .chart text { font: var(--text-xs) var(--font-mono); fill: var(--text-muted); }
   .chart .grid { stroke: var(--border-subtle); stroke-width: 1; }
   .chart .threshold { stroke: var(--danger); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.7; }
   .chart .line { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linejoin: round; }
