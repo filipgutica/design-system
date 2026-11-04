@@ -22,6 +22,8 @@ Choose the format before styling. A public product page and an application scree
 | Application | Task-sized navigation and content panes; compact controls and rows | Working content and its relevant actions |
 | Inline visualization | Fit the conversation width and inherit the host appearance | The comparison, explanation, or interaction itself |
 
+For data-driven charts, filterable reports, or portable HTML artifacts, read [Data visualizations](visualizations.md). It owns measurement consistency, reusable count rendering, filter checks, and inline/standalone delivery. Project-specific source queries stay in the owning project.
+
 Center the **container**, not every sentence. Align header, content, images, and footer to deliberate shared edges. Bound prose with `--measure`; let useful images, tables, and component previews use the available frame.
 
 ## Files and examples
