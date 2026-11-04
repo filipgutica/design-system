@@ -81,7 +81,7 @@ For standalone HTML, import or inline `tokens.css` and copy the matching example
 - Lists and properties: align short labels, values, and metadata. Use definition lists for terms and short meanings; use tables for actual comparisons.
 - Tabs: underline or segmented controls, with a clear current state and keyboard support. A screenshot opens at full size when clicked; use a native accessible trigger and restore its focus on close.
 - Callouts: short text plus an icon where useful. Status surfaces communicate a real caveat, not decorative emphasis.
-- Figures: one quiet plate (`--surface`, subtle border, `--radius-lg`) with the caption below it in `--text-sm` muted text. Number a figure only when the prose refers to it. Show the figure before the paragraph that explains it, and let wide figures scroll inside the plate.
+- Figures: one quiet plate (`--surface`, subtle border, `--radius-lg`) with the caption below it in `--text-sm` muted text. Number figures when the prose refers to any of them, and then number them all. Place a figure beside the paragraph that explains it, once the terms it uses have been introduced. Let wide figures scroll inside the plate.
 
 ## Interaction and motion
 
