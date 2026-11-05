@@ -43,8 +43,6 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 | Other repository | That repository's own tokens and components, matched to these roles by meaning. |
 | Inline visual | The host's supplied CSS variables and font, with no separate page shell. |
 
-`tokens.css` still defines `--text-faint`, `--surface-selected`, and `--radius-xl`, marked `ui: none`. Do not use them.
-
 ## Character
 
 - **Quiet surfaces, clear hierarchy.** Neutral backgrounds with color reserved for actions, links, and meaningful states. Contrast, type, alignment, and proximity carry the structure.
