@@ -8,7 +8,6 @@
  * Repos: map these names onto the repository's own token system.
  * Sites on @filipgutica/ui: use the variable named in each line's "ui:" comment.
  * When a line names several, use the first; the others are component roles with the same value.
- * "ui: none" means the library has no variable for that token.
  *
  * Theme states: bare :root is light. prefers-color-scheme picks dark unless
  * data-theme="light" is set. data-theme="dark" forces dark.
@@ -18,18 +17,16 @@
   color-scheme: light;
 
   /* Cool graphite neutrals. */
-  --bg: #f4f5f8; /* ui: --color-bg */
+  --bg: #f8f9fb; /* ui: --color-bg */
   --surface: #e7e8ec; /* ui: --color-surface */
   --surface-raised: #ffffff; /* ui: --color-surface-raised, --color-input-bg */
   --surface-hover: #e4e6eb; /* ui: --color-surface-muted */
-  --surface-selected: #dde0e6; /* ui: none */
   --row-hover: #dfe1e7; /* ui: --color-row-hover */
   --row-selected: #ffffff; /* ui: --color-row-selected */
   --border-subtle: #d8dbe2; /* ui: --color-border-subtle */
   --border: #777d88; /* ui: --color-border, --color-input-border */
   --text: #222326; /* ui: --color-text, --color-input-text, --color-row-selected-text, --color-status-text */
   --text-muted: #5d626c; /* ui: --color-muted, --color-input-placeholder, --color-syntax-operator, --color-syntax-punctuation */
-  --text-faint: #626772; /* ui: none */
 
   /* Primary actions, links, and focus have separate roles. */
   --accent: #6359a7; /* ui: --color-accent, --color-button-bg, --color-progress */
@@ -54,7 +51,7 @@
   --code-key: #715b42; /* ui: --color-syntax-keyword, --color-syntax-function, --color-syntax-tag */
   --code-string: #346347; /* ui: --color-syntax-string */
   --code-number: #86532e; /* ui: --color-syntax-number, --color-syntax-type, --color-syntax-attribute */
-  --code-comment: var(--text-faint); /* ui: --color-syntax-comment */
+  --code-comment: #626772; /* ui: --color-syntax-comment */
 
   /* Type: system faces, no font loading. */
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif; /* ui: --font-ui */
@@ -103,7 +100,6 @@
   --radius-sm: 4px; /* ui: --radius-inline */
   --radius-md: 6px; /* ui: --radius-control */
   --radius-lg: 8px; /* ui: --radius-panel */
-  --radius-xl: 12px; /* ui: none */
   --radius-pill: 999px; /* ui: --radius-pill */
 
   /* Elevation: floating layers only (menus, popovers, dialogs). */
@@ -122,14 +118,12 @@
     --surface: #0e0f12;
     --surface-raised: #212226;
     --surface-hover: #303238;
-    --surface-selected: #34373e;
     --row-hover: #25272d;
     --row-selected: #38334f;
     --border-subtle: #3b3e45;
     --border: #818894;
     --text: #f4f5f8;
     --text-muted: #b0b5bf;
-    --text-faint: #a0a6b1;
     --accent: #a99ce2;
     --accent-text: #151619;
     --accent-hover: #b7ace9;
@@ -142,7 +136,8 @@
     --code-key: #d8c2a5;
     --code-string: #a8bd9c;
     --code-number: #d5b98c;
-    --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border);
+    --code-comment: #a0a6b1;
+    --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border-subtle);
   }
 }
 
@@ -152,14 +147,12 @@
   --surface: #0e0f12;
   --surface-raised: #212226;
   --surface-hover: #303238;
-  --surface-selected: #34373e;
   --row-hover: #25272d;
   --row-selected: #38334f;
   --border-subtle: #3b3e45;
   --border: #818894;
   --text: #f4f5f8;
   --text-muted: #b0b5bf;
-  --text-faint: #a0a6b1;
   --accent: #a99ce2;
   --accent-text: #151619;
   --accent-hover: #b7ace9;
@@ -172,7 +165,8 @@
   --code-key: #d8c2a5;
   --code-string: #a8bd9c;
   --code-number: #d5b98c;
-  --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border);
+  --code-comment: #a0a6b1;
+  --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border-subtle);
 }
 
 /* Minimal base. Component styles live in reference.html. */

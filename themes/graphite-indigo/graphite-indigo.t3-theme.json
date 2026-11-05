@@ -68,9 +68,9 @@
   },
   "variants": {
     "light": {
-      "canvas": "#f4f5f8",
-      "chrome": "#f4f5f8",
-      "toolbar": "#f4f5f8",
+      "canvas": "#f8f9fb",
+      "chrome": "#f8f9fb",
+      "toolbar": "#f8f9fb",
       "toolbarForeground": "#222326",
       "toolbarBorder": "#d8dbe2",
       "toolbarControl": "#ffffff",
@@ -123,7 +123,7 @@
       "sidebarRowActive": "#ffffff",
       "sidebarRowSelected": "#ffffff",
       "sidebarBorder": "#d8dbe2",
-      "terminalBackground": "#f4f5f8",
+      "terminalBackground": "#f8f9fb",
       "terminalForeground": "#222326",
       "terminalCursor": "#222326",
       "terminalSelection": "#dde0e6",
