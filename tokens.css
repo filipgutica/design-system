@@ -18,7 +18,7 @@
   color-scheme: light;
 
   /* Cool graphite neutrals. */
-  --bg: #f4f5f8; /* ui: --color-bg */
+  --bg: #f8f9fb; /* ui: --color-bg */
   --surface: #e7e8ec; /* ui: --color-surface */
   --surface-raised: #ffffff; /* ui: --color-surface-raised, --color-input-bg */
   --surface-hover: #e4e6eb; /* ui: --color-surface-muted */
