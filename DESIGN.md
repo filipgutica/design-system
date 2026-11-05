@@ -144,6 +144,6 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 - [ ] Typography distinguishes title, section, body, and metadata without competing focal points.
 - [ ] Product evidence is real or clearly illustrative; factual caveats and attribution remain present.
 - [ ] Both supported themes are readable, with theme controls only where useful.
-- [ ] At 390, 720, and 1280 px wide there is no horizontal page scroll, and viewport media queries use only 640px and 800px.
+- [ ] At 390, 720, and 1280 px wide there is no horizontal page scroll, and viewport media queries use only `max-width: 640px`, `max-width: 800px`, and `min-width: 801px`.
 - [ ] Keyboard, focus, touch, deep links, and reduced motion work across relevant states.
 - [ ] Controls and spacing use the owning system's tokens; each panel and visual effect has a purpose.
