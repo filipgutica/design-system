@@ -31,7 +31,7 @@ const countKeys = (counts, keys, name) => {
 export function validateSnapshot(snapshot) {
   if (snapshot?.schemaVersion !== 1) fail('schemaVersion must be 1')
   text(snapshot.title, 'title')
-  if (snapshot.dimensionLabel !== undefined) text(snapshot.dimensionLabel, 'dimensionLabel')
+  for (const key of ['filterLabel', 'dimensionLabel']) if (snapshot[key] !== undefined) text(snapshot[key], key)
   const captured = instant(snapshot.capturedAt, 'capturedAt')
   for (const key of ['provider', 'dataset', 'basis', 'unit', 'sampling', 'scope', 'query']) text(snapshot.source?.[key], `source.${key}`)
   if (snapshot.source.url !== undefined) {
@@ -61,7 +61,7 @@ export function validateSnapshot(snapshot) {
       cells.push(JSON.stringify([row.region, row.endpoint]))
       countKeys(row.counts, keys, 'row.counts')
     }
-    unique(cells, `${window.key} region/endpoint cells`)
+    unique(cells, `${window.key} group/item cells`)
     const totals = Object.fromEntries(keys.map((key) => [key, safeSum(window.rows.map((r) => r.counts[key]))]))
     safeSum(Object.values(totals))
     if (window.referenceCounts !== undefined) {
@@ -119,7 +119,7 @@ function buildView({ snapshot, windowKey, region, percent, escape }) {
     return mark
   }).join('')
   const date = (s) => new Date(s).toISOString().replace('T', ' ').replace('.000Z', 'Z')
-  return { summary, table, mobile, bars, caption: `${date(window.from)} → ${date(window.to)} · snapshot`, announcement: `${region || 'All regions'}, ${window.label}: ${number(total)} ${snapshot.source.unit}`, reference: window.referenceCounts ? 'All-region aggregate cross-check matched.' : 'No independent aggregate supplied.' }
+  return { summary, table, mobile, bars, caption: `${date(window.from)} → ${date(window.to)} · snapshot`, announcement: `${snapshot.filterLabel || 'Group'}: ${region || 'All'}, ${window.label}: ${number(total)} ${snapshot.source.unit}`, reference: window.referenceCounts ? 'Independent aggregate cross-check matched.' : 'No independent aggregate supplied.' }
 }
 
 export async function renderReport(snapshot, { mode = 'inline', tokens = '' } = {}) {
@@ -131,16 +131,17 @@ export async function renderReport(snapshot, { mode = 'inline', tokens = '' } = 
   const view = buildView({ snapshot, windowKey: snapshot.defaultWindow, region: '', percent: formatPercent, escape: escapeHtml })
   const options = (items) => items.map(([key, label]) => `<option value="${escapeHtml(key)}">${escapeHtml(label)}</option>`).join('')
   const headers = snapshot.categories.map((c) => `<th><span class="ov-dot ${c.tone}" aria-hidden="true">●</span> ${escapeHtml(c.label)}</th>`).join('')
-  const data = JSON.stringify(snapshot).replaceAll('<', '\\u003c')
-  const script = `(()=>{const snapshot=${data},root=document.getElementById('ov-report'),region=root.querySelector('#ov-region'),windowPicker=root.querySelector('#ov-window');const percent=${formatPercent.toString()},escape=${escapeHtml.toString()},build=${buildView.toString()};windowPicker.value=snapshot.defaultWindow;function update(){const view=build({snapshot,windowKey:windowPicker.value,region:region.value,percent,escape});root.querySelector('#ov-summary').innerHTML=view.summary;root.querySelector('#ov-rows').innerHTML=view.table;root.querySelector('#ov-mobile').innerHTML=view.mobile;root.querySelector('#ov-bars').innerHTML=view.bars;root.querySelector('#ov-caption').textContent=view.caption;root.querySelector('#ov-announcement').textContent=view.announcement;root.querySelector('#ov-reference').textContent=view.reference;}region.addEventListener('change',update);windowPicker.addEventListener('change',update);update();})();`
+  // JSON.parse keeps a category key such as __proto__ as data; an object literal would not.
+  const data = JSON.stringify(JSON.stringify(snapshot)).replaceAll('<', '\\u003c')
+  const script = `(()=>{const snapshot=JSON.parse(${data}),root=document.getElementById('ov-report'),region=root.querySelector('#ov-region'),windowPicker=root.querySelector('#ov-window');const percent=${formatPercent.toString()},escape=${escapeHtml.toString()},build=${buildView.toString()};windowPicker.value=snapshot.defaultWindow;function update(){const view=build({snapshot,windowKey:windowPicker.value,region:region.value,percent,escape});root.querySelector('#ov-summary').innerHTML=view.summary;root.querySelector('#ov-rows').innerHTML=view.table;root.querySelector('#ov-mobile').innerHTML=view.mobile;root.querySelector('#ov-bars').innerHTML=view.bars;root.querySelector('#ov-caption').textContent=view.caption;root.querySelector('#ov-announcement').textContent=view.announcement;root.querySelector('#ov-reference').textContent=view.reference;}region.addEventListener('change',update);windowPicker.addEventListener('change',update);update();})();`
   const standalone = mode === 'standalone' ? `${tokens}\n:root{--foreground:var(--text);--muted-foreground:var(--text-muted);--background:var(--bg);--card:var(--surface-raised);--destructive:var(--danger);--primary:var(--link);--ring:var(--focus);--radius:var(--radius-sm)}body{background:var(--bg);padding:24px}.ov-report{max-width:1100px;margin-inline:auto}` : ''
   const link = snapshot.source.url ? `<a href="${escapeHtml(snapshot.source.url)}">Source</a> · ` : ''
   const other = snapshot.categories.some((c) => c.key === 'other') ? `<p class="ov-muted">Other = categories outside ${snapshot.categories.filter((c) => c.key !== 'other').map((c) => escapeHtml(c.label)).join(', ')}.</p>` : ''
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(snapshot.title)}</title><style>${standalone}\n${css}</style></head><body><main id="ov-report" class="ov-report">
-<header><h1>${escapeHtml(snapshot.title)}</h1><div class="ov-controls"><label for="ov-region">Region</label><select id="ov-region">${options([['', 'All regions'], ...regions.map((r) => [r, r])])}</select><label for="ov-window">Time</label><select id="ov-window">${snapshot.windows.map((w) => `<option value="${escapeHtml(w.key)}"${w.key === snapshot.defaultWindow ? ' selected' : ''}>${escapeHtml(w.label)}</option>`).join('')}</select></div></header>
+<header><h1>${escapeHtml(snapshot.title)}</h1><div class="ov-controls"><label for="ov-region">${escapeHtml(snapshot.filterLabel || 'Group')}</label><select id="ov-region">${options([['', 'All'], ...regions.map((r) => [r, r])])}</select><label for="ov-window">Time</label><select id="ov-window">${snapshot.windows.map((w) => `<option value="${escapeHtml(w.key)}"${w.key === snapshot.defaultWindow ? ' selected' : ''}>${escapeHtml(w.label)}</option>`).join('')}</select></div></header>
 <p id="ov-caption" class="ov-muted">${escapeHtml(view.caption)}</p><p class="ov-muted">${escapeHtml(snapshot.source.provider)} · ${escapeHtml(snapshot.source.basis)} · ${escapeHtml(snapshot.source.sampling)}</p>
-<div id="ov-summary" class="ov-summary" role="group" aria-label="Overall counts and percentages">${view.summary}</div><svg id="ov-bars" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="Status proportions; exact counts and percentages are listed above">${view.bars}</svg>
-<div class="ov-table-heading"><h2>By ${escapeHtml((snapshot.dimensionLabel || 'Endpoint').toLowerCase())}</h2><span class="ov-muted">Count (% of row total)</span></div><div class="ov-scroll"><table><thead><tr><th>${escapeHtml(snapshot.dimensionLabel || 'Endpoint')}</th><th>Total</th>${headers}</tr></thead><tbody id="ov-rows">${view.table}</tbody></table></div><section id="ov-mobile" class="ov-mobile" aria-label="${escapeHtml(snapshot.dimensionLabel || 'Endpoint')} breakdown">${view.mobile}</section>
+<div id="ov-summary" class="ov-summary" role="group" aria-label="Overall counts and percentages">${view.summary}</div><svg id="ov-bars" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="Category shares; exact counts and percentages are listed above">${view.bars}</svg>
+<div class="ov-table-heading"><h2>By ${escapeHtml((snapshot.dimensionLabel || 'Item').toLowerCase())}</h2><span class="ov-muted">Count (% of row total)</span></div><div class="ov-scroll"><table><thead><tr><th>${escapeHtml(snapshot.dimensionLabel || 'Item')}</th><th>Total</th>${headers}</tr></thead><tbody id="ov-rows">${view.table}</tbody></table></div><section id="ov-mobile" class="ov-mobile" aria-label="${escapeHtml(snapshot.dimensionLabel || 'Item')} breakdown">${view.mobile}</section>
 ${other}<p id="ov-announcement" class="ov-sr-only" aria-live="polite">${escapeHtml(view.announcement)}</p><footer class="ov-muted"><p>${link}All percentages use ${escapeHtml(snapshot.source.unit)} in the selected population. No auto-refresh.</p><p id="ov-reference">${view.reference}</p><details><summary>Measurement and scope</summary><p>${escapeHtml(snapshot.source.dataset)} · ${escapeHtml(snapshot.source.scope)}</p><pre>${escapeHtml(snapshot.source.query)}</pre><p>Captured ${escapeHtml(snapshot.capturedAt)}. Each item in this view is counted once. The category counts add up to Total.</p></details></footer>
 </main><script>${script}</script></body></html>`
 }
