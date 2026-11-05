@@ -58,7 +58,7 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 - Use `--font-sans` for UI and prose; `--font-mono` for code, identifiers, values, and keys. Use system fonts unless the project's system supplies a font.
 - Controls and dense application content use `--text-md`; secondary text uses `--text-sm`. Paragraphs and substantial article text use `--text-reading` with `--leading`. Bound reading text with `--measure` and introductory copy to a slightly shorter line.
 - Documentation titles use `--text-3xl`; section headings use `--text-xl` or `--text-2xl` according to their role. Application titles use `--text-2xl` or smaller.
-- Product pages may use `--text-display`, stepping down to `--text-display-sm` on phones. Keep a short heading measure and place supporting copy and the primary action nearby. The first product image should enter the initial desktop viewport.
+- Product pages may use `--text-display`, stepping down to `--text-display-sm` at tablet width. Keep a short heading measure and place supporting copy and the primary action nearby. The first product image should enter the initial desktop viewport.
 - Use `--weight-regular`, `--weight-medium`, and `--weight-semibold`. Sentence case and restrained tracking make hierarchy easier to scan.
 - Use `--text-muted` for secondary information and metadata, and `--text` for essential labels and instructions.
 
@@ -73,10 +73,18 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 
 ## Layout and spacing
 
-- Use the `--space-*` rhythm and flex/grid `gap`. Use smaller gaps within a group and larger gaps between groups. Documentation sections use `--space-12`, stepping down to `--space-8` on phones. Product sections use `--space-24` total separation, stepping down to `--space-16` on phones. Give each section gap one owner so adjoining padding does not double it.
+- Use the `--space-*` rhythm and flex/grid `gap`. Use smaller gaps within a group and larger gaps between groups. Documentation sections use `--space-12`, stepping down to `--space-8` on phones. Product sections use `--space-24` total separation, stepping down to `--space-16` at tablet width. Give each section gap one owner so adjoining padding does not double it.
 - Product pages use `--page-wide`; documentation uses `--page-max`, optionally combined with a thin navigation column. Center the combined shell, not only the article inside an edge-pinned sidebar.
 - Tool and docs introductions stay compact. Preserve the direct route to install commands and useful captures.
-- Use `--space-6` side gutters on desktop and tablet. On phones, use `--space-4` side gutters and one content column. Navigation can become a drawer or a native scrolling section strip. Keep wide code, tables, and charts scrolling inside their containers.
+- Use two named breakpoints. Write desktop styles first, then override them at these widths:
+
+  | Name | Media query | What changes |
+  | --- | --- | --- |
+  | Tablet | `@media (max-width: 800px)` | Multi-column layouts become one content column. Touch controls use `--control-lg`. |
+  | Phone | `@media (max-width: 640px)` | Side gutters drop from `--space-6` to `--space-4`, and section gaps take their phone step. |
+
+  Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. Add no other viewport breakpoint. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.
+- Navigation can become a drawer or a native scrolling section strip. Keep wide code, tables, and charts scrolling inside their containers.
 - Keep main headings, actions, and product evidence visible on load. Scrolling should reveal more content without being required to make existing content appear.
 
 ## Surfaces and components
@@ -138,6 +146,6 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 - [ ] Typography distinguishes title, section, body, and metadata without competing focal points.
 - [ ] Product evidence is real or clearly illustrative; factual caveats and attribution remain present.
 - [ ] Both supported themes are readable, with theme controls only where useful.
-- [ ] Phone, intermediate tablet, and wide desktop widths have no horizontal page scroll.
+- [ ] At 390, 720, and 1280 px wide there is no horizontal page scroll, and viewport media queries use only `max-width: 640px`, `max-width: 800px`, and `min-width: 801px`.
 - [ ] Keyboard, focus, touch, deep links, and reduced motion work across relevant states.
 - [ ] Controls and spacing use the owning system's tokens; each panel and visual effect has a purpose.
