@@ -16,36 +16,43 @@
 :root {
   color-scheme: light;
 
-  /* Cool graphite neutrals. */
-  --bg: #f8f9fb; /* ui: --color-bg */
-  --surface: #e7e8ec; /* ui: --color-surface */
-  --surface-raised: #ffffff; /* ui: --color-surface-raised, --color-input-bg */
-  --surface-hover: #e4e6eb; /* ui: --color-surface-muted */
-  --row-hover: #dfe1e7; /* ui: --color-row-hover */
-  --row-selected: #ffffff; /* ui: --color-row-selected */
-  --border-subtle: #d8dbe2; /* ui: --color-border-subtle */
-  --border: #777d88; /* ui: --color-border, --color-input-border */
-  --text: #222326; /* ui: --color-text, --color-input-text, --color-row-selected-text, --color-status-text */
-  --text-muted: #5d626c; /* ui: --color-muted, --color-input-placeholder, --color-syntax-operator, --color-syntax-punctuation */
+  /* Neutral paper and graphite surfaces. */
+  --bg: #f4f5f6; /* ui: --color-bg, --color-button-text */
+  --surface: #e9ebed; /* ui: --color-surface */
+  --surface-raised: #fbfbfc; /* ui: --color-surface-raised, --color-input-bg */
+  --surface-hover: #e2e5e8; /* ui: --color-surface-muted */
+  --row-hover: #e2e5e8; /* ui: --color-row-hover */
+  --row-selected: var(--surface-raised); /* ui: --color-row-selected */
+  --border-subtle: #d3d8dd; /* ui: --color-border-subtle */
+  --border: #6d747b; /* ui: --color-border, --color-input-border */
+  --text: #101315; /* ui: --color-text, --color-button-bg, --color-input-text, --color-row-selected-text, --color-status-text */
+  --text-muted: #50575e; /* ui: --color-muted, --color-button-hover, --color-input-placeholder, --color-syntax-operator, --color-syntax-punctuation */
 
-  /* Primary actions, links, and focus have separate roles. */
-  --accent: #6359a7; /* ui: --color-accent, --color-button-bg, --color-progress */
-  --accent-text: #ffffff; /* ui: --color-button-text */
-  --accent-hover: #554b94; /* ui: --color-button-hover */
-  --link: #075fc7; /* ui: --color-link */
-  --focus: #075fc7; /* ui: --color-focus */
+  /* Project hue for selection; ink primary actions; links and focus stay separate. */
+  --project: #4b45d1; /* ui: --color-project */
+  --project-dark: #a5a1ff; /* ui: --color-project-dark */
+  --accent: var(--project); /* ui: --color-accent, --color-progress */
+  --accent-text: var(--bg); /* ui: --color-accent-text */
+  --accent-hover: var(--text); /* ui: --color-accent-hover */
+  --link: #0b5f7c; /* ui: --color-link */
+  --focus: var(--link); /* ui: --color-focus */
 
   /* Status: only for state, never for decoration. */
   --success: #157249; /* ui: --color-success */
   --warning: #86532e; /* ui: --color-warning */
-  --danger: #c7372d; /* ui: --color-error */
+  --danger: #bd342b; /* ui: --color-error */
   --info: #175cd3; /* ui: --color-info */
-  --success-soft: color-mix(in srgb, var(--success) 11%, var(--bg)); /* ui: --color-success-surface */
-  --warning-soft: color-mix(in srgb, var(--warning) 12%, var(--bg)); /* ui: --color-warning-surface */
-  --danger-soft: color-mix(in srgb, var(--danger) 10%, var(--bg)); /* ui: --color-error-surface */
-  --info-soft: color-mix(in srgb, var(--info) 10%, var(--bg)); /* ui: --color-info-surface */
+  --success-soft: var(--surface-raised); /* ui: --color-success-surface */
+  --warning-soft: var(--surface-raised); /* ui: --color-warning-surface */
+  --danger-soft: var(--surface-raised); /* ui: --color-error-surface */
+  --info-soft: var(--surface-raised); /* ui: --color-info-surface */
 
   /* Code */
+  --terminal: #0a0c0e; /* ui: --color-terminal */
+  --terminal-text: #e6e9eb; /* ui: --color-terminal-text */
+  --terminal-border: #2a3036; /* ui: --color-terminal-border */
+  --terminal-caption: #13171a; /* ui: --color-terminal-caption */
+  --terminal-caption-text: #c9d0d6; /* ui: --color-terminal-caption-text */
   --code-bg: var(--surface); /* ui: --color-code */
   --code-text: var(--text); /* ui: --color-code-text, --color-syntax-variable */
   --code-key: #715b42; /* ui: --color-syntax-keyword, --color-syntax-function, --color-syntax-tag */
@@ -53,25 +60,26 @@
   --code-number: #86532e; /* ui: --color-syntax-number, --color-syntax-type, --color-syntax-attribute */
   --code-comment: #626772; /* ui: --color-syntax-comment */
 
-  /* Type: system faces, no font loading. */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif; /* ui: --font-ui */
-  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; /* ui: --font-mono */
+  /* Self-hosted IBM Plex latin faces (OFL); system fallbacks. */
+  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif; /* ui: --font-ui */
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; /* ui: --font-mono */
   --text-xs: 12px; /* ui: --text-xs */
   --text-sm: 13px; /* ui: --text-sm */
   --text-md: 14px; /* ui: --text-md */
   --text-lg: 16px; /* ui: --text-lg */
   --text-xl: 20px; /* ui: --text-xl */
   --text-2xl: 24px; /* ui: --text-2xl */
-  --text-3xl: 32px; /* ui: --text-3xl */
+  --text-3xl: 44px; /* ui: --text-3xl */
   --text-reading: 16px; /* ui: --text-reading */
   --text-display: 56px; /* ui: --text-display */
-  --text-display-sm: 38px; /* ui: --text-display-sm */
+  --text-display-sm: 34px; /* ui: --text-display-sm */
   --leading-tight: 1.25; /* ui: --leading-tight */
-  --leading: 1.5; /* ui: --leading */
+  --leading: 1.6; /* ui: --leading */
   --weight-regular: 400; /* ui: --weight-regular */
   --weight-medium: 500; /* ui: --weight-medium */
   --weight-semibold: 600; /* ui: --weight-semibold */
-  --tracking-tight: -0.01em; /* ui: --tracking-tight */
+  --tracking-tight: -0.03em; /* ui: --tracking-tight */
+  --text-code: 13.5px; /* ui: --text-code */
 
   /* Space: 4px rhythm. */
   --space-1: 4px; /* ui: --space-1 */
@@ -97,10 +105,10 @@
   --sidebar: 224px; /* ui: --sidebar */
 
   /* Shape */
-  --radius-sm: 4px; /* ui: --radius-inline */
-  --radius-md: 6px; /* ui: --radius-control */
-  --radius-lg: 8px; /* ui: --radius-panel */
-  --radius-pill: 999px; /* ui: --radius-pill */
+  --radius-sm: 2px; /* ui: --radius-inline */
+  --radius-md: 2px; /* ui: --radius-control */
+  --radius-lg: 3px; /* ui: --radius-panel */
+  --radius-pill: 2px; /* ui: --radius-pill */
 
   /* Elevation: floating layers only (menus, popovers, dialogs). */
   --shadow-popover: 0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px var(--border-subtle); /* ui: --shadow-dialog */
@@ -114,21 +122,17 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #151619;
-    --surface: #0e0f12;
-    --surface-raised: #212226;
-    --surface-hover: #303238;
-    --row-hover: #25272d;
-    --row-selected: #38334f;
-    --border-subtle: #3b3e45;
-    --border: #818894;
-    --text: #f4f5f8;
-    --text-muted: #b0b5bf;
-    --accent: #a99ce2;
-    --accent-text: #151619;
-    --accent-hover: #b7ace9;
-    --link: #58a6ff;
-    --focus: #58a6ff;
+    --bg: #0d1012;
+    --surface: #13171a;
+    --surface-raised: #181d21;
+    --surface-hover: #20262b;
+    --row-hover: #20262b;
+    --border-subtle: #262d33;
+    --border: #78818a;
+    --text: #e6e9eb;
+    --text-muted: #9aa3ab;
+    --project: #a5a1ff;
+    --link: #67c1df;
     --success: #4cc38a;
     --warning: #e2a54b;
     --danger: #f0776c;
@@ -143,21 +147,17 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #151619;
-  --surface: #0e0f12;
-  --surface-raised: #212226;
-  --surface-hover: #303238;
-  --row-hover: #25272d;
-  --row-selected: #38334f;
-  --border-subtle: #3b3e45;
-  --border: #818894;
-  --text: #f4f5f8;
-  --text-muted: #b0b5bf;
-  --accent: #a99ce2;
-  --accent-text: #151619;
-  --accent-hover: #b7ace9;
-  --link: #58a6ff;
-  --focus: #58a6ff;
+  --bg: #0d1012;
+  --surface: #13171a;
+  --surface-raised: #181d21;
+  --surface-hover: #20262b;
+  --row-hover: #20262b;
+  --border-subtle: #262d33;
+  --border: #78818a;
+  --text: #e6e9eb;
+  --text-muted: #9aa3ab;
+  --project: #a5a1ff;
+  --link: #67c1df;
   --success: #4cc38a;
   --warning: #e2a54b;
   --danger: #f0776c;
