@@ -42,10 +42,10 @@
   --warning: #86532e; /* ui: --color-warning */
   --danger: #bd342b; /* ui: --color-error */
   --info: #175cd3; /* ui: --color-info */
-  --success-soft: var(--surface-raised); /* ui: --color-success-surface */
-  --warning-soft: var(--surface-raised); /* ui: --color-warning-surface */
-  --danger-soft: var(--surface-raised); /* ui: --color-error-surface */
-  --info-soft: var(--surface-raised); /* ui: --color-info-surface */
+  --success-soft: #d9e5e1; /* ui: --color-success-surface */
+  --warning-soft: #e7e2de; /* ui: --color-warning-surface */
+  --danger-soft: #efe4e4; /* ui: --color-error-surface */
+  --info-soft: #d9e3f2; /* ui: --color-info-surface */
 
   /* Code */
   --terminal: #0a0c0e; /* ui: --color-terminal */
@@ -105,10 +105,10 @@
   --sidebar: 224px; /* ui: --sidebar */
 
   /* Shape */
-  --radius-sm: 2px; /* ui: --radius-inline */
-  --radius-md: 2px; /* ui: --radius-control */
-  --radius-lg: 3px; /* ui: --radius-panel */
-  --radius-pill: 2px; /* ui: --radius-pill */
+  --radius-sm: 3px; /* ui: --radius-inline */
+  --radius-md: 4px; /* ui: --radius-control */
+  --radius-lg: 6px; /* ui: --radius-panel */
+  --radius-pill: 999px; /* ui: --radius-pill */
 
   /* Elevation: floating layers only (menus, popovers, dialogs). */
   --shadow-popover: 0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px var(--border-subtle); /* ui: --shadow-dialog */
@@ -137,6 +137,10 @@
     --warning: #e2a54b;
     --danger: #f0776c;
     --info: #84adff;
+    --success-soft: #172d25;
+    --warning-soft: #2f281b;
+    --danger-soft: #312020;
+    --info-soft: #202938;
     --code-key: #d8c2a5;
     --code-string: #a8bd9c;
     --code-number: #d5b98c;
@@ -162,6 +166,10 @@
   --warning: #e2a54b;
   --danger: #f0776c;
   --info: #84adff;
+  --success-soft: #172d25;
+  --warning-soft: #2f281b;
+  --danger-soft: #312020;
+  --info-soft: #202938;
   --code-key: #d8c2a5;
   --code-string: #a8bd9c;
   --code-number: #d5b98c;
