@@ -14,16 +14,23 @@
 .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
 .sidebar { position: sticky; top: var(--space-6); align-self: start; display: grid; gap: var(--space-1); padding-block: var(--space-6); }
 .sidebar a { display: flex; align-items: center; min-height: var(--control-lg); padding-inline: var(--space-3); color: var(--text-muted); border-radius: var(--radius-md); font-size: var(--text-sm); }
-/* In-page location: stronger text only. The accent bar marks the current page, not a section. */
-.sidebar a[aria-current="location"] { color: var(--text); font-weight: var(--weight-medium); }
+/* In-page location: the 2px accent bar and stronger text, without the selected fill. */
+.sidebar a[aria-current="location"] { color: var(--text); font-weight: var(--weight-medium); box-shadow: inset 2px 0 0 var(--accent); }
 main { min-width: 0; display: grid; gap: var(--space-12); padding-block: var(--space-8) var(--space-16); }
 section { display: grid; gap: var(--space-4); min-width: 0; }
+h1, h2 { font-family: var(--font-mono); }
 h1 { font-size: var(--text-3xl); max-width: 24ch; }
 h2 { font-size: var(--text-xl); }
+/* The ## mark is decorative; the empty alternative text keeps it out of the accessible name. */
+h2::before { content: "## " / ""; color: var(--accent); }
+main > section + section { padding-top: var(--space-6); border-top: 1px solid var(--border-subtle); }
 p { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-reading); }
-.command { display: flex; align-items: center; gap: var(--space-3); max-width: var(--measure); padding: var(--space-1) var(--space-3); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--code-bg); }
+/* Terminal plate in both themes. Focus uses the light hue so the ring stays visible on the dark plate. */
+.command { --focus: var(--project-dark); display: flex; align-items: center; gap: var(--space-3); max-width: var(--measure); padding: var(--space-1) var(--space-3); border: 1px solid var(--terminal-border); border-radius: var(--radius-lg); background: var(--terminal); color: var(--terminal-text); }
+/* The prompt is drawn by CSS, so it is not copied and screen readers skip it. */
+.command code::before { content: "$ " / ""; color: var(--project-dark); }
 .command pre { min-width: 0; flex: 1; margin: 0; overflow-x: auto; font-size: var(--text-sm); }
-.command button { flex: none; min-width: var(--control-lg); min-height: var(--control-lg); border: 0; background: transparent; color: var(--text-muted); font: inherit; cursor: pointer; }
+.command button { flex: none; min-width: var(--control-lg); min-height: var(--control-lg); border: 0; background: transparent; color: var(--terminal-caption-text); font: inherit; cursor: pointer; }
 .meta, #copy-status { color: var(--text-muted); font-size: var(--text-sm); }
 .definitions { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-3) var(--space-6); margin: 0; padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
 .definitions dt { font-family: var(--font-mono); font-size: var(--text-sm); }
