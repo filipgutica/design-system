@@ -8,7 +8,7 @@ A shared visual language for personal products, documentation, tools, mockups, a
 2. A repository's own design system owns its tokens and components.
 3. Other personal work follows this language. Use a consistent palette, type family, and component vocabulary across projects.
 
-Interaction, flows, and states follow the `ux-laws` skill (`~/.agents/skills/ux-laws`). This file owns visual hierarchy and composition.
+Interaction, flows, states, interface copy, and accessibility checks follow the `interface-design` skill (`~/.agents/skills/interface-design`). This file owns visual hierarchy and composition.
 
 ## Apply the right format
 
