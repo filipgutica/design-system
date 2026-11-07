@@ -19,10 +19,10 @@ The identity layer reads only the identity tokens (`--project`, `--project-dark`
 - **Borders.** Every control keeps a 1px border, transparent unless its section says otherwise, so forced colors can draw an edge.
 - **Depth.** A resting raised control uses `--shadow-raise`. A field, a track, or a pressed control uses `--shadow-sink`.
 - **Focus.** Controls (button, checkbox and radio, radio card, switch track, toggle button, segmented option, slider thumb, dialog close and dialog content) show a `1.5px solid var(--accent)` outline, offset 2px, with no halo or glow. It is drawn over the control's own raise or sink shadow, which does not change. Chromium rounds 1.5px to 1px at 1x. In forced colors the outline is 2px. Only `:focus-visible` shows it; pointer hover never does.
-- **Field focus.** Fields (input, select, textarea) draw no ring. On `:focus-visible` the field lifts out of its well: the fill becomes `--control-thumb`, the shadow `--shadow-raise`, and the border `--accent` at 35% (`color-mix(in srgb, var(--accent) 35%, transparent)`). A `2px solid transparent` outline at offset 0 is invisible normally and draws as a ring in forced colors. An invalid field keeps its `--danger` border while focused. The lift is below 3:1 against the resting field by choice; see [known gaps](decisions.md#known-gaps).
+- **Field focus.** Fields (input, select, textarea) draw no ring. On `:focus-visible` the field lifts out of its well: the fill becomes `--field-focus` (`--control-thumb` by default), the shadow `--shadow-raise`, and the border `--accent` at 35% (`color-mix(in srgb, var(--accent) 35%, transparent)`). A `2px solid transparent` outline at offset 0 is invisible normally and draws as a ring in forced colors. The lifted fill must keep field text and placeholder at 4.5:1, on the page and on a surface. If a theme's field text would fall below that, set `--field-focus` to `--field`: the focused field keeps its resting fill, and the raise shadow and accent hairline still mark focus. An invalid field keeps its `--danger` border while focused, outside forced colors. The lift is below 3:1 against the resting field by choice; see [known gaps](decisions.md#known-gaps).
 - **Other focus.** Links, navigation rows, tabs, and code actions use the base ring: `2px solid var(--focus)`, offset 2px. Inside a scrolling or clipping parent, the ring is inset (`-2px`), and a comment names the reason.
 - **Disabled.** Opacity 0.58, `cursor: not-allowed`, no hover change, and no shadow on buttons. Use the native `disabled` attribute.
-- **Invalid.** `aria-invalid="true"` and a `--danger` border. Link the error text with `aria-describedby` or `aria-errormessage`.
+- **Invalid.** `aria-invalid="true"` and a `--danger` border (not in forced colors; see [field focus](#rules-for-every-control)). Link the error text with `aria-describedby` or `aria-errormessage`.
 - **Motion.** Hover and press transitions use `--duration-fast` with `--ease-out`. State changes such as a switch knob use `--duration`. Under `prefers-reduced-motion: reduce`, transitions are instant.
 
 ## Button
@@ -56,7 +56,7 @@ Layer: Core. ui: `UiInput`. ui has no textarea; a textarea uses the same field r
 - **Keyboard and screen reader.** Each field has a visible `<label>`. A field inside a [field wrapper](#field-wrapper) gets its description and error ids from it.
 - **Motion.** None.
 - **Search.** `type="search"` keeps the native clear button, quieted to a 12px cross drawn with a `mask` (1.5px round strokes) and filled `--text-muted`, with `--space-2` before it. Hover fills it `--text`.
-- **Forced colors.** The border draws as the system field edge, and the transparent outline draws the focus ring. The invalid edge stays because it is a real border.
+- **Forced colors.** The border draws as the system field edge, and the transparent outline draws the focus ring. The system edge replaces the `--danger` edge, so the invalid state relies on its error text there; see [known gaps](decisions.md#known-gaps).
 
 ## Select
 
@@ -157,8 +157,8 @@ Layer: Core. ui: `UiScore`.
 
 Layer: Core. ui: `UiTabs`.
 
-- **Anatomy.** A `role="tablist"` with no rule below it. It scrolls sideways when needed, and a 24px mask fades each clipped edge. Each tab is a borderless button at least `--control-md` tall (`--control-lg` on phones), with `--space-2` `--space-3` padding, `--radius-field` corners, medium weight, and `--text-muted`.
-- **States.** Hover fills `--row-hover` and turns the text `--text`. The selected tab takes the [navigation row](#navigation-list)'s current-page recipe: `--nav-current` fill, `--shadow-nav-current`, and `--accent` text, with no underline. Focus-visible is an inset `--focus` ring, because the list scrolls.
+- **Anatomy.** A `role="tablist"` with no rule below it and a 12px gap below it. It scrolls sideways when needed, and a 24px mask fades each clipped edge. Scrolling clips on every side, so the list has 4px (`--space-1`) padding all round: it keeps the selected tab's shadow whole and its fill off the frame edge. Each tab is a borderless button at least `--control-md` tall (`--control-lg` on phones), with `--space-2` `--space-3` padding, `--radius-field` corners, medium weight, and `--text-muted`.
+- **States.** Hover fills `--row-hover` and turns the text `--text`. The selected tab takes the [navigation row](#navigation-list)'s current-page recipe: `--nav-current` fill and `--shadow-nav-current`, with no underline. Its text is `--nav-current-text`: `--accent` only where the accent reaches 4.5:1 over the rendered current-row fill, both on the page and on a surface (composite a translucent fill over each first); otherwise `--text`. Focus-visible is an inset `--focus` ring, because the list scrolls.
 - **Keyboard and screen reader.** Roving `tabindex`: arrow keys move between tabs, Home and End go to the ends, and focus selects the tab. Each tab has `aria-controls` and `aria-selected`; each panel has `role="tabpanel"`. Without JavaScript, show every panel under its own heading. Apply the tab roles and hide the headings and unselected panels only when the script enhances the markup.
 - **Forced colors.** The fill and shadow drop, so the selected tab takes a 2px `Highlight` border, and its padding shrinks by 2px to keep its size.
 
@@ -214,7 +214,7 @@ Layer: Core. ui: `UiDrawer`.
 Layer: Core. The mono font on rail rows is identity. ui: the rows in `UiSiteNav` and the project menu.
 
 - **Anatomy.** A `<nav>` with a name, holding links in rows: at least `--row` tall (`--control-lg` at tablet width), `0 --space-3` padding, `--radius-field` corners, `--text-sm`, and `--text-muted`. Groups have a `--text-xs` semibold muted label and 2px gaps between rows.
-- **States.** Hover: `--row-hover` fill and `--text`. Current page (`aria-current="page"`): `--nav-current` fill, `--shadow-nav-current`, `--accent` text, and medium weight; hover keeps that fill. Current location in the page (`aria-current="location"`): `--text` in medium weight, with a 3×14 `--accent` pip at the leading edge, inset 4px, and no fill. Focus-visible: an inset `--focus` ring, because the rail and the drawer scroll.
+- **States.** Hover: `--row-hover` fill and `--text`. Current page (`aria-current="page"`): `--nav-current` fill, `--shadow-nav-current`, `--nav-current-text`, and medium weight; hover keeps that fill. `--nav-current-text` is `--accent` only where the accent reaches 4.5:1 over the rendered fill, on the page and on a surface; otherwise `--text`. Selected tabs use the same rule. Current location in the page (`aria-current="location"`): `--text` in medium weight, with a 3×14 `--accent` pip at the leading edge, inset 4px, and no fill. Focus-visible: an inset `--focus` ring, because the rail and the drawer scroll.
 - **Phone.** At tablet width a section rail becomes a drawer. Its trigger is a secondary button at `--control-lg` with a three-line menu glyph (14×10, 1.5px lines) before the label. Without JavaScript the list opens in place, so the trigger is a `<details>` summary drawn as a secondary button with a chevron after the label.
 - **Keyboard and screen reader.** Plain links in Tab order.
 - **Motion.** Fill, colour, and shadow change over `--duration-fast` with `ease`.
@@ -243,6 +243,7 @@ Layer: Identity. ui: `UiCapture`.
 
 - **Anatomy.** A panel whose header holds mono tabs (one for each capture) and a Full size button at the end. The screen is the neutral `--terminal` plate, and a mono status-line caption sits below it on `--terminal-caption` with `--terminal-caption-text`. Full size opens the capture in a dialog.
 - **Keyboard and screen reader.** Tabs follow the tabs spec. Full size opens the selected capture in a modal dialog named after it, and focus returns to the button when the dialog closes. Without JavaScript the button is hidden. Focus rings are inset, because the panel clips its content. Without JavaScript, every capture is listed under its own heading.
+- **Header.** The tab list keeps its 4px block padding, and the Full size control stays centred on the tab row. Capture tabs apply the selected-text rule against their own header fill and accent: on a terminal-dark header, that is `--project-dark`.
 
 ## Site header
 

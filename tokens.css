@@ -40,7 +40,12 @@
   --field: var(--surface-hover); /* ui: --color-well */
   --field-edge: transparent; /* ui: --color-field-edge */
   --control-thumb: var(--surface-raised); /* ui: --color-control-thumb */
+  /* A focused field's fill. Set it to var(--field) if field text or placeholder misses 4.5:1 on the lift. */
+  --field-focus: var(--control-thumb); /* ui: --color-field-focus-bg */
   --nav-current: var(--surface-raised); /* ui: --color-nav-current */
+  /* Text on the current nav row and selected tab. Set it to var(--text) if the accent misses 4.5:1
+     over --nav-current, on the page or on a surface. */
+  --nav-current-text: var(--accent); /* ui: --color-nav-current-text */
   --row-hover: #e2e5e8; /* ui: --color-row-hover */
   --row-selected: var(--surface-raised); /* ui: --color-row-selected */
   --border-subtle: #d3d8dd; /* ui: --color-border-subtle */

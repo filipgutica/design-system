@@ -194,11 +194,13 @@
   .score b span { color: var(--text-muted); font-weight: var(--weight-regular); }
 
   /* Tabs */
-  .tablist { display: flex; width: max-content; max-width: 100%; overflow-x: auto; }
+  /* The list scrolls, so it clips on every side: the padding keeps the selected tab's shadow whole
+     and its fill off the frame edge. */
+  .tablist { display: flex; width: max-content; max-width: 100%; overflow-x: auto; padding: var(--space-1); }
   .tab { flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-field); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-sans); white-space: nowrap; cursor: pointer; }
   .tab:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); }
   /* The selected tab takes the navigation row's lifted fill: one selected state for both. */
-  .tab[aria-selected="true"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--accent); }
+  .tab[aria-selected="true"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); }
   /* Inset: the tab list scrolls sideways, which would clip an outer ring. */
   .tab:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
   .tabpanel { padding-top: var(--space-3); font-size: var(--text-sm); color: var(--text-muted); }
@@ -269,7 +271,7 @@
   .navlist .group-label { padding: 0 var(--space-3) var(--space-1); color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--weight-semibold); }
   .navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-field); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease; }
   .navlist a:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); text-decoration: none; }
-  .navlist a[aria-current="page"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--accent); font-weight: var(--weight-medium); }
+  .navlist a[aria-current="page"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); font-weight: var(--weight-medium); }
   .navlist a[aria-current="location"] { color: var(--text); font-weight: var(--weight-medium); }
   .navlist a[aria-current="location"]::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--accent); }
   /* Inset: the rail and the drawer scroll. */
@@ -400,7 +402,7 @@
   /* Fields lift out of the well onto the control surface, with a faint accent hairline and no ring.
      The cue is below 3:1 by choice (decisions.md, Known gaps). The transparent outline is drawn
      only in forced colors, so the field keeps a ring there. */
-  :is(.input, .select, .textarea):is(:focus-visible, .is-focus) { outline: 2px solid transparent; outline-offset: 0; border-color: color-mix(in srgb, var(--accent) 35%, transparent); background-color: var(--control-thumb); box-shadow: var(--shadow-raise); }
+  :is(.input, .select, .textarea):is(:focus-visible, .is-focus) { outline: 2px solid transparent; outline-offset: 0; border-color: color-mix(in srgb, var(--accent) 35%, transparent); background-color: var(--field-focus); box-shadow: var(--shadow-raise); }
   :is(.input, .select, .textarea)[aria-invalid="true"]:is(:focus-visible, .is-focus) { border-color: var(--danger); }
 
   @media (forced-colors: active) {
