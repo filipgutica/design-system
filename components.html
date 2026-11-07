@@ -58,8 +58,8 @@
      The tint mixes currentColor, so it reads on a light panel and on a dark plate.
      :where keeps the base below each component's own size and layout. */
   :where(.quiet-action) { border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
-  .quiet-action:is(:hover, .is-hover):not(:disabled) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
-  .quiet-action:is(:active, .is-active):not(:disabled) { background: color-mix(in srgb, currentColor 18%, transparent); }
+  .quiet-action:is(:hover, .is-hover):where(:not(:disabled)) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
+  .quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 18%, transparent); }
   .quiet-action:disabled { opacity: 0.58; cursor: not-allowed; }
 
   /* Fields: input, textarea, select */

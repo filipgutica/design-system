@@ -36,8 +36,8 @@ p { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-r
 .command pre { min-width: 0; flex: 1; margin: 0; overflow-x: auto; font-size: var(--text-sm); }
 /* Copy is a quiet action: components.html#quiet-action, unchanged. The page adds its size and colour only. */
 :where(.quiet-action) { border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
-.quiet-action:is(:hover, .is-hover):not(:disabled) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
-.quiet-action:is(:active, .is-active):not(:disabled) { background: color-mix(in srgb, currentColor 18%, transparent); }
+.quiet-action:is(:hover, .is-hover):where(:not(:disabled)) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
+.quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 18%, transparent); }
 .quiet-action:disabled { opacity: 0.58; cursor: not-allowed; }
 .quiet-action:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .command button { flex: none; min-width: var(--control-lg); min-height: var(--control-lg); color: var(--terminal-caption-text); }
