@@ -43,7 +43,6 @@
   .btn.danger:is(:hover, .is-hover):not(:disabled) { background: color-mix(in srgb, var(--danger) 10%, var(--danger-soft)); }
   .btn.text { --depth: var(--flat); min-height: auto; padding: var(--space-1); background: transparent; color: var(--link); text-decoration: underline; text-underline-offset: 0.2em; }
   .btn.text:is(:hover, .is-hover):not(:disabled) { background: transparent; }
-  /* Press: primary mixes 80% with the canvas; every raised or ghost button sinks. */
   /* A press sinks the button 1px and changes its fill, so the click reads at a glance. */
   .btn:not(.secondary, .ghost, .danger, .text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--button-hover); }
   .btn:is(.secondary, .ghost):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--field); }

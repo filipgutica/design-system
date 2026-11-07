@@ -47,13 +47,13 @@
   /* Buttons: components.html#button */
   .btn { --depth: var(--shadow-raise); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-3); border-radius: var(--radius-md); border: 1px solid transparent; background: var(--control-thumb); color: var(--text); box-shadow: var(--depth); font: var(--weight-medium) var(--text-sm) / 1 var(--font-sans); cursor: pointer; transition: background var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
   .btn:hover:not(:disabled) { background: color-mix(in srgb, var(--text) 8%, var(--control-thumb)); }
-  .btn:active:not(:disabled) { --depth: var(--shadow-sink); background: var(--field); }
+  .btn:active:not(:disabled) { --depth: var(--shadow-sink); background: var(--field); transform: translateY(1px); }
   .btn.primary { background: var(--accent); color: var(--accent-text); }
   .btn.primary:hover:not(:disabled) { background: var(--button-hover); }
-  .btn.primary:active:not(:disabled) { background: color-mix(in srgb, var(--accent) 80%, var(--bg)); }
+  .btn.primary:active:not(:disabled) { background: var(--button-hover); }
   .btn.ghost { --depth: 0 0 0 0 transparent; background: transparent; color: var(--text-muted); }
   .btn.ghost:hover:not(:disabled) { background: var(--row-hover); color: var(--text); }
-  .btn.ghost:active:not(:disabled) { --depth: var(--shadow-sink); }
+  .btn.ghost:active:not(:disabled) { --depth: var(--shadow-sink); background: var(--field); }
   .btn:disabled { opacity: 0.58; cursor: not-allowed; box-shadow: none; }
   /* .is-focus pins the focus state in the Focus and motion specimens. */
   .is-focus { outline: 2px solid var(--focus); outline-offset: 2px; }
@@ -94,7 +94,6 @@
   .segmented button[aria-pressed="true"]::before { background: var(--thumb); box-shadow: var(--shadow-raise); }
   /* Forced colors drop shadows, so the pressed option takes the system highlight. */
   @media (forced-colors: active) {
-    :is(.btn, .segmented button):is(:focus-visible, .is-focus) { outline-width: 2px; }
     .tab[aria-selected="true"] { border: 2px solid Highlight; padding-inline: calc(var(--space-3) - 2px); }
     .segmented button[aria-pressed="true"] { forced-color-adjust: none; color: HighlightText; }
     .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
