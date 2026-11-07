@@ -255,6 +255,8 @@ Layer: Identity. ui: `site.css` helpers.
 
 - **Headings.** Page titles (`--text-3xl`) and section headings (`--text-xl`) use `--font-mono`. A section heading starts with a `## ` mark in `--accent`, drawn with `content: "## " / ""`, and has a `--border-subtle` rule above the section. A product page or tool home may use a mono `--text-display` title (`--text-display-sm` on phones).
 - **Steps.** An ordered list in which each step hangs from a mono number in `--accent` on a ruled leading column, with an h3 title per step.
+- **Definitions.** A definition list of terms and short meanings: medium-weight terms and muted meanings in two columns, one column on phones. Flags such as `--all` do not break.
+- **Skip link.** The first focusable element, hidden above the page until it takes focus, then shown as a floating layer with the base focus ring.
 - **Facts.** A mono definition list of short labels and values, such as a repository path. Values wrap anywhere.
 - **Command list.** A table of commands (mono) and descriptions (muted), with a Copy button for each row. On phones each row becomes a two-column grid.
 - **Footer.** Mono, with an attribution link at the start and project links at the end.
