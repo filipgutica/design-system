@@ -121,7 +121,7 @@ Controls use soft depth and familiar shapes: borderless surfaces that rise at re
   | Floating layer | Menus, popovers, pickers, and dialogs | `--surface-raised` | Included in the shadow | `--radius-lg` | `--shadow-popover` |
 
 - Borders stay 1px and transparent on buttons, fields, tracks, panels, and radio cards, so forced colors can draw them. `--border` keeps unchecked checkbox and radio edges visible. Invalid fields show a `--danger` edge, except in forced colors, where the system edge wins. Figures and dividers use `--border-subtle`.
-- Radii: `--radius-sm` for inline elements and checkboxes; `--radius-field` for fields and navigation rows; `--radius-md` (a pill) for buttons and segmented controls; `--radius-lg` for wells, plates, panels, radio cards, callouts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
+- Radii: `--radius-sm` for inline elements and checkboxes; `--radius-field` for fields, navigation rows, and toggle cards; `--radius-md` (a pill) for buttons and segmented controls; `--radius-lg` for wells, plates, panels, radio cards, callouts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
 - Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
 - `--shadow-raise` gives panels, source code, buttons, and segmented thumbs soft depth; `--shadow-sink` insets fields, tracks, and pressed controls. Floating layers keep `--shadow-popover`. Stable hover states keep normal content quiet.
 
