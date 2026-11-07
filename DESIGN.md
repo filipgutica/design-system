@@ -129,6 +129,7 @@ Controls use soft depth and familiar shapes: borderless surfaces that rise at re
 
 [`components.md`](components.md) specifies each component and [`components.html`](components.html) shows its states. These composition rules apply across them:
 
+- Build each control from the owning library's component or class, and style a link that acts as a button with the button's classes. A page adds layout only: size, spacing, and position. A local copy of a control drifts from the library, even when it uses the same tokens.
 - One clearly primary action per visible decision group, filled with the hue. Other actions are secondary, ghost, or text buttons.
 - Use a segmented control for two to five short options that apply at once, a select for longer lists, and radio cards for options that need descriptions.
 - Callouts carry a real caveat, not decorative emphasis.
@@ -140,7 +141,7 @@ Controls use soft depth and familiar shapes: borderless surfaces that rise at re
 ### Interaction and motion
 
 - Show visible focus and accessible names. A visual simplification must preserve useful controls, caveats, and keyboard paths.
-- Controls draw one thin `--accent` ring (1.5px, 2px offset) with no glow, over their own raise or sink shadow. Fields (input, select, textarea) draw no ring: they lift out of their well onto the control surface, which is below 3:1 by choice (see [known gaps](decisions.md#known-gaps)). Both keep a ring in forced colors. Links, navigation, tabs, and code actions keep `outline: 2px solid var(--focus); outline-offset: 2px`, which the `tokens.css` base sets. [Component specs](components.md#rules-for-every-control) give the values. Use an inset offset (`-2px`) only where a scrolling or clipping parent would cut the ring, or inside a segmented control; add a comment that names the reason. Keep page-wide defaults in `@layer base`, so a component's own focus rule can refine them. Pointer hover never draws the outline.
+- Controls draw one `--accent` ring (2px, 2px offset) with no glow, over their own raise or sink shadow. Fields (input, select, textarea) draw no ring: they lift out of their well onto the control surface, which is below 3:1 by choice (see [known gaps](decisions.md#known-gaps)). Both keep a ring in forced colors. Links, navigation, tabs, and code actions keep `outline: 2px solid var(--focus); outline-offset: 2px`, which the `tokens.css` base sets. [Component specs](components.md#rules-for-every-control) give the values. Use an inset offset (`-2px`) only where a scrolling or clipping parent would cut the ring, or inside a segmented control; add a comment that names the reason. Keep page-wide defaults in `@layer base`, so a component's own focus rule can refine them. Pointer hover never draws the outline.
 - Keep product navigation distinct from in-page section links. Current-page and current-section indicators serve different purposes. Open sibling project links in the same tab; indicate a new tab only when the link opens one.
 - Use `--duration-fast` for hover/press and `--duration` for menus/panels. Animate opacity or transform only where it explains a state change. A component spec may set its own timing, as the segmented control's glide does.
 - Keep content visible without reveal effects, entrance sequences, or continuous decorative animation. Honor reduced motion, including anchor scrolling.
@@ -186,4 +187,4 @@ The personal sites are terminal tools that read Markdown and paths, so their ide
 - [ ] Both supported themes are readable, with theme controls only where useful.
 - [ ] At 390, 720, and 1280 px wide there is no horizontal page scroll, and the page's own viewport media queries use only `max-width: 640px`, `max-width: 800px`, `min-width: 801px`, and the documented `min-width: 1024px` hero split.
 - [ ] Keyboard, focus, touch, deep links, and reduced motion work across relevant states.
-- [ ] Controls and spacing use the owning system's tokens and component specs; each panel and visual effect has a purpose.
+- [ ] Every control is the owning system's component or class, never a local copy built from its tokens; spacing uses its tokens; each panel and visual effect has a purpose.

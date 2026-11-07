@@ -19,8 +19,8 @@
 
   /* ---------- Shared recipes ---------- */
   :root {
-    /* Control focus: one thin accent ring, no glow. Chromium draws 1.5px as 1px at 1x. */
-    --ring: 1.5px solid var(--accent);
+    /* Control focus: one 2px accent ring, no glow, the same width as the link and navigation outline. */
+    --ring: 2px solid var(--accent);
     --flat: 0 0 0 0 transparent;
   }
   .icon { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
@@ -38,14 +38,17 @@
   .btn.secondary:is(:hover, .is-hover):not(:disabled) { background: color-mix(in srgb, var(--text) 8%, var(--control-thumb)); }
   .btn.ghost { --depth: var(--flat); background: transparent; color: var(--text-muted); }
   .btn.ghost:is(:hover, .is-hover):not(:disabled) { background: var(--row-hover); color: var(--text); }
-  .btn.danger { --depth: var(--flat); background: var(--danger-soft); color: var(--text); }
-  .btn.danger:is(:hover, .is-hover):not(:disabled) { border-color: var(--danger); background: var(--danger-soft); }
+  /* Danger rises like the other filled variants; its text mixes the hue toward --text, as status badges do. */
+  .btn.danger { background: var(--danger-soft); color: light-dark(color-mix(in srgb, var(--danger) 75%, var(--text)), color-mix(in srgb, var(--danger) 85%, var(--text))); }
+  .btn.danger:is(:hover, .is-hover):not(:disabled) { background: color-mix(in srgb, var(--danger) 10%, var(--danger-soft)); }
   .btn.text { --depth: var(--flat); min-height: auto; padding: var(--space-1); background: transparent; color: var(--link); text-decoration: underline; text-underline-offset: 0.2em; }
   .btn.text:is(:hover, .is-hover):not(:disabled) { background: transparent; }
   /* Press: primary mixes 80% with the canvas; every raised or ghost button sinks. */
-  .btn:not(.secondary, .ghost, .danger, .text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: color-mix(in srgb, var(--accent) 80%, var(--bg)); }
-  .btn.secondary:is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--field); }
-  .btn:not(.danger, .text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { --depth: var(--shadow-sink); }
+  /* A press sinks the button 1px and changes its fill, so the click reads at a glance. */
+  .btn:not(.secondary, .ghost, .danger, .text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--button-hover); }
+  .btn:is(.secondary, .ghost):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--field); }
+  .btn.danger:is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: color-mix(in srgb, var(--danger) 16%, var(--danger-soft)); }
+  .btn:not(.text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { --depth: var(--shadow-sink); transform: translateY(1px); }
   .btn:disabled { --depth: var(--flat); opacity: 0.58; cursor: not-allowed; }
   .btn[aria-busy="true"] { cursor: wait; }
   .btn[aria-busy="true"]::before { content: ""; flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 700ms linear infinite; }
@@ -421,12 +424,6 @@
   :is(.input, .select, .textarea)[aria-invalid="true"]:is(:focus-visible, .is-focus) { border-color: var(--danger); }
 
   @media (forced-colors: active) {
-    /* Fills and shadows flatten, so the control ring grows to a full 2px. */
-    :is(.btn, .check input, .segmented button, .toggle, .close):is(:focus-visible, .is-focus),
-    .switch:is(:focus-visible, .is-focus) .switch-track,
-    .radio-card:has(input:is(:focus-visible, .is-focus)) { outline-width: 2px; }
-    .range:is(:focus-visible, .is-focus)::-webkit-slider-thumb { outline-width: 2px; }
-    .range:is(:focus-visible, .is-focus)::-moz-range-thumb { outline-width: 2px; }
     /* The lifted fill drops, so the selected tab takes a system border; the padding absorbs it. */
     .tab[aria-selected="true"] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }
     .check input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; }
@@ -583,13 +580,14 @@
       <div class="state"><button class="btn ghost" type="button">Mute</button><span class="caption">Rest</span></div>
       <div class="state" inert><button class="btn ghost is-hover" type="button">Mute</button><span class="caption">Hover</span></div>
       <div class="state" inert><button class="btn ghost is-focus" type="button">Mute</button><span class="caption">Focus visible</span></div>
-      <div class="state" inert><button class="btn ghost is-hover is-active" type="button">Mute</button><span class="caption">Pressed</span></div>
+      <div class="state" inert><button class="btn ghost is-active" type="button">Mute</button><span class="caption">Pressed</span></div>
       <div class="state" inert><button class="btn ghost" type="button" disabled>Mute</button><span class="caption">Disabled</span></div>
     </div></div>
     <div class="row"><h4>Danger</h4><div class="states">
       <div class="state"><button class="btn danger" type="button">Delete monitor</button><span class="caption">Rest</span></div>
       <div class="state" inert><button class="btn danger is-hover" type="button">Delete monitor</button><span class="caption">Hover</span></div>
       <div class="state" inert><button class="btn danger is-focus" type="button">Delete monitor</button><span class="caption">Focus visible</span></div>
+      <div class="state" inert><button class="btn danger is-active" type="button">Delete monitor</button><span class="caption">Pressed</span></div>
       <div class="state" inert><button class="btn danger" type="button" disabled>Delete monitor</button><span class="caption">Disabled</span></div>
     </div></div>
     <div class="row"><h4>Text</h4><div class="states">

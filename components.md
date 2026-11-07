@@ -18,7 +18,7 @@ The identity layer reads only the identity tokens (`--project`, `--project-dark`
 - **Sizes.** `sm`, `md`, and `lg` use `--control-sm`, `--control-md`, and `--control-lg` for height, with `--text-sm`, `--text-md`, and `--text-lg`. At tablet width (`max-width: 800px`) touch targets use `--control-lg`.
 - **Borders.** Every control keeps a 1px border, transparent unless its section says otherwise, so forced colors can draw an edge.
 - **Depth.** A resting raised control uses `--shadow-raise`. A field, a track, or a pressed control uses `--shadow-sink`.
-- **Focus.** Controls (button, checkbox and radio, radio card, switch track, toggle button, segmented option, slider thumb, dialog close and dialog content) show a `1.5px solid var(--accent)` outline, offset 2px, with no halo or glow. It is drawn over the control's own raise or sink shadow, which does not change. Chromium rounds 1.5px to 1px at 1x. In forced colors the outline is 2px. Only `:focus-visible` shows it; pointer hover never does.
+- **Focus.** Controls (button, checkbox and radio, radio card, switch track, toggle button, segmented option, slider thumb, dialog close and dialog content) show a `2px solid var(--accent)` outline, offset 2px, with no halo or glow: the same width as the link and navigation outline. It is drawn over the control's own raise or sink shadow, which does not change. Only `:focus-visible` shows it; pointer hover never does.
 - **Field focus.** Fields (input, select, textarea) draw no ring. On `:focus-visible` the field lifts out of its well: the fill becomes `--field-focus` (`--control-thumb` by default), the shadow `--shadow-raise`, and the border `--accent` at 35% (`color-mix(in srgb, var(--accent) 35%, transparent)`). A `2px solid transparent` outline at offset 0 is invisible normally and draws as a ring in forced colors. The lifted fill must keep field text and placeholder at 4.5:1, on the page and on a surface. If a theme's field text would fall below that, set `--field-focus` to `--field`: the focused field keeps its resting fill, and the raise shadow and accent hairline still mark focus. An invalid field keeps its `--danger` border while focused, outside forced colors. The lift is below 3:1 against the resting field by choice; see [known gaps](decisions.md#known-gaps).
 - **Other focus.** Links, navigation rows, tabs, and code actions use the base ring: `2px solid var(--focus)`, offset 2px. Inside a scrolling or clipping parent, the ring is inset (`-2px`), and a comment names the reason.
 - **Disabled.** Opacity 0.58, `cursor: not-allowed`, no hover change, and no shadow on buttons. Use the native `disabled` attribute.
@@ -29,18 +29,18 @@ The identity layer reads only the identity tokens (`--project`, `--project-dark`
 
 Layer: Core. ui: `UiButton`.
 
-- **Anatomy.** A native `<button>` with a label and an optional 16px leading icon. Medium weight, `-0.01em` tracking, line height 1.25, `--radius-md` (pill). Horizontal padding is 10px at `sm`, `--space-3` at `md`, and `--space-4` at `lg`.
+- **Anatomy.** A native `<button>` with a label and an optional 16px leading icon. A link that should look like a button is an `<a>` with the same classes; in `@filipgutica/ui`, `class="fg-button"` with `data-variant` and `data-size`. Medium weight, `-0.01em` tracking, line height 1.25, `--radius-md` (pill). Horizontal padding is 10px at `sm`, `--space-3` at `md`, and `--space-4` at `lg`.
 - **Variants.**
 
   | Variant | Rest | Hover | Pressed |
   | --- | --- | --- | --- |
-  | Primary | `--accent` fill, `--accent-text`, `--shadow-raise` | `--button-hover` | `--accent` 80% with `--bg`, `--shadow-sink` |
+  | Primary | `--accent` fill, `--accent-text`, `--shadow-raise` | `--button-hover` | `--button-hover`, `--shadow-sink` |
   | Secondary | `--control-thumb` fill, `--text`, `--shadow-raise` | `--text` 8% into `--control-thumb` | `--field` fill, `--shadow-sink` |
-  | Ghost | Transparent, `--text-muted`, no shadow | `--row-hover` fill, `--text` | `--shadow-sink` |
-  | Danger | `--danger-soft` fill, `--text`, no shadow | `--danger` border | No change |
+  | Ghost | Transparent, `--text-muted`, no shadow | `--row-hover` fill, `--text` | `--field` fill, `--shadow-sink` |
+  | Danger | `--danger-soft` fill, `--danger` mixed 75% with `--text` (85% in dark), `--shadow-raise` | `--danger` 10% into `--danger-soft` | `--danger` 16% into `--danger-soft`, `--shadow-sink` |
   | Text | Transparent, `--link`, underlined, 4px padding | No change | No change |
 
-- **States.** Pressed also applies to `aria-pressed="true"`. Busy sets `aria-busy="true"` and `cursor: wait`, and shows a 14px spinner before the label: a 2px `currentColor` ring with a transparent right edge, turning once every 700ms. Keep the label while busy.
+- **States.** Pressed also moves the button 1px down, for every variant but text, and applies to `aria-pressed="true"`. Busy sets `aria-busy="true"` and `cursor: wait`, and shows a 14px spinner before the label: a 2px `currentColor` ring with a transparent right edge, turning once every 700ms. Keep the label while busy.
 - **Use.** One primary action for each decision group. The hue fill marks that action; every other action is secondary, ghost, or text.
 - **Keyboard and screen reader.** Native button behavior: Enter and Space activate it. An icon-only button needs `aria-label`.
 - **Motion.** Fill and shadow transition over `--duration-fast`. Reduced motion slows the spinner to 1.4s instead of stopping it, so the busy state stays visible.
