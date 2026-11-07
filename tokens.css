@@ -47,6 +47,9 @@
   /* Text on the current nav row and selected tab: the first of --accent, --text, black, and white
      that reaches 4.5:1 over --nav-current, on the page and on a surface. */
   --nav-current-text: var(--accent); /* ui: var(--color-nav-current-text, var(--color-accent)) */
+  /* The selected segmented label: the first of --accent, --text, black, and white that reaches
+     4.5:1 on the thumb. An icon-only option needs 3:1. */
+  --segmented-current-text: var(--accent); /* ui: var(--color-segmented-current-text, var(--color-accent)) */
   --row-hover: #e2e5e8; /* ui: --color-row-hover */
   --row-selected: var(--surface-raised); /* ui: --color-row-selected */
   --border-subtle: #d3d8dd; /* ui: --color-border-subtle */
@@ -231,24 +234,30 @@
   --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%);
 }
 
-/* Minimal base. Component styles live in components.html. */
-*, *::before, *::after { box-sizing: border-box; }
-[hidden] { display: none !important; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-h1, h2, h3, h4, p { margin: 0; }
-h1, h2, h3, h4 { font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); text-wrap: balance; }
-code, kbd, pre { font-family: var(--font-mono); }
-table, .num { font-variant-numeric: tabular-nums; }
-a { color: var(--link); text-decoration: none; }
-a:hover { text-decoration: underline; }
-p a, dd a { text-decoration: underline; text-underline-offset: 0.18em; }
-:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; scroll-behavior: auto !important; }
+/* Minimal base. Component styles live in components.html. The base sits in a layer, so any
+   page or component rule outranks it whatever its specificity. A layered !important outranks an
+   unlayered one, so reduced-motion exceptions belong here too. */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, p { margin: 0; }
+  h1, h2, h3, h4 { font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); text-wrap: balance; }
+  code, kbd, pre { font-family: var(--font-mono); }
+  table, .num { font-variant-numeric: tabular-nums; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p a, dd a { text-decoration: underline; text-underline-offset: 0.18em; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; scroll-behavior: auto !important; }
+    /* A busy spinner slows instead of stopping, so the busy state stays visible. */
+    [aria-busy="true"]::before { animation-duration: 1.4s !important; }
+  }
 }

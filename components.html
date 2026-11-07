@@ -18,11 +18,7 @@
    */
 
   /* ---------- Shared recipes ---------- */
-  :root {
-    /* Control focus: one 2px accent ring, no glow, the same width as the link and navigation outline. */
-    --ring: 2px solid var(--accent);
-    --flat: 0 0 0 0 transparent;
-  }
+  :root { --flat: 0 0 0 0 transparent; }
   .icon { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .muted { color: var(--text-muted); }
@@ -49,11 +45,21 @@
   .btn.danger:is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: color-mix(in srgb, var(--danger) 16%, var(--danger-soft)); }
   .btn:not(.text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { --depth: var(--shadow-sink); transform: translateY(1px); }
   .btn:disabled { --depth: var(--flat); opacity: 0.58; cursor: not-allowed; }
+  /* A link styled as a button keeps no underline. It has no disabled state: use <button disabled>. */
+  a.btn { text-decoration: none; }
+  /* Busy also sets disabled, so it takes no hover or press. */
   .btn[aria-busy="true"] { cursor: wait; }
   .btn[aria-busy="true"]::before { content: ""; flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 700ms linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  /* Reduced motion slows the spinner instead of stopping it; this outranks the base 0ms rule. */
-  @media (prefers-reduced-motion: reduce) { .btn[aria-busy="true"]::before { animation-duration: 1.4s !important; } }
+  /* Reduced motion slows the spinner instead of stopping it: the tokens.css base holds that exception. */
+
+  /* Quiet action: an icon or short text action inside a component, such as Copy, Full size, a dialog or
+     drawer close, or a menu trigger. One recipe gives each the same edge, hover, press, and focus, with no sink.
+     The tint mixes currentColor, so it reads on a light panel and on a dark plate.
+     :where keeps the base below each component's own size and layout. */
+  :where(.quiet-action) { border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  .quiet-action:is(:hover, .is-hover) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
+  .quiet-action:is(:active, .is-active) { background: color-mix(in srgb, currentColor 18%, transparent); }
 
   /* Fields: input, textarea, select */
   .field { display: grid; gap: 6px; justify-items: start; min-width: 0; }
@@ -158,8 +164,8 @@
   .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -2; border-radius: var(--radius-md); pointer-events: none; }
   .segmented button:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"]) { color: var(--text); }
   .segmented button:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"])::before { background: color-mix(in srgb, var(--control-thumb) 45%, transparent); }
-  /* The accent label or icon marks the pressed choice at 3:1 against its thumb. */
-  .segmented button[aria-pressed="true"] { color: var(--accent); }
+  /* The pressed label reads at 4.5:1 on its thumb, and an icon at 3:1 (--segmented-current-text). */
+  .segmented button[aria-pressed="true"] { color: var(--segmented-current-text); }
   .segmented button[aria-pressed="true"]::before { z-index: -1; background: var(--control-thumb); box-shadow: var(--shadow-raise); }
   .segmented button:disabled { opacity: 0.58; cursor: not-allowed; }
   /* Motion answers only the reader: the script marks a change of choice with data-slide and the old thumb's edges. */
@@ -185,8 +191,8 @@
   .range:disabled { opacity: 0.58; cursor: not-allowed; }
   /* The ring goes on the thumb, not the full-width input. */
   .range:is(:focus-visible, .is-focus) { outline: none; }
-  .range:is(:focus-visible, .is-focus)::-webkit-slider-thumb { outline: var(--ring); outline-offset: 2px; }
-  .range:is(:focus-visible, .is-focus)::-moz-range-thumb { outline: var(--ring); outline-offset: 2px; }
+  .range:is(:focus-visible, .is-focus)::-webkit-slider-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .range:is(:focus-visible, .is-focus)::-moz-range-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* Progress and score */
   .progress { width: 220px; max-width: 100%; height: 9px; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--surface-hover); }
@@ -202,9 +208,9 @@
   /* The list scrolls, so it clips on every side: the padding keeps the selected tab's shadow whole
      and its fill off the frame edge. */
   .tablist { display: flex; width: max-content; max-width: 100%; overflow-x: auto; padding: var(--space-1); }
-  .tab { flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-field); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-sans); white-space: nowrap; cursor: pointer; }
+  .tab { flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-field); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-sans); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
   .tab:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); }
-  /* The selected tab takes the navigation row's lifted fill: one selected state for both. */
+  /* The selected tab takes the navigation row's lifted fill and motion: one selected state for both. */
   .tab[aria-selected="true"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); }
   /* Inset: the tab list scrolls sideways, which would clip an outer ring. */
   .tab:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
@@ -256,8 +262,8 @@
   .dialog-head p { margin-top: var(--space-1); color: var(--text-muted); }
   .dialog-body { min-height: 0; overflow: auto; padding: var(--space-4); }
   .dialog-foot { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--border-subtle); background: var(--surface); }
-  .close { --depth: var(--flat); display: inline-grid; flex: none; place-items: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font-size: 22px; line-height: 1; cursor: pointer; }
-  .close:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); }
+  /* The close button is a quiet action; this sets its size only. */
+  .close { display: inline-grid; flex: none; place-items: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; color: var(--text-muted); font-size: 22px; line-height: 1; }
   .drawer { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(calc(var(--sidebar) + var(--space-12)), 100%); height: 260px; overflow: hidden; padding: 0; border: 0; border-right: 1px solid var(--border-subtle); background: var(--surface-raised); color: var(--text); box-shadow: var(--shadow-popover); }
   dialog.drawer { position: fixed; inset: 0 auto 0 0; height: 100dvh; max-height: none; margin: 0; }
   dialog.drawer::backdrop { background: var(--overlay); }
@@ -274,7 +280,7 @@
   /* Navigation list */
   .navlist { display: grid; gap: 2px; width: min(100%, 240px); }
   .navlist .group-label { padding: 0 var(--space-3) var(--space-1); color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--weight-semibold); }
-  .navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-field); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease; }
+  .navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-field); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
   .navlist a:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); text-decoration: none; }
   .navlist a[aria-current="page"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); font-weight: var(--weight-medium); }
   .navlist a[aria-current="location"] { color: var(--text); font-weight: var(--weight-medium); }
@@ -283,11 +289,10 @@
   .navlist a:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
   /* Phone trigger: a secondary button with a three-line menu glyph, because it opens a side drawer. */
   .menu-glyph::before { content: ""; flex: none; width: 14px; height: 10px; border-block: 1.5px solid currentColor; background: linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat; }
-  /* No-JavaScript fallback: the list opens in place, so the summary keeps a chevron. */
+  /* No-JavaScript fallback: the list opens in place. The summary is a secondary button with a chevron; only the chevron is local. */
   .rail-summary { list-style: none; width: max-content; max-width: 100%; }
   .rail-summary::-webkit-details-marker { display: none; }
   .rail-summary::after { content: ""; width: 6px; height: 6px; margin-left: var(--space-1); border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: rotate(45deg); }
-  .rail-summary:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: 2px; }
   details.rail[open] > .navlist { margin-top: var(--space-2); }
   /* List selection */
   .rows { display: grid; width: min(100%, 360px); }
@@ -301,10 +306,13 @@
   .code-head { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; padding: 4px var(--space-1) 4px var(--space-3); border-bottom: 1px solid var(--border-subtle); background: var(--surface-raised); font-size: var(--text-xs); }
   .code-head b { font-weight: var(--weight-semibold); }
   .code-head .lang { color: var(--text-muted); }
-  .copy { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: var(--control-lg); min-height: var(--control-lg); margin-left: auto; padding: var(--space-1) 6px; border: 0; border-radius: var(--radius-sm); background: transparent; color: inherit; font: inherit; cursor: pointer; }
-  .copy:is(:hover, .is-hover) { background: color-mix(in srgb, currentColor 12%, transparent); }
+  /* Copy is a quiet action; this sets its size and place. */
+  .copy { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: var(--control-lg); min-height: var(--control-lg); margin-left: auto; padding: var(--space-1) 6px; color: inherit; }
+  /* The code block has its own palette, so its Copy keeps the plate's text colour on hover. */
+  .code .copy:is(:hover, .is-hover) { color: inherit; }
   /* Inset: the code block clips its content. */
-  .copy:is(:focus-visible, .is-focus), .code pre:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .code pre:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .code .copy.quiet-action:is(:focus-visible, .is-focus) { outline-offset: -2px; }
   .code pre { margin: 0; padding: var(--space-4); overflow: auto; max-height: 32rem; font-size: var(--text-code); line-height: 1.65; tab-size: 2; }
   /* Each line is a baseline-aligned row, so a prompt or line number sits on the text's baseline. */
   .code .line { display: flex; align-items: baseline; min-height: 1.65em; }
@@ -313,12 +321,13 @@
   .code .k { color: var(--code-key); } .code .s { color: var(--code-string); } .code .n { color: var(--code-number); } .code .c { color: var(--code-comment); }
   .code.compact { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
   .code.compact pre { padding: var(--space-2) var(--space-3); }
-  .code.compact .copy { margin: var(--space-1); border-radius: var(--radius-md); }
+  .code.compact .copy { margin: var(--space-1); }
 
   /* ================= Identity: terminal folio ================= */
 
   /* Command plate: dark in both themes and tinted with the project hue. */
-  .code.command { --code-text: var(--terminal-text); --focus: var(--project-dark); border-color: var(--command-border); background: var(--command-bg); color: var(--terminal-text); }
+  /* Rings on the plate use --project-dark, so the control ring on Copy reads on the dark plate. */
+  .code.command { --code-text: var(--terminal-text); --accent: var(--project-dark); --focus: var(--project-dark); border-color: var(--command-border); background: var(--command-bg); color: var(--terminal-text); }
   .code.command .code-head { border-color: var(--command-border); background: transparent; color: var(--terminal-caption-text); }
   .code.command .code-head .lang { color: var(--terminal-caption-text); }
   /* The prompt is drawn by CSS, so copied and spoken text omit it. */
@@ -341,10 +350,10 @@
   .capture-head { display: flex; align-items: center; min-width: 0; }
   .capture .tablist { flex: 1; width: auto; padding-inline: var(--space-2); }
   .capture .tab { min-height: var(--control-lg); font-family: var(--font-mono); font-size: var(--text-sm); }
-  .full { display: inline-flex; align-items: center; gap: 6px; flex: none; min-height: var(--control-lg); padding: 0 var(--space-3); border: 0; background: transparent; color: var(--text-muted); font: inherit; font-size: var(--text-sm); cursor: pointer; }
-  .full:is(:hover, .is-hover) { color: var(--text); }
+  /* Full size is a quiet action; this sets its size and place. */
+  .full { display: inline-flex; align-items: center; gap: 6px; flex: none; min-height: var(--control-lg); padding: 0 var(--space-3); color: var(--text-muted); font-size: var(--text-sm); }
   /* Inset: the panel clips its content. */
-  .full:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .capture .full.quiet-action:is(:focus-visible, .is-focus) { outline-offset: -2px; }
   .capture .tabpanel { padding-top: 0; color: inherit; }
   /* Without JavaScript each capture keeps its heading, and panels after the first take a rule. */
   .capture .tabs-heading { margin: 0; padding: var(--space-3) var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); }
@@ -360,13 +369,14 @@
   /* Site header */
   .site-header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); min-height: var(--space-16); padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--text); background: var(--bg); width: 100%; }
   .projects { position: relative; }
-  .projects > summary { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--control-lg); padding-inline: var(--space-3); border-radius: var(--radius-md); font-family: var(--font-mono); font-weight: var(--weight-semibold); list-style: none; cursor: pointer; user-select: none; }
+  /* The trigger is a quiet action; this sets its size and type. */
+  .projects > summary { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--control-lg); padding-inline: var(--space-3); font-family: var(--font-mono); font-weight: var(--weight-semibold); list-style: none; user-select: none; }
   .projects > summary::-webkit-details-marker { display: none; }
   /* The ~/ mark is decorative: the empty alternative text keeps it out of the name. */
   .projects > summary::before { content: "~/" / ""; color: var(--project); }
-  .projects > summary:is(:hover, .is-hover), .projects[open] > summary { background: var(--row-hover); }
-  .projects > summary:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .projects .icon { transition: transform var(--duration-fast) ease; }
+  /* The open menu keeps the hover tint. :where keeps it below the quiet action's press. */
+  :where(.projects[open]) > summary { background: color-mix(in srgb, currentColor 12%, transparent); }
+  .projects .icon { transition: transform var(--duration-fast) var(--ease-out); }
   .projects[open] .icon { transform: rotate(180deg); }
   .projects .navlist { position: absolute; z-index: 3; top: 100%; left: 0; min-width: 224px; margin-top: var(--space-1); padding: var(--space-1); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-popover); }
   .projects.is-open .navlist { position: static; }
@@ -404,16 +414,21 @@
   .cmdlist td:first-child { width: 1%; white-space: nowrap; }
   .cmdlist td:nth-child(2) { color: var(--text-muted); }
   .cmdlist td:last-child { width: 1%; padding-right: 0; }
-  .cmdlist .copy { margin: 0; color: var(--text-muted); }
+  .cmdlist .copy { margin: 0; }
+  :where(.cmdlist) .copy { color: var(--text-muted); }
+  /* Inset: the table scrolls sideways on larger screens. */
+  .cmdlist .copy.quiet-action:is(:focus-visible, .is-focus) { outline-offset: -2px; }
   .site-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2) var(--space-5); width: 100%; padding-block: var(--space-4); border-top: 1px solid var(--border-subtle); font: var(--text-sm) / var(--leading) var(--font-mono); }
   .site-footer a { color: var(--text-muted); }
   .site-footer nav { display: flex; flex-wrap: wrap; gap: 0 var(--space-5); }
 
   /* ---------- Focus, forced colors, and touch ---------- */
-  /* Controls: a thin accent ring with a 2px gap and no glow, over the control's own raise or sink. */
-  :is(.btn, .check input, .segmented button, .toggle, .close):is(:focus-visible, .is-focus),
+  /* Controls that act or set a value: a 2px accent ring with a 2px gap and no glow, over the
+     control's own raise or sink. Links, navigation rows, and tabs keep the --focus ring; fields lift. */
+  :is(.btn, .quiet-action, .check input, .segmented button, .toggle):is(:focus-visible, .is-focus),
+  :is(.dialog, .drawer):focus-visible,
   .switch:is(:focus-visible, .is-focus) .switch-track,
-  .radio-card:has(input:is(:focus-visible, .is-focus)) { outline: var(--ring); outline-offset: 2px; }
+  .radio-card:has(input:is(:focus-visible, .is-focus)) { outline: 2px solid var(--accent); outline-offset: 2px; }
   /* Inside a segmented control, the ring hugs the thumb instead of crossing into the next option. */
   .segmented button:is(:focus-visible, .is-focus) { outline-offset: -2px; }
   /* Fields lift out of the well onto the control surface, with a faint accent hairline and no ring.
@@ -435,8 +450,10 @@
     .switch-track::after, .toggle-track::after { forced-color-adjust: none; background: ButtonText; }
     :is(.switch[aria-checked="true"] .switch-track, .toggle[aria-pressed="true"] .toggle-track) { border-color: Highlight; background: Highlight; }
     :is(.switch[aria-checked="true"] .switch-track, .toggle[aria-pressed="true"] .toggle-track)::after { background: HighlightText; }
-    /* Shadows drop, so the current row takes a system border. */
-    .navlist a[aria-current] { border-inline-start: 2px solid Highlight; }
+    /* Fills and shadows drop. The current page takes a system border; the in-page location keeps
+       its pip, redrawn in the system highlight, so the two still differ. */
+    .navlist a[aria-current="page"] { border-inline-start: 2px solid Highlight; }
+    .navlist a[aria-current="location"]::before { forced-color-adjust: none; background: Highlight; }
     .progress > span, .score .pips i.on { forced-color-adjust: none; background: Highlight; }
   }
 
@@ -537,7 +554,7 @@
 <nav class="toc" aria-label="Components">
   <div class="navlist" role="group" aria-labelledby="toc-core">
     <span class="group-label" id="toc-core">Core</span>
-    <a href="#button">Button</a><a href="#text-input-and-textarea">Text input and textarea</a><a href="#select">Select</a><a href="#field-wrapper">Field wrapper</a><a href="#checkbox-and-radio">Checkbox and radio</a><a href="#radio-card-group">Radio card group</a><a href="#switch">Switch</a><a href="#toggle-button">Toggle button</a><a href="#segmented-control">Segmented control</a><a href="#slider">Slider</a><a href="#progress">Progress</a><a href="#score">Score</a><a href="#tabs">Tabs</a><a href="#badge">Badge</a><a href="#alert">Alert</a><a href="#surface-and-card">Surface and card</a><a href="#figure">Figure</a><a href="#dialog">Dialog</a><a href="#drawer">Drawer</a><a href="#navigation-list">Navigation list</a><a href="#code-block">Code block</a>
+    <a href="#button">Button</a><a href="#quiet-action">Quiet action</a><a href="#text-input-and-textarea">Text input and textarea</a><a href="#select">Select</a><a href="#field-wrapper">Field wrapper</a><a href="#checkbox-and-radio">Checkbox and radio</a><a href="#radio-card-group">Radio card group</a><a href="#switch">Switch</a><a href="#toggle-button">Toggle button</a><a href="#segmented-control">Segmented control</a><a href="#slider">Slider</a><a href="#progress">Progress</a><a href="#score">Score</a><a href="#tabs">Tabs</a><a href="#badge">Badge</a><a href="#alert">Alert</a><a href="#surface-and-card">Surface and card</a><a href="#figure">Figure</a><a href="#dialog">Dialog</a><a href="#drawer">Drawer</a><a href="#navigation-list">Navigation list</a><a href="#code-block">Code block</a>
   </div>
   <div class="navlist" role="group" aria-labelledby="toc-identity">
     <span class="group-label" id="toc-identity">Identity</span>
@@ -565,7 +582,7 @@
       <div class="state" inert><button class="btn is-hover" type="button">New monitor</button><span class="caption">Hover</span></div>
       <div class="state" inert><button class="btn is-focus" type="button">New monitor</button><span class="caption">Focus visible</span></div>
       <div class="state" inert><button class="btn is-active" type="button">New monitor</button><span class="caption">Pressed</span></div>
-      <div class="state" inert><button class="btn" type="button" aria-busy="true">Saving</button><span class="caption">Busy</span></div>
+      <div class="state" inert><button class="btn" type="button" aria-busy="true" disabled>Saving</button><span class="caption">Busy</span></div>
       <div class="state" inert><button class="btn" type="button" disabled>New monitor</button><span class="caption">Disabled</span></div>
     </div></div>
     <div class="row"><h4>Secondary</h4><div class="states">
@@ -600,6 +617,27 @@
       <div class="state" inert><button class="btn" type="button" data-size="lg">Large</button><span class="caption">lg</span></div>
       <div class="state" inert><button class="btn secondary" type="button" data-size="sm">Small</button><span class="caption">sm</span></div>
       <div class="state" inert><button class="btn secondary" type="button" data-size="lg">Large</button><span class="caption">lg</span></div>
+    </div></div>
+    <div class="row"><h4>Link</h4><div class="states">
+      <div class="state"><a class="btn secondary" href="#quiet-action">Read the guide</a><span class="caption">Rest, live; no underline on hover</span></div>
+      <div class="state" inert><a class="btn secondary is-focus" href="#quiet-action">Read the guide</a><span class="caption">Focus visible; no disabled state</span></div>
+    </div></div>
+  </section>
+
+  <section class="component" id="quiet-action" data-layer="Core" aria-labelledby="quiet-action-title">
+    <header><h3 id="quiet-action-title">Quiet action</h3><span class="badge">Core</span><a href="components.md#quiet-action">Spec</a></header>
+    <p class="note">One recipe for Copy, Full size, dialog and drawer close, and the project trigger. Each component sets only its size and place.</p>
+    <div class="row"><h4>Icon</h4><div class="states">
+      <div class="state"><button class="quiet-action close" type="button" aria-label="Close">×</button><span class="caption">Rest</span></div>
+      <div class="state" inert><button class="quiet-action close is-hover" type="button" aria-label="Close">×</button><span class="caption">Hover</span></div>
+      <div class="state" inert><button class="quiet-action close is-focus" type="button" aria-label="Close">×</button><span class="caption">Focus visible</span></div>
+      <div class="state" inert><button class="quiet-action close is-active" type="button" aria-label="Close">×</button><span class="caption">Pressed</span></div>
+    </div></div>
+    <div class="row"><h4>Text</h4><div class="states">
+      <div class="state"><button class="quiet-action copy" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button><span class="caption">Rest</span></div>
+      <div class="state" inert><button class="quiet-action copy is-hover" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button><span class="caption">Hover</span></div>
+      <div class="state" inert><button class="quiet-action copy is-focus" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button><span class="caption">Focus visible</span></div>
+      <div class="state" inert><button class="quiet-action copy is-active" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button><span class="caption">Pressed</span></div>
     </div></div>
   </section>
 
@@ -841,7 +879,7 @@
       <div class="state"><button class="btn secondary" type="button" data-open="live-dialog">Open dialog</button><span class="caption">Opens a native modal dialog</span></div>
     </div></div>
     <div class="row"><h4>In place</h4><div class="states">
-      <div class="state wide" inert><div class="dialog" role="dialog" aria-labelledby="dlg-static-title" aria-describedby="dlg-static-desc"><div class="dialog-head"><div><h4 id="dlg-static-title">Delete monitor</h4><p id="dlg-static-desc">This removes its history.</p></div><button class="close" type="button" aria-label="Close dialog">×</button></div><div class="dialog-body">API p95 latency stops alerting at once.</div><div class="dialog-foot"><button class="btn secondary" type="button">Cancel</button><button class="btn danger" type="button">Delete</button></div></div><span class="caption">Static specimen; the real one sits over an <code>--overlay</code> backdrop</span></div>
+      <div class="state wide" inert><div class="dialog" role="dialog" aria-labelledby="dlg-static-title" aria-describedby="dlg-static-desc"><div class="dialog-head"><div><h4 id="dlg-static-title">Delete monitor</h4><p id="dlg-static-desc">This removes its history.</p></div><button class="quiet-action close" type="button" aria-label="Close dialog">×</button></div><div class="dialog-body">API p95 latency stops alerting at once.</div><div class="dialog-foot"><button class="btn secondary" type="button">Cancel</button><button class="btn danger" type="button">Delete</button></div></div><span class="caption">Static specimen; the real one sits over an <code>--overlay</code> backdrop</span></div>
     </div></div>
   </section>
 
@@ -852,7 +890,7 @@
       <div class="state"><button class="btn secondary menu-glyph" type="button" data-size="lg" data-open="live-drawer">Contents</button><span class="caption">Phone trigger: opens a side drawer</span></div>
     </div></div>
     <div class="row"><h4>In place</h4><div class="states">
-      <div class="state wide" inert><div class="drawer" role="dialog" aria-labelledby="drw-static-title"><div class="drawer-head"><h4 id="drw-static-title">Contents</h4><button class="close" type="button" aria-label="Close drawer">×</button></div><div class="drawer-body"><nav class="navlist" aria-label="Contents, static"><a href="#button" aria-current="page">Button</a><a href="#select">Select</a><a href="#switch">Switch</a></nav></div></div><span class="caption">Static specimen</span></div>
+      <div class="state wide" inert><div class="drawer" role="dialog" aria-labelledby="drw-static-title"><div class="drawer-head"><h4 id="drw-static-title">Contents</h4><button class="quiet-action close" type="button" aria-label="Close drawer">×</button></div><div class="drawer-body"><nav class="navlist" aria-label="Contents, static"><a href="#button" aria-current="page">Button</a><a href="#select">Select</a><a href="#switch">Switch</a></nav></div></div><span class="caption">Static specimen</span></div>
     </div></div>
   </section>
 
@@ -877,8 +915,8 @@
   <section class="component" id="code-block" data-layer="Core" aria-labelledby="code-title">
     <header><h3 id="code-title">Code block</h3><span class="badge">Core</span><a href="components.md#code-block">Spec</a></header>
     <div class="row"><h4>Source well</h4><div class="states">
-      <div class="state wide"><div class="code"><div class="code-head"><b>monitor.ts</b><span class="lang">TypeScript</span><button class="copy" type="button" data-copy="code-src"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="monitor.ts"><code id="code-src"><span class="line"><span class="ln">1</span><span><span class="k">const</span> threshold = <span class="n">300</span> <span class="c">// ms at p95</span></span></span><span class="line"><span class="ln">2</span><span><span class="k">export const</span> name = <span class="s">'API p95 latency'</span></span></span></code></pre></div><span class="caption">Header, line numbers, and Copy, live</span></div>
-      <div class="state wide" inert><div class="code compact"><pre><code><span class="line"><span>import { threshold } from './monitor'</span></span></code></pre><button class="copy is-focus" type="button" aria-label="Copy import"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, with focus visible on Copy</span></div>
+      <div class="state wide"><div class="code"><div class="code-head"><b>monitor.ts</b><span class="lang">TypeScript</span><button class="quiet-action copy" type="button" data-copy="code-src"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="monitor.ts"><code id="code-src"><span class="line"><span class="ln">1</span><span><span class="k">const</span> threshold = <span class="n">300</span> <span class="c">// ms at p95</span></span></span><span class="line"><span class="ln">2</span><span><span class="k">export const</span> name = <span class="s">'API p95 latency'</span></span></span></code></pre></div><span class="caption">Header, line numbers, and Copy, live</span></div>
+      <div class="state wide" inert><div class="code compact"><pre><code><span class="line"><span>import { threshold } from './monitor'</span></span></code></pre><button class="quiet-action copy is-focus" type="button" aria-label="Copy import"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, with focus visible on Copy</span></div>
     </div></div>
     <p class="sr-only" role="status" id="copy-status"></p>
   </section>
@@ -892,9 +930,9 @@
   <section class="component" id="command-plate" data-layer="Identity" aria-labelledby="cmd-title">
     <header><h3 id="cmd-title">Command plate</h3><span class="badge">Identity</span><a href="components.md#command-plate">Spec</a></header>
     <div class="row"><h4>Commands</h4><div class="states">
-      <div class="state wide"><div class="code command compact"><pre tabindex="0" role="region" aria-label="Install command"><code id="cmd-install"><span class="line"><span>brew install filipgutica/tap/filip-stack</span></span></code></pre><button class="copy" type="button" data-copy="cmd-install" aria-label="Copy install command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, live; the <code>$</code> is drawn by CSS</span></div>
-      <div class="state wide"><div class="code command"><div class="code-head"><b>Set up</b><button class="copy" type="button" data-copy="cmd-setup"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="Set up commands"><code id="cmd-setup"><span class="line"><span>pnpm install --frozen-lockfile</span></span><span class="line"><span>pnpm check</span></span></code></pre></div><span class="caption">With a header, two lines</span></div>
-      <div class="state wide" inert><div class="code command compact"><pre><code><span class="line"><span>filip-stack apply</span></span></code></pre><button class="copy is-focus" type="button" aria-label="Copy apply command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Focus visible on Copy, in <code>--project-dark</code></span></div>
+      <div class="state wide"><div class="code command compact"><pre tabindex="0" role="region" aria-label="Install command"><code id="cmd-install"><span class="line"><span>brew install filipgutica/tap/filip-stack</span></span></code></pre><button class="quiet-action copy" type="button" data-copy="cmd-install" aria-label="Copy install command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, live; the <code>$</code> is drawn by CSS</span></div>
+      <div class="state wide"><div class="code command"><div class="code-head"><b>Set up</b><button class="quiet-action copy" type="button" data-copy="cmd-setup"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="Set up commands"><code id="cmd-setup"><span class="line"><span>pnpm install --frozen-lockfile</span></span><span class="line"><span>pnpm check</span></span></code></pre></div><span class="caption">With a header, two lines</span></div>
+      <div class="state wide" inert><div class="code command compact"><pre><code><span class="line"><span>filip-stack apply</span></span></code></pre><button class="quiet-action copy is-focus" type="button" aria-label="Copy apply command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Focus visible on Copy, in <code>--project-dark</code></span></div>
     </div></div>
   </section>
 
@@ -903,7 +941,7 @@
     <header><h3 id="capture-title">Terminal capture</h3><span class="badge">Identity</span><a href="components.md#terminal-capture">Spec</a></header>
     <div class="capture" data-tabs data-label="Captures">
       <!-- The script adds the tab list and the Full size button; without it every capture is listed. -->
-      <div class="capture-head" hidden><button class="full" type="button" data-full-size><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>Full size</button></div>
+      <div class="capture-head" hidden><button class="quiet-action full" type="button" data-full-size><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>Full size</button></div>
       <section class="tabpanel" id="cap-status" aria-labelledby="cap-status-heading"><h4 class="tabs-heading" id="cap-status-heading">status</h4><pre class="screen" tabindex="0" role="region" aria-label="status capture"><span class="hi">●</span> host-config   <span class="dim">3 targets current</span>
 <span class="hi">●</span> field-guide   <span class="dim">synced 2 minutes ago</span></pre><p class="capture-caption">~/code/filip-stack · main</p></section>
       <section class="tabpanel" id="cap-diff" aria-labelledby="cap-diff-heading"><h4 class="tabs-heading" id="cap-diff-heading">diff</h4><pre class="screen" tabindex="0" role="region" aria-label="diff capture"><span class="dim">tokens.css</span>  +12 −4</pre><p class="capture-caption">~/code/filip-stack · docs/design-catalogue</p></section>
@@ -915,14 +953,14 @@
     <header><h3 id="header-title">Site header</h3><span class="badge">Identity</span><a href="components.md#site-header">Spec</a></header>
     <div class="row"><h4>Closed</h4><div class="states">
       <div class="state wide"><div class="site-header">
-        <details class="projects"><summary aria-label="Project: filip-stack"><span>filip-stack</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects"><a href="#site-header">annoterm</a><a href="#site-header" aria-current="page">filip-stack</a><a href="#site-header">ui</a></nav></details>
+        <details class="projects"><summary class="quiet-action" aria-label="Project: filip-stack"><span>filip-stack</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects"><a href="#site-header">annoterm</a><a href="#site-header" aria-current="page">filip-stack</a><a href="#site-header">ui</a></nav></details>
         <div class="site-end"><nav class="site-links" aria-label="Site links"><a href="#site-header">Docs</a><a href="#site-header">GitHub</a></nav>
           <div class="segmented" role="group" aria-label="Color theme, sample" data-size="lg" data-icon-only><button type="button" aria-pressed="true" aria-label="System" title="System"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><rect x="2" y="2.5" width="12" height="8.5" rx="1.5"/><path d="M5.5 14h5M8 11v3"/></svg></button><button type="button" aria-pressed="false" aria-label="Light" title="Light"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg></button><button type="button" aria-pressed="false" aria-label="Dark" title="Dark"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/></svg></button></div>
         </div>
       </div><span class="caption">Live: the project switcher opens; the picker is a sample</span></div>
     </div></div>
     <div class="row"><h4>Open menu</h4><div class="states">
-      <div class="state" inert><details class="projects is-open" open><summary aria-label="Project: filip-stack, open"><span>filip-stack</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects, pinned"><a href="#site-header" class="is-hover">annoterm</a><a href="#site-header" aria-current="page">filip-stack</a><a href="#site-header">ui</a></nav></details><span class="caption">Menu open, hover on annoterm</span></div>
+      <div class="state" inert><details class="projects is-open" open><summary class="quiet-action" aria-label="Project: filip-stack, open"><span>filip-stack</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects, pinned"><a href="#site-header" class="is-hover">annoterm</a><a href="#site-header" aria-current="page">filip-stack</a><a href="#site-header">ui</a></nav></details><span class="caption">Menu open, hover on annoterm</span></div>
     </div></div>
   </section>
 
@@ -946,7 +984,7 @@
       <div class="state" inert><a class="skip is-focus" href="#title">Skip to content</a><span class="caption">Focus visible; hidden until focused</span></div>
     </div></div>
     <div class="row"><h4>Command list</h4><div class="states">
-      <div class="state wide"><table class="cmdlist"><thead><tr><th scope="col">Command</th><th scope="col">Use it for</th><td></td></tr></thead><tbody><tr><td><code id="cl-status">filip-stack status</code></td><td>Compare host files with the repository.</td><td><button class="copy" type="button" data-copy="cl-status" aria-label="Copy filip-stack status"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></td></tr><tr><td><code id="cl-apply">filip-stack apply</code></td><td>Install the current host config.</td><td><button class="copy" type="button" data-copy="cl-apply" aria-label="Copy filip-stack apply"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></td></tr></tbody></table></div>
+      <div class="state wide"><table class="cmdlist"><thead><tr><th scope="col">Command</th><th scope="col">Use it for</th><td></td></tr></thead><tbody><tr><td><code id="cl-status">filip-stack status</code></td><td>Compare host files with the repository.</td><td><button class="quiet-action copy" type="button" data-copy="cl-status" aria-label="Copy filip-stack status"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></td></tr><tr><td><code id="cl-apply">filip-stack apply</code></td><td>Install the current host config.</td><td><button class="quiet-action copy" type="button" data-copy="cl-apply" aria-label="Copy filip-stack apply"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></td></tr></tbody></table></div>
     </div></div>
     <div class="row"><h4>Footer</h4><div class="states">
       <div class="state wide"><div class="site-footer"><a href="#folio-type-and-page-helpers">Made by Filip</a><nav aria-label="Projects, footer"><a href="#folio-type-and-page-helpers">annoterm</a><a href="#folio-type-and-page-helpers">ui</a></nav></div></div>
@@ -957,16 +995,16 @@
 </div>
 
 <dialog class="dialog" id="live-dialog" aria-labelledby="live-dialog-title" aria-describedby="live-dialog-desc">
-  <div class="dialog-head"><div><h4 id="live-dialog-title">Delete monitor</h4><p id="live-dialog-desc">This removes its history.</p></div><form method="dialog"><button class="close" type="submit" aria-label="Close dialog">×</button></form></div>
+  <div class="dialog-head"><div><h4 id="live-dialog-title">Delete monitor</h4><p id="live-dialog-desc">This removes its history.</p></div><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close dialog">×</button></form></div>
   <div class="dialog-body">API p95 latency stops alerting at once. Escape closes this dialog and returns focus to its trigger.</div>
   <form class="dialog-foot" method="dialog"><button class="btn secondary" type="submit">Cancel</button><button class="btn danger" type="submit">Delete</button></form>
 </dialog>
 <dialog class="dialog capture-viewer" id="capture-viewer" aria-labelledby="capture-viewer-title">
-  <div class="dialog-head"><h4 id="capture-viewer-title">Capture</h4><form method="dialog"><button class="close" type="submit" aria-label="Close full size capture">×</button></form></div>
+  <div class="dialog-head"><h4 id="capture-viewer-title">Capture</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close full size capture">×</button></form></div>
   <div class="dialog-body" id="capture-viewer-body"></div>
 </dialog>
 <dialog class="drawer" id="live-drawer" aria-labelledby="live-drawer-title">
-  <div class="drawer-head"><h4 id="live-drawer-title">Contents</h4><form method="dialog"><button class="close" type="submit" aria-label="Close drawer">×</button></form></div>
+  <div class="drawer-head"><h4 id="live-drawer-title">Contents</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close drawer">×</button></form></div>
   <div class="drawer-body"><nav class="navlist" aria-label="Contents"><a href="#button">Button</a><a href="#segmented-control">Segmented control</a><a href="#navigation-list" aria-current="page">Navigation list</a></nav></div>
 </dialog>
 

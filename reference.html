@@ -44,17 +44,23 @@
   /* Icons */
   .icon { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* Buttons: components.html#button */
-  .btn { --depth: var(--shadow-raise); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-3); border-radius: var(--radius-md); border: 1px solid transparent; background: var(--control-thumb); color: var(--text); box-shadow: var(--depth); font: var(--weight-medium) var(--text-sm) / 1 var(--font-sans); cursor: pointer; transition: background var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
-  .btn:hover:not(:disabled) { background: color-mix(in srgb, var(--text) 8%, var(--control-thumb)); }
-  .btn:active:not(:disabled) { --depth: var(--shadow-sink); background: var(--field); transform: translateY(1px); }
-  .btn.primary { background: var(--accent); color: var(--accent-text); }
-  .btn.primary:hover:not(:disabled) { background: var(--button-hover); }
-  .btn.primary:active:not(:disabled) { background: var(--button-hover); }
-  .btn.ghost { --depth: 0 0 0 0 transparent; background: transparent; color: var(--text-muted); }
-  .btn.ghost:hover:not(:disabled) { background: var(--row-hover); color: var(--text); }
-  .btn.ghost:active:not(:disabled) { --depth: var(--shadow-sink); background: var(--field); }
-  .btn:disabled { opacity: 0.58; cursor: not-allowed; box-shadow: none; }
+  /* Buttons and quiet actions: components.html#button and #quiet-action, unchanged. The page adds layout only. */
+  :root { --flat: 0 0 0 0 transparent; }
+  .btn { --depth: var(--shadow-raise); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--control-md); padding: 0 var(--space-3); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--accent); color: var(--accent-text); box-shadow: var(--depth); font: var(--weight-medium) var(--text-md) / 1.25 var(--font-sans); letter-spacing: -0.01em; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  .btn[data-size="sm"] { min-height: var(--control-sm); padding: 0 10px; font-size: var(--text-sm); }
+  .btn:is(:hover, .is-hover):not(:disabled) { background: var(--button-hover); }
+  .btn.secondary { background: var(--control-thumb); color: var(--text); }
+  .btn.secondary:is(:hover, .is-hover):not(:disabled) { background: color-mix(in srgb, var(--text) 8%, var(--control-thumb)); }
+  .btn.ghost { --depth: var(--flat); background: transparent; color: var(--text-muted); }
+  .btn.ghost:is(:hover, .is-hover):not(:disabled) { background: var(--row-hover); color: var(--text); }
+  .btn:not(.secondary, .ghost, .danger, .text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--button-hover); }
+  .btn:is(.secondary, .ghost):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--field); }
+  .btn:not(.text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { --depth: var(--shadow-sink); transform: translateY(1px); }
+  .btn:disabled { --depth: var(--flat); opacity: 0.58; cursor: not-allowed; }
+  :where(.quiet-action) { border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  .quiet-action:is(:hover, .is-hover) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
+  .quiet-action:is(:active, .is-active) { background: color-mix(in srgb, currentColor 18%, transparent); }
+  .copy { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-sm); padding: 0 var(--space-3); color: var(--text-muted); font-size: var(--text-sm); }
   /* .is-focus pins the focus state in the Focus and motion specimens. */
   .is-focus { outline: 2px solid var(--focus); outline-offset: 2px; }
 
@@ -89,8 +95,8 @@
   .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -1; border-radius: var(--radius-md); }
   .segmented button:hover:not(:disabled, [aria-pressed="true"]) { color: var(--text); }
   .segmented button:hover:not(:disabled, [aria-pressed="true"])::before { background: color-mix(in srgb, var(--thumb) 45%, transparent); }
-  .segmented button[aria-pressed="true"] { color: var(--accent); }
-  /* The accent label or icon gives the pressed choice at least 3:1 against the thumb. */
+  /* The pressed label reads at 4.5:1 on its thumb, and an icon at 3:1 (--segmented-current-text). */
+  .segmented button[aria-pressed="true"] { color: var(--segmented-current-text); }
   .segmented button[aria-pressed="true"]::before { background: var(--thumb); box-shadow: var(--shadow-raise); }
   /* Forced colors drop shadows, so the pressed option takes the system highlight. */
   @media (forced-colors: active) {
@@ -105,7 +111,7 @@
   .check input[type="radio"] { border-radius: 50%; }
 
   /* Control focus: a thin accent ring with a 2px gap and no glow, over the control's own shadow. */
-  :is(.btn, .segmented button):is(:focus-visible, .is-focus) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  :is(.btn, .quiet-action, .segmented button):is(:focus-visible, .is-focus) { outline: 2px solid var(--accent); outline-offset: 2px; }
   /* Inside the button, the outline hugs the thumb instead of crossing into the next option. */
   .segmented button:is(:focus-visible, .is-focus) { outline-offset: -2px; }
 
@@ -117,6 +123,7 @@
   .row:hover { background: var(--row-hover); }
   /* Selection uses the navigation recipe: selected fill plus a 2px accent bar. */
   .row[aria-selected="true"] { background: var(--row-selected); box-shadow: inset 2px 0 0 var(--accent); font-weight: var(--weight-medium); }
+  @media (forced-colors: active) { .row[aria-selected="true"] { border-inline-start: 2px solid Highlight; } }
   .row[aria-selected="true"] + .row { box-shadow: none; }
   .row .id { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); }
   .row .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -298,7 +305,7 @@
     .detail { position: static; }
   }
   @media (max-width: 800px) {
-    .btn, .tab, .row, .segmented button { min-height: var(--control-lg); min-width: var(--control-lg); }
+    .btn[data-size], .copy, .tab, .row, .segmented button { min-height: var(--control-lg); min-width: var(--control-lg); }
     .shell { grid-template-columns: 1fr; height: auto; }
     main { overflow: visible; }
     .sidebar { flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--border-subtle); padding: var(--space-2) var(--space-6); gap: var(--space-2); }
@@ -373,7 +380,7 @@
       </div>
       <span class="spacer"></span>
       <label class="search"><svg class="icon"><use href="#i-search"/></svg><input id="search" type="search" placeholder="Filter monitors" aria-label="Filter monitors"><kbd>/</kbd></label>
-      <button class="btn primary" type="button"><svg class="icon"><use href="#i-plus"/></svg>New monitor</button>
+      <button class="btn" type="button" data-size="sm"><svg class="icon"><use href="#i-plus"/></svg>New monitor</button>
     </div>
 
     <div class="content">
@@ -389,7 +396,7 @@
           <div class="list" id="list" role="listbox" aria-label="Monitors"></div>
           <div class="empty" id="empty" hidden>
             <p>No monitors match this filter.</p>
-            <button class="btn" type="button" id="clear-filter">Clear filter</button>
+            <button class="btn secondary" type="button" data-size="sm" id="clear-filter">Clear filter</button>
           </div>
         </div>
       </div>
@@ -481,6 +488,7 @@
             <li class="swatch" data-token="--field-focus"><i class="chip" aria-hidden="true"></i><code>--field-focus</code><span class="value"></span><span class="use">A focused field's lifted fill; <code>--field</code> where field text would miss 4.5:1 on the lift</span></li>
             <li class="swatch" data-token="--nav-current"><i class="chip" aria-hidden="true"></i><code>--nav-current</code><span class="value"></span><span class="use">Current navigation row and selected tab, with <code>--shadow-nav-current</code></span></li>
             <li class="swatch" data-token="--nav-current-text"><i class="chip" aria-hidden="true"></i><code>--nav-current-text</code><span class="value"></span><span class="use">Text on the current row and selected tab: the first of <code>--accent</code>, <code>--text</code>, black, and white that reaches 4.5:1 on the tinted fill</span></li>
+            <li class="swatch" data-token="--segmented-current-text"><i class="chip" aria-hidden="true"></i><code>--segmented-current-text</code><span class="value"></span><span class="use">The selected segmented label: the first of <code>--accent</code>, <code>--text</code>, black, and white that reaches 4.5:1 on the thumb (3:1 for an icon)</span></li>
             <li class="swatch" data-token="--row-hover"><i class="chip" aria-hidden="true"></i><code>--row-hover</code><span class="value"></span><span class="use">Navigation row hover</span></li>
             <li class="swatch" data-token="--row-selected"><i class="chip" aria-hidden="true"></i><code>--row-selected</code><span class="value"></span><span class="use">Selected list row</span></li>
             <li class="swatch" data-token="--overlay"><i class="chip" aria-hidden="true"></i><code>--overlay</code><span class="value"></span><span class="use">Backdrop behind dialogs and drawers</span></li>
@@ -614,14 +622,14 @@
         <section class="foundation" id="focus-motion" aria-labelledby="focus-motion-title">
           <h3 id="focus-motion-title">Focus and motion</h3>
           <ul class="specs">
-            <li class="spec"><div class="spec-meta"><code>2px solid --accent, offset 2px</code><span class="use">Controls: one ring with no glow, over their own raise or sink shadow, the same width as the link and navigation outline. Pointer hover never draws focus.</span></div><div inert><button class="btn is-focus" type="button">Focused</button></div></li>
+            <li class="spec"><div class="spec-meta"><code>2px solid --accent, offset 2px</code><span class="use">Controls that act or set a value, quiet actions included: one ring with no glow, over their own raise or sink shadow, the same width as the link and navigation outline. Pointer hover never draws focus.</span></div><div inert><button class="btn secondary is-focus" type="button" data-size="sm">Focused</button></div></li>
             <li class="spec"><div class="spec-meta"><code>--field-focus, --shadow-raise, accent edge at 35%</code><span class="use">Fields lift out of their well instead of drawing a ring. A transparent 2px outline keeps a ring in forced colors. The cue is below 3:1 by choice.</span></div><div inert><label class="search is-focus"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" value="latency" aria-label="Focused field sample"></label></div></li>
-            <li class="spec"><div class="spec-meta"><code>2px solid --focus, offset 2px</code><span class="use">Links, navigation, tabs, and code and capture actions keep the base outline.</span></div><a class="is-focus" href="docs.html">Documentation example</a></li>
+            <li class="spec"><div class="spec-meta"><code>2px solid --focus, offset 2px</code><span class="use">Links, navigation rows, and tabs keep the base outline.</span></div><a class="is-focus" href="docs.html">Documentation example</a></li>
             <li class="spec"><div class="spec-meta"><code>offset -2px</code><span class="use">Only inside a scrolling or clipping parent, or a segmented control, with a comment that names the reason</span></div><div inert><div class="tabs" role="tablist" aria-label="Inset focus sample"><button class="tab is-focus" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
             <li class="spec" data-token="--duration-fast"><div class="spec-meta"><code>--duration-fast</code><span class="value"></span></div><span class="use">Hover and press</span></li>
             <li class="spec" data-token="--duration"><div class="spec-meta"><code>--duration</code><span class="value"></span></div><span class="use">Menus, panels, and the switch knob</span></li>
             <li class="spec" data-token="--ease-out"><div class="spec-meta"><code>--ease-out</code><span class="value"></span></div><span class="use">Animate opacity or transform only where it explains a state change</span></li>
-            <li class="spec"><div class="spec-meta"><code>prefers-reduced-motion</code></div><span class="use">The <code>tokens.css</code> base sets transitions and animations to 0ms and turns off smooth scrolling</span></li>
+            <li class="spec"><div class="spec-meta"><code>prefers-reduced-motion</code></div><span class="use">The <code>tokens.css</code> base sets transitions and animations to 0ms and turns off smooth scrolling. A busy spinner slows to 1.4s instead.</span></li>
           </ul>
         </section>
       </section>
@@ -777,10 +785,10 @@
         <dt>Metric</dt><dd class="mono">${m.metric}</dd>
       </dl>
       <div class="code">
-        <div class="code-head"><span>Sample query</span><button class="btn ghost copy" type="button">${icon('i-copy')}<span>Copy</span></button></div>
+        <div class="code-head"><span>Sample query</span><button class="quiet-action copy" type="button">${icon('i-copy')}<span>Copy</span></button></div>
         <pre>${highlight(code)}</pre>
       </div>
-      <div class="cluster"><button class="btn" type="button">Open in explorer</button><button class="btn ghost" type="button">Mute</button></div>`;
+      <div class="cluster"><button class="btn secondary" type="button" data-size="sm">Open in explorer</button><button class="btn ghost" type="button" data-size="sm">Mute</button></div>`;
     const copy = detail.querySelector('.copy');
     copy.addEventListener('click', () => {
       const label = copy.lastElementChild;
