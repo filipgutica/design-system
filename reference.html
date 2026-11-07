@@ -1,3 +1,5 @@
+<!doctype html>
+<html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Application reference example</title>
@@ -41,11 +43,15 @@
 
   /* Buttons */
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--border); background: transparent; color: var(--text); font: var(--weight-medium) var(--text-sm) / 1 var(--font-sans); cursor: pointer; transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out); }
-  .btn:hover { background: var(--surface-hover); }
+  /* .is-hover and .is-focus pin a state for the foundations state matrix; drop them when you copy a component. */
+  .btn:hover:not(:disabled), .btn.is-hover { background: var(--surface-hover); }
   .btn.primary { background: var(--text); border-color: transparent; color: var(--bg); }
-  .btn.primary:hover { background: var(--text-muted); }
+  .btn.primary:hover:not(:disabled), .btn.primary.is-hover { background: var(--text-muted); }
   .btn.ghost { border-color: transparent; color: var(--text-muted); }
-  .btn.ghost:hover { color: var(--text); }
+  .btn.ghost:hover:not(:disabled), .btn.ghost.is-hover { color: var(--text); }
+  /* Disabled controls follow @filipgutica/ui: 58% opacity and a not-allowed cursor. */
+  .btn:disabled, .input:disabled, .select:disabled, .switch:disabled, .segmented button:disabled, .check:has(input:disabled) { opacity: 0.58; cursor: not-allowed; }
+  .is-focus { outline: 2px solid var(--focus); outline-offset: 2px; }
   .btn.md { height: var(--control-md); }
   .btn.lg { height: var(--control-lg); padding: 0 var(--space-4); }
 
@@ -63,7 +69,7 @@
   .tab:hover { color: var(--text); }
   .tab[aria-selected="true"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); }
   /* .tabs scrolls sideways and clips anything outside it, so the ring sits inside the tab. */
-  .tab:focus-visible { outline-offset: -2px; }
+  .tab:is(:focus-visible, .is-focus) { outline-offset: -2px; }
   .tab .count { color: var(--text-muted); margin-left: var(--space-1); font-variant-numeric: tabular-nums; }
 
   /* Segmented control */
@@ -71,18 +77,46 @@
   .segmented { --thumb: light-dark(var(--surface-raised), color-mix(in srgb, var(--text) 10%, var(--surface-hover))); display: inline-flex; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--surface-hover); }
   .segmented button { position: relative; isolation: isolate; height: 28px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-xs) / 1 var(--font-sans); cursor: pointer; }
   .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -1; border-radius: var(--radius-sm); }
-  .segmented button:hover:not([aria-pressed="true"]) { color: var(--text); }
-  .segmented button:hover:not([aria-pressed="true"])::before { background: color-mix(in srgb, var(--thumb) 45%, transparent); }
+  .segmented button:is(:hover:not(:disabled), .is-hover):not([aria-pressed="true"]) { color: var(--text); }
+  .segmented button:is(:hover:not(:disabled), .is-hover):not([aria-pressed="true"])::before { background: color-mix(in srgb, var(--thumb) 45%, transparent); }
   .segmented button[aria-pressed="true"] { color: var(--text); }
   /* The 1px --border ring gives the pressed option 3:1 against the track. */
   .segmented button[aria-pressed="true"]::before { background: var(--thumb); box-shadow: inset 0 0 0 1px var(--border); }
   /* Inside the button, the ring hugs the thumb instead of crossing into the next option. */
-  .segmented button:focus-visible { outline-offset: -2px; }
+  .segmented button:is(:focus-visible, .is-focus) { outline-offset: -2px; }
   /* Forced colors drop the fill and the ring, so the pressed option takes the system highlight. */
   @media (forced-colors: active) {
     .segmented button[aria-pressed="true"] { forced-color-adjust: none; color: HighlightText; }
     .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
   }
+
+  /* Fields, checkboxes, radios, and switches follow the @filipgutica/ui components of the same role. */
+  .field { display: grid; gap: var(--space-1); justify-items: start; }
+  .field-label { font-size: var(--text-sm); font-weight: var(--weight-semibold); }
+  .input, .select { height: var(--control-md); width: 200px; max-width: 100%; padding: 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: var(--text-md) / 1.35 var(--font-sans); }
+  .input::placeholder { color: var(--text-muted); opacity: 1; }
+  /* The chevron is drawn in currentColor, so it follows the text in both themes. */
+  .select { appearance: none; padding-right: var(--space-8); background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: calc(100% - 0.8rem) 52%, calc(100% - 0.55rem) 52%; background-size: 0.3rem 0.3rem; background-repeat: no-repeat; }
+  .input[aria-invalid="true"], .select[aria-invalid="true"] { border-color: var(--danger); }
+  .field-error { font-size: var(--text-sm); color: var(--danger); }
+
+  .choices { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  .check { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-md); cursor: pointer; }
+  .check input { appearance: none; display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-raised); cursor: inherit; }
+  .check input[type="radio"] { border-radius: 50%; }
+  /* Checked choices take the accent, never --link or --focus. */
+  .check input:checked { border-color: var(--accent); background: var(--accent); }
+  .check input[type="checkbox"]:checked::before { content: ""; width: 5px; height: 9px; margin-top: -2px; border: solid var(--accent-text); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .check input[type="radio"]:checked { border-width: 5px; background: var(--surface-raised); }
+
+  .switch { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-md); padding: 0; border: 0; background: transparent; color: var(--text); font: var(--text-md) / var(--leading) var(--font-sans); cursor: pointer; }
+  .switch-track { position: relative; flex: none; width: 36px; height: 20px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface-hover); transition: background-color var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out); }
+  .switch-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: var(--radius-pill); background: var(--border); transition: transform var(--duration) var(--ease-out), background-color var(--duration) var(--ease-out); }
+  .switch[aria-checked="true"] .switch-track { border-color: var(--accent); background: var(--accent); }
+  .switch[aria-checked="true"] .switch-track::after { background: var(--accent-text); transform: translateX(16px); }
+  /* The button is a larger hit area, so the ring follows the visible track. */
+  .switch:is(:focus-visible, .is-focus) { outline: none; }
+  .switch:is(:focus-visible, .is-focus) .switch-track { outline: 2px solid var(--focus); outline-offset: 2px; }
 
   /* List */
   .list { display: grid; }
@@ -167,6 +201,13 @@
   .code .k { color: var(--code-key); }
   .code .s { color: var(--code-string); }
   .code .n { color: var(--code-number); }
+  .code .c { color: var(--code-comment); }
+
+  /* Terminal plate: dark in both themes; the $ prompt is drawn by CSS, so copied and spoken text omit it. */
+  .terminal { margin: 0; border: 1px solid var(--terminal-border); border-radius: var(--radius-lg); background: var(--terminal); overflow: hidden; }
+  .terminal pre { margin: 0; padding: var(--space-3) var(--space-4); overflow-x: auto; color: var(--terminal-text); font-size: var(--text-code); }
+  .terminal pre::before { content: "$ " / ""; color: var(--project-dark); }
+  .terminal figcaption { padding: var(--space-1) var(--space-4); background: var(--terminal-caption); color: var(--terminal-caption-text); font: var(--text-xs) / var(--leading) var(--font-mono); }
 
   /* Table */
   .table-wrap { overflow-x: auto; }
@@ -205,14 +246,60 @@
   /* Empty state */
   .empty { display: grid; justify-items: center; gap: var(--space-3); padding: var(--space-12) var(--space-4); text-align: center; color: var(--text-muted); font-size: var(--text-sm); }
 
-  /* Specimens */
-  .type-scale { display: grid; gap: var(--space-3); }
-  .type-scale div { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: var(--space-4); align-items: baseline; }
-  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-3); }
-  .swatch { display: grid; gap: var(--space-1); font-size: var(--text-xs); }
-  .swatch i { height: 36px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); }
-  .swatch code { color: var(--text-muted); }
   .cluster { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+
+  /* Foundations catalogue. Specimens set their style from tokens; the script prints resolved values. */
+  .jump { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--text-sm); }
+  .foundation { display: grid; gap: var(--space-4); padding-top: var(--space-8); border-top: 1px solid var(--border-subtle); scroll-margin-top: var(--space-4); }
+  .foundation h3 { font-size: var(--text-lg); }
+  .foundation h4 { font-size: var(--text-sm); color: var(--text-muted); font-weight: var(--weight-medium); letter-spacing: 0; margin-top: var(--space-2); }
+  .note { color: var(--text-muted); font-size: var(--text-sm); max-width: var(--measure); }
+  .specs { display: grid; margin: 0; padding: 0; list-style: none; }
+  .spec { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--space-2) var(--space-6); align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--border-subtle); }
+  .spec:last-child { border-bottom: 0; }
+  .spec-meta { display: grid; gap: 2px; font-size: var(--text-xs); min-width: 0; }
+  .spec-meta code { font-size: var(--text-xs); color: var(--text); }
+  .value { font-family: var(--font-mono); color: var(--text-muted); overflow-wrap: anywhere; }
+  .use { color: var(--text-muted); }
+  .spec-sample { min-width: 0; overflow-wrap: anywhere; }
+  .t-display, .t-doc-title, .t-app-title, .t-section { font-family: var(--font-mono); font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
+  .t-display { font-size: var(--text-display); }
+  .t-doc-title { font-size: var(--text-3xl); }
+  .t-app-title { font-size: var(--text-2xl); }
+  /* The ## mark is decorative: the empty alt text after the slash keeps screen readers from reading it. */
+  .t-section { font-size: var(--text-xl); padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
+  .t-section::before { content: "## " / ""; color: var(--accent); }
+  .t-sub { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-tight); }
+  .t-reading { font-size: var(--text-reading); line-height: var(--leading); max-width: var(--measure); }
+  .t-secondary { font-size: var(--text-sm); color: var(--text-muted); }
+  .t-code { font-size: var(--text-code); }
+
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-3) var(--space-6); margin: 0; padding: 0; list-style: none; }
+  /* The chip spans every row; the last flexible row takes its extra height so text lines stay packed. */
+  .swatch { display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: repeat(4, min-content) 1fr; gap: 2px var(--space-3); align-items: start; font-size: var(--text-xs); }
+  .swatch > :not(.chip) { grid-column: 2; }
+  .swatch code { color: var(--text); }
+  .chip { grid-row: 1 / -1; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); font: var(--weight-semibold) var(--text-md) / 1 var(--font-sans); font-style: normal; }
+  .chip b { width: 16px; height: 16px; border-radius: var(--radius-sm); background: currentColor; }
+  .ratio { color: var(--text-muted); }
+
+  .bar { display: block; height: 12px; background: var(--accent); border-radius: var(--radius-sm); }
+  .height-bar { display: block; width: 48px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-raised); }
+  .shape-box { display: block; width: 96px; height: 56px; border: 1px solid var(--border); background: var(--surface-raised); }
+  .line-subtle { display: block; height: 0; border-top: 1px solid var(--border-subtle); }
+  .line-border { display: block; height: 0; border-top: 1px solid var(--border); }
+  .bar-sample { display: inline-flex; align-items: center; height: var(--control-sm); padding: 0 var(--space-3); border-radius: var(--radius-md); background: var(--row-selected); box-shadow: inset 2px 0 0 var(--accent); font-size: var(--text-sm); font-weight: var(--weight-medium); }
+  .header-rule { display: block; height: 0; border-top: 1px solid var(--text); }
+  .elevation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--bg); }
+  .elevation > div { display: grid; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--surface-raised); font-size: var(--text-sm); }
+  .elevation .floating { box-shadow: var(--shadow-popover); }
+  .elevation .panel-sample { border: 1px solid var(--border-subtle); }
+
+  .control-row { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: var(--space-2) var(--space-6); padding: var(--space-4) 0; border-bottom: 1px solid var(--border-subtle); }
+  .control-row:last-child { border-bottom: 0; }
+  .control-row h4 { margin: 0; padding-top: var(--space-2); color: var(--text); }
+  .states { display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-6); }
+  .state { display: grid; gap: var(--space-2); align-content: start; justify-items: start; min-width: 0; max-width: 100%; }
 
   .mobile-only { display: none; }
   /* The detail column collapses at main's own width (876px is a 1100px viewport minus --sidebar), not at a third viewport breakpoint. */
@@ -223,6 +310,8 @@
   }
   @media (max-width: 800px) {
     .btn, .tab, .row, .segmented button { min-height: var(--control-lg); min-width: var(--control-lg); }
+    .input, .select { height: var(--control-lg); }
+    .check, .switch { min-height: var(--control-lg); }
     .shell { grid-template-columns: 1fr; height: auto; }
     main { overflow: visible; }
     .sidebar { flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--border-subtle); padding: var(--space-2) var(--space-6); gap: var(--space-2); }
@@ -238,7 +327,8 @@
     .stats div:nth-child(3) { border-left: 0; padding-left: var(--space-3); }
     .row .id { display: none; }
     .row .channel { display: none; }
-    .type-scale div { grid-template-columns: 1fr; gap: 0; }
+    .spec, .control-row { grid-template-columns: 1fr; }
+    .elevation { grid-template-columns: 1fr; }
     .card-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 640px) {
@@ -272,7 +362,7 @@
       <nav class="nav" aria-label="Main">
         <a href="#monitors" aria-current="page"><svg class="icon"><use href="#i-list"/></svg>Monitors<span class="count">6</span></a>
         <a href="#reference"><svg class="icon"><use href="#i-chart"/></svg>Components</a>
-        <a href="#tokens"><svg class="icon"><use href="#i-doc"/></svg>Tokens</a>
+        <a href="#foundations"><svg class="icon"><use href="#i-doc"/></svg>Foundations</a>
       </nav>
     </div>
     <div class="sidebar-foot">
@@ -345,7 +435,7 @@
         <div class="callout"><svg class="icon"><use href="#i-help"/></svg><p>Values are sampled every 5 minutes. A spike shorter than one bucket can fall between samples.</p></div>
         <div class="callout warning"><svg class="icon"><use href="#i-alert"/></svg><p>No data for 42 minutes. Check ingestion before you trust this monitor.</p></div>
 
-        <div class="table-wrap">
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Sample routes">
           <table>
             <thead><tr><th>Route</th><th>Service</th><th class="num">Requests</th><th class="num">p95</th><th class="num">Errors</th></tr></thead>
             <tbody>
@@ -385,20 +475,262 @@
         </details>
       </section>
 
-      <section class="section" id="tokens">
+      <section class="section" id="foundations">
         <header>
-          <h2>Tokens</h2>
-          <p class="lede">Type, surface, and status tokens. Switch the theme in the sidebar to check both.</p>
+          <h2>Foundations</h2>
+          <p class="lede">Type, color, space, shape, borders, elevation, controls, focus, and motion. Each specimen takes its style from <code>tokens.css</code> and prints the value the browser resolved, so the catalogue follows the tokens when they change. Use the theme control in the sidebar to check both themes.</p>
+          <nav class="jump" aria-label="Foundations">
+            <a href="#typography">Typography</a>
+            <a href="#color">Color</a>
+            <a href="#spacing">Spacing and size</a>
+            <a href="#shape">Shape</a>
+            <a href="#borders">Borders and dividers</a>
+            <a href="#elevation">Elevation</a>
+            <a href="#controls">Inputs and controls</a>
+            <a href="#focus-motion">Focus and motion</a>
+          </nav>
         </header>
-        <div class="type-scale">
-          <div><span class="caption">--text-2xl</span><span style="font-size:var(--text-2xl);font-weight:var(--weight-semibold);letter-spacing:var(--tracking-tight)">Page title</span></div>
-          <div><span class="caption">--text-lg</span><span style="font-size:var(--text-lg);font-weight:var(--weight-semibold)">Section heading</span></div>
-          <div><span class="caption">--text-md</span><span>Body and UI text for most of the interface.</span></div>
-          <div><span class="caption">--text-sm</span><span class="muted" style="font-size:var(--text-sm)">Secondary text and controls.</span></div>
-          <div><span class="caption">--text-xs</span><span class="caption">Meta, captions, counts.</span></div>
-          <div><span class="caption">--font-mono</span><code style="font-size:var(--text-sm)">latency_p95</code></div>
-        </div>
-        <div class="swatches" id="swatches"></div>
+
+        <section class="foundation" id="typography" aria-labelledby="typography-title">
+          <h3 id="typography-title">Typography</h3>
+          <p class="note">Mono carries identity and structure; sans carries prose and controls. <code>@filipgutica/ui</code> self-hosts IBM Plex. A standalone page without the font installed, such as this one, shows the system fallback.</p>
+
+          <h4>Families</h4>
+          <ul class="specs">
+            <li class="spec" data-token="--font-mono"><div class="spec-meta"><code>--font-mono</code><span class="value"></span><span class="use">Identity, page and section headings, navigation rails, metadata, captions, code, identifiers, and keys</span></div><p class="spec-sample" style="font-family:var(--font-mono);font-size:var(--text-xl)">~/filip-stack 0123456789</p></li>
+            <li class="spec" data-token="--font-sans"><div class="spec-meta"><code>--font-sans</code><span class="value"></span><span class="use">Prose, h3 and below, labels, and controls</span></div><p class="spec-sample" style="font-family:var(--font-sans);font-size:var(--text-xl)">Quiet surfaces, clear hierarchy</p></li>
+          </ul>
+
+          <h4>Size scale</h4>
+          <ul class="specs">
+            <li class="spec" data-token="--text-display"><div class="spec-meta"><code>--text-display</code><span class="value"></span><span class="use">Product page and tool home title, in mono</span></div><p class="spec-sample t-display">Terminal folio</p></li>
+            <li class="spec" data-token="--text-display-sm"><div class="spec-meta"><code>--text-display-sm</code><span class="value"></span><span class="use">The display title on phones</span></div><p class="spec-sample t-display" style="font-size:var(--text-display-sm)">Terminal folio</p></li>
+            <li class="spec" data-token="--text-3xl"><div class="spec-meta"><code>--text-3xl</code><span class="value"></span><span class="use">Documentation title, in mono</span></div><p class="spec-sample t-doc-title">Design language</p></li>
+            <li class="spec" data-token="--text-2xl"><div class="spec-meta"><code>--text-2xl</code><span class="value"></span><span class="use">Largest application title</span></div><p class="spec-sample" style="font-size:var(--text-2xl)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--text-xl"><div class="spec-meta"><code>--text-xl</code><span class="value"></span><span class="use">Section heading, in mono</span></div><p class="spec-sample" style="font-size:var(--text-xl)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--text-lg"><div class="spec-meta"><code>--text-lg</code><span class="value"></span></div><p class="spec-sample" style="font-size:var(--text-lg)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--text-reading"><div class="spec-meta"><code>--text-reading</code><span class="value"></span><span class="use">Paragraphs and article text, with <code>--leading</code> and <code>--measure</code></span></div><p class="spec-sample" style="font-size:var(--text-reading)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--text-md"><div class="spec-meta"><code>--text-md</code><span class="value"></span><span class="use">Controls and dense application content</span></div><p class="spec-sample" style="font-size:var(--text-md)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--text-sm"><div class="spec-meta"><code>--text-sm</code><span class="value"></span><span class="use">Secondary text and figure captions</span></div><p class="spec-sample" style="font-size:var(--text-sm)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--text-xs"><div class="spec-meta"><code>--text-xs</code><span class="value"></span></div><p class="spec-sample" style="font-size:var(--text-xs)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--text-code"><div class="spec-meta"><code>--text-code</code><span class="value"></span></div><p class="spec-sample"><code class="t-code">latency_p95 &gt; 300</code></p></li>
+          </ul>
+
+          <h4>Line height, weight, and tracking</h4>
+          <ul class="specs">
+            <li class="spec" data-token="--leading-tight"><div class="spec-meta"><code>--leading-tight</code><span class="value"></span><span class="use">Headings, from the <code>tokens.css</code> base</span></div><p class="spec-sample" style="line-height:var(--leading-tight);max-width:24ch">Two lines of a heading sit close together</p></li>
+            <li class="spec" data-token="--leading"><div class="spec-meta"><code>--leading</code><span class="value"></span><span class="use">Body and reading text</span></div><p class="spec-sample" style="line-height:var(--leading);max-width:24ch">Two lines of body text leave room to read</p></li>
+            <li class="spec" data-token="--weight-regular"><div class="spec-meta"><code>--weight-regular</code><span class="value"></span></div><p class="spec-sample" style="font-weight:var(--weight-regular);font-size:var(--text-lg)">Regular body text</p></li>
+            <li class="spec" data-token="--weight-medium"><div class="spec-meta"><code>--weight-medium</code><span class="value"></span><span class="use">The current destination</span></div><p class="spec-sample" style="font-weight:var(--weight-medium);font-size:var(--text-lg)">Medium current item</p></li>
+            <li class="spec" data-token="--weight-semibold"><div class="spec-meta"><code>--weight-semibold</code><span class="value"></span><span class="use">Headings, from the <code>tokens.css</code> base</span></div><p class="spec-sample" style="font-weight:var(--weight-semibold);font-size:var(--text-lg)">Semibold heading</p></li>
+            <li class="spec" data-token="--tracking-tight"><div class="spec-meta"><code>--tracking-tight</code><span class="value"></span><span class="use">Headings, from the <code>tokens.css</code> base</span></div><p class="spec-sample" style="letter-spacing:var(--tracking-tight);font-size:var(--text-2xl);font-weight:var(--weight-semibold)">Restrained tracking</p></li>
+          </ul>
+
+          <h4>Roles</h4>
+          <ul class="specs">
+            <li class="spec"><div class="spec-meta"><span>Documentation title</span><code>--font-mono --text-3xl</code></div><p class="spec-sample t-doc-title">Design language</p></li>
+            <li class="spec"><div class="spec-meta"><span>Section heading</span><code>--font-mono --text-xl</code><span class="use">A <code>##</code> mark in <code>--accent</code> and a <code>--border-subtle</code> rule above</span></div><p class="spec-sample t-section">Typography</p></li>
+            <li class="spec"><div class="spec-meta"><span>Application title</span><code>--font-mono --text-2xl</code><span class="use">Or smaller</span></div><p class="spec-sample t-app-title">Monitors</p></li>
+            <li class="spec"><div class="spec-meta"><span>Subheading (h3 and below)</span><code>--font-sans --text-lg</code></div><p class="spec-sample t-sub">Install the command line tool</p></li>
+            <li class="spec"><div class="spec-meta"><span>Reading text and links</span><code>--text-reading --leading --measure</code><span class="use">Underline links in prose</span></div><p class="spec-sample t-reading">A shared language for personal products and tools. The <a href="docs.html">documentation example</a> shows it in a full page.</p></li>
+            <li class="spec"><div class="spec-meta"><span>Secondary text</span><code>--text-sm --text-muted</code></div><p class="spec-sample t-secondary">Updated 4 minutes ago by the nightly sync.</p></li>
+            <li class="spec"><div class="spec-meta"><span>Inline code</span><code>--font-mono --text-code</code></div><p class="spec-sample">Set <code class="t-code">--measure</code> on reading text.</p></li>
+            <li class="spec"><div class="spec-meta"><span>Shell command</span><code>--terminal --project-dark</code><span class="use">A terminal plate, with the <code>$</code> prompt drawn by CSS</span></div><figure class="terminal spec-sample"><pre>pnpm install --frozen-lockfile</pre><figcaption>zsh · ~/code/app</figcaption></figure></li>
+            <li class="spec"><div class="spec-meta"><span>Source code</span><code>--code-bg --code-*</code><span class="use">A theme-matched well with syntax colors and no prompt</span></div><div class="code spec-sample"><pre><span class="c">// Sample monitor</span>
+{
+  <span class="k">"metric"</span>: <span class="s">"latency_p95"</span>,
+  <span class="k">"threshold"</span>: <span class="n">300</span>
+}</pre></div></li>
+          </ul>
+        </section>
+
+        <section class="foundation" id="color" aria-labelledby="color-title">
+          <h3 id="color-title">Color</h3>
+          <p class="note">Ratios are WCAG contrast against each named background: 4.5:1 for text, and 3:1 for icons, marks, and control edges. A ratio below its target says so in text.</p>
+
+          <h4>Surfaces</h4>
+          <ul class="swatches">
+            <li class="swatch" data-token="--bg"><i class="chip" aria-hidden="true"></i><code>--bg</code><span class="value"></span><span class="use">Page canvas</span></li>
+            <li class="swatch" data-token="--surface"><i class="chip" aria-hidden="true"></i><code>--surface</code><span class="value"></span><span class="use">Wells: code, screenshots, figures</span></li>
+            <li class="swatch" data-token="--surface-raised"><i class="chip" aria-hidden="true"></i><code>--surface-raised</code><span class="value"></span><span class="use">Panels and floating layers</span></li>
+            <li class="swatch" data-token="--surface-hover"><i class="chip" aria-hidden="true"></i><code>--surface-hover</code><span class="value"></span><span class="use">Raised-control hover; segmented track</span></li>
+            <li class="swatch" data-token="--row-hover"><i class="chip" aria-hidden="true"></i><code>--row-hover</code><span class="value"></span><span class="use">Navigation row hover</span></li>
+            <li class="swatch" data-token="--row-selected"><i class="chip" aria-hidden="true"></i><code>--row-selected</code><span class="value"></span><span class="use">Current destination and selected row</span></li>
+          </ul>
+
+          <h4>Text and lines</h4>
+          <ul class="swatches">
+            <li class="swatch" data-token="--text" data-on="--bg --surface-raised" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--text</code><span class="value"></span><span class="ratio"></span><span class="use">Essential labels and instructions; primary action fill</span></li>
+            <li class="swatch" data-token="--text-muted" data-on="--bg --surface" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--text-muted</code><span class="value"></span><span class="ratio"></span><span class="use">Secondary information and metadata</span></li>
+            <li class="swatch" data-token="--border-subtle"><i class="chip" aria-hidden="true"></i><code>--border-subtle</code><span class="value"></span><span class="use">Panels, wells, and dividers</span></li>
+            <li class="swatch" data-token="--border" data-on="--bg --surface-hover" data-min="3"><i class="chip" aria-hidden="true"></i><code>--border</code><span class="value"></span><span class="ratio"></span><span class="use">Control edges only</span></li>
+          </ul>
+
+          <h4>Identity, links, and focus</h4>
+          <ul class="swatches">
+            <li class="swatch" data-token="--project" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--project</code><span class="value"></span><span class="ratio"></span><span class="use">The project hue; <code>--accent</code> follows it</span></li>
+            <li class="swatch" data-token="--project-dark" data-on="--terminal" data-min="3"><i class="chip" aria-hidden="true"></i><code>--project-dark</code><span class="value"></span><span class="ratio"></span><span class="use">The hue on the terminal plate</span></li>
+            <li class="swatch" data-token="--accent" data-on="--bg --surface-raised" data-min="3"><i class="chip" aria-hidden="true"></i><code>--accent</code><span class="value"></span><span class="ratio"></span><span class="use">Marks, current-item bars, checked controls; 4.5:1 where it colors text</span></li>
+            <li class="swatch" data-token="--accent-text" data-on="--accent" data-min="3"><i class="chip" aria-hidden="true"></i><code>--accent-text</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--accent-hover"><i class="chip" aria-hidden="true"></i><code>--accent-hover</code><span class="value"></span></li>
+            <li class="swatch" data-token="--link" data-on="--bg --surface-raised" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--link</code><span class="value"></span><span class="ratio"></span><span class="use">Links</span></li>
+            <li class="swatch" data-token="--focus" data-on="--bg --surface" data-min="3"><i class="chip" aria-hidden="true"></i><code>--focus</code><span class="value"></span><span class="ratio"></span><span class="use">Keyboard focus</span></li>
+          </ul>
+
+          <h4>Status</h4>
+          <p class="note">Status colors mean state and go on icons beside a text label. Status surfaces are the soft tints; badge text is the status color mixed 80% with <code>--text</code>.</p>
+          <ul class="swatches">
+            <li class="swatch" data-token="--success" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--success</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--success-soft" data-fg="color-mix(in srgb, var(--success) 80%, var(--text))" data-on="--success-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--success-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Ratio is for badge text</span></li>
+            <li class="swatch" data-token="--warning" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--warning</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--warning-soft" data-fg="color-mix(in srgb, var(--warning) 80%, var(--text))" data-on="--warning-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--warning-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Ratio is for badge text</span></li>
+            <li class="swatch" data-token="--danger" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--danger</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--danger-soft" data-fg="color-mix(in srgb, var(--danger) 80%, var(--text))" data-on="--danger-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--danger-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Ratio is for badge text</span></li>
+            <li class="swatch" data-token="--info" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--info</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--info-soft" data-fg="color-mix(in srgb, var(--info) 80%, var(--text))" data-on="--info-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--info-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Ratio is for badge text</span></li>
+          </ul>
+
+          <h4>Code and terminal</h4>
+          <ul class="swatches">
+            <li class="swatch" data-token="--code-bg"><i class="chip" aria-hidden="true"></i><code>--code-bg</code><span class="value"></span><span class="use">Source code well</span></li>
+            <li class="swatch" data-token="--code-text" data-on="--code-bg" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--code-text</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--code-key" data-on="--code-bg" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--code-key</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--code-string" data-on="--code-bg" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--code-string</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--code-number" data-on="--code-bg" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--code-number</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--code-comment" data-on="--code-bg" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--code-comment</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--terminal"><i class="chip" aria-hidden="true"></i><code>--terminal</code><span class="value"></span><span class="use">Terminal plate, in both themes</span></li>
+            <li class="swatch" data-token="--terminal-text" data-on="--terminal" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--terminal-text</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--terminal-border"><i class="chip" aria-hidden="true"></i><code>--terminal-border</code><span class="value"></span><span class="use">Terminal plate edge</span></li>
+            <li class="swatch" data-token="--terminal-caption"><i class="chip" aria-hidden="true"></i><code>--terminal-caption</code><span class="value"></span></li>
+            <li class="swatch" data-token="--terminal-caption-text" data-on="--terminal-caption" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--terminal-caption-text</code><span class="value"></span><span class="ratio"></span></li>
+          </ul>
+        </section>
+
+        <section class="foundation" id="spacing" aria-labelledby="spacing-title">
+          <h3 id="spacing-title">Spacing and size</h3>
+          <p class="note">A 4px rhythm. Use smaller gaps within a group and larger gaps between groups, with flex or grid <code>gap</code>.</p>
+          <ul class="specs">
+            <li class="spec" data-token="--space-1"><div class="spec-meta"><code>--space-1</code><span class="value"></span></div><i class="bar" style="width:var(--space-1)"></i></li>
+            <li class="spec" data-token="--space-2"><div class="spec-meta"><code>--space-2</code><span class="value"></span></div><i class="bar" style="width:var(--space-2)"></i></li>
+            <li class="spec" data-token="--space-3"><div class="spec-meta"><code>--space-3</code><span class="value"></span></div><i class="bar" style="width:var(--space-3)"></i></li>
+            <li class="spec" data-token="--space-4"><div class="spec-meta"><code>--space-4</code><span class="value"></span><span class="use">Side gutter on phones</span></div><i class="bar" style="width:var(--space-4)"></i></li>
+            <li class="spec" data-token="--space-5"><div class="spec-meta"><code>--space-5</code><span class="value"></span></div><i class="bar" style="width:var(--space-5)"></i></li>
+            <li class="spec" data-token="--space-6"><div class="spec-meta"><code>--space-6</code><span class="value"></span><span class="use">Side gutter</span></div><i class="bar" style="width:var(--space-6)"></i></li>
+            <li class="spec" data-token="--space-8"><div class="spec-meta"><code>--space-8</code><span class="value"></span><span class="use">Documentation section gap on phones</span></div><i class="bar" style="width:var(--space-8)"></i></li>
+            <li class="spec" data-token="--space-12"><div class="spec-meta"><code>--space-12</code><span class="value"></span><span class="use">Documentation section gap</span></div><i class="bar" style="width:var(--space-12)"></i></li>
+            <li class="spec" data-token="--space-16"><div class="spec-meta"><code>--space-16</code><span class="value"></span><span class="use">Product section separation at tablet width</span></div><i class="bar" style="width:var(--space-16)"></i></li>
+            <li class="spec" data-token="--space-20"><div class="spec-meta"><code>--space-20</code><span class="value"></span></div><i class="bar" style="width:var(--space-20)"></i></li>
+            <li class="spec" data-token="--space-24"><div class="spec-meta"><code>--space-24</code><span class="value"></span><span class="use">Product section separation</span></div><i class="bar" style="width:var(--space-24)"></i></li>
+          </ul>
+
+          <h4>Layout widths</h4>
+          <ul class="specs">
+            <li class="spec" data-token="--measure"><div class="spec-meta"><code>--measure</code><span class="value"></span></div><span class="use">Bounds reading text</span></li>
+            <li class="spec" data-token="--page-max"><div class="spec-meta"><code>--page-max</code><span class="value"></span></div><span class="use">Documentation frame</span></li>
+            <li class="spec" data-token="--page-wide"><div class="spec-meta"><code>--page-wide</code><span class="value"></span></div><span class="use">Product page frame</span></li>
+            <li class="spec" data-token="--sidebar"><div class="spec-meta"><code>--sidebar</code><span class="value"></span></div><span class="use">This page's sidebar</span></li>
+            <li class="spec" data-token="--row"><div class="spec-meta"><code>--row</code><span class="value"></span></div><i class="height-bar" style="height:var(--row)"></i></li>
+          </ul>
+        </section>
+
+        <section class="foundation" id="shape" aria-labelledby="shape-title">
+          <h3 id="shape-title">Shape</h3>
+          <p class="note">Radii are small and crisp. Pill shapes never apply to buttons or cards.</p>
+          <ul class="specs">
+            <li class="spec" data-token="--radius-sm"><div class="spec-meta"><code>--radius-sm</code><span class="value"></span><span class="use">Inline elements, such as <kbd>/</kbd>, and the segmented thumb</span></div><i class="shape-box" style="border-radius:var(--radius-sm)"></i></li>
+            <li class="spec" data-token="--radius-md"><div class="spec-meta"><code>--radius-md</code><span class="value"></span><span class="use">Controls and rows</span></div><i class="shape-box" style="border-radius:var(--radius-md)"></i></li>
+            <li class="spec" data-token="--radius-lg"><div class="spec-meta"><code>--radius-lg</code><span class="value"></span><span class="use">Wells, plates, panels, callouts, and floating layers</span></div><i class="shape-box" style="border-radius:var(--radius-lg)"></i></li>
+            <li class="spec" data-token="--radius-pill"><div class="spec-meta"><code>--radius-pill</code><span class="value"></span><span class="use">Status badges and switch tracks only</span></div><i class="shape-box" style="border-radius:var(--radius-pill)"></i></li>
+          </ul>
+        </section>
+
+        <section class="foundation" id="borders" aria-labelledby="borders-title">
+          <h3 id="borders-title">Borders and dividers</h3>
+          <p class="note">Borders are 1px; bars and underlines that mark the current item are 2px. Neither width has a token.</p>
+          <ul class="specs">
+            <li class="spec"><div class="spec-meta"><code>1px --border-subtle</code><span class="use">Panels, wells, dividers, and the rule above a section heading</span></div><i class="line-subtle"></i></li>
+            <li class="spec"><div class="spec-meta"><code>1px --border</code><span class="use">Control edges only: buttons, inputs, and selects</span></div><div class="cluster"><button class="btn" type="button">Secondary</button><input class="input" aria-label="Sample input" placeholder="Input edge"></div></li>
+            <li class="spec"><div class="spec-meta"><code>1px --text</code><span class="use">Solid rule below the shared site header</span></div><i class="header-rule"></i></li>
+            <li class="spec"><div class="spec-meta"><code>2px inset --accent</code><span class="use">Current destination or selected row, on the leading edge, with <code>--row-selected</code> and medium weight</span></div><span class="bar-sample">Monitors</span></li>
+            <li class="spec"><div class="spec-meta"><code>2px --accent underline</code><span class="use">Current tab</span></div><div inert><div class="tabs" role="tablist" aria-label="Underline sample"><button class="tab" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
+            <li class="spec"><div class="spec-meta"><code>1px --border ring</code><span class="use">Pressed segmented thumb, for 3:1 against the track</span></div><div inert><div class="segmented" role="group" aria-label="Pressed ring sample"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false">Board</button></div></div></li>
+            <li class="spec"><div class="spec-meta"><code>faint status border</code><span class="use">Callouts: the status color mixed into <code>--border-subtle</code></span></div><div class="callout warning"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><p>No data for 42 minutes.</p></div></li>
+          </ul>
+        </section>
+
+        <section class="foundation" id="elevation" aria-labelledby="elevation-title">
+          <h3 id="elevation-title">Elevation</h3>
+          <p class="note">Shadows belong to floating layers only: menus, popovers, pickers, and dialogs. A floating layer's border is part of its shadow.</p>
+          <ul class="specs">
+            <li class="spec" data-token="--shadow-popover"><div class="spec-meta"><code>--shadow-popover</code><span class="value"></span></div>
+              <div class="elevation">
+                <div class="panel-sample"><strong>Panel</strong><span class="muted">--surface-raised, --border-subtle, no shadow</span></div>
+                <div class="floating"><strong>Floating layer</strong><span class="muted">--surface-raised, --shadow-popover</span></div>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <section class="foundation" id="controls" aria-labelledby="controls-title">
+          <h3 id="controls-title">Inputs and controls</h3>
+          <p class="note">The Rest specimen in each row is live; the others pin one state for display and do not respond. Touch layouts at tablet width and below use <code>--control-lg</code>. A button has no separate pressed style.</p>
+
+          <div class="control-row" data-states="hover focus disabled">
+            <h4>Primary button</h4>
+            <div class="states"><div class="state"><div class="state-specimen"><button class="btn primary" type="button" data-target>Save</button></div><span class="caption">Rest</span></div></div>
+          </div>
+          <div class="control-row" data-states="hover focus disabled">
+            <h4>Secondary button</h4>
+            <div class="states"><div class="state"><div class="state-specimen"><button class="btn" type="button" data-target>Cancel</button></div><span class="caption">Rest</span></div></div>
+          </div>
+          <div class="control-row" data-states="hover focus disabled">
+            <h4>Ghost button</h4>
+            <div class="states"><div class="state"><div class="state-specimen"><button class="btn ghost" type="button" data-target>Mute</button></div><span class="caption">Rest</span></div></div>
+          </div>
+          <div class="control-row" data-states="focus disabled invalid">
+            <h4>Text input</h4>
+            <div class="states"><div class="state"><div class="state-specimen field"><label class="field-label" for="f-service">Service</label><input class="input" id="f-service" placeholder="checkout-api" aria-describedby="f-service-error" data-target><p class="field-error" id="f-service-error" hidden>Enter a service name.</p></div><span class="caption">Rest</span></div></div>
+          </div>
+          <div class="control-row" data-states="focus disabled invalid">
+            <h4>Select</h4>
+            <div class="states"><div class="state"><div class="state-specimen field"><label class="field-label" for="f-window">Window</label><select class="select" id="f-window" aria-describedby="f-window-error" data-target><option>Last hour</option><option>Last 24 hours</option><option>Last 7 days</option></select><p class="field-error" id="f-window-error" hidden>Choose a window.</p></div><span class="caption">Rest</span></div></div>
+          </div>
+          <div class="control-row" data-states="checked focus disabled">
+            <h4>Checkbox</h4>
+            <div class="states"><div class="state"><div class="state-specimen"><label class="check"><input type="checkbox" data-target>Notify on recovery</label></div><span class="caption">Rest</span></div></div>
+          </div>
+          <div class="control-row" data-states="checked focus disabled">
+            <h4>Radio</h4>
+            <div class="states"><div class="state"><div class="state-specimen choices" role="radiogroup" aria-label="Digest"><label class="check"><input type="radio" name="digest" data-target>Daily</label><label class="check"><input type="radio" name="digest">Weekly</label></div><span class="caption">Rest</span></div></div>
+          </div>
+          <div class="control-row" data-states="checked focus disabled">
+            <h4>Switch</h4>
+            <div class="states"><div class="state"><div class="state-specimen"><button class="switch" type="button" role="switch" aria-checked="false" data-target><span class="switch-track" aria-hidden="true"></span>Alerts</button></div><span class="caption">Rest</span></div></div>
+          </div>
+          <div class="control-row" data-states="hover focus disabled">
+            <h4>Segmented control</h4>
+            <div class="states"><div class="state"><div class="state-specimen segmented" role="group" aria-label="View"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false" data-target>Board</button><button type="button" aria-pressed="false">Table</button></div><span class="caption">Rest; List is pressed</span></div></div>
+          </div>
+
+          <h4>Control heights</h4>
+          <ul class="specs">
+            <li class="spec" data-token="--control-sm"><div class="spec-meta"><code>--control-sm</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-sm)"></i></li>
+            <li class="spec" data-token="--control-md"><div class="spec-meta"><code>--control-md</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-md)"></i></li>
+            <li class="spec" data-token="--control-lg"><div class="spec-meta"><code>--control-lg</code><span class="value"></span><span class="use">Touch controls</span></div><i class="height-bar" style="height:var(--control-lg)"></i></li>
+          </ul>
+        </section>
+
+        <section class="foundation" id="focus-motion" aria-labelledby="focus-motion-title">
+          <h3 id="focus-motion-title">Focus and motion</h3>
+          <ul class="specs">
+            <li class="spec"><div class="spec-meta"><code>2px solid --focus, offset 2px</code><span class="use">Keyboard focus, set for <code>:focus-visible</code> by the <code>tokens.css</code> base. Pointer hover never draws it. Never draw focus with <code>box-shadow</code>, which forced-colors mode removes.</span></div><div inert><button class="btn is-focus" type="button">Focused</button></div></li>
+            <li class="spec"><div class="spec-meta"><code>offset -2px</code><span class="use">Only inside a scrolling or clipping parent, or a segmented control, with a comment that names the reason</span></div><div inert><div class="tabs" role="tablist" aria-label="Inset focus sample"><button class="tab is-focus" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
+            <li class="spec" data-token="--duration-fast"><div class="spec-meta"><code>--duration-fast</code><span class="value"></span></div><span class="use">Hover and press</span></li>
+            <li class="spec" data-token="--duration"><div class="spec-meta"><code>--duration</code><span class="value"></span></div><span class="use">Menus and panels; the live switch above uses it</span></li>
+            <li class="spec" data-token="--ease-out"><div class="spec-meta"><code>--ease-out</code><span class="value"></span></div><span class="use">Animate opacity or transform only where it explains a state change</span></li>
+            <li class="spec"><div class="spec-meta"><code>prefers-reduced-motion</code></div><span class="use">The <code>tokens.css</code> base sets transitions and animations to 0ms and turns off smooth scrolling</span></li>
+          </ul>
+        </section>
       </section>
     </div>
   </main>
@@ -594,21 +926,99 @@
   });
   document.getElementById('clear-filter').addEventListener('click', () => { query = ''; search.value = ''; setFilter('all'); });
 
-  // Theme control: system removes the attribute so prefers-color-scheme decides.
-  const root = document.documentElement;
-  const SWATCH_TOKENS = ['--bg', '--surface', '--surface-raised', '--surface-hover', '--border-subtle', '--border', '--text', '--text-muted', '--accent', '--link', '--focus', '--success', '--warning', '--danger'];
-  const renderSwatches = () => {
-    const cs = getComputedStyle(root);
-    document.getElementById('swatches').innerHTML = SWATCH_TOKENS.map((t) =>
-      `<div class="swatch"><i style="background:var(${t})"></i><span>${t}</span><code>${cs.getPropertyValue(t).trim()}</code></div>`).join('');
+  // Foundations: live controls, the pinned state matrix, and resolved token values.
+  const foundations = document.getElementById('foundations');
+  foundations.querySelectorAll('.switch').forEach((s) => s.addEventListener('click', () =>
+    s.setAttribute('aria-checked', String(s.getAttribute('aria-checked') !== 'true'))));
+  foundations.querySelectorAll('.segmented').forEach((group) => group.addEventListener('click', (e) => {
+    const option = e.target.closest('button');
+    if (!option) return;
+    group.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === option)));
+  }));
+
+  // Each pinned state is a clone of the Rest specimen, so the matrix always matches the live markup.
+  const PINS = {
+    hover: { label: 'Hover', pin: (target) => target.classList.add('is-hover') },
+    focus: { label: 'Focus visible', pin: (target) => target.classList.add('is-focus') },
+    checked: { label: 'Checked', pin: (target) => { if (target.matches('input')) target.checked = true; else target.setAttribute('aria-checked', 'true'); } },
+    disabled: { label: 'Disabled', pin: (target) => { target.disabled = true; } },
+    invalid: { label: 'Invalid', pin: (target, cell) => { target.setAttribute('aria-invalid', 'true'); cell.querySelector('.field-error').hidden = false; } },
   };
+  foundations.querySelectorAll('.control-row').forEach((row) => {
+    const rest = row.querySelector('.state');
+    row.dataset.states.split(' ').forEach((state) => {
+      const cell = rest.cloneNode(true);
+      // Give each clone its own ids and radio group, keeping its label and error references intact.
+      cell.querySelectorAll('[id]').forEach((el) => { el.id += `-${state}`; });
+      cell.querySelectorAll('[for]').forEach((el) => { el.htmlFor += `-${state}`; });
+      cell.querySelectorAll('[aria-describedby]').forEach((el) => el.setAttribute('aria-describedby', `${el.getAttribute('aria-describedby')}-${state}`));
+      cell.querySelectorAll('input[name]').forEach((el) => { el.name += `-${state}`; });
+      PINS[state].pin(cell.querySelector('[data-target]'), cell);
+      cell.querySelector('.state-specimen').inert = true;
+      cell.querySelector('.caption').textContent = PINS[state].label;
+      rest.parentElement.append(cell);
+    });
+  });
+
+  // Resolve colors through a probe element; plain tokens compute to rgb(), color-mix() to color(srgb).
+  const probe = document.createElement('span');
+  probe.hidden = true;
+  document.body.append(probe);
+  const channels = (color) => {
+    probe.style.color = color;
+    const value = getComputedStyle(probe).color;
+    const srgb = value.match(/^color\(srgb ([\d.e-]+) ([\d.e-]+) ([\d.e-]+)/);
+    if (srgb) return srgb.slice(1, 4).map(Number);
+    const legacy = value.match(/^rgba?\(([\d.]+),? ([\d.]+),? ([\d.]+)/);
+    return legacy ? legacy.slice(1, 4).map((n) => Number(n) / 255) : null;
+  };
+  const luminance = (rgb) => rgb
+    .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+    .reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+  const contrast = (a, b) => {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+
+  // Chips: a pair shows its foreground on the first background, text pairs as Aa and marks as a square.
+  foundations.querySelectorAll('.swatch').forEach((el) => {
+    const chip = el.querySelector('.chip');
+    const on = el.dataset.on?.split(' ')[0];
+    chip.style.background = `var(${on || el.dataset.token})`;
+    if (!on) return;
+    chip.style.color = el.dataset.fg || `var(${el.dataset.token})`;
+    if (Number(el.dataset.min) >= 4.5) chip.textContent = 'Aa'; else chip.append(document.createElement('b'));
+  });
+
+  const root = document.documentElement;
+  const renderFoundations = () => {
+    const cs = getComputedStyle(root);
+    foundations.querySelectorAll('[data-token]').forEach((el) => {
+      const out = el.querySelector('.value');
+      if (out) out.textContent = cs.getPropertyValue(el.dataset.token).trim();
+    });
+    foundations.querySelectorAll('[data-on]').forEach((el) => {
+      const fg = channels(el.dataset.fg || `var(${el.dataset.token})`);
+      const min = Number(el.dataset.min);
+      el.querySelector('.ratio').textContent = el.dataset.on.split(' ').map((token) => {
+        const bg = channels(`var(${token})`);
+        if (!fg || !bg) return `on ${token}: not measured`;
+        const ratio = contrast(fg, bg);
+        return `${ratio.toFixed(1)}:1 on ${token}${ratio < min ? `, below ${min}:1` : ''}`;
+      }).join(' · ');
+    });
+  };
+
+  // Theme control: system removes the attribute so prefers-color-scheme decides.
   const setTheme = (choice) => {
     if (choice === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', choice);
     document.querySelectorAll('[data-theme-choice]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeChoice === choice)));
     try { localStorage.setItem('dl-theme', choice); } catch (e) {}
-    renderSwatches();
+    renderFoundations();
   };
   document.querySelectorAll('[data-theme-choice]').forEach((b) => b.addEventListener('click', () => setTheme(b.dataset.themeChoice)));
+  // In System mode an OS appearance change swaps the values without a click.
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderFoundations);
 
   let saved = 'system';
   try { saved = localStorage.getItem('dl-theme') || 'system'; } catch (e) {}

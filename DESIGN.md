@@ -29,7 +29,7 @@ Center the **container**, not every sentence. Align header, content, images, and
 ## Files and examples
 
 - `tokens.css`: generated standalone snapshot of the Terminal folio values (the Graphite Indigo theme) owned by `@filipgutica/ui`. Each line's `ui:` comment names the library variable for that token. Regenerate it when the package values change.
-- `reference.html`: application components and token inspection.
+- `reference.html`: application components, and a Foundations catalogue (`#foundations`) of every token: type, color with contrast, spacing, shape, borders, elevation, control states, focus, and motion. Copy foundations from there into any project.
 - `docs.html`: a balanced documentation shell and compact setup command.
 - `product.html`: a restrained product-page hierarchy with illustrative product evidence.
 - `DESIGN.md`: selection rules and acceptance criteria. It names tokens rather than repeating their values.
