@@ -579,7 +579,7 @@
           </ul>
 
           <h4>Status</h4>
-          <p class="note">Status colors mean state and go on icons beside a text label. Status surfaces are the soft tints; badge text is the status color mixed 80% with <code>--text</code>.</p>
+          <p class="note">Status colors mean state and go on icons beside a text label. Status surfaces are the soft tints; badge text is the status color mixed with <code>--text</code>.</p>
           <ul class="swatches">
             <li class="swatch" data-token="--success" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--success</code><span class="value"></span><span class="ratio"></span></li>
             <li class="swatch" data-token="--success-soft" data-fg="color-mix(in srgb, var(--success) 80%, var(--text))" data-on="--success-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--success-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Ratio is for badge text</span></li>
@@ -674,7 +674,7 @@
 
         <section class="foundation" id="controls" aria-labelledby="controls-title">
           <h3 id="controls-title">Inputs and controls</h3>
-          <p class="note">The Rest specimen in each row is live; the others pin one state for display and do not respond. Touch layouts at tablet width and below use <code>--control-lg</code>. A button has no separate pressed style.</p>
+          <p class="note">The Rest specimen in each row is live; the others pin one state for display and do not respond. Touch layouts at tablet width and below use <code>--control-lg</code>.</p>
 
           <div class="control-row" data-states="hover focus disabled">
             <h4>Primary button</h4>
@@ -923,7 +923,8 @@
   const search = document.getElementById('search');
   search.addEventListener('input', () => { query = search.value.trim().toLowerCase(); renderList(); });
   document.addEventListener('keydown', (e) => {
-    if (e.key === '/' && document.activeElement !== search) { e.preventDefault(); search.focus(); }
+    const editing = e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]');
+    if (e.key === '/' && !editing) { e.preventDefault(); search.focus(); }
   });
   document.getElementById('clear-filter').addEventListener('click', () => { query = ''; search.value = ''; setFilter('all'); });
 
