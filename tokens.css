@@ -29,7 +29,7 @@
   --text: #101315; /* ui: --color-text, --color-button-bg, --color-input-text, --color-row-selected-text, --color-status-text */
   --text-muted: #50575e; /* ui: --color-muted, --color-button-hover, --color-input-placeholder, --color-syntax-operator, --color-syntax-punctuation */
 
-  /* Project hue for selection; ink primary actions; links and focus stay separate. */
+  /* Project hue for selection and control focus; ink primary actions; links keep --link and --focus. */
   --project: #4b45d1; /* ui: --color-project */
   --project-dark: #a5a1ff; /* ui: --color-project-dark */
   --accent: var(--project); /* ui: --color-accent, --color-progress */

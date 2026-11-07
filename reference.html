@@ -113,6 +113,13 @@
   .switch-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: var(--radius-pill); background: var(--surface-raised); box-shadow: var(--shadow-raise); transition: transform var(--duration) var(--ease-out), background-color var(--duration) var(--ease-out); }
   .switch[aria-checked="true"] .switch-track { border-color: var(--accent); background: var(--accent); }
   .switch[aria-checked="true"] .switch-track::after { background: var(--accent-text); transform: translateX(16px); }
+  /* The switch knob is a fill, which forced colors drop; system colors redraw it. */
+  @media (forced-colors: active) {
+    .switch-track { forced-color-adjust: none; border-color: ButtonText; background: Canvas; }
+    .switch-track::after { forced-color-adjust: none; background: ButtonText; }
+    .switch[aria-checked="true"] .switch-track { border-color: Highlight; background: Highlight; }
+    .switch[aria-checked="true"] .switch-track::after { background: HighlightText; }
+  }
   /* The button is a larger hit area, so the ring follows the visible track. */
   .switch:is(:focus-visible, .is-focus) { outline: none; }
   .switch:is(:focus-visible, .is-focus) .switch-track { outline: 2px solid color-mix(in srgb, var(--accent) 80%, transparent); outline-offset: 2px; box-shadow: var(--shadow-sink), 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
@@ -250,7 +257,7 @@
   /* Definitions: mono key, short plain meaning, one rule line. Rule line stays block layout
      so inline code and chips flow with the sentence. */
   .defs { display: grid; gap: var(--space-3); align-content: start; }
-  /* Card grid: 2–4 parallel, self-contained items. Panel surface, no shadow, same inner order. */
+  /* Card grid: 2–4 parallel, self-contained items. Raised panel surface, same inner order. */
   .card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
   .card { background: var(--surface-raised); border: 1px solid transparent; box-shadow: var(--shadow-raise); border-radius: var(--radius-lg); padding: var(--space-4); min-width: 0; }
   /* Content row stretches so rule lines align along the bottom of each row. */
@@ -749,8 +756,8 @@
         <section class="foundation" id="focus-motion" aria-labelledby="focus-motion-title">
           <h3 id="focus-motion-title">Focus and motion</h3>
           <ul class="specs">
-            <li class="spec"><div class="spec-meta"><code>2px accent at 80%, offset 2px</code><span class="use">Library controls add a 6px accent halo at 18% to their raise or sink shadow. The outline is always present so forced colors keep it; the halo only adds to it. Pointer hover never draws focus.</span></div><div inert><button class="btn is-focus" type="button">Focused</button></div></li>
-            <li class="spec"><div class="spec-meta"><code>2px solid --focus, offset 2px</code><span class="use">Links and site navigation keep the base outline.</span></div><a class="is-focus" href="docs.html">Documentation example</a></li>
+            <li class="spec"><div class="spec-meta"><code>2px accent at 80%, offset 2px</code><span class="use">Form controls add a 6px accent halo at 18% to their raise or sink shadow. The outline is always present so forced colors keep it; the halo only adds to it. Pointer hover never draws focus.</span></div><div inert><button class="btn is-focus" type="button">Focused</button></div></li>
+            <li class="spec"><div class="spec-meta"><code>2px solid --focus, offset 2px</code><span class="use">Links, navigation, tabs, and code and capture actions keep the base outline.</span></div><a class="is-focus" href="docs.html">Documentation example</a></li>
             <li class="spec"><div class="spec-meta"><code>offset -2px</code><span class="use">Only inside a scrolling or clipping parent, or a segmented control, with a comment that names the reason</span></div><div inert><div class="tabs" role="tablist" aria-label="Inset focus sample"><button class="tab is-focus" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
             <li class="spec" data-token="--duration-fast"><div class="spec-meta"><code>--duration-fast</code><span class="value"></span></div><span class="use">Hover and press</span></li>
             <li class="spec" data-token="--duration"><div class="spec-meta"><code>--duration</code><span class="value"></span></div><span class="use">Menus and panels; the live switch above uses it</span></li>
