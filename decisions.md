@@ -12,8 +12,12 @@ Each entry records a choice this language made, the options it rejected, and why
 | Switch | Core | Borderless track, 44×22 with an 18px knob. The off state shows through the track fill. | A visible track border, which was not needed. |
 | Segmented control | Core | One thumb glides between options: the leading edge takes 260ms and the trailing edge 300ms, with CSS `ease`, so the thumb stretches a little on the way. This was matched frame by frame to a reference. There is no motion on load, on a restored value, or on a theme change. Reduced motion makes the change instant. | The earlier 180ms ease-out looked like a jump. |
 | Phone drawer trigger | Core | A soft secondary button with a three-line menu glyph. The no-JavaScript fallback keeps a chevron, because it opens in place. | A down chevron promised a dropdown, but the trigger opens a side drawer. |
+| Control focus | Core | A thin ring: `1.5px solid var(--accent)`, offset 2px, with no glow, over the control's own shadow. 2px in forced colors. | A 2px ring with a 6px accent halo felt jarring. |
+| Field focus | Core | The field lifts out of its well onto the control surface (`--control-thumb`, `--shadow-raise`, an accent edge at 35%), with no ring. | An accent edge with a halo, an underline, and a ring all felt too heavy. |
+| Selected tab | Core | The navigation row's lifted fill (`--nav-current`, `--shadow-nav-current`, accent text, 10px corners), with no underline. Navigation and tabs share one selected state. | A 2px accent underline curved at rounded corners and did not match navigation. |
 | Code blocks | Core | `text-size-adjust: 100%` on code, and prompts aligned to the line's baseline. | iOS Safari enlarged one line of wrapped code and left the `$` prompt misaligned. |
 
 ## Known gaps
 
 - In light mode, the pressed primary button (the hue mixed 80% with `--bg`) is below 4.5:1 for every site hue. For indigo it is about 4.2:1. Rest and hover pass. The gap applies to both pressed states: while the pointer is down (`:active`), and for as long as a toggle button stays on (`aria-pressed="true"`). It is still open in `@filipgutica/ui`.
+- Field focus is below the 3:1 that WCAG 2.2 asks of a focus indicator, by choice. The lifted fill (`--control-thumb`) measures about 1.2:1 against the resting field in light mode and 1.6:1 in dark. The 35% accent edge measures 1.6–1.7:1 against `--bg` in light and 3.0–3.3:1 in dark, across the six site hues. Forced colors still draw a 2px ring. The same gap is in `@filipgutica/ui`.

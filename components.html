@@ -19,9 +19,8 @@
 
   /* ---------- Shared recipes ---------- */
   :root {
-    /* Form-control focus: an accent ring plus a halo added after the control's own depth. */
-    --ring: 2px solid color-mix(in srgb, var(--accent) 80%, transparent);
-    --halo: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent);
+    /* Control focus: one thin accent ring, no glow. Chromium draws 1.5px as 1px at 1x. */
+    --ring: 1.5px solid var(--accent);
     --flat: 0 0 0 0 transparent;
   }
   .icon { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
@@ -83,6 +82,9 @@
     @media (pointer: coarse) { .select option { min-height: var(--control-lg); } }
   }
   :is(.input, .select, .textarea)[aria-invalid="true"] { border-color: var(--danger); }
+  /* The native search clear button, quieted to a thin muted cross drawn with a mask. */
+  .input[type="search"]::-webkit-search-cancel-button { width: 0.75rem; height: 0.75rem; margin-inline-start: var(--space-2); background: var(--text-muted); cursor: pointer; -webkit-appearance: none; appearance: none; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 2.5l7 7m0-7l-7 7' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .input[type="search"]::-webkit-search-cancel-button:hover { background: var(--text); }
   :is(.input, .select, .textarea):disabled { opacity: 0.58; cursor: not-allowed; }
   /* A static drawing of the open picker; a native select cannot be pinned open. */
   .picker { display: grid; width: 220px; max-width: 100%; margin: 0; padding: var(--space-1); list-style: none; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-popover); }
@@ -178,8 +180,8 @@
   .range:disabled { opacity: 0.58; cursor: not-allowed; }
   /* The ring goes on the thumb, not the full-width input. */
   .range:is(:focus-visible, .is-focus) { outline: none; }
-  .range:is(:focus-visible, .is-focus)::-webkit-slider-thumb { outline: var(--ring); outline-offset: 2px; box-shadow: var(--halo); }
-  .range:is(:focus-visible, .is-focus)::-moz-range-thumb { outline: var(--ring); outline-offset: 2px; box-shadow: var(--halo); }
+  .range:is(:focus-visible, .is-focus)::-webkit-slider-thumb { outline: var(--ring); outline-offset: 2px; }
+  .range:is(:focus-visible, .is-focus)::-moz-range-thumb { outline: var(--ring); outline-offset: 2px; }
 
   /* Progress and score */
   .progress { width: 220px; max-width: 100%; height: 9px; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--surface-hover); }
@@ -192,10 +194,11 @@
   .score b span { color: var(--text-muted); font-weight: var(--weight-regular); }
 
   /* Tabs */
-  .tablist { display: flex; width: max-content; max-width: 100%; overflow-x: auto; border-bottom: 1px solid var(--border-subtle); }
-  .tab { flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-sans); white-space: nowrap; cursor: pointer; }
-  .tab:is(:hover, .is-hover) { color: var(--text); }
-  .tab[aria-selected="true"] { border-bottom-color: var(--accent); color: var(--text); }
+  .tablist { display: flex; width: max-content; max-width: 100%; overflow-x: auto; }
+  .tab { flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-field); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-sans); white-space: nowrap; cursor: pointer; }
+  .tab:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); }
+  /* The selected tab takes the navigation row's lifted fill: one selected state for both. */
+  .tab[aria-selected="true"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--accent); }
   /* Inset: the tab list scrolls sideways, which would clip an outer ring. */
   .tab:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
   .tabpanel { padding-top: var(--space-3); font-size: var(--text-sm); color: var(--text-muted); }
@@ -317,7 +320,7 @@
   /* Terminal capture: neutral plate with a mono status line. */
   .capture { width: 100%; max-width: 640px; min-width: 0; overflow: hidden; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-raise); }
   .capture-head { display: flex; align-items: center; min-width: 0; }
-  .capture .tablist { flex: 1; width: auto; border-bottom: 0; padding-inline: var(--space-2); }
+  .capture .tablist { flex: 1; width: auto; padding-inline: var(--space-2); }
   .capture .tab { min-height: var(--control-lg); font-family: var(--font-mono); font-size: var(--text-sm); }
   .full { display: inline-flex; align-items: center; gap: 6px; flex: none; min-height: var(--control-lg); padding: 0 var(--space-3); border: 0; background: transparent; color: var(--text-muted); font: inherit; font-size: var(--text-sm); cursor: pointer; }
   .full:is(:hover, .is-hover) { color: var(--text); }
@@ -388,14 +391,27 @@
   .site-footer nav { display: flex; flex-wrap: wrap; gap: 0 var(--space-5); }
 
   /* ---------- Focus, forced colors, and touch ---------- */
-  /* Form controls: the outline survives forced colors; the halo adds to the control's depth. */
-  :is(.btn, .input, .select, .textarea, .check input, .segmented button, .toggle, .close):is(:focus-visible, .is-focus),
+  /* Controls: a thin accent ring with a 2px gap and no glow, over the control's own raise or sink. */
+  :is(.btn, .check input, .segmented button, .toggle, .close):is(:focus-visible, .is-focus),
   .switch:is(:focus-visible, .is-focus) .switch-track,
-  .radio-card:has(input:is(:focus-visible, .is-focus)) { outline: var(--ring); outline-offset: 2px; box-shadow: var(--depth), var(--halo); }
+  .radio-card:has(input:is(:focus-visible, .is-focus)) { outline: var(--ring); outline-offset: 2px; }
   /* Inside a segmented control, the ring hugs the thumb instead of crossing into the next option. */
   .segmented button:is(:focus-visible, .is-focus) { outline-offset: -2px; }
+  /* Fields lift out of the well onto the control surface, with a faint accent hairline and no ring.
+     The cue is below 3:1 by choice (decisions.md, Known gaps). The transparent outline is drawn
+     only in forced colors, so the field keeps a ring there. */
+  :is(.input, .select, .textarea):is(:focus-visible, .is-focus) { outline: 2px solid transparent; outline-offset: 0; border-color: color-mix(in srgb, var(--accent) 35%, transparent); background-color: var(--control-thumb); box-shadow: var(--shadow-raise); }
+  :is(.input, .select, .textarea)[aria-invalid="true"]:is(:focus-visible, .is-focus) { border-color: var(--danger); }
 
   @media (forced-colors: active) {
+    /* Fills and shadows flatten, so the control ring grows to a full 2px. */
+    :is(.btn, .check input, .segmented button, .toggle, .close):is(:focus-visible, .is-focus),
+    .switch:is(:focus-visible, .is-focus) .switch-track,
+    .radio-card:has(input:is(:focus-visible, .is-focus)) { outline-width: 2px; }
+    .range:is(:focus-visible, .is-focus)::-webkit-slider-thumb { outline-width: 2px; }
+    .range:is(:focus-visible, .is-focus)::-moz-range-thumb { outline-width: 2px; }
+    /* The lifted fill drops, so the selected tab takes a system border; the padding absorbs it. */
+    .tab[aria-selected="true"] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }
     .check input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; }
     .check input[type="checkbox"]:checked::before { border-color: HighlightText; }
     .check input[type="radio"]:checked { background: HighlightText; }
@@ -581,6 +597,9 @@
       <div class="state" inert><div class="field"><label class="field-label" for="in-focus">Service</label><input class="input is-focus" id="in-focus" value="checkout-api"></div><span class="caption">Focus visible</span></div>
       <div class="state" inert><div class="field"><label class="field-label" for="in-disabled">Service</label><input class="input" id="in-disabled" value="checkout-api" disabled></div><span class="caption">Disabled</span></div>
       <div class="state" inert><div class="field"><label class="field-label" for="in-invalid">Service</label><input class="input" id="in-invalid" aria-invalid="true" aria-errormessage="in-invalid-error"><p class="field-error" id="in-invalid-error">Enter a service name.</p></div><span class="caption">Invalid</span></div>
+    </div></div>
+    <div class="row"><h4>Search</h4><div class="states">
+      <div class="state"><input class="input" type="search" aria-label="Search monitors" value="latency"><span class="caption">Live; focus it to show the clear cross, which darkens on hover</span></div>
     </div></div>
     <div class="row"><h4>Sizes</h4><div class="states">
       <div class="state" inert><input class="input" data-size="sm" aria-label="Small input" placeholder="Small"><span class="caption">sm</span></div>

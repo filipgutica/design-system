@@ -18,7 +18,9 @@ The identity layer reads only the identity tokens (`--project`, `--project-dark`
 - **Sizes.** `sm`, `md`, and `lg` use `--control-sm`, `--control-md`, and `--control-lg` for height, with `--text-sm`, `--text-md`, and `--text-lg`. At tablet width (`max-width: 800px`) touch targets use `--control-lg`.
 - **Borders.** Every control keeps a 1px border, transparent unless its section says otherwise, so forced colors can draw an edge.
 - **Depth.** A resting raised control uses `--shadow-raise`. A field, a track, or a pressed control uses `--shadow-sink`.
-- **Focus.** Keyboard focus is a 2px outline of `--accent` mixed 80% with transparent, offset 2px, plus a 6px halo of `--accent` at 18%. The halo is a `box-shadow` added after the control's own raise or sink shadow. Only `:focus-visible` shows it; pointer hover never does. Links, navigation rows, tabs, and code actions use the base ring instead: `2px solid var(--focus)`, offset 2px. Inside a scrolling or clipping parent, the ring is inset (`-2px`), and a comment names the reason.
+- **Focus.** Controls (button, checkbox and radio, radio card, switch track, toggle button, segmented option, slider thumb, dialog close and dialog content) show a `1.5px solid var(--accent)` outline, offset 2px, with no halo or glow. It is drawn over the control's own raise or sink shadow, which does not change. Chromium rounds 1.5px to 1px at 1x. In forced colors the outline is 2px. Only `:focus-visible` shows it; pointer hover never does.
+- **Field focus.** Fields (input, select, textarea) draw no ring. On `:focus-visible` the field lifts out of its well: the fill becomes `--control-thumb`, the shadow `--shadow-raise`, and the border `--accent` at 35% (`color-mix(in srgb, var(--accent) 35%, transparent)`). A `2px solid transparent` outline at offset 0 is invisible normally and draws as a ring in forced colors. An invalid field keeps its `--danger` border while focused. The lift is below 3:1 against the resting field by choice; see [known gaps](decisions.md#known-gaps).
+- **Other focus.** Links, navigation rows, tabs, and code actions use the base ring: `2px solid var(--focus)`, offset 2px. Inside a scrolling or clipping parent, the ring is inset (`-2px`), and a comment names the reason.
 - **Disabled.** Opacity 0.58, `cursor: not-allowed`, no hover change, and no shadow on buttons. Use the native `disabled` attribute.
 - **Invalid.** `aria-invalid="true"` and a `--danger` border. Link the error text with `aria-describedby` or `aria-errormessage`.
 - **Motion.** Hover and press transitions use `--duration-fast` with `--ease-out`. State changes such as a switch knob use `--duration`. Under `prefers-reduced-motion: reduce`, transitions are instant.
@@ -50,10 +52,11 @@ Layer: Core. ui: `UiInput`. ui has no textarea; a textarea uses the same field r
 
 - **Anatomy.** A native `<input>` or `<textarea>`. Full width, line height 1.35. Input heights follow the control size, and horizontal padding is about 9px, 10px, or 11px.
 - **Tokens.** Fill `--field`, text `--text`, placeholder `--text-muted` at full opacity, corners `--radius-field`, border 1px `--field-edge` (transparent in light, a faint edge in dark), shadow `--shadow-sink`.
-- **States.** Rest, focus-visible (ring and halo over the sink), disabled, and invalid (`--danger` border). A textarea keeps the same padding at the top and bottom as at the sides, and resizes vertically only.
+- **States.** Rest, focus-visible (the field lift from [field focus](#rules-for-every-control)), disabled, and invalid (`--danger` border, kept while focused). A textarea keeps the same padding at the top and bottom as at the sides, and resizes vertically only.
 - **Keyboard and screen reader.** Each field has a visible `<label>`. A field inside a [field wrapper](#field-wrapper) gets its description and error ids from it.
 - **Motion.** None.
-- **Forced colors.** The border draws as the system field edge. The invalid edge stays because it is a real border.
+- **Search.** `type="search"` keeps the native clear button, quieted to a 12px cross drawn with a `mask` (1.5px round strokes) and filled `--text-muted`, with `--space-2` before it. Hover fills it `--text`.
+- **Forced colors.** The border draws as the system field edge, and the transparent outline draws the focus ring. The invalid edge stays because it is a real border.
 
 ## Select
 
@@ -80,7 +83,7 @@ Layer: Core. ui: `UiCheckbox`. ui has no standalone radio; radio cards cover rad
 
 - **Anatomy.** A `<label>` around the box and its text, with a gap of about 9px. The box is 16px at `sm`, 18px at `md`, and 20px at `lg`. Checkbox corners are `--radius-sm`; a radio is round. The row is at least the control height.
 - **Tokens.** Unchecked: `--surface-raised` fill and a 1px `--border` edge. Checked: `--accent` fill and edge, with a check mark in `--accent-text`. A checked radio shows a 5px `--accent` ring around a `--surface-raised` centre.
-- **States.** Rest, checked, focus-visible (ring and halo on the box), and disabled.
+- **States.** Rest, checked, focus-visible (the control ring on the box), and disabled.
 - **Keyboard and screen reader.** Native `<input type="checkbox">` or `type="radio"`. Space toggles a checkbox. Arrow keys move between radios in a named `radiogroup` or `<fieldset>`.
 - **Forced colors.** Native inputs keep system colors. A custom-drawn box redraws in `Highlight` when checked.
 
@@ -90,7 +93,7 @@ Layer: Core. ui: `UiRadioCardGroup`, `UiRadioCard`.
 
 - **Anatomy.** A grid of cards (`repeat(auto-fit, minmax(160px, 1fr))`, `--space-3` gap). Each card is a `<label>` with a title, an optional muted description, and a 16px round indicator in the top right corner. The native radio stays inside the card.
 - **Tokens.** Unselected: `--surface-raised`, `--shadow-raise`, transparent border, `--radius-lg`, `--space-3` padding. Hover: `--surface-hover` 45% into `--surface-raised`. Selected: `--field` fill and `--shadow-sink`, with the indicator filled `--accent` and an `--accent-text` check. The selected card has no accent ring.
-- **States.** Rest, hover, selected, focus-visible (ring and halo over the card's raise or sink), and disabled.
+- **States.** Rest, hover, selected, focus-visible (the control ring over the card's raise or sink), and disabled.
 - **Keyboard and screen reader.** One Tab stop for the group; arrow keys change the selection. Name the group.
 - **Forced colors.** The selected indicator uses `Highlight` with `HighlightText`.
 
@@ -100,7 +103,7 @@ Layer: Core. ui: `UiSwitch`.
 
 - **Anatomy.** A `<button role="switch" aria-checked>` that contains the track, and a separate `<label for>` with an optional description. The button's hit area is at least 32px wide and the control height tall. The track is 44×22 with a pill radius; the knob is 18px, inset 2px. `sm` scales both by 0.8 and `lg` by 1.2.
 - **Tokens.** Off track: `--border` 90% into `--field`, `--shadow-sink`, transparent 1px border. Knob: `--surface-raised` with `--shadow-raise`. On: `--accent` track, `--accent-text` knob moved 22px to the right.
-- **States.** Off, on, focus-visible (the ring and halo go on the track, not the hit area), and disabled.
+- **States.** Off, on, focus-visible (the control ring goes on the track, not the hit area), and disabled.
 - **Keyboard and screen reader.** Space and Enter toggle it. The label names it; the description is linked with `aria-describedby`.
 - **Motion.** The knob's transform and the track's fill change over `--duration` with `--ease-out`.
 - **Forced colors.** Track: `ButtonText` edge on `Canvas`, with a `ButtonText` knob. On: `Highlight` track with a `HighlightText` knob.
@@ -154,10 +157,10 @@ Layer: Core. ui: `UiScore`.
 
 Layer: Core. ui: `UiTabs`.
 
-- **Anatomy.** A `role="tablist"` with a 1px `--border-subtle` rule below it. It scrolls sideways when needed, and a 24px mask fades each clipped edge. Each tab is a button at least `--control-md` tall (`--control-lg` on phones), with `--space-2` `--space-3` padding, medium weight, `--text-muted`, and a 2px transparent bottom border.
-- **States.** Hover changes only the text to `--text`. The selected tab takes a 2px `--accent` underline and `--text`. Focus-visible is an inset `--focus` ring, because the list scrolls.
+- **Anatomy.** A `role="tablist"` with no rule below it. It scrolls sideways when needed, and a 24px mask fades each clipped edge. Each tab is a borderless button at least `--control-md` tall (`--control-lg` on phones), with `--space-2` `--space-3` padding, `--radius-field` corners, medium weight, and `--text-muted`.
+- **States.** Hover fills `--row-hover` and turns the text `--text`. The selected tab takes the [navigation row](#navigation-list)'s current-page recipe: `--nav-current` fill, `--shadow-nav-current`, and `--accent` text, with no underline. Focus-visible is an inset `--focus` ring, because the list scrolls.
 - **Keyboard and screen reader.** Roving `tabindex`: arrow keys move between tabs, Home and End go to the ends, and focus selects the tab. Each tab has `aria-controls` and `aria-selected`; each panel has `role="tabpanel"`. Without JavaScript, show every panel under its own heading. Apply the tab roles and hide the headings and unselected panels only when the script enhances the markup.
-- **Forced colors.** The underline is a border, so it stays visible.
+- **Forced colors.** The fill and shadow drop, so the selected tab takes a 2px `Highlight` border, and its padding shrinks by 2px to keep its size.
 
 ## Badge
 

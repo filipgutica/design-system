@@ -60,17 +60,22 @@
 
   /* Input */
   .search { display: flex; align-items: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-2); border: 1px solid var(--field-edge); border-radius: var(--radius-field); background: var(--field); box-shadow: var(--shadow-sink); color: var(--text-muted); min-width: 0; }
-  /* The field draws the focus ring, so the input inside it does not. */
-  .search:has(input:focus-visible) { outline: 2px solid color-mix(in srgb, var(--accent) 80%, transparent); outline-offset: 2px; box-shadow: var(--shadow-sink), 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
+  /* The field lifts onto the control surface on focus, so the input inside it draws nothing.
+     The transparent outline shows only in forced colors. */
+  .search:is(:has(input:focus-visible), .is-focus) { outline: 2px solid transparent; outline-offset: 0; border-color: color-mix(in srgb, var(--accent) 35%, transparent); background: var(--control-thumb); box-shadow: var(--shadow-raise); }
   .search input { border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--text-sm); width: 180px; min-width: 0; }
   .search input::placeholder { color: var(--text-muted); }
+  /* The native clear button, quieted to a thin muted cross drawn with a mask. */
+  .search input::-webkit-search-cancel-button { width: 0.75rem; height: 0.75rem; margin-inline-start: var(--space-2); background: var(--text-muted); cursor: pointer; -webkit-appearance: none; appearance: none; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 2.5l7 7m0-7l-7 7' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .search input::-webkit-search-cancel-button:hover { background: var(--text); }
   kbd { font-size: var(--text-xs); color: var(--text-muted); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 var(--space-1); line-height: 18px; background: var(--surface-raised); }
 
   /* Tabs */
   .tabs { display: flex; gap: var(--space-1); overflow-x: auto; }
-  .tab { height: var(--control-sm); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-sm) / 1 var(--font-sans); cursor: pointer; white-space: nowrap; }
-  .tab:hover { color: var(--text); }
-  .tab[aria-selected="true"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); }
+  .tab { height: var(--control-sm); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-field); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-sm) / 1 var(--font-sans); cursor: pointer; white-space: nowrap; }
+  .tab:hover { background: var(--row-hover); color: var(--text); }
+  /* Selected filters take the navigation row's lifted fill, so nav and tabs share one selected state. */
+  .tab[aria-selected="true"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--accent); }
   /* .tabs scrolls sideways and clips anything outside it, so the ring sits inside the tab. */
   .tab:is(:focus-visible, .is-focus) { outline-offset: -2px; }
   .tab .count { color: var(--text-muted); margin-left: var(--space-1); font-variant-numeric: tabular-nums; }
@@ -88,6 +93,8 @@
   .segmented button[aria-pressed="true"]::before { background: var(--thumb); box-shadow: var(--shadow-raise); }
   /* Forced colors drop shadows, so the pressed option takes the system highlight. */
   @media (forced-colors: active) {
+    :is(.btn, .segmented button):is(:focus-visible, .is-focus) { outline-width: 2px; }
+    .tab[aria-selected="true"] { border: 2px solid Highlight; padding-inline: calc(var(--space-3) - 2px); }
     .segmented button[aria-pressed="true"] { forced-color-adjust: none; color: HighlightText; }
     .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
   }
@@ -97,8 +104,8 @@
   .check input { appearance: none; flex: none; width: 18px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); }
   .check input[type="radio"] { border-radius: 50%; }
 
-  /* Form-control focus: an accent ring, plus a halo added to the control's depth. */
-  :is(.btn, .segmented button):is(:focus-visible, .is-focus) { outline: 2px solid color-mix(in srgb, var(--accent) 80%, transparent); outline-offset: 2px; box-shadow: var(--depth, 0 0 0 0 transparent), 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
+  /* Control focus: a thin accent ring with a 2px gap and no glow, over the control's own shadow. */
+  :is(.btn, .segmented button):is(:focus-visible, .is-focus) { outline: 1.5px solid var(--accent); outline-offset: 2px; }
   /* Inside the button, the outline hugs the thumb instead of crossing into the next option. */
   .segmented button:is(:focus-visible, .is-focus) { outline-offset: -2px; }
 
@@ -579,14 +586,13 @@
 
         <section class="foundation" id="borders" aria-labelledby="borders-title">
           <h3 id="borders-title">Borders and dividers</h3>
-          <p class="note">Borders are 1px; bars and underlines that mark the current item are 2px. Neither width has a token.</p>
+          <p class="note">Borders are 1px; bars that mark the current item are 2px. Neither width has a token.</p>
           <ul class="specs">
             <li class="spec"><div class="spec-meta"><code>1px --border-subtle</code><span class="use">Figures, dividers, and the rule above a section heading</span></div><i class="line-subtle"></i></li>
             <li class="spec"><div class="spec-meta"><code>1px --border</code><span class="use">Unchecked checkbox and radio edges</span></div><div class="cluster" inert><label class="check"><input type="checkbox">Unchecked</label><label class="check"><input type="radio" name="border-radio">Radio</label></div></li>
             <li class="spec"><div class="spec-meta"><code>1px --text</code><span class="use">Solid rule below the shared site header</span></div><i class="header-rule"></i></li>
-            <li class="spec"><div class="spec-meta"><code>--nav-current, --shadow-nav-current</code><span class="use">Current page: a lifted fill with <code>--accent</code> text and no border</span></div><span class="nav-current-sample">Monitors</span></li>
+            <li class="spec"><div class="spec-meta"><code>--nav-current, --shadow-nav-current</code><span class="use">Current page and selected tab: a lifted fill with <code>--accent</code> text and no border or underline</span></div><div inert><div class="tabs" role="tablist" aria-label="Selected tab sample"><button class="tab" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
             <li class="spec"><div class="spec-meta"><code>3×14 --accent pip</code><span class="use">Current location in the page, with medium weight and no fill</span></div><span class="pip-sample">Thresholds</span></li>
-            <li class="spec"><div class="spec-meta"><code>2px --accent underline</code><span class="use">Current tab</span></div><div inert><div class="tabs" role="tablist" aria-label="Underline sample"><button class="tab" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
             <li class="spec"><div class="spec-meta"><code>1px transparent</code><span class="use">Borderless controls retain a border for forced colors; pressed segmented thumbs rise without a ring</span></div><div inert><div class="segmented" role="group" aria-label="Raised thumb sample"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false">Board</button></div></div></li>
             <li class="spec"><div class="spec-meta"><code>tint without a visible border</code><span class="use">Callouts keep a transparent 1px border for forced colors</span></div><div class="callout warning"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><p>No data for 42 minutes.</p></div></li>
           </ul>
@@ -598,7 +604,7 @@
           <ul class="specs">
             <li class="spec" data-token="--shadow-raise"><div class="spec-meta"><code>--shadow-raise</code><span class="value"></span><span class="use">Panels, cards, buttons, source code, and command plates</span></div><div class="elevation"><div class="panel-sample"><strong>Panel</strong><span class="muted">Raised surface, transparent border</span></div></div></li>
             <li class="spec" data-token="--shadow-sink"><div class="spec-meta"><code>--shadow-sink</code><span class="value"></span><span class="use">Fields, tracks, pressed buttons, and selected radio cards</span></div><div class="elevation"><div class="field-sample"><strong>Sunk field</strong><span class="muted">--field</span></div></div></li>
-            <li class="spec" data-token="--shadow-nav-current"><div class="spec-meta"><code>--shadow-nav-current</code><span class="value"></span><span class="use">The current navigation row's lift</span></div><div class="elevation"><span class="nav-current-sample">Monitors</span></div></li>
+            <li class="spec" data-token="--shadow-nav-current"><div class="spec-meta"><code>--shadow-nav-current</code><span class="value"></span><span class="use">The lift under the current navigation row and the selected tab</span></div><div class="elevation"><span class="nav-current-sample">Monitors</span></div></li>
             <li class="spec" data-token="--shadow-popover"><div class="spec-meta"><code>--shadow-popover</code><span class="value"></span><span class="use">Menus, popovers, pickers, and dialogs</span></div><div class="elevation"><div class="floating"><strong>Floating layer</strong><span class="muted">Raised surface, dialog shadow</span></div></div></li>
           </ul>
         </section>
@@ -606,7 +612,8 @@
         <section class="foundation" id="focus-motion" aria-labelledby="focus-motion-title">
           <h3 id="focus-motion-title">Focus and motion</h3>
           <ul class="specs">
-            <li class="spec"><div class="spec-meta"><code>2px accent at 80%, offset 2px</code><span class="use">Form controls add a 6px accent halo at 18% to their raise or sink shadow. The outline is always present so forced colors keep it; the halo only adds to it. Pointer hover never draws focus.</span></div><div inert><button class="btn is-focus" type="button">Focused</button></div></li>
+            <li class="spec"><div class="spec-meta"><code>1.5px solid --accent, offset 2px</code><span class="use">Controls: a thin ring with no glow, over their own raise or sink shadow. Chromium draws it 1px at 1x; forced colors draw it 2px. Pointer hover never draws focus.</span></div><div inert><button class="btn is-focus" type="button">Focused</button></div></li>
+            <li class="spec"><div class="spec-meta"><code>--control-thumb, --shadow-raise, accent edge at 35%</code><span class="use">Fields lift out of their well instead of drawing a ring. A transparent 2px outline keeps a ring in forced colors. The cue is below 3:1 by choice.</span></div><div inert><label class="search is-focus"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" value="latency" aria-label="Focused field sample"></label></div></li>
             <li class="spec"><div class="spec-meta"><code>2px solid --focus, offset 2px</code><span class="use">Links, navigation, tabs, and code and capture actions keep the base outline.</span></div><a class="is-focus" href="docs.html">Documentation example</a></li>
             <li class="spec"><div class="spec-meta"><code>offset -2px</code><span class="use">Only inside a scrolling or clipping parent, or a segmented control, with a comment that names the reason</span></div><div inert><div class="tabs" role="tablist" aria-label="Inset focus sample"><button class="tab is-focus" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
             <li class="spec" data-token="--duration-fast"><div class="spec-meta"><code>--duration-fast</code><span class="value"></span></div><span class="use">Hover and press</span></li>
