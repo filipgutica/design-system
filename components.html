@@ -199,6 +199,7 @@
   /* Inset: the tab list scrolls sideways, which would clip an outer ring. */
   .tab:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
   .tabpanel { padding-top: var(--space-3); font-size: var(--text-sm); color: var(--text-muted); }
+  .tabs-heading { margin-bottom: var(--space-1); color: var(--text); font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }
 
   /* Badge */
   .badge { display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 3px 9px; border: 1px solid transparent; border-radius: var(--radius-pill); background: var(--surface-hover); color: var(--text-muted); font: var(--weight-medium) var(--text-xs) / 1.25 var(--font-sans); white-space: nowrap; }
@@ -322,6 +323,13 @@
   .full:is(:hover, .is-hover) { color: var(--text); }
   /* Inset: the panel clips its content. */
   .full:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .capture .tabpanel { padding-top: 0; color: inherit; }
+  /* Without JavaScript each capture keeps its heading, and panels after the first take a rule. */
+  .capture .tabs-heading { margin: 0; padding: var(--space-3) var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); }
+  .capture:not([data-enhanced]) .tabpanel + .tabpanel { border-top: 1px solid var(--border-subtle); }
+  dialog.capture-viewer { width: min(960px, calc(100% - var(--space-8))); }
+  .capture-viewer .dialog-head h4 { font-family: var(--font-mono); }
+  .capture-viewer .dialog-body { padding: 0; }
   .screen { margin: 0; padding: var(--space-4); overflow-x: auto; background: var(--terminal); color: var(--terminal-text); font-size: var(--text-code); line-height: 1.5; }
   .screen .hi { color: var(--project-dark); }
   .screen .dim { color: var(--terminal-caption-text); }
@@ -738,15 +746,11 @@
   <section class="component" id="tabs" data-layer="Core" aria-labelledby="tabs-title">
     <header><h3 id="tabs-title">Tabs</h3><span class="badge">Core</span><a href="components.md#tabs">Spec</a></header>
     <div class="row"><h4>Live</h4><div class="states">
-      <div class="state wide" data-live-tabs>
-        <div class="tablist" role="tablist" aria-label="Monitor">
-          <button class="tab" type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" tabindex="0">Overview</button>
-          <button class="tab" type="button" role="tab" id="tab-history" aria-controls="panel-history" aria-selected="false" tabindex="-1">History</button>
-          <button class="tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" tabindex="-1">Settings</button>
-        </div>
-        <div class="tabpanel" role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" tabindex="0">Arrow keys move between tabs; Home and End jump to the ends.</div>
-        <div class="tabpanel" role="tabpanel" id="panel-history" aria-labelledby="tab-history" tabindex="0" hidden>Seven days of evaluations.</div>
-        <div class="tabpanel" role="tabpanel" id="panel-settings" aria-labelledby="tab-settings" tabindex="0" hidden>Threshold and notification settings.</div>
+      <div class="state wide" data-tabs data-label="Monitor">
+        <!-- Without JavaScript every panel shows under its heading; the script builds the tab list. -->
+        <section class="tabpanel" id="panel-overview" aria-labelledby="panel-overview-heading"><h5 class="tabs-heading" id="panel-overview-heading">Overview</h5><p>Arrow keys move between tabs; Home and End jump to the ends.</p></section>
+        <section class="tabpanel" id="panel-history" aria-labelledby="panel-history-heading"><h5 class="tabs-heading" id="panel-history-heading">History</h5><p>Seven days of evaluations.</p></section>
+        <section class="tabpanel" id="panel-settings" aria-labelledby="panel-settings-heading"><h5 class="tabs-heading" id="panel-settings-heading">Settings</h5><p>Threshold and notification settings.</p></section>
       </div>
     </div></div>
     <div class="row"><h4>Pinned</h4><div class="states">
@@ -864,17 +868,12 @@
   <!-- Terminal capture -->
   <section class="component" id="terminal-capture" data-layer="Identity" aria-labelledby="capture-title">
     <header><h3 id="capture-title">Terminal capture</h3><span class="badge">Identity</span><a href="components.md#terminal-capture">Spec</a></header>
-    <div class="capture" data-live-tabs>
-      <div class="capture-head">
-        <div class="tablist" role="tablist" aria-label="Captures">
-          <button class="tab" type="button" role="tab" id="cap-tab-status" aria-controls="cap-status" aria-selected="true" tabindex="0">status</button>
-          <button class="tab" type="button" role="tab" id="cap-tab-diff" aria-controls="cap-diff" aria-selected="false" tabindex="-1">diff</button>
-        </div>
-        <button class="full" type="button" aria-label="Full size"><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>Full size</button>
-      </div>
-      <div role="tabpanel" id="cap-status" aria-labelledby="cap-tab-status"><pre class="screen" tabindex="0" role="region" aria-label="status capture"><span class="hi">●</span> host-config   <span class="dim">3 targets current</span>
-<span class="hi">●</span> field-guide   <span class="dim">synced 2 minutes ago</span></pre><p class="capture-caption">~/code/filip-stack · main</p></div>
-      <div role="tabpanel" id="cap-diff" aria-labelledby="cap-tab-diff" hidden><pre class="screen" tabindex="0" role="region" aria-label="diff capture"><span class="dim">tokens.css</span>  +12 −4</pre><p class="capture-caption">~/code/filip-stack · docs/design-catalogue</p></div>
+    <div class="capture" data-tabs data-label="Captures">
+      <!-- The script adds the tab list and the Full size button; without it every capture is listed. -->
+      <div class="capture-head" hidden><button class="full" type="button" data-full-size><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>Full size</button></div>
+      <section class="tabpanel" id="cap-status" aria-labelledby="cap-status-heading"><h4 class="tabs-heading" id="cap-status-heading">status</h4><pre class="screen" tabindex="0" role="region" aria-label="status capture"><span class="hi">●</span> host-config   <span class="dim">3 targets current</span>
+<span class="hi">●</span> field-guide   <span class="dim">synced 2 minutes ago</span></pre><p class="capture-caption">~/code/filip-stack · main</p></section>
+      <section class="tabpanel" id="cap-diff" aria-labelledby="cap-diff-heading"><h4 class="tabs-heading" id="cap-diff-heading">diff</h4><pre class="screen" tabindex="0" role="region" aria-label="diff capture"><span class="dim">tokens.css</span>  +12 −4</pre><p class="capture-caption">~/code/filip-stack · docs/design-catalogue</p></section>
     </div>
   </section>
 
@@ -928,6 +927,10 @@
   <div class="dialog-head"><div><h4 id="live-dialog-title">Delete monitor</h4><p id="live-dialog-desc">This removes its history.</p></div><form method="dialog"><button class="close" type="submit" aria-label="Close dialog">×</button></form></div>
   <div class="dialog-body">API p95 latency stops alerting at once. Escape closes this dialog and returns focus to its trigger.</div>
   <form class="dialog-foot" method="dialog"><button class="btn secondary" type="submit">Cancel</button><button class="btn danger" type="submit">Delete</button></form>
+</dialog>
+<dialog class="dialog capture-viewer" id="capture-viewer" aria-labelledby="capture-viewer-title">
+  <div class="dialog-head"><h4 id="capture-viewer-title">Capture</h4><form method="dialog"><button class="close" type="submit" aria-label="Close full size capture">×</button></form></div>
+  <div class="dialog-body" id="capture-viewer-body"></div>
 </dialog>
 <dialog class="drawer" id="live-drawer" aria-labelledby="live-drawer-title">
   <div class="drawer-head"><h4 id="live-drawer-title">Contents</h4><form method="dialog"><button class="close" type="submit" aria-label="Close drawer">×</button></form></div>
@@ -996,15 +999,40 @@
   // Slider fill follows the value.
   document.querySelectorAll('[data-live-range]').forEach((r) => r.addEventListener('input', () => r.style.setProperty('--value', `${r.value}%`)));
 
-  // Tabs: roving tabindex; focus selects.
-  document.querySelectorAll('[data-live-tabs]').forEach((box) => {
-    const tabs = [...box.querySelectorAll('[role="tab"]')];
+  // Tabs: progressive enhancement. Each panel starts visible under its heading; the script builds
+  // the tab list from the headings, applies tab roles, and hides the headings and other panels.
+  document.querySelectorAll('[data-tabs]').forEach((box) => {
+    const panels = [...box.querySelectorAll(':scope > .tabpanel')];
+    const list = document.createElement('div');
+    list.className = 'tablist';
+    list.setAttribute('role', 'tablist');
+    list.setAttribute('aria-label', box.dataset.label);
+    const tabs = panels.map((panel) => {
+      const heading = panel.querySelector('.tabs-heading');
+      const tab = document.createElement('button');
+      tab.type = 'button';
+      tab.className = 'tab';
+      tab.id = `${panel.id}-tab`;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', panel.id);
+      tab.textContent = heading.textContent;
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', tab.id);
+      panel.tabIndex = 0;
+      heading.hidden = true;
+      list.append(tab);
+      return tab;
+    });
+    const head = box.querySelector('.capture-head');
+    if (head) { head.prepend(list); head.hidden = false; } else box.prepend(list);
+    box.dataset.enhanced = 'true';
     const select = (tab) => tabs.forEach((t) => {
       const on = t === tab;
       t.setAttribute('aria-selected', String(on));
       t.tabIndex = on ? 0 : -1;
       document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
     });
+    select(tabs[0]);
     tabs.forEach((t, i) => {
       t.addEventListener('click', () => select(t));
       t.addEventListener('keydown', (e) => {
@@ -1018,10 +1046,27 @@
     });
   });
 
-  // Copy actions announce the result politely.
+  // Full size: open the selected capture in a named modal; the native dialog restores focus to the trigger.
+  const viewer = document.getElementById('capture-viewer');
+  document.querySelectorAll('[data-full-size]').forEach((button) => button.addEventListener('click', () => {
+    const panel = button.closest('.capture').querySelector('.tabpanel:not([hidden])');
+    const name = panel.querySelector('.tabs-heading').textContent;
+    document.getElementById('capture-viewer-title').textContent = `${name} capture, full size`;
+    const screen = panel.querySelector('.screen').cloneNode(true);
+    screen.setAttribute('aria-label', `${name} capture, full size`);
+    document.getElementById('capture-viewer-body').replaceChildren(screen, panel.querySelector('.capture-caption').cloneNode(true));
+    viewer.showModal();
+  }));
+
+  // Copy actions copy each line without its line number, one line per row, and announce the result.
+  const copyText = (source) => {
+    const lines = source.querySelectorAll('.line');
+    if (!lines.length) return source.textContent;
+    return [...lines].map((line) => [...line.childNodes].filter((n) => !(n instanceof Element && n.classList.contains('ln'))).map((n) => n.textContent).join('')).join('\n');
+  };
   const status = document.getElementById('copy-status');
   document.querySelectorAll('[data-copy]').forEach((button) => button.addEventListener('click', async () => {
-    const text = document.getElementById(button.dataset.copy).textContent;
+    const text = copyText(document.getElementById(button.dataset.copy));
     try { await navigator.clipboard.writeText(text); status.textContent = 'Copied.'; } catch (e) { status.textContent = 'Copy failed. Select the text instead.'; }
   }));
 

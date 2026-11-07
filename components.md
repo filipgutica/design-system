@@ -156,7 +156,7 @@ Layer: Core. ui: `UiTabs`.
 
 - **Anatomy.** A `role="tablist"` with a 1px `--border-subtle` rule below it. It scrolls sideways when needed, and a 24px mask fades each clipped edge. Each tab is a button at least `--control-md` tall (`--control-lg` on phones), with `--space-2` `--space-3` padding, medium weight, `--text-muted`, and a 2px transparent bottom border.
 - **States.** Hover changes only the text to `--text`. The selected tab takes a 2px `--accent` underline and `--text`. Focus-visible is an inset `--focus` ring, because the list scrolls.
-- **Keyboard and screen reader.** Roving `tabindex`: arrow keys move between tabs, Home and End go to the ends, and focus selects the tab. Each tab has `aria-controls` and `aria-selected`; each panel has `role="tabpanel"`. Without JavaScript, show every panel under its own heading.
+- **Keyboard and screen reader.** Roving `tabindex`: arrow keys move between tabs, Home and End go to the ends, and focus selects the tab. Each tab has `aria-controls` and `aria-selected`; each panel has `role="tabpanel"`. Without JavaScript, show every panel under its own heading. Apply the tab roles and hide the headings and unselected panels only when the script enhances the markup.
 - **Forced colors.** The underline is a border, so it stays visible.
 
 ## Badge
@@ -224,7 +224,7 @@ Layer: Core. ui: `UiCodeBlock`.
 
 - **Anatomy.** A source code well: `--code-bg`, transparent 1px border, `--radius-lg`, `--shadow-raise`. An optional header (at least 40px, `--surface-raised`, `--text-xs`, a `--border-subtle` rule below) holds the title in semibold, the language in muted text, and a Copy button. The `<pre>` has `--space-4` padding, scrolls in both directions, is at most 32rem tall, and sets `--font-mono` at `--text-code` with a line height of 1.65. Line numbers are muted and right-aligned. Syntax uses the `--code-*` tokens. A compact variant puts the code and the Copy button on one row, with no header.
 - **Phone text.** Set `text-size-adjust: 100%` (and `-webkit-text-size-adjust`) on the block, and align each line's items to the baseline, so iOS Safari does not enlarge one line.
-- **Copy.** A button at least 44×44 with an accessible name, `--radius-sm`, and a transparent fill that becomes `currentColor` at 12% on hover. Announce the result in a polite live region; in the compact variant the success message is visually hidden.
+- **Copy.** Copies the code text only: no line numbers or prompts, and one line per row joined with newlines. A button at least 44×44 with an accessible name, `--radius-sm`, and a transparent fill that becomes `currentColor` at 12% on hover. Announce the result in a polite live region; in the compact variant the success message is visually hidden.
 - **Keyboard and screen reader.** The `<pre>` is focusable when it scrolls. Its focus ring and the Copy button's ring are inset, because the block clips its content.
 
 ## Command plate
@@ -239,7 +239,7 @@ Layer: Identity. ui: `UiCodeBlock` with a shell language or the compact variant.
 Layer: Identity. ui: `UiCapture`.
 
 - **Anatomy.** A panel whose header holds mono tabs (one for each capture) and a Full size button at the end. The screen is the neutral `--terminal` plate, and a mono status-line caption sits below it on `--terminal-caption` with `--terminal-caption-text`. Full size opens the capture in a dialog.
-- **Keyboard and screen reader.** Tabs follow the tabs spec. Full size is a native button that restores focus when the dialog closes. Focus rings are inset, because the panel clips its content. Without JavaScript, every capture is listed under its own heading.
+- **Keyboard and screen reader.** Tabs follow the tabs spec. Full size opens the selected capture in a modal dialog named after it, and focus returns to the button when the dialog closes. Without JavaScript the button is hidden. Focus rings are inset, because the panel clips its content. Without JavaScript, every capture is listed under its own heading.
 
 ## Site header
 
