@@ -58,8 +58,9 @@
      The tint mixes currentColor, so it reads on a light panel and on a dark plate.
      :where keeps the base below each component's own size and layout. */
   :where(.quiet-action) { border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
-  .quiet-action:is(:hover, .is-hover) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
-  .quiet-action:is(:active, .is-active) { background: color-mix(in srgb, currentColor 18%, transparent); }
+  .quiet-action:is(:hover, .is-hover):not(:disabled) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
+  .quiet-action:is(:active, .is-active):not(:disabled) { background: color-mix(in srgb, currentColor 18%, transparent); }
+  .quiet-action:disabled { opacity: 0.58; cursor: not-allowed; }
 
   /* Fields: input, textarea, select */
   .field { display: grid; gap: 6px; justify-items: start; min-width: 0; }
@@ -638,6 +639,7 @@
       <div class="state" inert><button class="quiet-action copy is-hover" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button><span class="caption">Hover</span></div>
       <div class="state" inert><button class="quiet-action copy is-focus" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button><span class="caption">Focus visible</span></div>
       <div class="state" inert><button class="quiet-action copy is-active" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button><span class="caption">Pressed</span></div>
+      <div class="state"><button class="quiet-action copy" type="button" disabled><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button><span class="caption">Disabled, live; no hover or press fill</span></div>
     </div></div>
   </section>
 
