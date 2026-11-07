@@ -112,8 +112,8 @@ Layer: Core. ui: `UiSwitch`.
 
 Layer: Core. ui: `UiToggleButton`.
 
-- **Anatomy.** A `<button aria-pressed>` with a switch track at the start, then a label and an optional `--text-xs` muted description. Pill corners, `--space-2` `--space-3` padding, `--surface-raised` fill, and a 1px `--border-subtle` edge.
-- **States.** Rest, hover (`--border` edge), pressed (`--accent` edge, and the track turns on as in the switch), focus-visible, and disabled.
+- **Anatomy.** A `<button aria-pressed>` with a switch track at the start, then a label and an optional `--text-xs` muted description. `--radius-field` corners (a labelled card, so wrapped labels sit square), `--space-2` `--space-3` padding, `--surface-raised` fill, and a 1px `--border-subtle` edge.
+- **States.** Rest, hover (`--border` edge), pressed (the track turns on as in the switch and carries the state; the card takes `--accent` at 8% over `--surface-raised` and a hairline of `--accent` at 35%), focus-visible, and disabled.
 - **Keyboard and screen reader.** A native button; Space and Enter toggle `aria-pressed`.
 - **Forced colors.** As for the switch track.
 
@@ -158,7 +158,7 @@ Layer: Core. ui: `UiScore`.
 Layer: Core. ui: `UiTabs`.
 
 - **Anatomy.** A `role="tablist"` with no rule below it and a 12px gap below it. It scrolls sideways when needed, and a 24px mask fades each clipped edge. Scrolling clips on every side, so the list has 4px (`--space-1`) padding all round: it keeps the selected tab's shadow whole and its fill off the frame edge. Each tab is a borderless button at least `--control-md` tall (`--control-lg` on phones), with `--space-2` `--space-3` padding, `--radius-field` corners, medium weight, and `--text-muted`.
-- **States.** Hover fills `--row-hover` and turns the text `--text`. The selected tab takes the [navigation row](#navigation-list)'s current-page recipe: `--nav-current` fill and `--shadow-nav-current`, with no underline. Its text is `--nav-current-text`: `--accent` only where the accent reaches 4.5:1 over the rendered current-row fill, both on the page and on a surface (composite a translucent fill over each first); otherwise `--text`. Focus-visible is an inset `--focus` ring, because the list scrolls.
+- **States.** Hover fills `--row-hover` and turns the text `--text`. The selected tab takes the [navigation row](#navigation-list)'s current-page recipe: `--nav-current` fill and `--shadow-nav-current`, with no underline. Its text is `--nav-current-text`: the first of `--accent`, `--text`, black, and white that reaches 4.5:1 over the tinted fill, both on the page and on a surface (composite a translucent fill over each first). Focus-visible is an inset `--focus` ring, because the list scrolls.
 - **Keyboard and screen reader.** Roving `tabindex`: arrow keys move between tabs, Home and End go to the ends, and focus selects the tab. Each tab has `aria-controls` and `aria-selected`; each panel has `role="tabpanel"`. Without JavaScript, show every panel under its own heading. Apply the tab roles and hide the headings and unselected panels only when the script enhances the markup.
 - **Forced colors.** The fill and shadow drop, so the selected tab takes a 2px `Highlight` border, and its padding shrinks by 2px to keep its size.
 
@@ -214,7 +214,7 @@ Layer: Core. ui: `UiDrawer`.
 Layer: Core. The mono font on rail rows is identity. ui: the rows in `UiSiteNav` and the project menu.
 
 - **Anatomy.** A `<nav>` with a name, holding links in rows: at least `--row` tall (`--control-lg` at tablet width), `0 --space-3` padding, `--radius-field` corners, `--text-sm`, and `--text-muted`. Groups have a `--text-xs` semibold muted label and 2px gaps between rows.
-- **States.** Hover: `--row-hover` fill and `--text`. Current page (`aria-current="page"`): `--nav-current` fill, `--shadow-nav-current`, `--nav-current-text`, and medium weight; hover keeps that fill. `--nav-current-text` is `--accent` only where the accent reaches 4.5:1 over the rendered fill, on the page and on a surface; otherwise `--text`. Selected tabs use the same rule. Current location in the page (`aria-current="location"`): `--text` in medium weight, with a 3×14 `--accent` pip at the leading edge, inset 4px, and no fill. Focus-visible: an inset `--focus` ring, because the rail and the drawer scroll.
+- **States.** Hover: `--row-hover` fill and `--text`. Current page (`aria-current="page"`): `--nav-current` fill, `--shadow-nav-current`, `--nav-current-text`, and medium weight; hover keeps that fill. `--nav-current` is a faint accent tint: `--accent` at 8% over `--surface-raised` in light, and `--accent` at 14% over transparent in dark. `--nav-current-text` is the first of `--accent`, `--text`, black, and white that reaches 4.5:1 over the tinted fill, both on the page and on a surface (composite a translucent fill over each first). Selected tabs use the same fill and rule. Current location in the page (`aria-current="location"`): `--text` in medium weight, with a 3×14 `--accent` pip at the leading edge, inset 4px, and no fill. Focus-visible: an inset `--focus` ring, because the rail and the drawer scroll.
 - **Phone.** At tablet width a section rail becomes a drawer. Its trigger is a secondary button at `--control-lg` with a three-line menu glyph (14×10, 1.5px lines) before the label. Without JavaScript the list opens in place, so the trigger is a `<details>` summary drawn as a secondary button with a chevron after the label.
 - **Keyboard and screen reader.** Plain links in Tab order.
 - **Motion.** Fill, colour, and shadow change over `--duration-fast` with `ease`.
@@ -243,7 +243,7 @@ Layer: Identity. ui: `UiCapture`.
 
 - **Anatomy.** A panel whose header holds mono tabs (one for each capture) and a Full size button at the end. The screen is the neutral `--terminal` plate, and a mono status-line caption sits below it on `--terminal-caption` with `--terminal-caption-text`. Full size opens the capture in a dialog.
 - **Keyboard and screen reader.** Tabs follow the tabs spec. Full size opens the selected capture in a modal dialog named after it, and focus returns to the button when the dialog closes. Without JavaScript the button is hidden. Focus rings are inset, because the panel clips its content. Without JavaScript, every capture is listed under its own heading.
-- **Header.** The whole panel, header included, is the `--terminal` plate in both page appearances, with a 1px `--terminal-border` edge. It scopes its own palette so the tabs read on it: current fill `--terminal-text` at 7% with a `0 1px 2px rgb(0 0 0 / 25%)` lift, hover `--terminal-text` at 4%, selected text, accent, and focus `--project-dark`, text `--terminal-text`, muted text `--terminal-caption-text`, and dividers `--terminal-border`. The tab list keeps its 4px block padding, and the Full size control stays centred on the tab row.
+- **Header.** The whole panel, header included, is the `--terminal` plate in both page appearances, with a 1px `--terminal-border` edge. It scopes its own palette so the tabs read on it: current fill `--project-dark` at 14% over transparent, with a `0 1px 2px rgb(0 0 0 / 25%)` lift, hover `--terminal-text` at 4%, selected text, accent, and focus `--project-dark`, text `--terminal-text`, muted text `--terminal-caption-text`, and dividers `--terminal-border`. The tab list keeps its 4px block padding, and the Full size control stays centred on the tab row.
 
 ## Site header
 
