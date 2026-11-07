@@ -21,6 +21,7 @@
   --surface: #e9ebed; /* ui: --color-surface */
   --surface-raised: #fbfbfc; /* ui: --color-surface-raised, --color-input-bg */
   --surface-hover: #e2e5e8; /* ui: --color-surface-muted */
+  --field: var(--surface-hover); /* ui: --color-well */
   --row-hover: #e2e5e8; /* ui: --color-row-hover */
   --row-selected: var(--surface-raised); /* ui: --color-row-selected */
   --border-subtle: #d3d8dd; /* ui: --color-border-subtle */
@@ -105,12 +106,14 @@
   --sidebar: 224px; /* ui: --sidebar */
 
   /* Shape */
-  --radius-sm: 3px; /* ui: --radius-inline */
-  --radius-md: 4px; /* ui: --radius-control */
-  --radius-lg: 6px; /* ui: --radius-panel */
+  --radius-sm: 6px; /* ui: --radius-inline */
+  --radius-md: 999px; /* ui: --radius-control */
+  --radius-lg: 16px; /* ui: --radius-panel */
   --radius-pill: 999px; /* ui: --radius-pill */
 
-  /* Elevation: floating layers only (menus, popovers, dialogs). */
+  /* Elevation: raised panels, sunk fields, and floating layers. */
+  --shadow-raise: 2px 2px 6px rgb(130 142 158 / 35%), -2px -2px 6px rgb(255 255 255 / 80%); /* ui: --shadow-raise */
+  --shadow-sink: inset 1.2px 1.2px 3.6px rgb(130 142 158 / 35%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 80%); /* ui: --shadow-sink */
   --shadow-popover: 0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px var(--border-subtle); /* ui: --shadow-dialog */
 
   /* Motion */
@@ -126,6 +129,7 @@
     --surface: #13171a;
     --surface-raised: #181d21;
     --surface-hover: #20262b;
+    --field: color-mix(in srgb, var(--bg) 87.5%, black);
     --row-hover: #20262b;
     --border-subtle: #262d33;
     --border: #78818a;
@@ -145,6 +149,8 @@
     --code-string: #a8bd9c;
     --code-number: #d5b98c;
     --code-comment: #a0a6b1;
+    --shadow-raise: 2px 2px 6px rgb(0 0 0 / 50%), -2px -2px 6px rgb(255 255 255 / 5%);
+    --shadow-sink: inset 1.2px 1.2px 3.6px rgb(0 0 0 / 55%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 5%);
     --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border-subtle);
   }
 }
@@ -155,6 +161,7 @@
   --surface: #13171a;
   --surface-raised: #181d21;
   --surface-hover: #20262b;
+  --field: color-mix(in srgb, var(--bg) 87.5%, black);
   --row-hover: #20262b;
   --border-subtle: #262d33;
   --border: #78818a;
@@ -174,6 +181,8 @@
   --code-string: #a8bd9c;
   --code-number: #d5b98c;
   --code-comment: #a0a6b1;
+  --shadow-raise: 2px 2px 6px rgb(0 0 0 / 50%), -2px -2px 6px rgb(255 255 255 / 5%);
+  --shadow-sink: inset 1.2px 1.2px 3.6px rgb(0 0 0 / 55%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 5%);
   --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border-subtle);
 }
 
