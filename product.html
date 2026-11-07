@@ -17,9 +17,11 @@ h1, .workflow > h2 { font-family: var(--font-mono); }
 h1 { max-width: 18ch; font-size: var(--text-display); letter-spacing: var(--tracking-tight); }
 .lead { max-width: 56ch; font-size: var(--text-reading); color: var(--text-muted); }
 .actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-6); }
-.action { border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; min-height: var(--control-lg); padding-inline: var(--space-4); border-radius: var(--radius-md); background: var(--text); color: var(--bg); font-size: var(--text-sm); font-weight: var(--weight-medium); }
-.action:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 80%, transparent); outline-offset: 2px; box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
-.action:hover { background: var(--text-muted); color: var(--bg); text-decoration: none; }
+/* The one primary action: filled with the project hue, raised at rest, sunk while pressed. */
+.action { --depth: var(--shadow-raise); border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; min-height: var(--control-lg); padding-inline: var(--space-4); border-radius: var(--radius-md); background: var(--accent); color: var(--accent-text); box-shadow: var(--depth); font-size: var(--text-sm); font-weight: var(--weight-medium); }
+.action:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 80%, transparent); outline-offset: 2px; box-shadow: var(--depth), 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
+.action:hover { background: var(--button-hover); color: var(--accent-text); text-decoration: none; }
+.action:active { --depth: var(--shadow-sink); background: color-mix(in srgb, var(--accent) 80%, var(--bg)); }
 .actions > a { min-height: var(--control-lg); display: inline-flex; align-items: center; }
 figure { margin: 0; min-width: 0; }
 /* Product evidence sits in a well: one quiet frame, no frame around it. */

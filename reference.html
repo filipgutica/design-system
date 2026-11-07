@@ -5,7 +5,9 @@
 <title>Application reference example</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
-  /* Component styles. Copy from here; values come only from tokens.css. */
+  /* Application example and Foundations catalogue. Values come only from tokens.css.
+     Component specimens and their styles live in components.html; this page keeps the few
+     it needs for the example, matched to that page. */
 
   /* Other page formats use docs.html and product.html. This specimen shows an app. */
   /* App shell */
@@ -16,9 +18,10 @@
   .workspace .mark { width: 20px; height: 20px; border-radius: var(--radius-sm); background: var(--text); color: var(--bg); display: grid; place-items: center; font-size: var(--text-xs); }
   .nav { display: grid; gap: 2px; }
   .nav-label { font-size: var(--text-xs); color: var(--text-muted); padding: var(--space-2) var(--space-2) var(--space-1); }
-  .nav a { display: flex; align-items: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-2); border-radius: var(--radius-sm); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: background var(--duration-fast) var(--ease-out); }
+  .nav a { display: flex; align-items: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-2); border-radius: var(--radius-field); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: background var(--duration-fast) var(--ease-out); }
   .nav a:hover { background: var(--row-hover); color: var(--text); }
-  .nav a[aria-current="page"] { background: var(--row-selected); color: var(--text); font-weight: var(--weight-medium); box-shadow: inset 2px 0 0 var(--accent); }
+  .nav a[aria-current="page"] { background: var(--nav-current); color: var(--accent); font-weight: var(--weight-medium); box-shadow: var(--shadow-nav-current); }
+  @media (forced-colors: active) { .nav a[aria-current="page"] { border-inline-start: 2px solid Highlight; } }
   .nav .count { margin-left: auto; font-size: var(--text-xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
   .sidebar-foot { margin-top: auto; }
 
@@ -41,22 +44,22 @@
   /* Icons */
   .icon { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* Buttons */
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-3); border-radius: var(--radius-md); border: 1px solid transparent; background: var(--surface-hover); color: var(--text); font: var(--weight-medium) var(--text-sm) / 1 var(--font-sans); cursor: pointer; transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out); }
-  /* .is-hover and .is-focus pin a state for the foundations state matrix; drop them when you copy a component. */
-  .btn:hover:not(:disabled), .btn.is-hover { background: color-mix(in srgb, var(--text) 8%, var(--surface-hover)); }
-  .btn.primary { background: var(--text); border-color: transparent; color: var(--bg); }
-  .btn.primary:hover:not(:disabled), .btn.primary.is-hover { background: var(--text-muted); }
-  .btn.ghost { background: transparent; color: var(--text-muted); }
-  .btn.ghost:hover:not(:disabled), .btn.ghost.is-hover { background: var(--row-hover); color: var(--text); }
-  /* Disabled controls follow @filipgutica/ui: 58% opacity and a not-allowed cursor. */
-  .btn:disabled, .input:disabled, .select:disabled, .switch:disabled, .segmented button:disabled, .check:has(input:disabled) { opacity: 0.58; cursor: not-allowed; }
+  /* Buttons: components.html#button */
+  .btn { --depth: var(--shadow-raise); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-3); border-radius: var(--radius-md); border: 1px solid transparent; background: var(--control-thumb); color: var(--text); box-shadow: var(--depth); font: var(--weight-medium) var(--text-sm) / 1 var(--font-sans); cursor: pointer; transition: background var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  .btn:hover:not(:disabled) { background: color-mix(in srgb, var(--text) 8%, var(--control-thumb)); }
+  .btn:active:not(:disabled) { --depth: var(--shadow-sink); background: var(--field); }
+  .btn.primary { background: var(--accent); color: var(--accent-text); }
+  .btn.primary:hover:not(:disabled) { background: var(--button-hover); }
+  .btn.primary:active:not(:disabled) { background: color-mix(in srgb, var(--accent) 80%, var(--bg)); }
+  .btn.ghost { --depth: 0 0 0 0 transparent; background: transparent; color: var(--text-muted); }
+  .btn.ghost:hover:not(:disabled) { background: var(--row-hover); color: var(--text); }
+  .btn.ghost:active:not(:disabled) { --depth: var(--shadow-sink); }
+  .btn:disabled { opacity: 0.58; cursor: not-allowed; box-shadow: none; }
+  /* .is-focus pins the focus state in the Focus and motion specimens. */
   .is-focus { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .btn.md { height: var(--control-md); }
-  .btn.lg { height: var(--control-lg); padding: 0 var(--space-4); }
 
   /* Input */
-  .search { display: flex; align-items: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-2); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--field); box-shadow: var(--shadow-sink); color: var(--text-muted); min-width: 0; }
+  .search { display: flex; align-items: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-2); border: 1px solid var(--field-edge); border-radius: var(--radius-field); background: var(--field); box-shadow: var(--shadow-sink); color: var(--text-muted); min-width: 0; }
   /* The field draws the focus ring, so the input inside it does not. */
   .search:has(input:focus-visible) { outline: 2px solid color-mix(in srgb, var(--accent) 80%, transparent); outline-offset: 2px; box-shadow: var(--shadow-sink), 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
   .search input { border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--text-sm); width: 180px; min-width: 0; }
@@ -73,13 +76,13 @@
   .tab .count { color: var(--text-muted); margin-left: var(--space-1); font-variant-numeric: tabular-nums; }
 
   /* Segmented control */
-  /* Matches UiSegmentedControl: a raised pill thumb on a sunk, undivided track. */
-  .segmented { --thumb: light-dark(var(--surface-raised), color-mix(in srgb, var(--surface-raised) 88%, white)); display: inline-flex; border: 1px solid transparent; border-radius: var(--radius-md); background: var(--field); box-shadow: var(--shadow-sink); }
+  /* components.html#segmented-control, without the glide: a raised pill thumb on a sunk, undivided track. */
+  .segmented { --thumb: var(--control-thumb); display: inline-flex; border: 1px solid transparent; border-radius: var(--radius-md); background: var(--field); box-shadow: var(--shadow-sink); }
   /* The fill alone marks the track. The transparent border keeps its size, and forced colors draw it. */
   .segmented button { position: relative; isolation: isolate; height: 28px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-xs) / 1 var(--font-sans); cursor: pointer; }
   .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -1; border-radius: var(--radius-md); }
-  .segmented button:is(:hover:not(:disabled), .is-hover):not([aria-pressed="true"]) { color: var(--text); }
-  .segmented button:is(:hover:not(:disabled), .is-hover):not([aria-pressed="true"])::before { background: color-mix(in srgb, var(--thumb) 45%, transparent); }
+  .segmented button:hover:not(:disabled, [aria-pressed="true"]) { color: var(--text); }
+  .segmented button:hover:not(:disabled, [aria-pressed="true"])::before { background: color-mix(in srgb, var(--thumb) 45%, transparent); }
   .segmented button[aria-pressed="true"] { color: var(--accent); }
   /* The accent label or icon gives the pressed choice at least 3:1 against the thumb. */
   .segmented button[aria-pressed="true"]::before { background: var(--thumb); box-shadow: var(--shadow-raise); }
@@ -89,61 +92,15 @@
     .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
   }
 
-  /* Fields, checkboxes, radios, and switches follow the @filipgutica/ui components of the same role. */
-  .field { display: grid; gap: var(--space-1); justify-items: start; }
-  .field-label { font-size: var(--text-sm); font-weight: var(--weight-semibold); }
-  .input, .select { height: var(--control-md); width: 200px; max-width: 100%; padding: 0 var(--space-3); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--field); box-shadow: var(--shadow-sink); color: var(--text); font: var(--text-md) / 1.35 var(--font-sans); }
-  .input::placeholder { color: var(--text-muted); opacity: 1; }
-  /* The chevron is drawn in currentColor, so it follows the text in both themes. */
-  .select { appearance: none; padding-right: var(--space-8); background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: calc(100% - 0.8rem) 52%, calc(100% - 0.55rem) 52%; background-size: 0.3rem 0.3rem; background-repeat: no-repeat; }
-  .input[aria-invalid="true"], .select[aria-invalid="true"] { border-color: var(--danger); }
-  .field-error { font-size: var(--text-sm); color: var(--danger); }
-
-  .choices { display: flex; flex-wrap: wrap; gap: var(--space-4); }
-  .check { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-md); cursor: pointer; }
-  .check input { appearance: none; display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); cursor: inherit; }
+  /* Unchecked choices for the Borders specimen: components.html#checkbox-and-radio */
+  .cluster .check { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-md); }
+  .check input { appearance: none; flex: none; width: 18px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); }
   .check input[type="radio"] { border-radius: 50%; }
-  /* Checked choices take the accent, never --link or --focus. */
-  .check input:checked { border-color: var(--accent); background: var(--accent); }
-  .check input[type="checkbox"]:checked::before { content: ""; width: 5px; height: 9px; margin-top: -2px; border: solid var(--accent-text); border-width: 0 2px 2px 0; transform: rotate(45deg); }
-  .check input[type="radio"]:checked { border-width: 5px; background: var(--surface-raised); }
 
-  .switch { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-md); padding: 0; border: 0; background: transparent; color: var(--text); font: var(--text-md) / var(--leading) var(--font-sans); cursor: pointer; }
-  .switch-track { position: relative; flex: none; width: 36px; height: 20px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--field); box-shadow: var(--shadow-sink); transition: background-color var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out); }
-  .switch-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: var(--radius-pill); background: var(--surface-raised); box-shadow: var(--shadow-raise); transition: transform var(--duration) var(--ease-out), background-color var(--duration) var(--ease-out); }
-  .switch[aria-checked="true"] .switch-track { border-color: var(--accent); background: var(--accent); }
-  .switch[aria-checked="true"] .switch-track::after { background: var(--accent-text); transform: translateX(16px); }
-  /* The switch knob is a fill, which forced colors drop; system colors redraw it. */
-  @media (forced-colors: active) {
-    .switch-track { forced-color-adjust: none; border-color: ButtonText; background: Canvas; }
-    .switch-track::after { forced-color-adjust: none; background: ButtonText; }
-    .switch[aria-checked="true"] .switch-track { border-color: Highlight; background: Highlight; }
-    .switch[aria-checked="true"] .switch-track::after { background: HighlightText; }
-  }
-  /* The button is a larger hit area, so the ring follows the visible track. */
-  .switch:is(:focus-visible, .is-focus) { outline: none; }
-  .switch:is(:focus-visible, .is-focus) .switch-track { outline: 2px solid color-mix(in srgb, var(--accent) 80%, transparent); outline-offset: 2px; box-shadow: var(--shadow-sink), 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
-
-  /* Native radios own selection and keyboard behavior; the label owns the card surface. */
-  .radio-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-3); }
-  .radio-card { position: relative; display: grid; gap: var(--space-1); min-width: 0; padding: var(--space-3); padding-right: var(--space-12); border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-raise); cursor: pointer; }
-  .radio-card:hover:not(:has(input:checked, input:disabled)), .radio-card:has(input.is-hover):not(:has(input:checked, input:disabled)) { background: color-mix(in srgb, var(--surface-hover) 45%, var(--surface-raised)); }
-  .radio-card:has(input:checked) { background: var(--field); box-shadow: var(--shadow-sink); }
-  .radio-card:has(input:disabled) { opacity: 0.58; cursor: not-allowed; }
-  .radio-card input { appearance: none; position: absolute; top: var(--space-3); right: var(--space-3); margin: 0; width: 16px; height: 16px; border: 1px solid var(--border); border-radius: 50%; background: var(--surface-raised); color: var(--accent-text); cursor: inherit; }
-  .radio-card input:checked { border-color: var(--accent); background: var(--accent); }
-  .radio-card input:checked::after { content: ""; position: absolute; inset: 2px 4px 4px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
-  .radio-card input:is(:focus-visible, .is-focus) { outline: none; }
-
-  /* The outline survives forced colors; the halo adds to the existing surface depth. */
-  :is(.btn, .input, .select, .check input, .segmented button):is(:focus-visible, .is-focus), .radio-card:has(input:is(:focus-visible, .is-focus)) { outline: 2px solid color-mix(in srgb, var(--accent) 80%, transparent); outline-offset: 2px; box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
-  :is(.input, .select):is(:focus-visible, .is-focus), .radio-card:has(input:checked):has(input:is(:focus-visible, .is-focus)) { box-shadow: var(--shadow-sink), 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
-  .radio-card:not(:has(input:checked)):has(input:is(:focus-visible, .is-focus)) { box-shadow: var(--shadow-raise), 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
+  /* Form-control focus: an accent ring, plus a halo added to the control's depth. */
+  :is(.btn, .segmented button):is(:focus-visible, .is-focus) { outline: 2px solid color-mix(in srgb, var(--accent) 80%, transparent); outline-offset: 2px; box-shadow: var(--depth, 0 0 0 0 transparent), 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); }
   /* Inside the button, the outline hugs the thumb instead of crossing into the next option. */
   .segmented button:is(:focus-visible, .is-focus) { outline-offset: -2px; }
-  @media (forced-colors: active) {
-    .radio-card input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; color: HighlightText; }
-  }
 
   /* List */
   .list { display: grid; }
@@ -231,11 +188,10 @@
   .code .n { color: var(--code-number); }
   .code .c { color: var(--code-comment); }
 
-  /* Terminal plate: dark in both themes; the $ prompt is drawn by CSS, so copied and spoken text omit it. */
-  .terminal { margin: 0; box-shadow: var(--shadow-raise); border: 1px solid var(--terminal-border); border-radius: var(--radius-lg); background: var(--terminal); overflow: hidden; }
+  /* Command plate: dark in both themes and tinted with the hue; the $ prompt is drawn by CSS, so copied and spoken text omit it. */
+  .terminal { margin: 0; box-shadow: var(--shadow-raise); border: 1px solid var(--command-border); border-radius: var(--radius-lg); background: var(--command-bg); overflow: hidden; }
   .terminal pre { margin: 0; padding: var(--space-3) var(--space-4); overflow-x: auto; color: var(--terminal-text); font-size: var(--text-code); }
   .terminal pre::before { content: "$ " / ""; color: var(--project-dark); }
-  .terminal figcaption { padding: var(--space-1) var(--space-4); background: var(--terminal-caption); color: var(--terminal-caption-text); font: var(--text-xs) / var(--leading) var(--font-mono); }
 
   /* Table */
   .table-wrap { overflow-x: auto; }
@@ -316,19 +272,16 @@
   .shape-box { display: block; width: 96px; height: 56px; border: 1px solid var(--border); background: var(--surface-raised); }
   .line-subtle { display: block; height: 0; border-top: 1px solid var(--border-subtle); }
   .line-border { display: block; height: 0; border-top: 1px solid var(--border); }
-  .bar-sample { display: inline-flex; align-items: center; height: var(--control-sm); padding: 0 var(--space-3); border-radius: var(--radius-sm); background: var(--row-selected); box-shadow: inset 2px 0 0 var(--accent); font-size: var(--text-sm); font-weight: var(--weight-medium); }
+  .pip-sample { position: relative; display: inline-flex; align-items: center; height: var(--control-sm); padding: 0 var(--space-3); font-size: var(--text-sm); font-weight: var(--weight-medium); }
+  .pip-sample::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--accent); }
+  .nav-current-sample { display: inline-flex; align-items: center; height: var(--control-sm); padding: 0 var(--space-3); border-radius: var(--radius-field); background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--accent); font-size: var(--text-sm); font-weight: var(--weight-medium); }
   .header-rule { display: block; height: 0; border-top: 1px solid var(--text); }
   .elevation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--bg); }
   .elevation > div { display: grid; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--surface-raised); font-size: var(--text-sm); }
   .elevation .floating { box-shadow: var(--shadow-popover); }
   .elevation .panel-sample { border: 1px solid transparent; box-shadow: var(--shadow-raise); }
-  .elevation .field-sample { border: 1px solid transparent; border-radius: var(--radius-md); background: var(--field); box-shadow: var(--shadow-sink); }
+  .elevation .field-sample { border: 1px solid var(--field-edge); border-radius: var(--radius-field); background: var(--field); box-shadow: var(--shadow-sink); }
 
-  .control-row { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: var(--space-2) var(--space-6); padding: var(--space-4) 0; border-bottom: 1px solid var(--border-subtle); }
-  .control-row:last-child { border-bottom: 0; }
-  .control-row h4 { margin: 0; padding-top: var(--space-2); color: var(--text); }
-  .states { display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-6); }
-  .state { display: grid; gap: var(--space-2); align-content: start; justify-items: start; min-width: 0; max-width: 100%; }
 
   .mobile-only { display: none; }
   /* The detail column collapses at main's own width (876px is a 1100px viewport minus --sidebar), not at a third viewport breakpoint. */
@@ -339,8 +292,6 @@
   }
   @media (max-width: 800px) {
     .btn, .tab, .row, .segmented button { min-height: var(--control-lg); min-width: var(--control-lg); }
-    .input, .select { height: var(--control-lg); }
-    .check, .switch { min-height: var(--control-lg); }
     .shell { grid-template-columns: 1fr; height: auto; }
     main { overflow: visible; }
     .sidebar { flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--border-subtle); padding: var(--space-2) var(--space-6); gap: var(--space-2); }
@@ -356,7 +307,7 @@
     .stats div:nth-child(3) { border-left: 0; padding-left: var(--space-3); }
     .row .id { display: none; }
     .row .channel { display: none; }
-    .spec, .control-row { grid-template-columns: 1fr; }
+    .spec { grid-template-columns: 1fr; }
     .elevation { grid-template-columns: 1fr; }
     .card-grid { grid-template-columns: 1fr; }
   }
@@ -390,12 +341,12 @@
       <div class="nav-label">Workspace</div>
       <nav class="nav" aria-label="Main">
         <a href="#monitors" aria-current="page"><svg class="icon"><use href="#i-list"/></svg>Monitors<span class="count">6</span></a>
-        <a href="#reference"><svg class="icon"><use href="#i-chart"/></svg>Components</a>
+        <a href="components.html"><svg class="icon"><use href="#i-chart"/></svg>Components</a>
         <a href="#foundations"><svg class="icon"><use href="#i-doc"/></svg>Foundations</a>
       </nav>
     </div>
     <div class="sidebar-foot">
-      <nav class="nav" aria-label="Reference formats"><a href="docs.html">Documentation example</a><a href="product.html">Product page example</a></nav>
+      <nav class="nav" aria-label="Reference formats"><a href="components.html">Component catalogue</a><a href="docs.html">Documentation example</a><a href="product.html">Product page example</a></nav>
       <div class="segmented" role="group" aria-label="Theme">
         <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
         <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
@@ -439,75 +390,10 @@
     </div>
 
     <div class="doc">
-      <section class="section" id="reference">
-        <header>
-          <h2>Components</h2>
-          <p class="lede">Every component on this page uses only tokens from <code>tokens.css</code>. Copy the markup and CSS from here instead of inventing new versions.</p>
-        </header>
-
-        <div class="cluster">
-          <button class="btn primary" type="button">Primary</button>
-          <button class="btn" type="button">Secondary</button>
-          <button class="btn ghost" type="button">Ghost</button>
-          <button class="btn md" type="button">Medium</button>
-          <button class="btn lg" type="button">Large</button>
-        </div>
-
-        <div class="cluster">
-          <span class="badge danger">Alerting</span>
-          <span class="badge warning">Warning</span>
-          <span class="badge success">Healthy</span>
-          <span class="badge info">Running</span>
-          <span class="badge">No data</span>
-        </div>
-
-        <div class="callout"><svg class="icon"><use href="#i-help"/></svg><p>Values are sampled every 5 minutes. A spike shorter than one bucket can fall between samples.</p></div>
-        <div class="callout warning"><svg class="icon"><use href="#i-alert"/></svg><p>No data for 42 minutes. Check ingestion before you trust this monitor.</p></div>
-
-        <div class="table-wrap" tabindex="0" role="region" aria-label="Sample routes">
-          <table>
-            <thead><tr><th>Route</th><th>Service</th><th class="num">Requests</th><th class="num">p95</th><th class="num">Errors</th></tr></thead>
-            <tbody>
-              <tr><td><code>POST /v1/orders</code></td><td>checkout-api</td><td class="num">1,204,881</td><td class="num">412 ms</td><td class="num">0.9%</td></tr>
-              <tr><td><code>GET /v1/catalog</code></td><td>catalog</td><td class="num">3,918,207</td><td class="num">96 ms</td><td class="num">0.1%</td></tr>
-              <tr><td><code>POST /v1/payments</code></td><td>payments</td><td class="num">402,115</td><td class="num">288 ms</td><td class="num">2.8%</td></tr>
-              <tr><td><code>POST /v1/chat</code></td><td>ai-gateway</td><td class="num">88,430</td><td class="num">1,940 ms</td><td class="num">0.3%</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="card-grid">
-        <div class="defs card">
-          <h3>Aggregation <code>agg</code></h3>
-          <dl>
-            <dt>p95</dt><dd>95% of requests were at or below this.</dd>
-            <dt>avg</dt><dd>Mean; hides tail latency.</dd>
-            <dt>sum</dt><dd>Total across the bucket.</dd>
-          </dl>
-          <p class="rule"><span class="gate">bucket 15m</span>Percentiles are not additive across buckets.</p>
-        </div>
-        <div class="defs card">
-          <h3>Monitor state <code>status</code></h3>
-          <dl>
-            <dt>alerting</dt><dd>Condition met for the full window.</dd>
-            <dt>warning</dt><dd>Moved more than 30% from baseline.</dd>
-            <dt>healthy</dt><dd>Within threshold and baseline.</dd>
-            <dt>no_data</dt><dd>No points in the last evaluation window.</dd>
-          </dl>
-          <p class="rule"><span class="gate">for ≥ 10m</span><span class="gate">eval every 1m</span>A <code>no_data</code> monitor is not healthy. Check ingestion first.</p>
-        </div>
-        </div>
-
-        <details class="disclosure">
-          <summary><svg class="icon"><use href="#i-chevron"/></svg>How the baseline is computed</summary>
-          <p class="muted">The baseline is the median of the same hour over the previous 7 days. A monitor warns when the current value moves more than 30% from it for 10 minutes.</p>
-        </details>
-      </section>
-
       <section class="section" id="foundations">
         <header>
           <h2>Foundations</h2>
-          <p class="lede">Type, color, space, shape, borders, elevation, controls, focus, and motion. Each specimen takes its style from <code>tokens.css</code> and prints the value the browser resolved, so the catalogue follows the tokens when they change. Use the theme control in the sidebar to check both themes.</p>
+          <p class="lede">Type, color, space, shape, borders, elevation, focus, and motion. Components and their states are in the <a href="components.html">component catalogue</a>. Each specimen takes its style from <code>tokens.css</code> and prints the value the browser resolved, so the catalogue follows the tokens when they change. Use the theme control in the sidebar to check both themes.</p>
           <nav class="jump" aria-label="Foundations">
             <a href="#typography">Typography</a>
             <a href="#color">Color</a>
@@ -515,7 +401,6 @@
             <a href="#shape">Shape</a>
             <a href="#borders">Borders and dividers</a>
             <a href="#elevation">Elevation</a>
-            <a href="#controls">Inputs and controls</a>
             <a href="#focus-motion">Focus and motion</a>
           </nav>
         </header>
@@ -564,7 +449,7 @@
             <li class="spec"><div class="spec-meta"><span>Reading text and links</span><code>--text-reading --leading --measure</code><span class="use">Underline links in prose</span></div><p class="spec-sample t-reading">A shared language for personal products and tools. The <a href="docs.html">documentation example</a> shows it in a full page.</p></li>
             <li class="spec"><div class="spec-meta"><span>Secondary text</span><code>--text-sm --text-muted</code></div><p class="spec-sample t-secondary">Updated 4 minutes ago by the nightly sync.</p></li>
             <li class="spec"><div class="spec-meta"><span>Inline code</span><code>--font-mono --text-code</code></div><p class="spec-sample">Set <code class="t-code">--measure</code> on reading text.</p></li>
-            <li class="spec"><div class="spec-meta"><span>Shell command</span><code>--terminal --project-dark</code><span class="use">A terminal plate, with the <code>$</code> prompt drawn by CSS</span></div><figure class="terminal spec-sample"><pre tabindex="0" role="region" aria-label="Sample install command">pnpm install --frozen-lockfile</pre><figcaption>zsh · ~/code/app</figcaption></figure></li>
+            <li class="spec"><div class="spec-meta"><span>Shell command</span><code>--command-bg --project-dark</code><span class="use">A command plate tinted with the hue, with the <code>$</code> prompt drawn by CSS</span></div><figure class="terminal spec-sample"><pre tabindex="0" role="region" aria-label="Sample install command">pnpm install --frozen-lockfile</pre></figure></li>
             <li class="spec"><div class="spec-meta"><span>Source code</span><code>--code-bg --code-*</code><span class="use">A theme-matched well with syntax colors and no prompt</span></div><div class="code spec-sample"><pre><span class="c">// Sample monitor</span>
 {
   <span class="k">"metric"</span>: <span class="s">"latency_p95"</span>,
@@ -582,15 +467,19 @@
             <li class="swatch" data-token="--bg"><i class="chip" aria-hidden="true"></i><code>--bg</code><span class="value"></span><span class="use">Page canvas</span></li>
             <li class="swatch" data-token="--surface"><i class="chip" aria-hidden="true"></i><code>--surface</code><span class="value"></span><span class="use">Wells: code, screenshots, figures</span></li>
             <li class="swatch" data-token="--surface-raised"><i class="chip" aria-hidden="true"></i><code>--surface-raised</code><span class="value"></span><span class="use">Panels and floating layers</span></li>
-            <li class="swatch" data-token="--surface-hover"><i class="chip" aria-hidden="true"></i><code>--surface-hover</code><span class="value"></span><span class="use">Secondary buttons and control hover</span></li>
+            <li class="swatch" data-token="--surface-hover"><i class="chip" aria-hidden="true"></i><code>--surface-hover</code><span class="value"></span><span class="use">Neutral badges and control tracks</span></li>
             <li class="swatch" data-token="--field"><i class="chip" aria-hidden="true"></i><code>--field</code><span class="value"></span><span class="use">Sunk inputs, selects, tracks, and selected radio cards</span></li>
+            <li class="swatch" data-token="--field-edge"><i class="chip" aria-hidden="true"></i><code>--field-edge</code><span class="value"></span><span class="use">Field border: transparent in light, a faint edge in dark</span></li>
+            <li class="swatch" data-token="--control-thumb"><i class="chip" aria-hidden="true"></i><code>--control-thumb</code><span class="value"></span><span class="use">Secondary buttons and segmented thumbs</span></li>
+            <li class="swatch" data-token="--nav-current"><i class="chip" aria-hidden="true"></i><code>--nav-current</code><span class="value"></span><span class="use">Current navigation row, with <code>--shadow-nav-current</code></span></li>
             <li class="swatch" data-token="--row-hover"><i class="chip" aria-hidden="true"></i><code>--row-hover</code><span class="value"></span><span class="use">Navigation row hover</span></li>
-            <li class="swatch" data-token="--row-selected"><i class="chip" aria-hidden="true"></i><code>--row-selected</code><span class="value"></span><span class="use">Current destination and selected row</span></li>
+            <li class="swatch" data-token="--row-selected"><i class="chip" aria-hidden="true"></i><code>--row-selected</code><span class="value"></span><span class="use">Selected list row</span></li>
+            <li class="swatch" data-token="--overlay"><i class="chip" aria-hidden="true"></i><code>--overlay</code><span class="value"></span><span class="use">Backdrop behind dialogs and drawers</span></li>
           </ul>
 
           <h4>Text and lines</h4>
           <ul class="swatches">
-            <li class="swatch" data-token="--text" data-on="--bg --surface-raised" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--text</code><span class="value"></span><span class="ratio"></span><span class="use">Essential labels and instructions; primary action fill</span></li>
+            <li class="swatch" data-token="--text" data-on="--bg --surface-raised" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--text</code><span class="value"></span><span class="ratio"></span><span class="use">Essential labels and instructions</span></li>
             <li class="swatch" data-token="--text-muted" data-on="--bg --surface" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--text-muted</code><span class="value"></span><span class="ratio"></span><span class="use">Secondary information and metadata</span></li>
             <li class="swatch" data-token="--border-subtle"><i class="chip" aria-hidden="true"></i><code>--border-subtle</code><span class="value"></span><span class="use">Figures and dividers</span></li>
             <li class="swatch" data-token="--border" data-on="--bg --surface-hover" data-min="3"><i class="chip" aria-hidden="true"></i><code>--border</code><span class="value"></span><span class="ratio"></span><span class="use">Unchecked choices and switch edges</span></li>
@@ -600,8 +489,9 @@
           <ul class="swatches">
             <li class="swatch" data-token="--project" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--project</code><span class="value"></span><span class="ratio"></span><span class="use">The project hue; <code>--accent</code> follows it</span></li>
             <li class="swatch" data-token="--project-dark" data-on="--terminal" data-min="3"><i class="chip" aria-hidden="true"></i><code>--project-dark</code><span class="value"></span><span class="ratio"></span><span class="use">The hue on the terminal plate</span></li>
-            <li class="swatch" data-token="--accent" data-on="--bg --surface-raised" data-min="3"><i class="chip" aria-hidden="true"></i><code>--accent</code><span class="value"></span><span class="ratio"></span><span class="use">Marks, current-item bars, checked controls; 4.5:1 where it colors text</span></li>
-            <li class="swatch" data-token="--accent-text" data-on="--accent" data-min="3"><i class="chip" aria-hidden="true"></i><code>--accent-text</code><span class="value"></span><span class="ratio"></span></li>
+            <li class="swatch" data-token="--accent" data-on="--bg --surface-raised" data-min="3"><i class="chip" aria-hidden="true"></i><code>--accent</code><span class="value"></span><span class="ratio"></span><span class="use">Primary action fill, marks, current items, checked controls; 4.5:1 where it colors text</span></li>
+            <li class="swatch" data-token="--accent-text" data-on="--accent --button-hover" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--accent-text</code><span class="value"></span><span class="ratio"></span><span class="use">Primary button label</span></li>
+            <li class="swatch" data-token="--button-hover" data-fg="var(--accent-text)" data-on="--button-hover" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--button-hover</code><span class="value"></span><span class="ratio"></span><span class="use">Primary button hover</span></li>
             <li class="swatch" data-token="--accent-hover"><i class="chip" aria-hidden="true"></i><code>--accent-hover</code><span class="value"></span></li>
             <li class="swatch" data-token="--link" data-on="--bg --surface-raised" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--link</code><span class="value"></span><span class="ratio"></span><span class="use">Links</span></li>
             <li class="swatch" data-token="--focus" data-on="--bg --surface" data-min="3"><i class="chip" aria-hidden="true"></i><code>--focus</code><span class="value"></span><span class="ratio"></span><span class="use">Link and navigation focus</span></li>
@@ -629,7 +519,11 @@
             <li class="swatch" data-token="--code-string" data-on="--code-bg" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--code-string</code><span class="value"></span><span class="ratio"></span></li>
             <li class="swatch" data-token="--code-number" data-on="--code-bg" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--code-number</code><span class="value"></span><span class="ratio"></span></li>
             <li class="swatch" data-token="--code-comment" data-on="--code-bg" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--code-comment</code><span class="value"></span><span class="ratio"></span></li>
-            <li class="swatch" data-token="--terminal"><i class="chip" aria-hidden="true"></i><code>--terminal</code><span class="value"></span><span class="use">Terminal plate, in both themes</span></li>
+            <li class="swatch" data-token="--command-bg"><i class="chip" aria-hidden="true"></i><code>--command-bg</code><span class="value"></span><span class="use">Command plate, tinted with the hue, in both themes</span></li>
+            <li class="swatch" data-token="--command-border"><i class="chip" aria-hidden="true"></i><code>--command-border</code><span class="value"></span><span class="use">Command plate edge; transparent in light</span></li>
+            <li class="swatch" data-token="--terminal-text" data-fg="var(--terminal-text)" data-on="--command-bg" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--terminal-text</code><span class="value"></span><span class="ratio"></span><span class="use">Command text</span></li>
+            <li class="swatch" data-token="--project-dark" data-fg="var(--project-dark)" data-on="--command-bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--project-dark</code><span class="value"></span><span class="ratio"></span><span class="use">The <code>$</code> prompt on the command plate</span></li>
+            <li class="swatch" data-token="--terminal"><i class="chip" aria-hidden="true"></i><code>--terminal</code><span class="value"></span><span class="use">Terminal capture plate, in both themes</span></li>
             <li class="swatch" data-token="--terminal-text" data-on="--terminal" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--terminal-text</code><span class="value"></span><span class="ratio"></span></li>
             <li class="swatch" data-token="--terminal-border"><i class="chip" aria-hidden="true"></i><code>--terminal-border</code><span class="value"></span><span class="use">Terminal plate edge</span></li>
             <li class="swatch" data-token="--terminal-caption"><i class="chip" aria-hidden="true"></i><code>--terminal-caption</code><span class="value"></span></li>
@@ -660,16 +554,24 @@
             <li class="spec" data-token="--page-max"><div class="spec-meta"><code>--page-max</code><span class="value"></span></div><span class="use">Documentation frame</span></li>
             <li class="spec" data-token="--page-wide"><div class="spec-meta"><code>--page-wide</code><span class="value"></span></div><span class="use">Product page frame</span></li>
             <li class="spec" data-token="--sidebar"><div class="spec-meta"><code>--sidebar</code><span class="value"></span></div><span class="use">This page's sidebar</span></li>
-            <li class="spec" data-token="--row"><div class="spec-meta"><code>--row</code><span class="value"></span></div><i class="height-bar" style="height:var(--row)"></i></li>
+            <li class="spec" data-token="--row"><div class="spec-meta"><code>--row</code><span class="value"></span><span class="use">Navigation and list rows</span></div><i class="height-bar" style="height:var(--row)"></i></li>
+          </ul>
+
+          <h4>Control heights</h4>
+          <ul class="specs">
+            <li class="spec" data-token="--control-sm"><div class="spec-meta"><code>--control-sm</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-sm)"></i></li>
+            <li class="spec" data-token="--control-md"><div class="spec-meta"><code>--control-md</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-md)"></i></li>
+            <li class="spec" data-token="--control-lg"><div class="spec-meta"><code>--control-lg</code><span class="value"></span><span class="use">Touch controls</span></div><i class="height-bar" style="height:var(--control-lg)"></i></li>
           </ul>
         </section>
 
         <section class="foundation" id="shape" aria-labelledby="shape-title">
           <h3 id="shape-title">Shape</h3>
-          <p class="note">Pill controls, soft panels, and inline corners. Cards keep the panel radius, never a pill.</p>
+          <p class="note">Pill buttons, rounded fields, soft panels, and inline corners. Cards keep the panel radius, never a pill.</p>
           <ul class="specs">
-            <li class="spec" data-token="--radius-sm"><div class="spec-meta"><code>--radius-sm</code><span class="value"></span><span class="use">Inline elements, checkboxes, and navigation rows</span></div><i class="shape-box" style="border-radius:var(--radius-sm)"></i></li>
-            <li class="spec" data-token="--radius-md"><div class="spec-meta"><code>--radius-md</code><span class="value"></span><span class="use">Pill controls and segmented thumbs</span></div><i class="shape-box" style="border-radius:var(--radius-md)"></i></li>
+            <li class="spec" data-token="--radius-sm"><div class="spec-meta"><code>--radius-sm</code><span class="value"></span><span class="use">Inline elements and checkboxes</span></div><i class="shape-box" style="border-radius:var(--radius-sm)"></i></li>
+            <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Inputs, selects, textareas, and navigation rows</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
+            <li class="spec" data-token="--radius-md"><div class="spec-meta"><code>--radius-md</code><span class="value"></span><span class="use">Buttons, segmented controls, and their thumbs</span></div><i class="shape-box" style="border-radius:var(--radius-md)"></i></li>
             <li class="spec" data-token="--radius-lg"><div class="spec-meta"><code>--radius-lg</code><span class="value"></span><span class="use">Wells, plates, panels, callouts, and floating layers</span></div><i class="shape-box" style="border-radius:var(--radius-lg)"></i></li>
             <li class="spec" data-token="--radius-pill"><div class="spec-meta"><code>--radius-pill</code><span class="value"></span><span class="use">Status badges and switch tracks</span></div><i class="shape-box" style="border-radius:var(--radius-pill)"></i></li>
           </ul>
@@ -680,9 +582,10 @@
           <p class="note">Borders are 1px; bars and underlines that mark the current item are 2px. Neither width has a token.</p>
           <ul class="specs">
             <li class="spec"><div class="spec-meta"><code>1px --border-subtle</code><span class="use">Figures, dividers, and the rule above a section heading</span></div><i class="line-subtle"></i></li>
-            <li class="spec"><div class="spec-meta"><code>1px --border</code><span class="use">Unchecked checkbox and radio edges; switch track</span></div><div class="cluster"><label class="check"><input type="checkbox">Unchecked</label><label class="check"><input type="radio" name="border-radio">Radio</label></div></li>
+            <li class="spec"><div class="spec-meta"><code>1px --border</code><span class="use">Unchecked checkbox and radio edges</span></div><div class="cluster"><label class="check"><input type="checkbox">Unchecked</label><label class="check"><input type="radio" name="border-radio">Radio</label></div></li>
             <li class="spec"><div class="spec-meta"><code>1px --text</code><span class="use">Solid rule below the shared site header</span></div><i class="header-rule"></i></li>
-            <li class="spec"><div class="spec-meta"><code>2px inset --accent</code><span class="use">Current destination or selected row, on the leading edge, with <code>--row-selected</code> and medium weight</span></div><span class="bar-sample">Monitors</span></li>
+            <li class="spec"><div class="spec-meta"><code>--nav-current, --shadow-nav-current</code><span class="use">Current page: a lifted fill with <code>--accent</code> text and no border</span></div><span class="nav-current-sample">Monitors</span></li>
+            <li class="spec"><div class="spec-meta"><code>3×14 --accent pip</code><span class="use">Current location in the page, with medium weight and no fill</span></div><span class="pip-sample">Thresholds</span></li>
             <li class="spec"><div class="spec-meta"><code>2px --accent underline</code><span class="use">Current tab</span></div><div inert><div class="tabs" role="tablist" aria-label="Underline sample"><button class="tab" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
             <li class="spec"><div class="spec-meta"><code>1px transparent</code><span class="use">Borderless controls retain a border for forced colors; pressed segmented thumbs rise without a ring</span></div><div inert><div class="segmented" role="group" aria-label="Raised thumb sample"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false">Board</button></div></div></li>
             <li class="spec"><div class="spec-meta"><code>tint without a visible border</code><span class="use">Callouts keep a transparent 1px border for forced colors</span></div><div class="callout warning"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><p>No data for 42 minutes.</p></div></li>
@@ -693,63 +596,10 @@
           <h3 id="elevation-title">Elevation</h3>
           <p class="note">Panels rise; fields sink. Floating layers keep their dialog shadow, including its border.</p>
           <ul class="specs">
-            <li class="spec" data-token="--shadow-raise"><div class="spec-meta"><code>--shadow-raise</code><span class="value"></span><span class="use">Panels, cards, source code, and command plates</span></div><div class="elevation"><div class="panel-sample"><strong>Panel</strong><span class="muted">Raised surface, transparent border</span></div></div></li>
-            <li class="spec" data-token="--shadow-sink"><div class="spec-meta"><code>--shadow-sink</code><span class="value"></span><span class="use">Fields, tracks, and selected radio cards</span></div><div class="elevation"><div class="field-sample"><strong>Sunk field</strong><span class="muted">--field</span></div></div></li>
+            <li class="spec" data-token="--shadow-raise"><div class="spec-meta"><code>--shadow-raise</code><span class="value"></span><span class="use">Panels, cards, buttons, source code, and command plates</span></div><div class="elevation"><div class="panel-sample"><strong>Panel</strong><span class="muted">Raised surface, transparent border</span></div></div></li>
+            <li class="spec" data-token="--shadow-sink"><div class="spec-meta"><code>--shadow-sink</code><span class="value"></span><span class="use">Fields, tracks, pressed buttons, and selected radio cards</span></div><div class="elevation"><div class="field-sample"><strong>Sunk field</strong><span class="muted">--field</span></div></div></li>
+            <li class="spec" data-token="--shadow-nav-current"><div class="spec-meta"><code>--shadow-nav-current</code><span class="value"></span><span class="use">The current navigation row's lift</span></div><div class="elevation"><span class="nav-current-sample">Monitors</span></div></li>
             <li class="spec" data-token="--shadow-popover"><div class="spec-meta"><code>--shadow-popover</code><span class="value"></span><span class="use">Menus, popovers, pickers, and dialogs</span></div><div class="elevation"><div class="floating"><strong>Floating layer</strong><span class="muted">Raised surface, dialog shadow</span></div></div></li>
-          </ul>
-        </section>
-
-        <section class="foundation" id="controls" aria-labelledby="controls-title">
-          <h3 id="controls-title">Inputs and controls</h3>
-          <p class="note">The Rest specimen in each row is live; the others pin one state for display and do not respond. Touch layouts at tablet width and below use <code>--control-lg</code>.</p>
-
-          <div class="control-row" data-states="hover focus disabled">
-            <h4>Primary button</h4>
-            <div class="states"><div class="state"><div class="state-specimen"><button class="btn primary" type="button" data-target>Save</button></div><span class="caption">Rest</span></div></div>
-          </div>
-          <div class="control-row" data-states="hover focus disabled">
-            <h4>Secondary button</h4>
-            <div class="states"><div class="state"><div class="state-specimen"><button class="btn" type="button" data-target>Cancel</button></div><span class="caption">Rest</span></div></div>
-          </div>
-          <div class="control-row" data-states="hover focus disabled">
-            <h4>Ghost button</h4>
-            <div class="states"><div class="state"><div class="state-specimen"><button class="btn ghost" type="button" data-target>Mute</button></div><span class="caption">Rest</span></div></div>
-          </div>
-          <div class="control-row" data-states="focus disabled invalid">
-            <h4>Text input</h4>
-            <div class="states"><div class="state"><div class="state-specimen field"><label class="field-label" for="f-service">Service</label><input class="input" id="f-service" placeholder="checkout-api" aria-describedby="f-service-error" data-target><p class="field-error" id="f-service-error" hidden>Enter a service name.</p></div><span class="caption">Rest</span></div></div>
-          </div>
-          <div class="control-row" data-states="focus disabled invalid">
-            <h4>Select</h4>
-            <div class="states"><div class="state"><div class="state-specimen field"><label class="field-label" for="f-window">Window</label><select class="select" id="f-window" aria-describedby="f-window-error" data-target><option>Last hour</option><option>Last 24 hours</option><option>Last 7 days</option></select><p class="field-error" id="f-window-error" hidden>Choose a window.</p></div><span class="caption">Rest</span></div></div>
-          </div>
-          <div class="control-row" data-states="checked focus disabled">
-            <h4>Checkbox</h4>
-            <div class="states"><div class="state"><div class="state-specimen"><label class="check"><input type="checkbox" data-target>Notify on recovery</label></div><span class="caption">Rest</span></div></div>
-          </div>
-          <div class="control-row" data-states="checked focus disabled">
-            <h4>Radio</h4>
-            <div class="states"><div class="state"><div class="state-specimen choices" role="radiogroup" aria-label="Digest"><label class="check"><input type="radio" name="digest" data-target>Daily</label><label class="check"><input type="radio" name="digest">Weekly</label></div><span class="caption">Rest</span></div></div>
-          </div>
-          <div class="control-row" data-states="checked focus disabled">
-            <h4>Switch</h4>
-            <div class="states"><div class="state"><div class="state-specimen"><button class="switch" type="button" role="switch" aria-checked="false" data-target><span class="switch-track" aria-hidden="true"></span>Alerts</button></div><span class="caption">Rest</span></div></div>
-          </div>
-          <div class="control-row" data-states="hover focus disabled">
-            <h4>Segmented control</h4>
-            <div class="states"><div class="state"><div class="state-specimen segmented" role="group" aria-label="View"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false" data-target>Board</button><button type="button" aria-pressed="false">Table</button></div><span class="caption">Rest; List is pressed</span></div></div>
-          </div>
-
-          <div class="control-row" data-states="hover checked focus disabled">
-            <h4>Radio card</h4>
-            <div class="states"><div class="state"><div class="state-specimen radio-cards" role="radiogroup" aria-label="Delivery"><label class="radio-card"><input type="radio" name="delivery" data-target><strong>Immediate</strong><span class="muted">Send each alert.</span></label><label class="radio-card"><input type="radio" name="delivery"><strong>Digest</strong><span class="muted">Group the alerts.</span></label></div><span class="caption">Rest</span></div></div>
-          </div>
-
-          <h4>Control heights</h4>
-          <ul class="specs">
-            <li class="spec" data-token="--control-sm"><div class="spec-meta"><code>--control-sm</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-sm)"></i></li>
-            <li class="spec" data-token="--control-md"><div class="spec-meta"><code>--control-md</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-md)"></i></li>
-            <li class="spec" data-token="--control-lg"><div class="spec-meta"><code>--control-lg</code><span class="value"></span><span class="use">Touch controls</span></div><i class="height-bar" style="height:var(--control-lg)"></i></li>
           </ul>
         </section>
 
@@ -760,7 +610,7 @@
             <li class="spec"><div class="spec-meta"><code>2px solid --focus, offset 2px</code><span class="use">Links, navigation, tabs, and code and capture actions keep the base outline.</span></div><a class="is-focus" href="docs.html">Documentation example</a></li>
             <li class="spec"><div class="spec-meta"><code>offset -2px</code><span class="use">Only inside a scrolling or clipping parent, or a segmented control, with a comment that names the reason</span></div><div inert><div class="tabs" role="tablist" aria-label="Inset focus sample"><button class="tab is-focus" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
             <li class="spec" data-token="--duration-fast"><div class="spec-meta"><code>--duration-fast</code><span class="value"></span></div><span class="use">Hover and press</span></li>
-            <li class="spec" data-token="--duration"><div class="spec-meta"><code>--duration</code><span class="value"></span></div><span class="use">Menus and panels; the live switch above uses it</span></li>
+            <li class="spec" data-token="--duration"><div class="spec-meta"><code>--duration</code><span class="value"></span></div><span class="use">Menus, panels, and the switch knob</span></li>
             <li class="spec" data-token="--ease-out"><div class="spec-meta"><code>--ease-out</code><span class="value"></span></div><span class="use">Animate opacity or transform only where it explains a state change</span></li>
             <li class="spec"><div class="spec-meta"><code>prefers-reduced-motion</code></div><span class="use">The <code>tokens.css</code> base sets transitions and animations to 0ms and turns off smooth scrolling</span></li>
           </ul>
@@ -961,39 +811,8 @@
   });
   document.getElementById('clear-filter').addEventListener('click', () => { query = ''; search.value = ''; setFilter('all'); });
 
-  // Foundations: live controls, the pinned state matrix, and resolved token values.
+  // Foundations: resolved token values and contrast.
   const foundations = document.getElementById('foundations');
-  foundations.querySelectorAll('.switch').forEach((s) => s.addEventListener('click', () =>
-    s.setAttribute('aria-checked', String(s.getAttribute('aria-checked') !== 'true'))));
-  foundations.querySelectorAll('.segmented').forEach((group) => group.addEventListener('click', (e) => {
-    const option = e.target.closest('button');
-    if (!option) return;
-    group.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === option)));
-  }));
-
-  // Each pinned state is a clone of the Rest specimen, so the matrix always matches the live markup.
-  const PINS = {
-    hover: { label: 'Hover', pin: (target) => target.classList.add('is-hover') },
-    focus: { label: 'Focus visible', pin: (target) => target.classList.add('is-focus') },
-    checked: { label: 'Checked', pin: (target) => { if (target.matches('input')) target.checked = true; else target.setAttribute('aria-checked', 'true'); } },
-    disabled: { label: 'Disabled', pin: (target) => { target.disabled = true; } },
-    invalid: { label: 'Invalid', pin: (target, cell) => { target.setAttribute('aria-invalid', 'true'); cell.querySelector('.field-error').hidden = false; } },
-  };
-  foundations.querySelectorAll('.control-row').forEach((row) => {
-    const rest = row.querySelector('.state');
-    row.dataset.states.split(' ').forEach((state) => {
-      const cell = rest.cloneNode(true);
-      // Give each clone its own ids and radio group, keeping its label and error references intact.
-      cell.querySelectorAll('[id]').forEach((el) => { el.id += `-${state}`; });
-      cell.querySelectorAll('[for]').forEach((el) => { el.htmlFor += `-${state}`; });
-      cell.querySelectorAll('[aria-describedby]').forEach((el) => el.setAttribute('aria-describedby', `${el.getAttribute('aria-describedby')}-${state}`));
-      cell.querySelectorAll('input[name]').forEach((el) => { el.name += `-${state}`; });
-      PINS[state].pin(cell.querySelector('[data-target]'), cell);
-      cell.querySelector('.state-specimen').inert = true;
-      cell.querySelector('.caption').textContent = PINS[state].label;
-      rest.parentElement.append(cell);
-    });
-  });
 
   // Resolve colors through a probe element; plain tokens compute to rgb(), color-mix() to color(srgb).
   const probe = document.createElement('span');

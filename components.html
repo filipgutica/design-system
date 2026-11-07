@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Component catalogue</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  /*
+   * Component catalogue. Plain HTML and CSS on tokens.css; no framework or build step.
+   * components.md specifies each component; copy markup and styles from here.
+   *
+   * Pinned states: the first specimen in each row is live. The others pin one state so it
+   * renders without a pointer or keyboard: .is-hover, .is-active (pressed), and .is-focus
+   * stand in for :hover, :active, and :focus-visible, and ARIA or native attributes
+   * (aria-pressed, aria-checked, checked, disabled, aria-invalid, aria-busy) set the rest.
+   * Pinned specimens sit inside an inert wrapper, so they take no focus and no input.
+   * Drop the .is-* classes when you copy a component.
+   */
+
+  /* ---------- Shared recipes ---------- */
+  :root {
+    /* Form-control focus: an accent ring plus a halo added after the control's own depth. */
+    --ring: 2px solid color-mix(in srgb, var(--accent) 80%, transparent);
+    --halo: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent);
+    --flat: 0 0 0 0 transparent;
+  }
+  .icon { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .muted { color: var(--text-muted); }
+
+  /* ================= Core ================= */
+
+  /* Button */
+  .btn { --depth: var(--shadow-raise); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--control-md); padding: 0 var(--space-3); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--accent); color: var(--accent-text); box-shadow: var(--depth); font: var(--weight-medium) var(--text-md) / 1.25 var(--font-sans); letter-spacing: -0.01em; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  .btn[data-size="sm"] { min-height: var(--control-sm); padding: 0 10px; font-size: var(--text-sm); }
+  .btn[data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-4); font-size: var(--text-lg); }
+  .btn:is(:hover, .is-hover):not(:disabled) { background: var(--button-hover); }
+  .btn.secondary { background: var(--control-thumb); color: var(--text); }
+  .btn.secondary:is(:hover, .is-hover):not(:disabled) { background: color-mix(in srgb, var(--text) 8%, var(--control-thumb)); }
+  .btn.ghost { --depth: var(--flat); background: transparent; color: var(--text-muted); }
+  .btn.ghost:is(:hover, .is-hover):not(:disabled) { background: var(--row-hover); color: var(--text); }
+  .btn.danger { --depth: var(--flat); background: var(--danger-soft); color: var(--text); }
+  .btn.danger:is(:hover, .is-hover):not(:disabled) { border-color: var(--danger); background: var(--danger-soft); }
+  .btn.text { --depth: var(--flat); min-height: auto; padding: var(--space-1); background: transparent; color: var(--link); text-decoration: underline; text-underline-offset: 0.2em; }
+  .btn.text:is(:hover, .is-hover):not(:disabled) { background: transparent; }
+  /* Press: primary mixes 80% with the canvas; every raised or ghost button sinks. */
+  .btn:not(.secondary, .ghost, .danger, .text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: color-mix(in srgb, var(--accent) 80%, var(--bg)); }
+  .btn.secondary:is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--field); }
+  .btn:not(.danger, .text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { --depth: var(--shadow-sink); }
+  .btn:disabled { --depth: var(--flat); opacity: 0.58; cursor: not-allowed; }
+  .btn[aria-busy="true"] { cursor: wait; }
+  .btn[aria-busy="true"]::before { content: ""; flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 700ms linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Fields: input, textarea, select */
+  .field { display: grid; gap: 6px; justify-items: start; min-width: 0; }
+  .field-label { font-size: var(--text-sm); font-weight: var(--weight-semibold); }
+  .field-description { font-size: var(--text-sm); color: var(--text-muted); }
+  .field-error { font-size: var(--text-sm); color: var(--danger); }
+  .input, .select, .textarea { --depth: var(--shadow-sink); width: 220px; max-width: 100%; border: 1px solid var(--field-edge); border-radius: var(--radius-field); background: var(--field); box-shadow: var(--depth); color: var(--text); font: var(--text-md) / 1.35 var(--font-sans); }
+  .input, .select { height: var(--control-md); padding: 0 10px; }
+  .input[data-size="sm"], .select[data-size="sm"] { height: var(--control-sm); padding-inline: 9px; font-size: var(--text-sm); }
+  .input[data-size="lg"], .select[data-size="lg"] { height: var(--control-lg); padding-inline: 11px; font-size: var(--text-lg); }
+  .textarea { display: block; min-height: 88px; padding: 10px; resize: vertical; }
+  :is(.input, .textarea)::placeholder { color: var(--text-muted); opacity: 1; }
+  /* The chevron is drawn in currentColor, so it follows the text in both themes. */
+  .select { appearance: none; padding-right: 28px; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: calc(100% - 0.8rem) 52%, calc(100% - 0.55rem) 52%; background-size: 0.3rem 0.3rem; background-repeat: no-repeat; }
+  /* Where the browser supports a styled select, the open list is a floating layer and the
+     chevron a thin corner. Other browsers keep the native picker and the gradient chevron. */
+  @supports (appearance: base-select) {
+    .select, .select::picker(select) { appearance: base-select; }
+    .select { position: relative; display: flex; align-items: center; background-image: none; cursor: pointer; }
+    .select:disabled { cursor: not-allowed; }
+    .select::picker-icon { display: none; }
+    .select::after { content: ""; position: absolute; right: var(--space-3); width: var(--space-2); height: var(--space-2); border-right: 1.5px solid var(--text-muted); border-bottom: 1.5px solid var(--text-muted); transform: translateY(-2px) rotate(45deg); }
+    .select::picker(select) { min-width: anchor-size(width); max-height: min(20rem, 50dvh); overflow: auto; margin-block: var(--space-1); padding: var(--space-1); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--surface-raised); color: var(--text); box-shadow: var(--shadow-popover); font: var(--text-md) / var(--leading) var(--font-sans); }
+    .select option { min-height: var(--control-sm); padding: var(--space-2) var(--space-3); border-radius: calc(var(--radius-lg) - var(--space-1)); cursor: pointer; }
+    .select option:checked { background: var(--row-selected); }
+    .select option:hover { background: var(--row-hover); }
+    /* Inset: the picker scrolls. */
+    .select option:focus-visible { background: var(--row-hover); outline: 2px solid var(--focus); outline-offset: -2px; }
+    .select option::checkmark { order: 1; margin-left: auto; color: var(--accent); }
+    @media (pointer: coarse) { .select option { min-height: var(--control-lg); } }
+  }
+  :is(.input, .select, .textarea)[aria-invalid="true"] { border-color: var(--danger); }
+  :is(.input, .select, .textarea):disabled { opacity: 0.58; cursor: not-allowed; }
+  /* A static drawing of the open picker; a native select cannot be pinned open. */
+  .picker { display: grid; width: 220px; max-width: 100%; margin: 0; padding: var(--space-1); list-style: none; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-popover); }
+  .picker li { display: flex; align-items: center; min-height: var(--control-sm); padding: var(--space-2) var(--space-3); border-radius: calc(var(--radius-lg) - var(--space-1)); }
+  .picker li.is-hover { background: var(--row-hover); }
+  .picker li[aria-selected="true"] { background: var(--row-selected); }
+  .picker li[aria-selected="true"]::after { content: "✓"; margin-left: auto; color: var(--accent); }
+
+  /* Checkbox and radio: native inputs drawn with tokens. */
+  .choices { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  .check { display: inline-flex; align-items: center; gap: 9px; min-height: var(--control-md); cursor: pointer; }
+  .check input { --depth: var(--flat); appearance: none; display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); cursor: inherit; }
+  .check[data-size="sm"] input { width: 16px; height: 16px; }
+  .check[data-size="lg"] input { width: 20px; height: 20px; }
+  .check input[type="radio"] { border-radius: 50%; }
+  .check input:checked { border-color: var(--accent); background: var(--accent); }
+  .check input[type="checkbox"]:checked::before { content: ""; width: 5px; height: 9px; margin-top: -2px; border: solid var(--accent-text); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .check input[type="radio"]:checked { border-width: 5px; background: var(--surface-raised); }
+  .check:has(input:disabled) { opacity: 0.58; cursor: not-allowed; }
+
+  /* Radio card: the native radio owns selection; the label owns the card surface. */
+  .radio-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-3); width: min(100%, 420px); border: 0; margin: 0; padding: 0; }
+  .radio-card { --depth: var(--shadow-raise); position: relative; display: grid; gap: var(--space-1); min-width: 0; padding: var(--space-3); padding-right: var(--space-8); border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--depth); cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out); }
+  .radio-card:is(:hover, .is-hover):not(:has(input:checked, input:disabled)) { background: color-mix(in srgb, var(--surface-hover) 45%, var(--surface-raised)); }
+  /* Depth and a check badge show the choice, without an accent ring. */
+  .radio-card:has(input:checked) { --depth: var(--shadow-sink); background: var(--field); }
+  .radio-card:has(input:disabled) { opacity: 0.58; cursor: not-allowed; }
+  .radio-card input { appearance: none; position: absolute; top: var(--space-3); right: var(--space-3); width: 16px; height: 16px; margin: 0; border: 1px solid var(--border); border-radius: 50%; background: var(--surface-raised); color: var(--accent-text); cursor: inherit; }
+  .radio-card input:checked { border-color: var(--accent); background: var(--accent); }
+  .radio-card input:checked::after { content: ""; position: absolute; inset: 2px 4px 4px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
+  /* The card draws the ring, so the radio inside it does not. */
+  .radio-card input:focus-visible { outline: none; }
+
+  /* Switch: a button with role="switch"; the label sits beside it. */
+  .switch-row { display: inline-flex; align-items: center; gap: var(--space-2); }
+  .switch { --w: 44px; --h: 22px; --inset: 2px; display: inline-flex; align-items: center; justify-content: center; flex: none; min-width: var(--control-sm); min-height: var(--control-md); padding: 0; border: 0; background: transparent; cursor: pointer; }
+  .switch[data-size="sm"] { --w: 35.2px; --h: 17.6px; --inset: 1.6px; min-height: var(--control-sm); }
+  .switch[data-size="lg"] { --w: 52.8px; --h: 26.4px; --inset: 2.4px; min-height: var(--control-lg); }
+  .switch-track, .toggle-track { --depth: var(--shadow-sink); position: relative; flex: none; width: var(--w); height: var(--h); border: 1px solid transparent; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--border) 90%, var(--field)); box-shadow: var(--depth); transition: background-color var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out); }
+  .switch-track::after, .toggle-track::after { content: ""; position: absolute; top: calc(var(--inset) - 1px); left: calc(var(--inset) - 1px); width: calc(var(--h) - 2 * var(--inset)); height: calc(var(--h) - 2 * var(--inset)); border-radius: var(--radius-pill); background: var(--surface-raised); box-shadow: var(--shadow-raise); transition: transform var(--duration) var(--ease-out), background-color var(--duration) var(--ease-out); }
+  :is(.switch[aria-checked="true"] .switch-track, .toggle[aria-pressed="true"] .toggle-track) { border-color: var(--accent); background: var(--accent); }
+  :is(.switch[aria-checked="true"] .switch-track, .toggle[aria-pressed="true"] .toggle-track)::after { background: var(--accent-text); transform: translateX(calc(var(--w) - var(--h))); }
+  .switch:disabled, .switch:disabled + label { opacity: 0.58; cursor: not-allowed; }
+  .switch-row label { cursor: pointer; }
+  /* The button is a larger hit area, so the ring follows the visible track. */
+  .switch:is(:focus-visible, .is-focus) { outline: none; }
+
+  /* Toggle button */
+  .toggle { --w: 44px; --h: 22px; --inset: 2px; --depth: var(--flat); display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--surface-raised); color: var(--text); font: var(--text-md) / var(--leading-tight) var(--font-sans); text-align: left; cursor: pointer; }
+  .toggle:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"]) { border-color: var(--border); }
+  .toggle[aria-pressed="true"] { border-color: var(--accent); }
+  .toggle:disabled { opacity: 0.58; cursor: not-allowed; }
+  .toggle-text { display: grid; }
+  .toggle-text small { color: var(--text-muted); font-size: var(--text-xs); }
+
+  /* Segmented control: a raised pill thumb on a sunk, undivided track. */
+  .segmented { --item: var(--control-md); --glide-lead: 260ms; --glide-trail: 300ms; display: inline-flex; flex: none; border: 1px solid transparent; border-radius: var(--radius-md); background: var(--field); box-shadow: var(--shadow-sink); isolation: isolate; }
+  /* The fill alone marks the track. The transparent border keeps its size, and forced colors draw it. */
+  .segmented[data-size="sm"] { --item: var(--control-sm); font-size: var(--text-sm); }
+  .segmented[data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
+  .segmented button { --depth: var(--flat); position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: inherit; cursor: pointer; }
+  .segmented[data-icon-only] button { width: var(--item); padding: 0; }
+  /* The thumb is inset inside each full-size button, so it floats on the track and the hit area keeps its size. */
+  .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -2; border-radius: var(--radius-md); pointer-events: none; }
+  .segmented button:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"]) { color: var(--text); }
+  .segmented button:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"])::before { background: color-mix(in srgb, var(--control-thumb) 45%, transparent); }
+  /* The accent label or icon marks the pressed choice at 3:1 against its thumb. */
+  .segmented button[aria-pressed="true"] { color: var(--accent); }
+  .segmented button[aria-pressed="true"]::before { z-index: -1; background: var(--control-thumb); box-shadow: var(--shadow-raise); }
+  .segmented button:disabled { opacity: 0.58; cursor: not-allowed; }
+  /* Motion answers only the reader: the script marks a change of choice with data-slide and the old thumb's edges. */
+  @media (prefers-reduced-motion: no-preference) {
+    .segmented[data-slide] button { transition: color var(--glide-lead) ease; }
+    .segmented[data-slide="right"] button[aria-pressed="true"]::before { animation: glide-left var(--glide-trail) ease, glide-right var(--glide-lead) ease; }
+    .segmented[data-slide="left"] button[aria-pressed="true"]::before { animation: glide-left var(--glide-lead) ease, glide-right var(--glide-trail) ease; }
+  }
+  @keyframes glide-left { from { left: var(--slide-left); } }
+  @keyframes glide-right { from { right: var(--slide-right); } }
+
+  /* Slider: a native range input. */
+  .range { width: 220px; max-width: 100%; height: var(--control-md); margin: 0; background: transparent; appearance: none; cursor: pointer; }
+  .range::-webkit-slider-runnable-track { height: 6px; border-radius: var(--radius-sm); background: linear-gradient(var(--accent), var(--accent)) 0 / var(--value, 50%) 100% no-repeat, var(--surface-hover); }
+  .range::-moz-range-track { height: 6px; border-radius: var(--radius-sm); background: var(--surface-hover); }
+  .range::-moz-range-progress { height: 6px; border-radius: var(--radius-sm); background: var(--accent); }
+  .range::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; margin-top: -6px; border: 2px solid var(--accent); border-radius: 50%; background: var(--surface-raised); }
+  .range::-moz-range-thumb { width: 14px; height: 14px; border: 2px solid var(--accent); border-radius: 50%; background: var(--surface-raised); }
+  .range:disabled { opacity: 0.58; cursor: not-allowed; }
+  /* The ring goes on the thumb, not the full-width input. */
+  .range:is(:focus-visible, .is-focus) { outline: none; }
+  .range:is(:focus-visible, .is-focus)::-webkit-slider-thumb { outline: var(--ring); outline-offset: 2px; box-shadow: var(--halo); }
+  .range:is(:focus-visible, .is-focus)::-moz-range-thumb { outline: var(--ring); outline-offset: 2px; box-shadow: var(--halo); }
+
+  /* Progress and score */
+  .progress { width: 220px; max-width: 100%; height: 9px; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--surface-hover); }
+  .progress > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: transform var(--duration-fast) var(--ease-out); }
+  .score { display: inline-flex; align-items: center; gap: var(--space-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .score .pips { display: inline-flex; gap: 3px; }
+  .score .pips i { width: 8px; height: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+  .score .pips i.on { border-color: var(--accent); background: var(--accent); }
+  .score b { font-weight: var(--weight-medium); }
+  .score b span { color: var(--text-muted); font-weight: var(--weight-regular); }
+
+  /* Tabs */
+  .tablist { display: flex; width: max-content; max-width: 100%; overflow-x: auto; border-bottom: 1px solid var(--border-subtle); }
+  .tab { flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-sans); white-space: nowrap; cursor: pointer; }
+  .tab:is(:hover, .is-hover) { color: var(--text); }
+  .tab[aria-selected="true"] { border-bottom-color: var(--accent); color: var(--text); }
+  /* Inset: the tab list scrolls sideways, which would clip an outer ring. */
+  .tab:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .tabpanel { padding-top: var(--space-3); font-size: var(--text-sm); color: var(--text-muted); }
+
+  /* Badge */
+  .badge { display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 3px 9px; border: 1px solid transparent; border-radius: var(--radius-pill); background: var(--surface-hover); color: var(--text-muted); font: var(--weight-medium) var(--text-xs) / 1.25 var(--font-sans); white-space: nowrap; }
+  .badge:is(.success, .warning, .danger, .info) { background: color-mix(in srgb, var(--tone) 22%, var(--surface-raised)); color: light-dark(color-mix(in srgb, var(--tone) 75%, var(--text)), color-mix(in srgb, var(--tone) 85%, var(--text))); }
+  .badge:is(.success, .warning, .danger, .info)::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .badge.success { --tone: var(--success); }
+  .badge.warning { --tone: var(--warning); }
+  .badge.danger { --tone: var(--danger); }
+  .badge.info { --tone: var(--info); }
+
+  /* Alert */
+  .alert { display: flex; align-items: flex-start; gap: var(--space-3); max-width: var(--measure); padding: var(--space-3) var(--space-4); border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface); color: var(--text); font-size: var(--text-sm); }
+  .alert .icon { margin-top: 2px; color: var(--text-muted); }
+  .alert.success { background: var(--success-soft); } .alert.success .icon { color: var(--success); }
+  .alert.warning { background: var(--warning-soft); } .alert.warning .icon { color: var(--warning); }
+  .alert.danger { background: var(--danger-soft); } .alert.danger .icon { color: var(--danger); }
+  .alert.info { background: var(--info-soft); } .alert.info .icon { color: var(--info); }
+
+  /* Surface and card */
+  .surface, .card { min-width: 0; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-raise); }
+  .surface { padding: var(--space-4); }
+  .surface[data-padding="compact"] { padding: var(--space-3); }
+  .card { width: min(100%, 360px); overflow: hidden; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4); }
+  .card-head h4 { font-size: var(--text-md); font-weight: var(--weight-medium); line-height: var(--leading); letter-spacing: 0; }
+  .card-body { padding: 0 var(--space-4) var(--space-4); font-size: var(--text-sm); color: var(--text-muted); }
+  .card-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3); margin-inline: var(--space-4); padding-block: var(--space-3); border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: var(--text-sm); }
+
+  /* Figure */
+  .figure { display: grid; gap: var(--space-3); min-width: 0; margin: 0; }
+  .figure-plate { min-width: 0; overflow-x: auto; padding: var(--space-5); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--surface); }
+  .figure figcaption { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-sm); }
+  .figure figcaption b { color: var(--text); font-weight: var(--weight-medium); }
+
+  /* Dialog and drawer. The catalogue shows them in place; real ones are native dialogs opened with showModal(). */
+  .dialog { display: grid; width: min(512px, 100%); max-height: min(672px, calc(100dvh - var(--space-8))); overflow: hidden; padding: 0; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--surface-raised); color: var(--text); box-shadow: var(--shadow-popover); }
+  /* The component sets display, so a closed native dialog needs its hidden state back. */
+  dialog:not([open]) { display: none; }
+  dialog.dialog { margin: auto; }
+  dialog.dialog::backdrop { background: var(--overlay); }
+  .dialog-head, .dialog-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); padding: var(--space-4); }
+  .dialog-head { border-bottom: 1px solid var(--border-subtle); }
+  .dialog-head h4 { font-size: 18px; font-weight: var(--weight-semibold); letter-spacing: -0.02em; }
+  .dialog-head p { margin-top: var(--space-1); color: var(--text-muted); }
+  .dialog-body { min-height: 0; overflow: auto; padding: var(--space-4); }
+  .dialog-foot { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--border-subtle); background: var(--surface); }
+  .close { --depth: var(--flat); display: inline-grid; flex: none; place-items: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font-size: 22px; line-height: 1; cursor: pointer; }
+  .close:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); }
+  .drawer { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(calc(var(--sidebar) + var(--space-12)), 100%); height: 260px; overflow: hidden; padding: 0; border: 0; border-right: 1px solid var(--border-subtle); background: var(--surface-raised); color: var(--text); box-shadow: var(--shadow-popover); }
+  dialog.drawer { position: fixed; inset: 0 auto 0 0; height: 100dvh; max-height: none; margin: 0; }
+  dialog.drawer::backdrop { background: var(--overlay); }
+  @media (prefers-reduced-motion: no-preference) {
+    dialog.drawer[open] { animation: drawer-in var(--duration) var(--ease-out); }
+    dialog.drawer[open]::backdrop { animation: fade-in var(--duration) var(--ease-out); }
+  }
+  @keyframes drawer-in { from { transform: translateX(-100%); } }
+  @keyframes fade-in { from { opacity: 0; } }
+  .drawer-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-subtle); }
+  .drawer-head h4 { font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }
+  .drawer-body { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: var(--space-4); }
+
+  /* Navigation list */
+  .navlist { display: grid; gap: 2px; width: min(100%, 240px); }
+  .navlist .group-label { padding: 0 var(--space-3) var(--space-1); color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--weight-semibold); }
+  .navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-field); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease; }
+  .navlist a:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); text-decoration: none; }
+  .navlist a[aria-current="page"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--accent); font-weight: var(--weight-medium); }
+  .navlist a[aria-current="location"] { color: var(--text); font-weight: var(--weight-medium); }
+  .navlist a[aria-current="location"]::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--accent); }
+  /* Inset: the rail and the drawer scroll. */
+  .navlist a:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  /* Phone trigger: a secondary button with a three-line menu glyph, because it opens a side drawer. */
+  .menu-glyph::before { content: ""; flex: none; width: 14px; height: 10px; border-block: 1.5px solid currentColor; background: linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat; }
+  /* No-JavaScript fallback: the list opens in place, so the summary keeps a chevron. */
+  .rail-summary { list-style: none; width: max-content; max-width: 100%; }
+  .rail-summary::-webkit-details-marker { display: none; }
+  .rail-summary::after { content: ""; width: 6px; height: 6px; margin-left: var(--space-1); border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: rotate(45deg); }
+  .rail-summary:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: 2px; }
+  details.rail[open] > .navlist { margin-top: var(--space-2); }
+  /* List selection */
+  .rows { display: grid; width: min(100%, 360px); }
+  .rows [role="option"] { display: flex; align-items: center; min-height: var(--row); padding: 0 var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-sm); }
+  .rows [role="option"]:is(:hover, .is-hover) { background: var(--row-hover); }
+  .rows [role="option"][aria-selected="true"] { background: var(--row-selected); box-shadow: inset 2px 0 0 var(--accent); font-weight: var(--weight-medium); }
+  @media (forced-colors: active) { .rows [role="option"][aria-selected="true"] { border-inline-start: 2px solid Highlight; } }
+
+  /* Code block: a source well */
+  .code { width: 100%; max-width: var(--measure); min-width: 0; overflow: hidden; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--code-bg); color: var(--code-text); box-shadow: var(--shadow-raise); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  .code-head { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; padding: 4px var(--space-1) 4px var(--space-3); border-bottom: 1px solid var(--border-subtle); background: var(--surface-raised); font-size: var(--text-xs); }
+  .code-head b { font-weight: var(--weight-semibold); }
+  .code-head .lang { color: var(--text-muted); }
+  .copy { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: var(--control-lg); min-height: var(--control-lg); margin-left: auto; padding: var(--space-1) 6px; border: 0; border-radius: var(--radius-sm); background: transparent; color: inherit; font: inherit; cursor: pointer; }
+  .copy:is(:hover, .is-hover) { background: color-mix(in srgb, currentColor 12%, transparent); }
+  /* Inset: the code block clips its content. */
+  .copy:is(:focus-visible, .is-focus), .code pre:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .code pre { margin: 0; padding: var(--space-4); overflow: auto; max-height: 32rem; font-size: var(--text-code); line-height: 1.65; tab-size: 2; }
+  /* Each line is a baseline-aligned row, so a prompt or line number sits on the text's baseline. */
+  .code .line { display: flex; align-items: baseline; min-height: 1.65em; }
+  .code .line > span { white-space: pre; }
+  .code .ln { min-width: 2.5em; padding-right: 1em; flex: none; text-align: right; color: var(--text-muted); user-select: none; }
+  .code .k { color: var(--code-key); } .code .s { color: var(--code-string); } .code .n { color: var(--code-number); } .code .c { color: var(--code-comment); }
+  .code.compact { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .code.compact pre { padding: var(--space-2) var(--space-3); }
+  .code.compact .copy { margin: var(--space-1); border-radius: var(--radius-md); }
+
+  /* ================= Identity: terminal folio ================= */
+
+  /* Command plate: dark in both themes and tinted with the project hue. */
+  .code.command { --code-text: var(--terminal-text); --focus: var(--project-dark); border-color: var(--command-border); background: var(--command-bg); color: var(--terminal-text); }
+  .code.command .code-head { border-color: var(--command-border); background: transparent; color: var(--terminal-caption-text); }
+  .code.command .code-head .lang { color: var(--terminal-caption-text); }
+  /* The prompt is drawn by CSS, so copied and spoken text omit it. */
+  .code.command .line::before { content: "$ " / ""; flex: none; white-space: pre; color: var(--project-dark); user-select: none; }
+
+  /* Terminal capture: neutral plate with a mono status line. */
+  .capture { width: 100%; max-width: 640px; min-width: 0; overflow: hidden; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-raise); }
+  .capture-head { display: flex; align-items: center; min-width: 0; }
+  .capture .tablist { flex: 1; width: auto; border-bottom: 0; padding-inline: var(--space-2); }
+  .capture .tab { min-height: var(--control-lg); font-family: var(--font-mono); font-size: var(--text-sm); }
+  .full { display: inline-flex; align-items: center; gap: 6px; flex: none; min-height: var(--control-lg); padding: 0 var(--space-3); border: 0; background: transparent; color: var(--text-muted); font: inherit; font-size: var(--text-sm); cursor: pointer; }
+  .full:is(:hover, .is-hover) { color: var(--text); }
+  /* Inset: the panel clips its content. */
+  .full:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .screen { margin: 0; padding: var(--space-4); overflow-x: auto; background: var(--terminal); color: var(--terminal-text); font-size: var(--text-code); line-height: 1.5; }
+  .screen .hi { color: var(--project-dark); }
+  .screen .dim { color: var(--terminal-caption-text); }
+  .capture-caption { padding: var(--space-1) var(--space-4); background: var(--terminal-caption); color: var(--terminal-caption-text); font: var(--text-xs) / var(--leading) var(--font-mono); overflow-wrap: anywhere; }
+
+  /* Site header */
+  .site-header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); min-height: var(--space-16); padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--text); background: var(--bg); width: 100%; }
+  .projects { position: relative; }
+  .projects > summary { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--control-lg); padding-inline: var(--space-3); border-radius: var(--radius-md); font-family: var(--font-mono); font-weight: var(--weight-semibold); list-style: none; cursor: pointer; user-select: none; }
+  .projects > summary::-webkit-details-marker { display: none; }
+  /* The ~/ mark is decorative: the empty alternative text keeps it out of the name. */
+  .projects > summary::before { content: "~/" / ""; color: var(--project); }
+  .projects > summary:is(:hover, .is-hover), .projects[open] > summary { background: var(--row-hover); }
+  .projects > summary:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .projects .icon { transition: transform var(--duration-fast) ease; }
+  .projects[open] .icon { transform: rotate(180deg); }
+  .projects .navlist { position: absolute; z-index: 3; top: 100%; left: 0; min-width: 224px; margin-top: var(--space-1); padding: var(--space-1); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-popover); }
+  .projects.is-open .navlist { position: static; }
+  .projects .navlist a { font-family: var(--font-mono); }
+  .site-end { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-6); margin-left: auto; }
+  .site-links { display: flex; gap: var(--space-4); }
+  .site-links a { display: inline-flex; align-items: center; min-height: var(--control-lg); color: var(--text-muted); text-decoration: none; }
+  .site-links a:hover { color: var(--text); }
+
+  /* Folio type and page helpers */
+  .folio-h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); letter-spacing: var(--tracking-tight); }
+  .folio-h2::before { content: "## " / ""; color: var(--accent); }
+  .folio-display { font: var(--weight-semibold) var(--text-display) / 1.08 var(--font-mono); letter-spacing: var(--tracking-tight); }
+  .steps { display: grid; gap: var(--space-5); max-width: var(--measure); margin: 0; padding: 0; list-style: none; counter-reset: step; }
+  .steps li { position: relative; display: grid; gap: var(--space-1); padding-left: var(--space-12); counter-increment: step; }
+  .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: var(--space-8); font: var(--weight-semibold) var(--text-lg) / var(--leading-tight) var(--font-mono); color: var(--accent); text-align: right; }
+  .steps li:not(:last-child)::after { content: ""; position: absolute; left: calc(var(--space-8) + var(--space-2)); top: var(--space-6); bottom: calc(-1 * var(--space-4)); border-left: 1px solid var(--border-subtle); }
+  .steps h4 { font-size: var(--text-lg); }
+  .steps p { color: var(--text-muted); }
+  .facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: 0; font: var(--text-sm) / var(--leading) var(--font-mono); }
+  .facts > div { display: flex; flex-wrap: wrap; column-gap: var(--space-2); }
+  .facts dt { color: var(--text-muted); }
+  .facts dd { margin: 0; overflow-wrap: anywhere; }
+  .cmdlist { width: 100%; max-width: var(--measure); border-collapse: collapse; font-size: var(--text-sm); }
+  .cmdlist th { padding: var(--space-2) var(--space-4) var(--space-2) 0; border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--weight-medium); text-align: left; }
+  .cmdlist td { padding: var(--space-1) var(--space-4) var(--space-1) 0; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+  .cmdlist td:first-child { width: 1%; white-space: nowrap; }
+  .cmdlist td:nth-child(2) { color: var(--text-muted); }
+  .cmdlist td:last-child { width: 1%; padding-right: 0; }
+  .cmdlist .copy { margin: 0; color: var(--text-muted); }
+  .site-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2) var(--space-5); width: 100%; padding-block: var(--space-4); border-top: 1px solid var(--border-subtle); font: var(--text-sm) / var(--leading) var(--font-mono); }
+  .site-footer a { color: var(--text-muted); }
+  .site-footer nav { display: flex; flex-wrap: wrap; gap: 0 var(--space-5); }
+
+  /* ---------- Focus, forced colors, and touch ---------- */
+  /* Form controls: the outline survives forced colors; the halo adds to the control's depth. */
+  :is(.btn, .input, .select, .textarea, .check input, .segmented button, .toggle, .close):is(:focus-visible, .is-focus),
+  .switch:is(:focus-visible, .is-focus) .switch-track,
+  .radio-card:has(input:is(:focus-visible, .is-focus)) { outline: var(--ring); outline-offset: 2px; box-shadow: var(--depth), var(--halo); }
+  /* Inside a segmented control, the ring hugs the thumb instead of crossing into the next option. */
+  .segmented button:is(:focus-visible, .is-focus) { outline-offset: -2px; }
+
+  @media (forced-colors: active) {
+    .check input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; }
+    .check input[type="checkbox"]:checked::before { border-color: HighlightText; }
+    .check input[type="radio"]:checked { background: HighlightText; }
+    .radio-card input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; color: HighlightText; }
+    .segmented button[aria-pressed="true"] { forced-color-adjust: none; color: HighlightText; }
+    .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
+    .switch-track, .toggle-track { forced-color-adjust: none; border-color: ButtonText; background: Canvas; }
+    .switch-track::after, .toggle-track::after { forced-color-adjust: none; background: ButtonText; }
+    :is(.switch[aria-checked="true"] .switch-track, .toggle[aria-pressed="true"] .toggle-track) { border-color: Highlight; background: Highlight; }
+    :is(.switch[aria-checked="true"] .switch-track, .toggle[aria-pressed="true"] .toggle-track)::after { background: HighlightText; }
+    /* Shadows drop, so the current row takes a system border. */
+    .navlist a[aria-current] { border-inline-start: 2px solid Highlight; }
+    .progress > span, .score .pips i.on { forced-color-adjust: none; background: Highlight; }
+  }
+
+  /* ---------- Catalogue page ---------- */
+  .frame { width: min(calc(var(--page-max) + var(--sidebar)), calc(100% - var(--space-12))); margin-inline: auto; }
+  .page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--space-16); border-bottom: 1px solid var(--border-subtle); }
+  .page-head .brand { color: var(--text); font: var(--weight-semibold) var(--text-md) var(--font-mono); }
+  .page-head nav { display: flex; flex-wrap: wrap; gap: 0 var(--space-6); }
+  .page-head nav a { display: inline-flex; align-items: center; min-height: var(--control-lg); font-size: var(--text-sm); }
+  .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
+  .toc { position: sticky; top: 0; align-self: start; max-height: 100dvh; overflow-y: auto; padding-block: var(--space-6); }
+  .toc .navlist { width: auto; }
+  .toc .navlist + .navlist { margin-top: var(--space-4); }
+  main { display: grid; gap: var(--space-12); min-width: 0; padding-block: var(--space-8) var(--space-16); }
+  .intro { display: grid; gap: var(--space-3); }
+  .intro h1 { font: var(--weight-semibold) var(--text-3xl) / 1.08 var(--font-mono); letter-spacing: var(--tracking-tight); }
+  .intro p { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-reading); }
+  .layer-head { display: grid; gap: var(--space-2); padding-top: var(--space-6); border-top: 1px solid var(--border-subtle); }
+  .layer-head h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); }
+  .layer-head h2::before { content: "## " / ""; color: var(--accent); }
+  .layer-head p { max-width: var(--measure); color: var(--text-muted); }
+  .component { display: grid; gap: var(--space-3); min-width: 0; scroll-margin-top: var(--space-4); }
+  .component > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-3); }
+  .component h3 { font-size: var(--text-lg); }
+  .component > header a { font-size: var(--text-sm); }
+  .note { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-sm); }
+  .row { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: var(--space-2) var(--space-6); padding: var(--space-3) 0; border-bottom: 1px solid var(--border-subtle); }
+  .row:last-child { border-bottom: 0; }
+  .row h4 { padding-top: var(--space-2); font-size: var(--text-sm); font-weight: var(--weight-medium); letter-spacing: 0; }
+  .states { display: flex; flex-wrap: wrap; align-items: start; gap: var(--space-4) var(--space-6); min-width: 0; }
+  .state { display: grid; gap: var(--space-2); align-content: start; justify-items: start; min-width: 0; max-width: 100%; }
+  .state > :first-child { max-width: 100%; }
+  .caption { color: var(--text-muted); font-size: var(--text-xs); }
+  .wide { flex-basis: 100%; }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    /* Phones: the contents become one native scrolling strip, so the title stays in view. */
+    .toc { position: static; max-height: none; display: flex; gap: var(--space-4); overflow-x: auto; padding-block: var(--space-2); border-bottom: 1px solid var(--border-subtle); }
+    .toc .navlist + .navlist { margin-top: 0; }
+    .toc .navlist { display: flex; flex: none; width: auto; }
+    .toc .navlist a { flex: none; white-space: nowrap; }
+    .toc .navlist .group-label { display: flex; align-items: center; padding: 0 var(--space-1) 0 0; }
+    .row { grid-template-columns: minmax(0, 1fr); }
+    /* Touch: unsized controls grow to --control-lg. Size specimens keep their sizes. */
+    .btn:not([data-size]), .segmented:not([data-size]) button, .navlist a, .tab { min-height: var(--control-lg); }
+    .input:not([data-size]), .select:not([data-size]) { height: var(--control-lg); }
+    .check:not([data-size]), .switch:not([data-size]) { min-height: var(--control-lg); }
+    .folio-display { font-size: var(--text-display-sm); }
+  }
+  @media (max-width: 640px) {
+    .frame { width: calc(100% - var(--space-8)); }
+    main { gap: var(--space-8); }
+    .figure-plate { padding: var(--space-4); }
+    .cmdlist thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .cmdlist, .cmdlist tbody { display: block; }
+    .cmdlist tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-2); padding-block: var(--space-2); border-bottom: 1px solid var(--border-subtle); }
+    .cmdlist td, .cmdlist td:first-child, .cmdlist td:last-child { width: auto; padding: 0; border: 0; white-space: normal; overflow-wrap: anywhere; }
+    .cmdlist td:nth-child(2) { grid-column: 1; }
+    .cmdlist td:last-child { grid-column: 2; grid-row: 1 / span 2; }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></symbol>
+  <symbol id="i-help" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M6.6 6.4a1.5 1.5 0 1 1 2 1.4c-.4.2-.6.5-.6.9M8 10.8v.2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.5M8 10.8v.2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M5.8 8.2l1.5 1.5 2.9-3"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 16 16"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></symbol>
+  <symbol id="i-list" viewBox="0 0 16 16"><path d="M5.5 4.5h8M5.5 8h8M5.5 11.5h8M2.5 4.5h.01M2.5 8h.01M2.5 11.5h.01"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1"/><rect x="9" y="9" width="4.5" height="4.5" rx="1"/></symbol>
+</svg>
+
+<div class="frame">
+<header class="page-head">
+  <a class="brand" href="components.html">Component catalogue</a>
+  <nav aria-label="Design language">
+    <a href="reference.html#foundations">Foundations</a>
+    <a href="reference.html">Application example</a>
+    <a href="docs.html">Documentation example</a>
+    <a href="product.html">Product page example</a>
+  </nav>
+  <div class="segmented" role="group" aria-label="Theme" data-live>
+    <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
+    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc" aria-label="Components">
+  <div class="navlist" role="group" aria-labelledby="toc-core">
+    <span class="group-label" id="toc-core">Core</span>
+    <a href="#button">Button</a><a href="#text-input-and-textarea">Text input and textarea</a><a href="#select">Select</a><a href="#field-wrapper">Field wrapper</a><a href="#checkbox-and-radio">Checkbox and radio</a><a href="#radio-card-group">Radio card group</a><a href="#switch">Switch</a><a href="#toggle-button">Toggle button</a><a href="#segmented-control">Segmented control</a><a href="#slider">Slider</a><a href="#progress">Progress</a><a href="#score">Score</a><a href="#tabs">Tabs</a><a href="#badge">Badge</a><a href="#alert">Alert</a><a href="#surface-and-card">Surface and card</a><a href="#figure">Figure</a><a href="#dialog">Dialog</a><a href="#drawer">Drawer</a><a href="#navigation-list">Navigation list</a><a href="#code-block">Code block</a>
+  </div>
+  <div class="navlist" role="group" aria-labelledby="toc-identity">
+    <span class="group-label" id="toc-identity">Identity</span>
+    <a href="#command-plate">Command plate</a><a href="#terminal-capture">Terminal capture</a><a href="#site-header">Site header</a><a href="#folio-type-and-page-helpers">Folio type and page helpers</a>
+  </div>
+</nav>
+
+<main>
+  <section class="intro" aria-labelledby="title">
+    <h1 id="title">Components</h1>
+    <p>Every component in the design language, in each state that applies. The styles use only <a href="tokens.css"><code>tokens.css</code></a>, and the markup carries the roles and states a React or Vue version should copy. <a href="components.md">Component specs</a> describe each one; <a href="decisions.md">decisions</a> say why.</p>
+    <p>The first specimen in each row is live. The others pin one state for display and do not respond. Use the theme control to compare light and dark.</p>
+  </section>
+
+  <section class="layer-head" aria-labelledby="core-title">
+    <h2 id="core-title">Core</h2>
+    <p>A new project adopts these as they are, with its own hue and fonts set in the <code>tokens.css</code> identity block.</p>
+  </section>
+
+  <!-- Button -->
+  <section class="component" id="button" data-layer="Core" aria-labelledby="button-title">
+    <header><h3 id="button-title">Button</h3><span class="badge">Core</span><a href="components.md#button">Spec</a></header>
+    <div class="row"><h4>Primary</h4><div class="states">
+      <div class="state"><button class="btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>New monitor</button><span class="caption">Rest</span></div>
+      <div class="state" inert><button class="btn is-hover" type="button">New monitor</button><span class="caption">Hover</span></div>
+      <div class="state" inert><button class="btn is-focus" type="button">New monitor</button><span class="caption">Focus visible</span></div>
+      <div class="state" inert><button class="btn is-active" type="button">New monitor</button><span class="caption">Pressed</span></div>
+      <div class="state" inert><button class="btn" type="button" aria-busy="true">Saving</button><span class="caption">Busy</span></div>
+      <div class="state" inert><button class="btn" type="button" disabled>New monitor</button><span class="caption">Disabled</span></div>
+    </div></div>
+    <div class="row"><h4>Secondary</h4><div class="states">
+      <div class="state"><button class="btn secondary" type="button">Cancel</button><span class="caption">Rest</span></div>
+      <div class="state" inert><button class="btn secondary is-hover" type="button">Cancel</button><span class="caption">Hover</span></div>
+      <div class="state" inert><button class="btn secondary is-focus" type="button">Cancel</button><span class="caption">Focus visible</span></div>
+      <div class="state" inert><button class="btn secondary is-active" type="button">Cancel</button><span class="caption">Pressed</span></div>
+      <div class="state" inert><button class="btn secondary" type="button" disabled>Cancel</button><span class="caption">Disabled</span></div>
+    </div></div>
+    <div class="row"><h4>Ghost</h4><div class="states">
+      <div class="state"><button class="btn ghost" type="button">Mute</button><span class="caption">Rest</span></div>
+      <div class="state" inert><button class="btn ghost is-hover" type="button">Mute</button><span class="caption">Hover</span></div>
+      <div class="state" inert><button class="btn ghost is-focus" type="button">Mute</button><span class="caption">Focus visible</span></div>
+      <div class="state" inert><button class="btn ghost is-hover is-active" type="button">Mute</button><span class="caption">Pressed</span></div>
+      <div class="state" inert><button class="btn ghost" type="button" disabled>Mute</button><span class="caption">Disabled</span></div>
+    </div></div>
+    <div class="row"><h4>Danger</h4><div class="states">
+      <div class="state"><button class="btn danger" type="button">Delete monitor</button><span class="caption">Rest</span></div>
+      <div class="state" inert><button class="btn danger is-hover" type="button">Delete monitor</button><span class="caption">Hover</span></div>
+      <div class="state" inert><button class="btn danger is-focus" type="button">Delete monitor</button><span class="caption">Focus visible</span></div>
+      <div class="state" inert><button class="btn danger" type="button" disabled>Delete monitor</button><span class="caption">Disabled</span></div>
+    </div></div>
+    <div class="row"><h4>Text</h4><div class="states">
+      <div class="state"><button class="btn text" type="button">Show details</button><span class="caption">Rest</span></div>
+      <div class="state" inert><button class="btn text is-focus" type="button">Show details</button><span class="caption">Focus visible</span></div>
+      <div class="state" inert><button class="btn text" type="button" disabled>Show details</button><span class="caption">Disabled</span></div>
+    </div></div>
+    <div class="row"><h4>Sizes</h4><div class="states">
+      <div class="state" inert><button class="btn" type="button" data-size="sm">Small</button><span class="caption">sm</span></div>
+      <div class="state" inert><button class="btn" type="button" data-size="md">Medium</button><span class="caption">md</span></div>
+      <div class="state" inert><button class="btn" type="button" data-size="lg">Large</button><span class="caption">lg</span></div>
+      <div class="state" inert><button class="btn secondary" type="button" data-size="sm">Small</button><span class="caption">sm</span></div>
+      <div class="state" inert><button class="btn secondary" type="button" data-size="lg">Large</button><span class="caption">lg</span></div>
+    </div></div>
+  </section>
+
+  <!-- Text input and textarea -->
+  <section class="component" id="text-input-and-textarea" data-layer="Core" aria-labelledby="input-title">
+    <header><h3 id="input-title">Text input and textarea</h3><span class="badge">Core</span><a href="components.md#text-input-and-textarea">Spec</a></header>
+    <div class="row"><h4>Input</h4><div class="states">
+      <div class="state"><div class="field"><label class="field-label" for="in-rest">Service</label><input class="input" id="in-rest" placeholder="checkout-api"></div><span class="caption">Rest</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="in-focus">Service</label><input class="input is-focus" id="in-focus" value="checkout-api"></div><span class="caption">Focus visible</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="in-disabled">Service</label><input class="input" id="in-disabled" value="checkout-api" disabled></div><span class="caption">Disabled</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="in-invalid">Service</label><input class="input" id="in-invalid" aria-invalid="true" aria-errormessage="in-invalid-error"><p class="field-error" id="in-invalid-error">Enter a service name.</p></div><span class="caption">Invalid</span></div>
+    </div></div>
+    <div class="row"><h4>Sizes</h4><div class="states">
+      <div class="state" inert><input class="input" data-size="sm" aria-label="Small input" placeholder="Small"><span class="caption">sm</span></div>
+      <div class="state" inert><input class="input" data-size="md" aria-label="Medium input" placeholder="Medium"><span class="caption">md</span></div>
+      <div class="state" inert><input class="input" data-size="lg" aria-label="Large input" placeholder="Large"><span class="caption">lg</span></div>
+    </div></div>
+    <div class="row"><h4>Textarea</h4><div class="states">
+      <div class="state"><div class="field"><label class="field-label" for="ta-rest">Note</label><textarea class="textarea" id="ta-rest" placeholder="What changed?"></textarea></div><span class="caption">Rest</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="ta-focus">Note</label><textarea class="textarea is-focus" id="ta-focus">Raised the threshold.</textarea></div><span class="caption">Focus visible</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="ta-disabled">Note</label><textarea class="textarea" id="ta-disabled" disabled>Raised the threshold.</textarea></div><span class="caption">Disabled</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="ta-invalid">Note</label><textarea class="textarea" id="ta-invalid" aria-invalid="true" aria-errormessage="ta-invalid-error"></textarea><p class="field-error" id="ta-invalid-error">Add a note.</p></div><span class="caption">Invalid</span></div>
+    </div></div>
+  </section>
+
+  <!-- Select -->
+  <section class="component" id="select" data-layer="Core" aria-labelledby="select-title">
+    <header><h3 id="select-title">Select</h3><span class="badge">Core</span><a href="components.md#select">Spec</a></header>
+    <div class="row"><h4>Closed</h4><div class="states">
+      <div class="state"><div class="field"><label class="field-label" for="se-rest">Window</label><select class="select" id="se-rest"><option>Last hour</option><option>Last 24 hours</option><option>Last 7 days</option></select></div><span class="caption">Rest</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="se-focus">Window</label><select class="select is-focus" id="se-focus"><option>Last hour</option></select></div><span class="caption">Focus visible</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="se-disabled">Window</label><select class="select" id="se-disabled" disabled><option>Last hour</option></select></div><span class="caption">Disabled</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="se-invalid">Window</label><select class="select" id="se-invalid" aria-invalid="true" aria-errormessage="se-invalid-error"><option></option></select><p class="field-error" id="se-invalid-error">Choose a window.</p></div><span class="caption">Invalid</span></div>
+    </div></div>
+    <div class="row"><h4>Open picker</h4><div class="states">
+      <div class="state" inert aria-hidden="true"><ul class="picker"><li>Last hour</li><li class="is-hover">Last 24 hours</li><li aria-selected="true">Last 7 days</li></ul><span class="caption">A static drawing: hover on one option, another checked</span></div>
+    </div></div>
+  </section>
+
+  <!-- Field wrapper -->
+  <section class="component" id="field-wrapper" data-layer="Core" aria-labelledby="fieldw-title">
+    <header><h3 id="fieldw-title">Field wrapper</h3><span class="badge">Core</span><a href="components.md#field-wrapper">Spec</a></header>
+    <div class="row"><h4>Description and error</h4><div class="states">
+      <div class="state"><div class="field"><label class="field-label" for="fw-desc">Threshold</label><input class="input" id="fw-desc" inputmode="numeric" value="300" aria-describedby="fw-desc-text"><p class="field-description" id="fw-desc-text">Milliseconds at p95.</p></div><span class="caption">With description</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="fw-error">Threshold</label><input class="input" id="fw-error" value="-1" aria-invalid="true" aria-errormessage="fw-error-text"><p class="field-error" id="fw-error-text">Enter a positive number.</p></div><span class="caption">Error replaces the description</span></div>
+    </div></div>
+  </section>
+
+  <!-- Checkbox and radio -->
+  <section class="component" id="checkbox-and-radio" data-layer="Core" aria-labelledby="check-title">
+    <header><h3 id="check-title">Checkbox and radio</h3><span class="badge">Core</span><a href="components.md#checkbox-and-radio">Spec</a></header>
+    <div class="row"><h4>Checkbox</h4><div class="states">
+      <div class="state"><label class="check"><input type="checkbox">Notify on recovery</label><span class="caption">Rest</span></div>
+      <div class="state" inert><label class="check"><input type="checkbox" checked>Notify on recovery</label><span class="caption">Checked</span></div>
+      <div class="state" inert><label class="check"><input type="checkbox" class="is-focus">Notify on recovery</label><span class="caption">Focus visible</span></div>
+      <div class="state" inert><label class="check"><input type="checkbox" disabled>Notify on recovery</label><span class="caption">Disabled</span></div>
+      <div class="state" inert><label class="check"><input type="checkbox" checked disabled>Notify on recovery</label><span class="caption">Disabled, checked</span></div>
+    </div></div>
+    <div class="row"><h4>Radio</h4><div class="states">
+      <div class="state"><div class="choices" role="radiogroup" aria-label="Digest"><label class="check"><input type="radio" name="digest" checked>Daily</label><label class="check"><input type="radio" name="digest">Weekly</label></div><span class="caption">Rest, live</span></div>
+      <div class="state" inert><div class="choices" role="radiogroup" aria-label="Digest, focused"><label class="check"><input type="radio" name="digest-focus" class="is-focus" checked>Daily</label><label class="check"><input type="radio" name="digest-focus">Weekly</label></div><span class="caption">Focus visible</span></div>
+      <div class="state" inert><div class="choices" role="radiogroup" aria-label="Digest, disabled"><label class="check"><input type="radio" name="digest-disabled" checked disabled>Daily</label><label class="check"><input type="radio" name="digest-disabled" disabled>Weekly</label></div><span class="caption">Disabled</span></div>
+    </div></div>
+    <div class="row"><h4>Sizes</h4><div class="states">
+      <div class="state" inert><label class="check" data-size="sm"><input type="checkbox" checked>Small</label><span class="caption">sm</span></div>
+      <div class="state" inert><label class="check" data-size="md"><input type="checkbox" checked>Medium</label><span class="caption">md</span></div>
+      <div class="state" inert><label class="check" data-size="lg"><input type="checkbox" checked>Large</label><span class="caption">lg</span></div>
+    </div></div>
+  </section>
+
+  <!-- Radio card group -->
+  <section class="component" id="radio-card-group" data-layer="Core" aria-labelledby="rc-title">
+    <header><h3 id="rc-title">Radio card group</h3><span class="badge">Core</span><a href="components.md#radio-card-group">Spec</a></header>
+    <div class="row"><h4>Live</h4><div class="states">
+      <div class="state wide"><fieldset class="radio-cards"><legend class="sr-only">Delivery</legend><label class="radio-card"><input type="radio" name="delivery" checked><strong>Immediate</strong><span class="muted">Send each alert.</span></label><label class="radio-card"><input type="radio" name="delivery"><strong>Digest</strong><span class="muted">Group the alerts.</span></label></fieldset><span class="caption">Rest; Immediate is selected</span></div>
+    </div></div>
+    <div class="row"><h4>Pinned</h4><div class="states">
+      <div class="state wide" inert><fieldset class="radio-cards"><legend class="sr-only">Delivery, pinned</legend><label class="radio-card is-hover"><input type="radio" name="delivery-pin"><strong>Hover</strong><span class="muted">Unselected, under the pointer.</span></label><label class="radio-card"><input type="radio" name="delivery-pin" class="is-focus" checked><strong>Selected, focused</strong><span class="muted">Sunk, with a check badge.</span></label></fieldset><span class="caption">Hover; selected with focus visible</span></div>
+      <div class="state wide" inert><fieldset class="radio-cards"><legend class="sr-only">Delivery, disabled</legend><label class="radio-card"><input type="radio" name="delivery-off" disabled><strong>Webhook</strong><span class="muted">Not configured.</span></label><label class="radio-card"><input type="radio" name="delivery-off2" class="is-focus"><strong>Focused</strong><span class="muted">Unselected.</span></label></fieldset><span class="caption">Disabled; unselected with focus visible</span></div>
+    </div></div>
+  </section>
+
+  <!-- Switch -->
+  <section class="component" id="switch" data-layer="Core" aria-labelledby="switch-title">
+    <header><h3 id="switch-title">Switch</h3><span class="badge">Core</span><a href="components.md#switch">Spec</a></header>
+    <div class="row"><h4>States</h4><div class="states">
+      <div class="state"><div class="switch-row"><button class="switch" id="sw-rest" type="button" role="switch" aria-checked="false" aria-labelledby="sw-rest-label"><span class="switch-track" aria-hidden="true"></span></button><label id="sw-rest-label" for="sw-rest">Alerts</label></div><span class="caption">Off, live</span></div>
+      <div class="state" inert><div class="switch-row"><button class="switch" id="sw-on" type="button" role="switch" aria-checked="true" aria-labelledby="sw-on-label"><span class="switch-track" aria-hidden="true"></span></button><label id="sw-on-label" for="sw-on">Alerts</label></div><span class="caption">On</span></div>
+      <div class="state" inert><div class="switch-row"><button class="switch is-focus" id="sw-focus" type="button" role="switch" aria-checked="false" aria-labelledby="sw-focus-label"><span class="switch-track" aria-hidden="true"></span></button><label id="sw-focus-label" for="sw-focus">Alerts</label></div><span class="caption">Focus visible</span></div>
+      <div class="state" inert><div class="switch-row"><button class="switch" id="sw-off-dis" type="button" role="switch" aria-checked="false" aria-labelledby="sw-off-dis-label" disabled><span class="switch-track" aria-hidden="true"></span></button><label id="sw-off-dis-label" for="sw-off-dis">Alerts</label></div><span class="caption">Disabled</span></div>
+      <div class="state" inert><div class="switch-row"><button class="switch" id="sw-on-dis" type="button" role="switch" aria-checked="true" aria-labelledby="sw-on-dis-label" disabled><span class="switch-track" aria-hidden="true"></span></button><label id="sw-on-dis-label" for="sw-on-dis">Alerts</label></div><span class="caption">Disabled, on</span></div>
+    </div></div>
+    <div class="row"><h4>Sizes</h4><div class="states">
+      <div class="state" inert><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Small switch" data-size="sm"><span class="switch-track" aria-hidden="true"></span></button><span class="caption">sm</span></div>
+      <div class="state" inert><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Medium switch"><span class="switch-track" aria-hidden="true"></span></button><span class="caption">md</span></div>
+      <div class="state" inert><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Large switch" data-size="lg"><span class="switch-track" aria-hidden="true"></span></button><span class="caption">lg</span></div>
+    </div></div>
+  </section>
+
+  <!-- Toggle button -->
+  <section class="component" id="toggle-button" data-layer="Core" aria-labelledby="toggle-title">
+    <header><h3 id="toggle-title">Toggle button</h3><span class="badge">Core</span><a href="components.md#toggle-button">Spec</a></header>
+    <div class="row"><h4>States</h4><div class="states">
+      <div class="state"><button class="toggle" type="button" aria-pressed="false" data-live-toggle><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Wrap lines<small>Long lines fold</small></span></button><span class="caption">Rest, live</span></div>
+      <div class="state" inert><button class="toggle is-hover" type="button" aria-pressed="false"><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Wrap lines</span></button><span class="caption">Hover</span></div>
+      <div class="state" inert><button class="toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Wrap lines</span></button><span class="caption">Pressed</span></div>
+      <div class="state" inert><button class="toggle is-focus" type="button" aria-pressed="false"><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Wrap lines</span></button><span class="caption">Focus visible</span></div>
+      <div class="state" inert><button class="toggle" type="button" aria-pressed="false" disabled><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Wrap lines</span></button><span class="caption">Disabled</span></div>
+    </div></div>
+  </section>
+
+  <!-- Segmented control -->
+  <section class="component" id="segmented-control" data-layer="Core" aria-labelledby="seg-title">
+    <header><h3 id="seg-title">Segmented control</h3><span class="badge">Core</span><a href="components.md#segmented-control">Spec</a></header>
+    <p class="note">The live control glides its thumb between options: 260ms for the leading edge, 300ms for the trailing edge. The theme picker at the top uses the same script, and it does not glide when the page loads a saved choice.</p>
+    <div class="row"><h4>Text</h4><div class="states">
+      <div class="state"><div class="segmented" role="group" aria-label="View" data-live><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false">Board</button><button type="button" aria-pressed="false">Timeline</button></div><span class="caption">Rest, live</span></div>
+      <div class="state" inert><div class="segmented" role="group" aria-label="View, hover"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false" class="is-hover">Board</button><button type="button" aria-pressed="false">Timeline</button></div><span class="caption">Hover on Board</span></div>
+      <div class="state" inert><div class="segmented" role="group" aria-label="View, focus"><button type="button" aria-pressed="false">List</button><button type="button" aria-pressed="true" class="is-focus">Board</button><button type="button" aria-pressed="false">Timeline</button></div><span class="caption">Focus visible on Board</span></div>
+      <div class="state" inert><div class="segmented" role="group" aria-label="View, disabled"><button type="button" aria-pressed="true" disabled>List</button><button type="button" aria-pressed="false" disabled>Board</button><button type="button" aria-pressed="false" disabled>Timeline</button></div><span class="caption">Disabled</span></div>
+    </div></div>
+    <div class="row"><h4>Icon only and sizes</h4><div class="states">
+      <div class="state"><div class="segmented" role="group" aria-label="Layout" data-icon-only data-live><button type="button" aria-pressed="true" aria-label="List" title="List"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg></button><button type="button" aria-pressed="false" aria-label="Grid" title="Grid"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg></button></div><span class="caption">Icon only, live</span></div>
+      <div class="state" inert><div class="segmented" role="group" aria-label="Small" data-size="sm"><button type="button" aria-pressed="true">Day</button><button type="button" aria-pressed="false">Week</button></div><span class="caption">sm</span></div>
+      <div class="state" inert><div class="segmented" role="group" aria-label="Large" data-size="lg"><button type="button" aria-pressed="true">Day</button><button type="button" aria-pressed="false">Week</button></div><span class="caption">lg</span></div>
+    </div></div>
+  </section>
+
+  <!-- Slider -->
+  <section class="component" id="slider" data-layer="Core" aria-labelledby="slider-title">
+    <header><h3 id="slider-title">Slider</h3><span class="badge">Core</span><a href="components.md#slider">Spec</a></header>
+    <div class="row"><h4>States</h4><div class="states">
+      <div class="state"><div class="field"><label class="field-label" for="sl-rest">Sample rate</label><input class="range" id="sl-rest" type="range" min="0" max="100" value="40" style="--value:40%" data-live-range></div><span class="caption">Rest, live</span></div>
+      <div class="state" inert><input class="range is-focus" type="range" aria-label="Sample rate, focused" min="0" max="100" value="60" style="--value:60%"><span class="caption">Focus visible</span></div>
+      <div class="state" inert><input class="range" type="range" aria-label="Sample rate, disabled" min="0" max="100" value="60" style="--value:60%" disabled><span class="caption">Disabled</span></div>
+    </div></div>
+  </section>
+
+  <!-- Progress -->
+  <section class="component" id="progress" data-layer="Core" aria-labelledby="progress-title">
+    <header><h3 id="progress-title">Progress</h3><span class="badge">Core</span><a href="components.md#progress">Spec</a></header>
+    <div class="row"><h4>Values</h4><div class="states">
+      <div class="state"><div class="progress" role="progressbar" aria-label="Import, empty" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span style="transform:translateX(-100%)"></span></div><span class="caption">0%</span></div>
+      <div class="state"><div class="progress" role="progressbar" aria-label="Import" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40"><span style="transform:translateX(-60%)"></span></div><span class="caption">40%</span></div>
+      <div class="state"><div class="progress" role="progressbar" aria-label="Import, done" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span></span></div><span class="caption">100%</span></div>
+    </div></div>
+  </section>
+
+  <!-- Score -->
+  <section class="component" id="score" data-layer="Core" aria-labelledby="score-title">
+    <header><h3 id="score-title">Score</h3><span class="badge">Core</span><a href="components.md#score">Spec</a></header>
+    <div class="row"><h4>Values</h4><div class="states">
+      <div class="state"><span class="score"><span class="pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span><b>3<span>/5</span></b></span><span class="caption">3 of 5</span></div>
+      <div class="state"><span class="score"><span class="pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><b>5<span>/5</span></b></span><span class="caption">5 of 5</span></div>
+    </div></div>
+  </section>
+
+  <!-- Tabs -->
+  <section class="component" id="tabs" data-layer="Core" aria-labelledby="tabs-title">
+    <header><h3 id="tabs-title">Tabs</h3><span class="badge">Core</span><a href="components.md#tabs">Spec</a></header>
+    <div class="row"><h4>Live</h4><div class="states">
+      <div class="state wide" data-live-tabs>
+        <div class="tablist" role="tablist" aria-label="Monitor">
+          <button class="tab" type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" tabindex="0">Overview</button>
+          <button class="tab" type="button" role="tab" id="tab-history" aria-controls="panel-history" aria-selected="false" tabindex="-1">History</button>
+          <button class="tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" tabindex="-1">Settings</button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" tabindex="0">Arrow keys move between tabs; Home and End jump to the ends.</div>
+        <div class="tabpanel" role="tabpanel" id="panel-history" aria-labelledby="tab-history" tabindex="0" hidden>Seven days of evaluations.</div>
+        <div class="tabpanel" role="tabpanel" id="panel-settings" aria-labelledby="tab-settings" tabindex="0" hidden>Threshold and notification settings.</div>
+      </div>
+    </div></div>
+    <div class="row"><h4>Pinned</h4><div class="states">
+      <div class="state" inert><div class="tablist" role="tablist" aria-label="Monitor, hover"><button class="tab" type="button" role="tab" aria-selected="true">Overview</button><button class="tab is-hover" type="button" role="tab" aria-selected="false">History</button></div><span class="caption">Hover on History</span></div>
+      <div class="state" inert><div class="tablist" role="tablist" aria-label="Monitor, focus"><button class="tab is-focus" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">History</button></div><span class="caption">Focus visible</span></div>
+    </div></div>
+  </section>
+
+  <!-- Badge -->
+  <section class="component" id="badge" data-layer="Core" aria-labelledby="badge-title">
+    <header><h3 id="badge-title">Badge</h3><span class="badge">Core</span><a href="components.md#badge">Spec</a></header>
+    <div class="row"><h4>Tones</h4><div class="states">
+      <div class="state"><span class="badge">No data</span><span class="caption">Neutral</span></div>
+      <div class="state"><span class="badge success">Healthy</span><span class="caption">Success</span></div>
+      <div class="state"><span class="badge warning">Warning</span><span class="caption">Warning</span></div>
+      <div class="state"><span class="badge danger">Alerting</span><span class="caption">Danger</span></div>
+      <div class="state"><span class="badge info">Running</span><span class="caption">Info</span></div>
+    </div></div>
+  </section>
+
+  <!-- Alert -->
+  <section class="component" id="alert" data-layer="Core" aria-labelledby="alert-title">
+    <header><h3 id="alert-title">Alert</h3><span class="badge">Core</span><a href="components.md#alert">Spec</a></header>
+    <div class="row"><h4>Tones</h4><div class="states">
+      <div class="state wide"><div class="alert"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg><p>Values are sampled every 5 minutes.</p></div><span class="caption">Neutral</span></div>
+      <div class="state wide"><div class="alert success"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><p>The monitor recovered at 14:20.</p></div><span class="caption">Success</span></div>
+      <div class="state wide"><div class="alert warning"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><p>No data for 42 minutes. Check ingestion before you trust this monitor.</p></div><span class="caption">Warning</span></div>
+      <div class="state wide"><div class="alert danger"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><p>The webhook returned 500 three times.</p></div><span class="caption">Danger</span></div>
+      <div class="state wide"><div class="alert info"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg><p>A new baseline is ready to review.</p></div><span class="caption">Info</span></div>
+    </div></div>
+  </section>
+
+  <!-- Surface and card -->
+  <section class="component" id="surface-and-card" data-layer="Core" aria-labelledby="card-title">
+    <header><h3 id="card-title">Surface and card</h3><span class="badge">Core</span><a href="components.md#surface-and-card">Spec</a></header>
+    <div class="row"><h4>Card</h4><div class="states">
+      <div class="state wide"><article class="card" aria-labelledby="card-sample-title"><div class="card-head"><h4 id="card-sample-title">API p95 latency</h4><span class="badge danger">Alerting</span></div><div class="card-body">412 ms against a 300 ms threshold for 10 minutes.</div><div class="card-foot"><span>checkout-api</span><span>Updated 2 minutes ago</span></div></article><span class="caption">Header, body, and footer</span></div>
+    </div></div>
+    <div class="row"><h4>Surface</h4><div class="states">
+      <div class="state"><div class="surface">Default padding</div><span class="caption">Default</span></div>
+      <div class="state"><div class="surface" data-padding="compact">Compact padding</div><span class="caption">Compact</span></div>
+    </div></div>
+  </section>
+
+  <!-- Figure -->
+  <section class="component" id="figure" data-layer="Core" aria-labelledby="figure-title">
+    <header><h3 id="figure-title">Figure</h3><span class="badge">Core</span><a href="components.md#figure">Spec</a></header>
+    <figure class="figure"><div class="figure-plate"><div class="cluster" style="display:flex;gap:var(--space-2);flex-wrap:wrap"><span class="badge success">Healthy</span><span class="badge warning">Warning</span><span class="badge danger">Alerting</span></div></div><figcaption><b>Figure 1.</b> A well with its caption below.</figcaption></figure>
+  </section>
+
+  <!-- Dialog -->
+  <section class="component" id="dialog" data-layer="Core" aria-labelledby="dialog-title">
+    <header><h3 id="dialog-title">Dialog</h3><span class="badge">Core</span><a href="components.md#dialog">Spec</a></header>
+    <div class="row"><h4>Live</h4><div class="states">
+      <div class="state"><button class="btn secondary" type="button" data-open="live-dialog">Open dialog</button><span class="caption">Opens a native modal dialog</span></div>
+    </div></div>
+    <div class="row"><h4>In place</h4><div class="states">
+      <div class="state wide" inert><div class="dialog" role="dialog" aria-labelledby="dlg-static-title" aria-describedby="dlg-static-desc"><div class="dialog-head"><div><h4 id="dlg-static-title">Delete monitor</h4><p id="dlg-static-desc">This removes its history.</p></div><button class="close" type="button" aria-label="Close dialog">×</button></div><div class="dialog-body">API p95 latency stops alerting at once.</div><div class="dialog-foot"><button class="btn secondary" type="button">Cancel</button><button class="btn danger" type="button">Delete</button></div></div><span class="caption">Static specimen; the real one sits over an <code>--overlay</code> backdrop</span></div>
+    </div></div>
+  </section>
+
+  <!-- Drawer -->
+  <section class="component" id="drawer" data-layer="Core" aria-labelledby="drawer-title">
+    <header><h3 id="drawer-title">Drawer</h3><span class="badge">Core</span><a href="components.md#drawer">Spec</a></header>
+    <div class="row"><h4>Live</h4><div class="states">
+      <div class="state"><button class="btn secondary menu-glyph" type="button" data-size="lg" data-open="live-drawer">Contents</button><span class="caption">Phone trigger: opens a side drawer</span></div>
+    </div></div>
+    <div class="row"><h4>In place</h4><div class="states">
+      <div class="state wide" inert><div class="drawer" role="dialog" aria-labelledby="drw-static-title"><div class="drawer-head"><h4 id="drw-static-title">Contents</h4><button class="close" type="button" aria-label="Close drawer">×</button></div><div class="drawer-body"><nav class="navlist" aria-label="Contents, static"><a href="#button" aria-current="page">Button</a><a href="#select">Select</a><a href="#switch">Switch</a></nav></div></div><span class="caption">Static specimen</span></div>
+    </div></div>
+  </section>
+
+  <!-- Navigation list -->
+  <section class="component" id="navigation-list" data-layer="Core" aria-labelledby="nav-title">
+    <header><h3 id="nav-title">Navigation list</h3><span class="badge">Core</span><a href="components.md#navigation-list">Spec</a></header>
+    <div class="row"><h4>Rows</h4><div class="states">
+      <div class="state"><nav class="navlist" aria-label="Sample routes"><span class="group-label">Guides</span><a href="#navigation-list" aria-current="page">Install</a><a href="#navigation-list">Configure</a><a href="#navigation-list">Release</a></nav><span class="caption">Live; Install is the current page</span></div>
+      <div class="state" inert><nav class="navlist" aria-label="Sample routes, pinned"><a href="#navigation-list" class="is-hover">Hover</a><a href="#navigation-list" aria-current="page" class="is-hover">Current page, hover</a><a href="#navigation-list" aria-current="location">Current location</a><a href="#navigation-list" class="is-focus">Focus visible</a></nav><span class="caption">Pinned states</span></div>
+    </div></div>
+    <div class="row"><h4>Phone trigger</h4><div class="states">
+      <div class="state" inert><button class="btn secondary menu-glyph" type="button" data-size="lg">On this page</button><span class="caption">Drawer trigger</span></div>
+      <div class="state" inert><button class="btn secondary menu-glyph is-active" type="button" data-size="lg">On this page</button><span class="caption">Pressed</span></div>
+      <div class="state"><details class="rail"><summary class="btn secondary rail-summary" data-size="lg">On this page</summary><nav class="navlist" aria-label="On this page, no JavaScript"><a href="#navigation-list" aria-current="location">Rows</a><a href="#code-block">Next section</a></nav></details><span class="caption">No-JavaScript fallback, live</span></div>
+    </div></div>
+    <div class="row"><h4>List selection</h4><div class="states">
+      <div class="state wide" inert><div class="rows" role="listbox" aria-label="Monitors"><div role="option" aria-selected="false">5xx error rate</div><div role="option" aria-selected="true">API p95 latency</div><div role="option" aria-selected="false" class="is-hover">Request volume</div></div><span class="caption">Selected row, and hover on the next</span></div>
+    </div></div>
+  </section>
+
+  <!-- Code block -->
+  <section class="component" id="code-block" data-layer="Core" aria-labelledby="code-title">
+    <header><h3 id="code-title">Code block</h3><span class="badge">Core</span><a href="components.md#code-block">Spec</a></header>
+    <div class="row"><h4>Source well</h4><div class="states">
+      <div class="state wide"><div class="code"><div class="code-head"><b>monitor.ts</b><span class="lang">TypeScript</span><button class="copy" type="button" data-copy="code-src"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="monitor.ts"><code id="code-src"><span class="line"><span class="ln">1</span><span><span class="k">const</span> threshold = <span class="n">300</span> <span class="c">// ms at p95</span></span></span><span class="line"><span class="ln">2</span><span><span class="k">export const</span> name = <span class="s">'API p95 latency'</span></span></span></code></pre></div><span class="caption">Header, line numbers, and Copy, live</span></div>
+      <div class="state wide" inert><div class="code compact"><pre><code><span class="line"><span>import { threshold } from './monitor'</span></span></code></pre><button class="copy is-focus" type="button" aria-label="Copy import"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, with focus visible on Copy</span></div>
+    </div></div>
+    <p class="sr-only" role="status" id="copy-status"></p>
+  </section>
+
+  <section class="layer-head" aria-labelledby="identity-title">
+    <h2 id="identity-title">Identity: terminal folio</h2>
+    <p>The personal sites' own look. A new project replaces these with its own identity and keeps the core.</p>
+  </section>
+
+  <!-- Command plate -->
+  <section class="component" id="command-plate" data-layer="Identity" aria-labelledby="cmd-title">
+    <header><h3 id="cmd-title">Command plate</h3><span class="badge">Identity</span><a href="components.md#command-plate">Spec</a></header>
+    <div class="row"><h4>Commands</h4><div class="states">
+      <div class="state wide"><div class="code command compact"><pre tabindex="0" role="region" aria-label="Install command"><code id="cmd-install"><span class="line"><span>brew install filipgutica/tap/filip-stack</span></span></code></pre><button class="copy" type="button" data-copy="cmd-install" aria-label="Copy install command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, live; the <code>$</code> is drawn by CSS</span></div>
+      <div class="state wide"><div class="code command"><div class="code-head"><b>Set up</b><button class="copy" type="button" data-copy="cmd-setup"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="Set up commands"><code id="cmd-setup"><span class="line"><span>pnpm install --frozen-lockfile</span></span><span class="line"><span>pnpm check</span></span></code></pre></div><span class="caption">With a header, two lines</span></div>
+      <div class="state wide" inert><div class="code command compact"><pre><code><span class="line"><span>filip-stack apply</span></span></code></pre><button class="copy is-focus" type="button" aria-label="Copy apply command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Focus visible on Copy, in <code>--project-dark</code></span></div>
+    </div></div>
+  </section>
+
+  <!-- Terminal capture -->
+  <section class="component" id="terminal-capture" data-layer="Identity" aria-labelledby="capture-title">
+    <header><h3 id="capture-title">Terminal capture</h3><span class="badge">Identity</span><a href="components.md#terminal-capture">Spec</a></header>
+    <div class="capture" data-live-tabs>
+      <div class="capture-head">
+        <div class="tablist" role="tablist" aria-label="Captures">
+          <button class="tab" type="button" role="tab" id="cap-tab-status" aria-controls="cap-status" aria-selected="true" tabindex="0">status</button>
+          <button class="tab" type="button" role="tab" id="cap-tab-diff" aria-controls="cap-diff" aria-selected="false" tabindex="-1">diff</button>
+        </div>
+        <button class="full" type="button" aria-label="Full size"><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>Full size</button>
+      </div>
+      <div role="tabpanel" id="cap-status" aria-labelledby="cap-tab-status"><pre class="screen" tabindex="0" role="region" aria-label="status capture"><span class="hi">●</span> host-config   <span class="dim">3 targets current</span>
+<span class="hi">●</span> field-guide   <span class="dim">synced 2 minutes ago</span></pre><p class="capture-caption">~/code/filip-stack · main</p></div>
+      <div role="tabpanel" id="cap-diff" aria-labelledby="cap-tab-diff" hidden><pre class="screen" tabindex="0" role="region" aria-label="diff capture"><span class="dim">tokens.css</span>  +12 −4</pre><p class="capture-caption">~/code/filip-stack · docs/design-catalogue</p></div>
+    </div>
+  </section>
+
+  <!-- Site header -->
+  <section class="component" id="site-header" data-layer="Identity" aria-labelledby="header-title">
+    <header><h3 id="header-title">Site header</h3><span class="badge">Identity</span><a href="components.md#site-header">Spec</a></header>
+    <div class="row"><h4>Closed</h4><div class="states">
+      <div class="state wide"><div class="site-header">
+        <details class="projects"><summary aria-label="Project: filip-stack"><span>filip-stack</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects"><a href="#site-header">annoterm</a><a href="#site-header" aria-current="page">filip-stack</a><a href="#site-header">ui</a></nav></details>
+        <div class="site-end"><nav class="site-links" aria-label="Site links"><a href="#site-header">Docs</a><a href="#site-header">GitHub</a></nav>
+          <div class="segmented" role="group" aria-label="Color theme, sample" data-size="lg" data-icon-only><button type="button" aria-pressed="true" aria-label="System" title="System"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><rect x="2" y="2.5" width="12" height="8.5" rx="1.5"/><path d="M5.5 14h5M8 11v3"/></svg></button><button type="button" aria-pressed="false" aria-label="Light" title="Light"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg></button><button type="button" aria-pressed="false" aria-label="Dark" title="Dark"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/></svg></button></div>
+        </div>
+      </div><span class="caption">Live: the project switcher opens; the picker is a sample</span></div>
+    </div></div>
+    <div class="row"><h4>Open menu</h4><div class="states">
+      <div class="state" inert><details class="projects is-open" open><summary aria-label="Project: filip-stack, open"><span>filip-stack</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects, pinned"><a href="#site-header" class="is-hover">annoterm</a><a href="#site-header" aria-current="page">filip-stack</a><a href="#site-header">ui</a></nav></details><span class="caption">Menu open, hover on annoterm</span></div>
+    </div></div>
+  </section>
+
+  <!-- Folio type and page helpers -->
+  <section class="component" id="folio-type-and-page-helpers" data-layer="Identity" aria-labelledby="folio-title">
+    <header><h3 id="folio-title">Folio type and page helpers</h3><span class="badge">Identity</span><a href="components.md#folio-type-and-page-helpers">Spec</a></header>
+    <div class="row"><h4>Headings</h4><div class="states">
+      <div class="state wide"><p class="folio-display">~/annoterm</p><span class="caption">Display title, mono</span></div>
+      <div class="state wide"><p class="folio-h2">Install</p><span class="caption">Section heading with its <code>##</code> mark</span></div>
+    </div></div>
+    <div class="row"><h4>Steps</h4><div class="states">
+      <div class="state wide"><ol class="steps"><li><h4>Install the CLI</h4><p>Homebrew installs the launcher.</p></li><li><h4>Apply host config</h4><p>It copies the guidance and the design language.</p></li></ol></div>
+    </div></div>
+    <div class="row"><h4>Facts</h4><div class="states">
+      <div class="state wide"><dl class="facts"><div><dt>Installed to</dt><dd>~/design-language</dd></div><div><dt>Source</dt><dd>host-config/design-language</dd></div></dl></div>
+    </div></div>
+    <div class="row"><h4>Command list</h4><div class="states">
+      <div class="state wide"><table class="cmdlist"><thead><tr><th scope="col">Command</th><th scope="col">Use it for</th><td></td></tr></thead><tbody><tr><td><code id="cl-status">filip-stack status</code></td><td>Compare host files with the repository.</td><td><button class="copy" type="button" data-copy="cl-status" aria-label="Copy filip-stack status"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></td></tr><tr><td><code id="cl-apply">filip-stack apply</code></td><td>Install the current host config.</td><td><button class="copy" type="button" data-copy="cl-apply" aria-label="Copy filip-stack apply"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></td></tr></tbody></table></div>
+    </div></div>
+    <div class="row"><h4>Footer</h4><div class="states">
+      <div class="state wide"><div class="site-footer"><a href="#folio-type-and-page-helpers">Made by Filip</a><nav aria-label="Projects, footer"><a href="#folio-type-and-page-helpers">annoterm</a><a href="#folio-type-and-page-helpers">ui</a></nav></div></div>
+    </div></div>
+  </section>
+</main>
+</div>
+</div>
+
+<dialog class="dialog" id="live-dialog" aria-labelledby="live-dialog-title" aria-describedby="live-dialog-desc">
+  <div class="dialog-head"><div><h4 id="live-dialog-title">Delete monitor</h4><p id="live-dialog-desc">This removes its history.</p></div><form method="dialog"><button class="close" type="submit" aria-label="Close dialog">×</button></form></div>
+  <div class="dialog-body">API p95 latency stops alerting at once. Escape closes this dialog and returns focus to its trigger.</div>
+  <form class="dialog-foot" method="dialog"><button class="btn secondary" type="submit">Cancel</button><button class="btn danger" type="submit">Delete</button></form>
+</dialog>
+<dialog class="drawer" id="live-drawer" aria-labelledby="live-drawer-title">
+  <div class="drawer-head"><h4 id="live-drawer-title">Contents</h4><form method="dialog"><button class="close" type="submit" aria-label="Close drawer">×</button></form></div>
+  <div class="drawer-body"><nav class="navlist" aria-label="Contents"><a href="#button">Button</a><a href="#segmented-control">Segmented control</a><a href="#navigation-list" aria-current="page">Navigation list</a></nav></div>
+</dialog>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+  // Segmented control. Each pressed button draws its own thumb in CSS. A change of choice starts
+  // the new thumb at the old one's edges, and CSS animates each edge home. Glides start only after
+  // the first frame, so a restored value shows at once. A newer choice ends an older glide.
+  const segmented = (group, onChange) => {
+    let ready = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => { ready = true; }));
+    let glide = 0;
+    const buttons = [...group.querySelectorAll('button')];
+    const clear = () => { delete group.dataset.slide; group.style.removeProperty('--slide-left'); group.style.removeProperty('--slide-right'); };
+    const press = (to) => {
+      const from = buttons.find((b) => b.getAttribute('aria-pressed') === 'true');
+      if (from === to) return;
+      if (ready && from && !reduced.matches) {
+        // An interrupted glide starts from where its thumb is now, read before the DOM changes.
+        const thumb = getComputedStyle(from, '::before');
+        const a = from.getBoundingClientRect();
+        const fromLeft = a.left + parseFloat(thumb.left);
+        const fromRight = a.right - parseFloat(thumb.right);
+        const b = to.getBoundingClientRect();
+        clear();
+        group.style.setProperty('--slide-left', `${fromLeft - b.left}px`);
+        group.style.setProperty('--slide-right', `${b.right - fromRight}px`);
+        const direction = b.left + b.right > fromLeft + fromRight ? 'right' : 'left';
+        group.dataset.slide = direction;
+        const id = ++glide;
+        const end = () => { if (id === glide) clear(); };
+        requestAnimationFrame(() => {
+          const trailing = group.getAnimations({ subtree: true }).find((x) => x.animationName === (direction === 'right' ? 'glide-left' : 'glide-right'));
+          if (trailing) trailing.finished.then(end, end); else end();
+        });
+      } else clear();
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === to)));
+      onChange?.(to);
+    };
+    group.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b && !b.disabled) press(b); });
+    return press;
+  };
+
+  // Theme: System removes the attribute so prefers-color-scheme decides.
+  const themeGroup = document.querySelector('[aria-label="Theme"]');
+  const pressTheme = segmented(themeGroup, (b) => {
+    const choice = b.dataset.themeChoice;
+    if (choice === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', choice);
+    try { localStorage.setItem('dl-theme', choice); } catch (e) {}
+  });
+  let saved = 'system';
+  try { saved = localStorage.getItem('dl-theme') || 'system'; } catch (e) {}
+  pressTheme(themeGroup.querySelector(`[data-theme-choice="${saved}"]`) || themeGroup.querySelector('button'));
+  document.querySelectorAll('.segmented[data-live]').forEach((g) => { if (g !== themeGroup) segmented(g); });
+
+  // Switches and toggle buttons.
+  document.querySelectorAll('main .switch:not([inert] *)').forEach((s) => s.addEventListener('click', () => s.setAttribute('aria-checked', String(s.getAttribute('aria-checked') !== 'true'))));
+  document.querySelectorAll('[data-live-toggle]').forEach((t) => t.addEventListener('click', () => t.setAttribute('aria-pressed', String(t.getAttribute('aria-pressed') !== 'true'))));
+
+  // Slider fill follows the value.
+  document.querySelectorAll('[data-live-range]').forEach((r) => r.addEventListener('input', () => r.style.setProperty('--value', `${r.value}%`)));
+
+  // Tabs: roving tabindex; focus selects.
+  document.querySelectorAll('[data-live-tabs]').forEach((box) => {
+    const tabs = [...box.querySelectorAll('[role="tab"]')];
+    const select = (tab) => tabs.forEach((t) => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(t));
+      t.addEventListener('keydown', (e) => {
+        const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+        if (next === undefined) return;
+        e.preventDefault();
+        const target = tabs[(next + tabs.length) % tabs.length];
+        select(target);
+        target.focus();
+      });
+    });
+  });
+
+  // Copy actions announce the result politely.
+  const status = document.getElementById('copy-status');
+  document.querySelectorAll('[data-copy]').forEach((button) => button.addEventListener('click', async () => {
+    const text = document.getElementById(button.dataset.copy).textContent;
+    try { await navigator.clipboard.writeText(text); status.textContent = 'Copied.'; } catch (e) { status.textContent = 'Copy failed. Select the text instead.'; }
+  }));
+
+  // Live dialog and drawer: native modal dialogs return focus to the trigger on close.
+  document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.open).showModal()));
+
+  // Project switcher: Escape closes it and returns focus to the summary.
+  document.querySelectorAll('.projects:not(.is-open)').forEach((menu) => {
+    menu.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); } });
+    menu.addEventListener('focusout', (e) => { if (!menu.contains(e.relatedTarget)) menu.open = false; });
+  });
+
+  // Contents: mark the section the reader jumped to.
+  const toc = document.querySelector('.toc');
+  const mark = () => toc.querySelectorAll('a').forEach((a) => {
+    if (a.getAttribute('href') === location.hash) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+  });
+  addEventListener('hashchange', mark);
+  mark();
+})();
+</script>

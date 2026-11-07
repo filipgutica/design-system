@@ -1,7 +1,16 @@
 /*
- * Design language tokens. Generated from themes/graphite-indigo.json in
- * @filipgutica/ui; edit that file and run `pnpm themes:build`. Values live there.
+ * Design language tokens: a snapshot of the Graphite Indigo values in @filipgutica/ui.
+ * Most lines come from its generated themes/graphite-indigo.tokens.css (edit
+ * themes/graphite-indigo.json and run `pnpm themes:build`); the control, field, nav,
+ * button, and command roles come from its src/theme.css. Values live there.
  * DESIGN.md names these tokens; it never repeats their values.
+ *
+ * Two layers. The identity block at the top of :root is the project's own: its hue
+ * pair and fonts. A new project keeps this file unchanged and sets those lines on
+ * :root in its own stylesheet, loaded after this one. The dark blocks switch
+ * --project to --project-dark, so the override needs no dark rule. Check
+ * --accent-text at 4.5:1 on the new hue and override it too when it falls short.
+ * The terminal plate tokens also belong to the identity layer; every other line is core.
  *
  * Standalone HTML: import or inline this file.
  * Inline visuals: inherit the host font and theme variables; see DESIGN.md.
@@ -16,25 +25,35 @@
 :root {
   color-scheme: light;
 
-  /* Neutral paper and graphite surfaces. */
-  --bg: #f4f5f6; /* ui: --color-bg, --color-button-text */
+  /* Identity layer: a project swaps these four lines. --project is the light-theme hue;
+     --project-dark is the dark-theme hue, also used on dark plates in both themes. */
+  --project: #4b45d1; /* ui: --color-project */
+  --project-dark: #a5a1ff; /* ui: --color-project-dark */
+  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif; /* ui: --font-ui */
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; /* ui: --font-mono */
+
+  /* Core roles: only the identity lines above feed them. Neutral paper and graphite surfaces. */
+  --bg: #f4f5f6; /* ui: --color-bg */
   --surface: #e9ebed; /* ui: --color-surface */
   --surface-raised: #fbfbfc; /* ui: --color-surface-raised, --color-input-bg */
   --surface-hover: #e2e5e8; /* ui: --color-surface-muted */
   --field: var(--surface-hover); /* ui: --color-well */
+  --field-edge: transparent; /* ui: --color-field-edge */
+  --control-thumb: var(--surface-raised); /* ui: --color-control-thumb */
+  --nav-current: var(--surface-raised); /* ui: --color-nav-current */
   --row-hover: #e2e5e8; /* ui: --color-row-hover */
   --row-selected: var(--surface-raised); /* ui: --color-row-selected */
   --border-subtle: #d3d8dd; /* ui: --color-border-subtle */
   --border: #6d747b; /* ui: --color-border, --color-input-border */
-  --text: #101315; /* ui: --color-text, --color-button-bg, --color-input-text, --color-row-selected-text, --color-status-text */
-  --text-muted: #50575e; /* ui: --color-muted, --color-button-hover, --color-input-placeholder, --color-syntax-operator, --color-syntax-punctuation */
+  --text: #101315; /* ui: --color-text, --color-input-text, --color-row-selected-text, --color-status-text */
+  --text-muted: #50575e; /* ui: --color-muted, --color-input-placeholder, --color-syntax-operator, --color-syntax-punctuation */
+  --overlay: rgb(0 0 0 / 42%); /* ui: --color-overlay */
 
-  /* Project hue for selection and control focus; ink primary actions; links keep --link and --focus. */
-  --project: #4b45d1; /* ui: --color-project */
-  --project-dark: #a5a1ff; /* ui: --color-project-dark */
-  --accent: var(--project); /* ui: --color-accent, --color-progress */
-  --accent-text: var(--bg); /* ui: --color-accent-text */
+  /* The hue fills primary actions and marks selection and control focus; links keep --link and --focus. */
+  --accent: var(--project); /* ui: --color-accent, --color-button-bg, --color-progress */
+  --accent-text: var(--bg); /* ui: --color-accent-text, --color-button-text */
   --accent-hover: var(--text); /* ui: --color-accent-hover */
+  --button-hover: color-mix(in srgb, var(--accent) 85%, var(--text)); /* ui: --color-button-hover */
   --link: #0b5f7c; /* ui: --color-link */
   --focus: var(--link); /* ui: --color-focus */
 
@@ -48,12 +67,17 @@
   --danger-soft: #efe4e4; /* ui: --color-error-surface */
   --info-soft: #d9e3f2; /* ui: --color-info-surface */
 
-  /* Code */
+  /* Identity layer, derived: terminal folio plates. Commands take the hue; captures stay neutral.
+     A project without terminal plates leaves these unused. */
+  --command-bg: color-mix(in srgb, var(--project) 25%, #101010); /* ui: --color-command-bg */
+  --command-border: transparent; /* ui: --color-command-border */
   --terminal: #0a0c0e; /* ui: --color-terminal */
   --terminal-text: #e6e9eb; /* ui: --color-terminal-text */
   --terminal-border: #2a3036; /* ui: --color-terminal-border */
   --terminal-caption: #13171a; /* ui: --color-terminal-caption */
   --terminal-caption-text: #c9d0d6; /* ui: --color-terminal-caption-text */
+
+  /* Source code wells */
   --code-bg: var(--surface); /* ui: --color-code */
   --code-text: var(--text); /* ui: --color-code-text, --color-syntax-variable */
   --code-key: #715b42; /* ui: --color-syntax-keyword, --color-syntax-function, --color-syntax-tag */
@@ -61,9 +85,7 @@
   --code-number: #86532e; /* ui: --color-syntax-number, --color-syntax-type, --color-syntax-attribute */
   --code-comment: #626772; /* ui: --color-syntax-comment */
 
-  /* Self-hosted IBM Plex latin faces (OFL); system fallbacks. */
-  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif; /* ui: --font-ui */
-  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; /* ui: --font-mono */
+  /* Type scale. The identity block names the families. */
   --text-xs: 12px; /* ui: --text-xs */
   --text-sm: 13px; /* ui: --text-sm */
   --text-md: 14px; /* ui: --text-md */
@@ -109,12 +131,14 @@
   --radius-sm: 6px; /* ui: --radius-inline */
   --radius-md: 999px; /* ui: --radius-control */
   --radius-lg: 16px; /* ui: --radius-panel */
+  --radius-field: 10px; /* ui: --radius-field */
   --radius-pill: 999px; /* ui: --radius-pill */
 
   /* Elevation: raised panels, sunk fields, and floating layers. */
   --shadow-raise: 2px 2px 6px rgb(130 142 158 / 35%), -2px -2px 6px rgb(255 255 255 / 80%); /* ui: --shadow-raise */
   --shadow-sink: inset 1.2px 1.2px 3.6px rgb(130 142 158 / 35%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 80%); /* ui: --shadow-sink */
   --shadow-popover: 0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px var(--border-subtle); /* ui: --shadow-dialog */
+  --shadow-nav-current: 0 1px 3px rgb(130 142 158 / 40%); /* ui: --shadow-nav-current */
 
   /* Motion */
   --duration-fast: 120ms; /* ui: --duration-fast */
@@ -130,12 +154,19 @@
     --surface-raised: #181d21;
     --surface-hover: #20262b;
     --field: color-mix(in srgb, var(--bg) 87.5%, black);
+    /* The dark well sits within about 1.01:1 of the canvas, so fields take a faint edge. */
+    --field-edge: var(--border-subtle);
+    --control-thumb: color-mix(in srgb, var(--surface-raised) 88%, white);
+    --nav-current: color-mix(in srgb, var(--text) 7%, transparent);
     --row-hover: #20262b;
     --border-subtle: #262d33;
     --border: #78818a;
     --text: #e6e9eb;
     --text-muted: #9aa3ab;
-    --project: #a5a1ff;
+    --project: var(--project-dark);
+    --overlay: rgb(0 0 0 / 62%);
+    --command-bg: color-mix(in srgb, var(--project) 16%, black);
+    --command-border: color-mix(in srgb, var(--project) 28%, black);
     --link: #67c1df;
     --success: #4cc38a;
     --warning: #e2a54b;
@@ -152,6 +183,7 @@
     --shadow-raise: 2px 2px 6px rgb(0 0 0 / 50%), -2px -2px 6px rgb(255 255 255 / 5%);
     --shadow-sink: inset 1.2px 1.2px 3.6px rgb(0 0 0 / 55%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 5%);
     --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border-subtle);
+    --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%);
   }
 }
 
@@ -162,12 +194,18 @@
   --surface-raised: #181d21;
   --surface-hover: #20262b;
   --field: color-mix(in srgb, var(--bg) 87.5%, black);
+  --field-edge: var(--border-subtle);
+  --control-thumb: color-mix(in srgb, var(--surface-raised) 88%, white);
+  --nav-current: color-mix(in srgb, var(--text) 7%, transparent);
   --row-hover: #20262b;
   --border-subtle: #262d33;
   --border: #78818a;
   --text: #e6e9eb;
   --text-muted: #9aa3ab;
-  --project: #a5a1ff;
+  --project: var(--project-dark);
+  --overlay: rgb(0 0 0 / 62%);
+  --command-bg: color-mix(in srgb, var(--project) 16%, black);
+  --command-border: color-mix(in srgb, var(--project) 28%, black);
   --link: #67c1df;
   --success: #4cc38a;
   --warning: #e2a54b;
@@ -184,9 +222,10 @@
   --shadow-raise: 2px 2px 6px rgb(0 0 0 / 50%), -2px -2px 6px rgb(255 255 255 / 5%);
   --shadow-sink: inset 1.2px 1.2px 3.6px rgb(0 0 0 / 55%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 5%);
   --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border-subtle);
+  --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%);
 }
 
-/* Minimal base. Component styles live in reference.html. */
+/* Minimal base. Component styles live in components.html. */
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body {

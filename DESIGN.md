@@ -10,6 +10,17 @@ A shared visual language for personal products, documentation, tools, mockups, a
 
 Interaction, flows, states, interface copy, and accessibility checks follow the `interface-design` skill (`~/.agents/skills/interface-design`). This file owns visual hierarchy and composition.
 
+## Two layers
+
+The language has a reusable core and a replaceable identity layer.
+
+| Layer | What it holds | A new project |
+| --- | --- | --- |
+| Core | Tokens, depth (raise and sink), controls and their states, focus, motion, accessibility, and forced colors | Adopts it as is |
+| Identity | The terminal folio look of the personal sites: the `~/name` header, the project registry, mono display headings, `##` section marks, and terminal plates | Replaces it with its own |
+
+A new project keeps `tokens.css` unchanged and sets the identity inputs (`--project`, `--project-dark`, `--font-sans`, `--font-mono`, and `--accent-text` when the hue needs it) on `:root` in its own stylesheet. [Component specs](components.md) mark each component Core or Identity, and [decisions](decisions.md) record why each choice was made and which options were rejected. Read both before you build or change a component.
+
 ## Apply the right format
 
 Choose the format before styling. A public product page and an application screen need different density.
@@ -28,8 +39,11 @@ Center the **container**, not every sentence. Align header, content, images, and
 
 ## Files and examples
 
-- `tokens.css`: generated standalone snapshot of the Terminal folio values (the Graphite Indigo theme) owned by `@filipgutica/ui`. Each line's `ui:` comment names the library variable for that token. Regenerate it when the package values change.
-- `reference.html`: application components, and a Foundations catalogue (`#foundations`) of every token: type, color with contrast, spacing, shape, borders, elevation, control states, focus, and motion. Copy foundations from there into any project.
+- `tokens.css`: a standalone snapshot of the values (the Graphite Indigo theme) owned by `@filipgutica/ui`. The identity inputs sit in one block at the top. Each line's `ui:` comment names the library variable for that token. Update it when the package values change.
+- `components.md`: one spec for each component, with anatomy, tokens, states, keyboard and screen-reader behavior, motion, and forced colors. Read it for any component work.
+- `components.html`: every component in each of its states, in plain HTML and CSS on `tokens.css`. Copy component markup and styles from there.
+- `decisions.md`: the choices behind the components, and the options they replaced.
+- `reference.html`: an application example, and a Foundations catalogue (`#foundations`) of every token: type, color with contrast, spacing, shape, borders, elevation, focus, and motion.
 - `docs.html`: a balanced documentation shell and compact setup command.
 - `product.html`: a restrained product-page hierarchy with illustrative product evidence.
 - `DESIGN.md`: selection rules and acceptance criteria. It names tokens rather than repeating their values.
@@ -40,14 +54,16 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 
 | Context | Variable names to write |
 | --- | --- |
-| Standalone HTML | The `tokens.css` names. Import or inline `tokens.css` and copy the matching example's component styles. |
+| Standalone HTML | The `tokens.css` names. Import or inline `tokens.css`, and copy component styles from `components.html`. |
 | Site on `@filipgutica/ui` | The library variable in the `ui:` comment beside each `tokens.css` line, such as `--color-muted` for `--text-muted`. Some names are unchanged, such as `--text-sm`. When a comment names several, use the first. A `tokens.css` name that its comment does not list is undefined on a library site, and `var()` falls back without an error. |
 | Other repository | That repository's own tokens and components, matched to these roles by meaning. |
 | Inline visual | The host's supplied CSS variables and font, with no separate page shell. |
 
-## Character
+## Core
 
-The look is a **terminal folio**: the products are terminal tools that read Markdown and paths, so their identity comes from that world. Mono type carries identity and structure, a dark terminal plate holds commands and captures, and each project has one hue. Controls use soft depth and familiar shapes; the terminal look belongs to identity, headings, and commands, not to every surface.
+### Character
+
+Controls use soft depth and familiar shapes: borderless surfaces that rise at rest and sink when pressed or filled in.
 
 - **Quiet surfaces, clear hierarchy.** Neutral paper and graphite backgrounds, with color reserved for the project hue, links, and meaningful states. Contrast, type, alignment, and proximity carry the structure.
 - **Purposeful space.** Compact elements within a group, larger gaps between groups. Every gap should help a reader understand a relationship.
@@ -55,26 +71,27 @@ The look is a **terminal folio**: the products are terminal tools that read Mark
 - **Fewer competing choices.** Make the next useful action obvious and group secondary destinations separately.
 - **Precise and readable.** Consistent edges, measured prose, tabular numbers, comfortable line height, and meaningful text contrast.
 
-## Typography
+### Typography
 
-- Use `--font-mono` (IBM Plex Mono) for identity, page and section headings, navigation rails, metadata, captions, code, identifiers, and keys. Use `--font-sans` (IBM Plex Sans) for prose, h3 and below, labels, and controls. `@filipgutica/ui` self-hosts both; elsewhere the token falls back to the system stack.
+- Use `--font-sans` for prose, h3 and below, labels, and controls, and `--font-mono` for code, identifiers, and keys. The identity layer decides where else mono appears.
 - Controls and dense application content use `--text-md`; secondary text uses `--text-sm`. Paragraphs and substantial article text use `--text-reading` with `--leading`. Bound reading text with `--measure` and introductory copy to a slightly shorter line.
-- Documentation titles use `--text-3xl` in mono. Section headings use `--text-xl` in mono, preceded by a `##` mark in `--accent` (decorative, so screen readers skip it) and a `--border-subtle` rule above the section. Headings sit above their content. Application titles use `--text-2xl` or smaller.
-- Product pages and tool homes may use a mono `--text-display` title, stepping down to `--text-display-sm` on phones. Keep a short heading measure and place supporting copy and the primary action nearby. The first product image should enter the initial desktop viewport.
+- Documentation titles use `--text-3xl`; section headings use `--text-xl` and sit above their content. Application titles use `--text-2xl` or smaller.
 - Use `--weight-regular`, `--weight-medium`, and `--weight-semibold`. Keep the source text's case; never transform it. Sentence case and restrained tracking make hierarchy easier to scan.
 - Use `--text-muted` for secondary information and metadata, and `--text` for essential labels and instructions.
 
-## Theme and color
+### Theme and color
 
 - Inline visuals inherit the host theme. They do **not** need an independent theme switch.
 - Standalone pages follow the OS by default. A visible theme control is optional: include it when the user requests one, the product already has one, or choosing/comparing themes serves the task. Token inspection and UI-library documentation are valid uses; a simple chart or explainer usually is not.
 - Existing products retain their theme preferences and persistence contracts. Where a standalone choice is needed, System removes the override and explicit Light/Dark choices set it. Wrap storage access in try/catch.
 - Use neutral `--bg`, `--surface`, and `--surface-raised` (paper in light, graphite in dark) to separate regions. Use `--text` and `--text-muted` for the main hierarchy.
-- Each project sets one hue as `--project` (with `--project-dark` for the terminal plate), and `--accent` follows it. The hue marks identity and selection: the `~/` header mark, the `##` section mark, current-item bars, the current tab underline, the `$` prompt, and checked or selected controls. It is never a fill for buttons, cards, or wells. Check it at 3:1 for marks and bars and 4.5:1 wherever it colours text, on every surface it sits on. A hue that misses 4.5:1 on a surface does not colour text there.
-- Primary actions are ink on paper: a `--text` fill with `--bg` text, and `--text-muted` on hover, in both themes. `--link` identifies links. `--focus` outlines keyboard focus everywhere except the controls listed under Interaction and motion, which focus in `--accent`. Underline prose links. Navigation rows use neutral `--row-hover` and persistent `--row-selected` (the raised surface). Mark the current destination with a 2px inset `--accent` bar and medium text weight. Put the bar on the left of vertical route lists and below horizontal project strips. In-page location links use the 2px bar without the fill. Hover on the current destination retains its selected fill. List and table selection uses the same recipe: `--row-selected` fill plus the 2px accent bar on the leading edge. Where color marks a checked or selected state, such as a checkbox, a radio choice, or the selected-row bar, use `--accent`; `--link` and `--focus` never mark one. Selected tabs take a 2px `--accent` underline and `--text`; hover changes only the text colour. A segmented control is an undivided `--field` track with `--shadow-sink` and no visible outer border; a transparent 1px border keeps its size and shows in forced colors. Its pressed option is a pill thumb inset 2px inside the button, with `--shadow-raise` and no ring: `--surface-raised` in light, and that surface mixed 88% with white in dark. The pressed label or icon takes `--accent`, measured at least 3:1 against the thumb. Hover shows the thumb at 45%. Keep raised-control hover (`--surface-hover`) and keyboard focus separate from navigation states. Keep restrained syntax colors separate from the action palette. Status colors mean state and have a text or icon label. Status surfaces are soft tints of their status color (the `--*-soft` tokens). Callouts use the status tint without a visible border; keep a transparent 1px border for forced colors. Status badges are pills with a 22% status tint over `--surface-raised`, text mixed 75% with `--text` in light and 85% in dark, and a leading 6px dot; neutral badges have no visible border or dot. Outside badges, status foreground colors go on icons; numbers and labels beside them stay in `--text` or `--text-muted`.
+- Each project sets one hue, and `--accent` follows it. The hue fills the one primary action in each decision group, and marks identity and selection: current items, the current tab underline, and checked or selected controls. It is never a fill for secondary buttons, cards, or wells. Check it at 3:1 for marks and bars, and at 4.5:1 wherever it colours text, on every surface it sits on. `--accent-text` on an `--accent` fill must reach 4.5:1 for each hue; a hue that misses does not colour text or carry a label there.
+- `--link` identifies links; underline prose links. `--focus` outlines keyboard focus on links, navigation, and tabs; form controls focus in `--accent` (see [focus](components.md#rules-for-every-control)). Where color marks a checked or selected state, use `--accent`; `--link` and `--focus` never mark one.
+- Navigation and selection: the current page takes a quiet lifted fill with accent text; an in-page location takes a short accent pip without a fill; a selected list row takes `--row-selected` with a 2px accent bar on its leading edge. Keep raised-control hover and keyboard focus separate from these states. [Component specs](components.md#navigation-list) give the values.
+- Status colors mean state and have a text or icon label. Status surfaces are soft tints of their status color (the `--*-soft` tokens). Outside badges, status foreground colors go on icons; numbers and labels beside them stay in `--text` or `--text-muted`. Keep restrained syntax colors separate from the action palette.
 - Verify light and dark appearance where supported, regardless of whether a switch is visible. Check text contrast rather than assuming a muted token is accessible at every size.
 
-## Layout and spacing
+### Layout and spacing
 
 - Use the `--space-*` rhythm and flex/grid `gap`. Use smaller gaps within a group and larger gaps between groups. Documentation sections use `--space-12`, stepping down to `--space-8` on phones. Product sections use `--space-24` total separation, stepping down to `--space-16` at tablet width. Give each section gap one owner so adjoining padding does not double it.
 - Product pages use `--page-wide`; documentation uses `--page-max`, optionally combined with a thin navigation column. Center the combined shell, not only the article inside an edge-pinned sidebar.
@@ -90,7 +107,7 @@ The look is a **terminal folio**: the products are terminal tools that read Mark
 - Navigation can become a drawer or a native scrolling section strip. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line; `UiSiteNav` does this. Keep wide code, tables, and charts scrolling inside their containers.
 - Keep main headings, actions, and product evidence visible on load. Scrolling should reveal more content without being required to make existing content appear.
 
-## Surfaces and components
+### Surfaces
 
 - Start with headings, content, and whitespace. Use a `--border-subtle` divider where it clarifies a boundary.
 - Each surface role has one recipe:
@@ -100,36 +117,37 @@ The look is a **terminal folio**: the products are terminal tools that read Mark
   | Page | The canvas | `--bg` | None | None | None |
   | Well | Source code, screenshots, figures, and inset previews | `--surface` | Source code: transparent 1px; figures: `--border-subtle` | `--radius-lg` | Source code: `--shadow-raise`; figures: none |
   | Panel | Cards, forms, charts, and detail views | `--surface-raised` | Transparent 1px | `--radius-lg` | `--shadow-raise` |
-  | Field | Inputs, selects, segmented and switch tracks, and selected radio cards | `--field` | Transparent 1px; switch keeps `--border` | Controls: `--radius-md`; radio cards: `--radius-lg` | `--shadow-sink` |
+  | Field | Inputs, selects, textareas, segmented and switch tracks, and selected radio cards | `--field` | `--field-edge` for fields; transparent 1px otherwise | Fields: `--radius-field`; tracks: `--radius-md`; radio cards: `--radius-lg` | `--shadow-sink` |
   | Floating layer | Menus, popovers, pickers, and dialogs | `--surface-raised` | Included in the shadow | `--radius-lg` | `--shadow-popover` |
-  | Terminal plate | Command lines and terminal captures, in both themes | `--terminal` | `--terminal-border` | `--radius-lg` | Commands: `--shadow-raise`; captures: none |
 
-- `--border` keeps unchecked checkbox and radio edges visible, and outlines the switch track. Buttons, fields, panels, and radio cards keep transparent 1px borders for forced colors; invalid fields show a `--danger` edge. Figures and dividers use `--border-subtle`.
-- Radii are soft: `--radius-sm` (6px) for inline elements, checkboxes, and navigation rows; `--radius-md` (999px) for pill controls; `--radius-lg` (16px) for wells, plates, panels, radio cards, callouts, and floating layers. Inner menu rows derive their radius from the panel radius minus `--space-1`. Status badges and switch tracks use `--radius-pill`.
+- Borders stay 1px and transparent on buttons, fields, tracks, panels, and radio cards, so forced colors can draw them. `--border` keeps unchecked checkbox and radio edges visible. Invalid fields show a `--danger` edge. Figures and dividers use `--border-subtle`.
+- Radii: `--radius-sm` for inline elements and checkboxes; `--radius-field` for fields and navigation rows; `--radius-md` (a pill) for buttons and segmented controls; `--radius-lg` for wells, plates, panels, radio cards, callouts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
 - Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
-- `--shadow-raise` gives panels, source code, command plates, and segmented thumbs soft depth; `--shadow-sink` insets fields and tracks. Floating layers keep `--shadow-popover`. Stable hover states keep normal content quiet.
-- Buttons: pill shapes, with one clearly primary action per visible decision group. Secondary actions use `--surface-hover` without a visible border; hover mixes 8% `--text` into the fill. Touch controls use `--control-lg`. Inputs and selects use `--field` and `--shadow-sink`. Radio cards rise when unselected and sink when selected, with an accent check badge instead of an accent ring.
-- Code: commands sit on a terminal plate. A shell command gets a `$` prompt in `--project-dark`, drawn by CSS so it never enters copied or accessible text. Source code sits in a theme-matched well with syntax colours and no prompt; multiline samples may have a small descriptive header and Copy action. Short commands use a headerless compact row with an accessible Copy control. Put useful setup context above the row; omit repeated language labels.
-- Steps: a real sequence is an ordered list with mono numbers in `--accent` on a ruled leading column, an h3 title per step, and an optional result note on the last step.
-- Lists and properties: align short labels, values, and metadata. Use definition lists for terms and short meanings; use tables for actual comparisons.
-- Tabs: underline tabs in the control font with an `--accent` underline on the current tab, with keyboard support. Tabs on a terminal capture switch to mono. Terminal captures use the terminal plate, with a mono status-line caption below the screen. A screenshot opens at full size when clicked; use a native accessible trigger and restore its focus on close.
-- Segmented controls: use `UiSegmentedControl` from `@filipgutica/ui` for two to five short options that apply at once, such as a view mode or the System, Light, and Dark appearance picker. Each option is a button with `aria-pressed` and its own Tab stop, inside a group with an accessible name. Icon-only options use their label as the accessible name and tooltip. Use the site header's built-in picker, or this component, instead of building another appearance control. For longer lists use a select; for options that need descriptions use radio cards.
-- Callouts: short text plus an icon where useful. Status surfaces communicate a real caveat, not decorative emphasis.
-- Figures: one quiet frame (`--surface`, subtle border, `--radius-lg`) with the caption below it in `--text-sm` muted text. Number figures when the prose refers to any of them, and then number them all. Place a figure beside the paragraph that explains it, once the terms it uses have been introduced. Let wide figures scroll inside the plate.
+- `--shadow-raise` gives panels, source code, buttons, and segmented thumbs soft depth; `--shadow-sink` insets fields, tracks, and pressed controls. Floating layers keep `--shadow-popover`. Stable hover states keep normal content quiet.
 
-## Interaction and motion
+### Components
+
+[`components.md`](components.md) specifies each component and [`components.html`](components.html) shows its states. These composition rules apply across them:
+
+- One clearly primary action per visible decision group, filled with the hue. Other actions are secondary, ghost, or text buttons.
+- Use a segmented control for two to five short options that apply at once, a select for longer lists, and radio cards for options that need descriptions.
+- Callouts carry a real caveat, not decorative emphasis.
+- Lists and properties: align short labels, values, and metadata. Use definition lists for terms and short meanings; use tables for actual comparisons.
+- Figures: number them when the prose refers to any of them, and then number them all. Place a figure beside the paragraph that explains it, once the terms it uses have been introduced.
+- Source code sits in a theme-matched well with syntax colours; multiline samples may have a small descriptive header and Copy action. Put useful setup context above a command; omit repeated language labels.
+- A screenshot opens at full size when clicked; use a native accessible trigger and restore its focus on close.
+
+### Interaction and motion
 
 - Show visible focus and accessible names. A visual simplification must preserve useful controls, caveats, and keyboard paths.
-- Buttons, fields, checkboxes, radio cards, switches, segmented options, sliders, and dialogs draw keyboard focus as a 2px outline of `--accent` mixed 80% with transparent, offset 2px, plus a 6px accent halo at 18% via `box-shadow`, added to the existing raise or sink shadow. Everything else, such as links, navigation, tabs, drawers, and code and capture actions, keeps `outline: 2px solid var(--focus); outline-offset: 2px` without the halo; the `tokens.css` base sets it. Use an inset offset (`-2px`) only where a scrolling or clipping parent would cut the ring, or inside a segmented control, where the ring hugs the thumb instead of crossing into the next option; add a comment that names the reason. Keep page-wide defaults such as this one in `@layer base`, so a library component's own focus rule can refine them. The outline is always present so forced colors keep it; the halo only adds to it. Pointer hover never draws the outline; it appears only for `:focus-visible`. Hover changes a fill, or the text colour where a component says so, such as tabs.
-- Personal product sites share a compact static header: a mono `~/name` identity with the `~/` in `--accent`, a project switcher, useful page links, appearance controls, and a solid `--text` rule below. Use the shared project registry for names, order, and destinations. Keep a gallery's existing application navigation structure.
+- Form controls draw the accent focus ring with its halo; links, navigation, tabs, and code actions keep `outline: 2px solid var(--focus); outline-offset: 2px`, which the `tokens.css` base sets. Use an inset offset (`-2px`) only where a scrolling or clipping parent would cut the ring, or inside a segmented control; add a comment that names the reason. Keep page-wide defaults in `@layer base`, so a component's own focus rule can refine them. Pointer hover never draws the outline.
 - Keep product navigation distinct from in-page section links. Current-page and current-section indicators serve different purposes. Open sibling project links in the same tab; indicate a new tab only when the link opens one.
-- Personal Pages share the built-in System/Light/Dark choice. An explicitly selected custom gallery theme overrides that choice until the reader selects a built-in appearance. Preserve installed themes.
-- Use `--duration-fast` for hover/press and `--duration` for menus/panels. Animate opacity or transform only where it explains a state change.
+- Use `--duration-fast` for hover/press and `--duration` for menus/panels. Animate opacity or transform only where it explains a state change. A component spec may set its own timing, as the segmented control's glide does.
 - Keep content visible without reveal effects, entrance sequences, or continuous decorative animation. Honor reduced motion, including anchor scrolling.
 - An interactive figure first renders as complete static content, so it reads the same without JavaScript; enhancement adds controls, not information. Give each state a text label and announce live results politely. A lesson needs one interactive figure at most; keep the rest static.
 - Data views account for loading, empty, error, and recovery states. Heuristics guide design; browser evidence validates the result.
 
-## Copy and density
+### Copy and density
 
 - Lead with a plain description and a useful action. Keep one idea per short paragraph. Product pages can explain value without unsupported superlatives or invented statistics.
 - Say each point once. Put exact payloads, logs, or long reference text behind a useful disclosure when appropriate.
@@ -137,10 +155,23 @@ The look is a **terminal folio**: the products are terminal tools that read Mark
 - Label illustrative data and demo outcomes clearly. Credit upstream creators when presenting a derivative product.
 - Use monochrome line icons sparingly; give an icon a purpose beyond filling space.
 
+## Identity layer: terminal folio
+
+The personal sites are terminal tools that read Markdown and paths, so their identity comes from that world. A new project replaces this section with its own identity and keeps the core.
+
+- **Mono identity.** `--font-mono` (IBM Plex Mono) sets identity, page and section headings, navigation rails, metadata, captions, and the footer. `@filipgutica/ui` self-hosts IBM Plex; elsewhere the tokens fall back to the system stack.
+- **Headings.** Documentation titles and section headings are mono. A section heading starts with a `##` mark in `--accent` (decorative, so screen readers skip it), with a `--border-subtle` rule above the section. Product pages and tool homes may use a mono `--text-display` title, stepping down to `--text-display-sm` on phones; keep a short heading measure, place supporting copy and the primary action nearby, and let the first product image enter the initial desktop viewport.
+- **Hue marks.** The hue also draws the `~/` header mark, the `##` section mark, step numbers, and the `$` prompt.
+- **Header.** Personal product sites share a compact static header: a mono `~/name` identity with the `~/` in `--accent`, a project switcher, useful page links, appearance controls, and a solid `--text` rule below. Use the shared project registry for names, order, and destinations. Keep a gallery's existing application navigation structure.
+- **Appearance.** Personal pages share the built-in System/Light/Dark choice, through the header's picker. An explicitly selected custom gallery theme overrides that choice until the reader selects a built-in appearance. Preserve installed themes.
+- **Terminal plates.** Commands sit on a dark plate tinted with the project hue (`--command-bg`), in both themes. A shell command gets a `$` prompt in `--project-dark`, drawn by CSS so it never enters copied or accessible text. Short commands use a headerless compact row with an accessible Copy control. Terminal captures keep the neutral `--terminal` plate, with a mono status-line caption below the screen; tabs on a capture switch to mono.
+- **Steps.** A real sequence is an ordered list with mono numbers in `--accent` on a ruled leading column, an h3 title per step, and an optional result note on the last step.
+
 ## Avoid recurring clutter
 
 - Decorative eyebrows, numbered markers on unordered content, and badge rows that repeat the title.
-- Multiple cards around ordinary prose, ornamental grids, glows, gradients, decoratively tinted wells, pill-shaped cards, and hover lifts.
+- Multiple cards around ordinary prose, ornamental grids, glows, gradients, pill-shaped cards, and hover lifts.
+- Tinted wells or panels used for decoration. The hue-tinted command plate is the one tinted surface, because it carries the project's identity.
 - Display typography on dense tool screens, or tiny application typography on a product landing page.
 - Large blank gaps that push the action or evidence away from the introduction.
 - Centered long paragraphs, excessively faint text, and horizontal page overflow.
@@ -155,4 +186,4 @@ The look is a **terminal folio**: the products are terminal tools that read Mark
 - [ ] Both supported themes are readable, with theme controls only where useful.
 - [ ] At 390, 720, and 1280 px wide there is no horizontal page scroll, and the page's own viewport media queries use only `max-width: 640px`, `max-width: 800px`, `min-width: 801px`, and the documented `min-width: 1024px` hero split.
 - [ ] Keyboard, focus, touch, deep links, and reduced motion work across relevant states.
-- [ ] Controls and spacing use the owning system's tokens; each panel and visual effect has a purpose.
+- [ ] Controls and spacing use the owning system's tokens and component specs; each panel and visual effect has a purpose.
