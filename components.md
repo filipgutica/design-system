@@ -206,7 +206,7 @@ Layer: Core. ui: `UiDialog`.
 Layer: Core. ui: `UiDrawer`.
 
 - **Anatomy.** A dialog fixed to the left edge, full height, `min(--sidebar + 48px, 100vw - 48px)` wide, with a header (title and close button) and a body that scrolls on its own. Its right edge is a 1px `--border-subtle` rule.
-- **Keyboard and screen reader.** As for the dialog.
+- **Keyboard and screen reader.** As for the dialog. Following an in-page link inside the drawer closes it and moves focus to the link's destination (given `tabindex="-1"` if it is not focusable), not back to the trigger. Modified clicks (a new tab or window) leave it open.
 - **Motion.** It slides in over `--duration` and out over `--duration-fast`, with `--ease-out`, while the overlay fades. Reduced motion shows and hides it at once.
 
 ## Navigation list
@@ -243,7 +243,7 @@ Layer: Identity. ui: `UiCapture`.
 
 - **Anatomy.** A panel whose header holds mono tabs (one for each capture) and a Full size button at the end. The screen is the neutral `--terminal` plate, and a mono status-line caption sits below it on `--terminal-caption` with `--terminal-caption-text`. Full size opens the capture in a dialog.
 - **Keyboard and screen reader.** Tabs follow the tabs spec. Full size opens the selected capture in a modal dialog named after it, and focus returns to the button when the dialog closes. Without JavaScript the button is hidden. Focus rings are inset, because the panel clips its content. Without JavaScript, every capture is listed under its own heading.
-- **Header.** The tab list keeps its 4px block padding, and the Full size control stays centred on the tab row. Capture tabs apply the selected-text rule against their own header fill and accent: on a terminal-dark header, that is `--project-dark`.
+- **Header.** The whole panel, header included, is the `--terminal` plate in both page appearances, with a 1px `--terminal-border` edge. It scopes its own palette so the tabs read on it: current fill `--terminal-text` at 7% with a `0 1px 2px rgb(0 0 0 / 25%)` lift, hover `--terminal-text` at 4%, selected text, accent, and focus `--project-dark`, text `--terminal-text`, muted text `--terminal-caption-text`, and dividers `--terminal-border`. The tab list keeps its 4px block padding, and the Full size control stays centred on the tab row.
 
 ## Site header
 

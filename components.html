@@ -50,6 +50,8 @@
   .btn[aria-busy="true"] { cursor: wait; }
   .btn[aria-busy="true"]::before { content: ""; flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 700ms linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  /* Reduced motion slows the spinner instead of stopping it; this outranks the base 0ms rule. */
+  @media (prefers-reduced-motion: reduce) { .btn[aria-busy="true"]::before { animation-duration: 1.4s !important; } }
 
   /* Fields: input, textarea, select */
   .field { display: grid; gap: 6px; justify-items: start; min-width: 0; }
@@ -319,8 +321,20 @@
   /* The prompt is drawn by CSS, so copied and spoken text omit it. */
   .code.command .line::before { content: "$ " / ""; flex: none; white-space: pre; color: var(--project-dark); user-select: none; }
 
-  /* Terminal capture: neutral plate with a mono status line. */
-  .capture { width: 100%; max-width: 640px; min-width: 0; overflow: hidden; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-raise); }
+  /* Terminal capture: neutral plate with a mono status line. The header stays terminal-dark in
+     both page appearances, so the capture scopes its own tab, text, and focus colours. */
+  .capture {
+    --nav-current: color-mix(in srgb, var(--terminal-text) 7%, transparent);
+    --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%);
+    --row-hover: color-mix(in srgb, var(--terminal-text) 4%, transparent);
+    --nav-current-text: var(--project-dark);
+    --text: var(--terminal-text);
+    --text-muted: var(--terminal-caption-text);
+    --accent: var(--project-dark);
+    --focus: var(--project-dark);
+    --border-subtle: var(--terminal-border);
+    width: 100%; max-width: 640px; min-width: 0; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--terminal); color: var(--terminal-text); box-shadow: var(--shadow-raise);
+  }
   .capture-head { display: flex; align-items: center; min-width: 0; }
   .capture .tablist { flex: 1; width: auto; padding-inline: var(--space-2); }
   .capture .tab { min-height: var(--control-lg); font-family: var(--font-mono); font-size: var(--text-sm); }
@@ -1093,6 +1107,22 @@
 
   // Live dialog and drawer: native modal dialogs return focus to the trigger on close.
   document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.open).showModal()));
+  // Following an in-page link closes the drawer, then focus moves to the destination instead of the trigger.
+  document.querySelectorAll('dialog.drawer').forEach((drawer) => {
+    let destination = null;
+    drawer.addEventListener('click', (e) => {
+      const link = e.target.closest('a[href^="#"]');
+      if (!link || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+      destination = document.getElementById(link.hash.slice(1));
+      drawer.close();
+    });
+    drawer.addEventListener('close', () => {
+      if (!destination) return;
+      if (!destination.hasAttribute('tabindex')) destination.tabIndex = -1;
+      destination.focus({ preventScroll: true });
+      destination = null;
+    });
+  });
 
   // Project switcher: Escape closes it and returns focus to the summary.
   document.querySelectorAll('.projects:not(.is-open)').forEach((menu) => {
