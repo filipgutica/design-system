@@ -114,14 +114,14 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
   | Role | Use for | Fill | Border | Radius | Shadow |
   | --- | --- | --- | --- | --- | --- |
-  | Page | The canvas | `--bg` | None | None | None |
-  | Well | Source code, screenshots, figures, and inset previews | `--surface` | Source code: transparent 1px; figures: `--border-subtle` | `--radius-lg` | Source code: `--shadow-surface`; figures: none |
+  | Page | The canvas and example stages | `--bg` | None | None | None |
+  | Well | Source code, screenshots, figures, and inset previews other than example stages | `--surface` | Source code: transparent 1px; figures: `--border-subtle` | `--radius-lg` | Source code: `--shadow-surface`; figures: none |
   | Panel | Cards, forms, charts, and detail views | `--surface-raised` | Transparent 1px | `--radius-lg` | `--shadow-surface` |
   | Field | Inputs, selects, textareas, segmented and switch tracks, and selected radio cards | `--field` | `--field-edge` for fields; transparent 1px otherwise | Fields: `--radius-field`; tracks: `--radius-md`; radio cards: `--radius-lg` | `--shadow-sink` |
   | Floating layer | Menus, popovers, pickers, and dialogs | `--surface-raised` | Transparent 1px; the shadow's ring draws the edge | `--radius-lg` | `--shadow-popover` |
 
-- Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--field-edge`. `--border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--border-subtle` edge and no rest raise. Invalid fields show a `--danger` edge, except in forced colors, where the system edge wins. Figures and dividers use `--border-subtle`.
-- Radii: `--radius-sm` for inline elements and checkboxes; `--radius-field` for fields, navigation rows, tabs, and toggle cards; `--radius-md` (a pill) for buttons and segmented controls; `--radius-lg` for wells, plates, panels, radio cards, alerts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
+- Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--field-edge`. `--border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--border-subtle` edge and no rest raise. Invalid fields show a `--danger` edge, except in forced colors, where the system edge wins. Figures, example frames, and dividers use `--border-subtle`.
+- Radii: `--radius-sm` for inline elements and checkboxes; `--radius-field` for fields, navigation rows, tabs, and toggle cards; `--radius-md` (a pill) for buttons and segmented controls; `--radius-lg` for wells, example frames, plates, panels, radio cards, alerts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
 - Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
 - [Depth](#depth) gives each role its shadow. Stable hover states keep normal content quiet.
 
@@ -132,7 +132,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 | Tier | Token | Use for |
 | --- | --- | --- |
 | Control | `--shadow-raise` | Idle buttons, unselected radio cards, switch knobs, segmented thumbs, and focused fields |
-| Container | `--shadow-surface` | Panels, cards, source code, command plates, and terminal captures |
+| Container | `--shadow-surface` | Panels, cards, source code (not inside an example frame), command plates, and terminal captures |
 | Pressed or well | `--shadow-sink` | Fields, tracks, pressed buttons, and selected radio cards |
 | Selected row | `--shadow-nav-current` | The current navigation row and the selected tab |
 | Floating | `--shadow-popover` | Menus, popovers, pickers, and dialogs |
@@ -151,6 +151,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 - Lists and properties: align short labels, values, and metadata. Use definition lists for terms and short meanings; use tables for actual comparisons.
 - Figures: number them when the prose refers to any of them, and then number them all. Place a figure beside the paragraph that explains it, once the terms it uses have been introduced.
 - Source code sits in a theme-matched well with syntax colours; multiline samples may have a small descriptive header and Copy action. Put useful setup context above a command; omit repeated language labels.
+- Examples: show a live component on a stage above its code, in one frame, with Copy in the code's corner. The stage sits on the page background. See [example](components.md#example).
 - A screenshot opens at full size when clicked; use a native accessible trigger and restore its focus on close.
 
 ### Interaction and motion
