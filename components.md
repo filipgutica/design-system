@@ -19,7 +19,7 @@ The identity layer reads only the identity tokens (`--project`, `--project-dark`
 - **Borders.** Every control keeps a 1px border, transparent unless its section says otherwise, so forced colors can draw an edge.
 - **Depth.** A resting raised control uses `--shadow-raise`. A field, a track, or a pressed control uses `--shadow-sink`.
 - **Press.** Only a button has a pressed state; see [Button](#button). A [quiet action](#quiet-action) tints on press without sinking. Other controls have no `:active` treatment: they show their latched state as their section says.
-- **Focus.** The ring's colour follows the role. Controls that act or set a value (button, quiet action, checkbox and radio, radio card, switch track, toggle button, segmented option, slider thumb, and dialog and drawer content) show a `2px solid var(--accent)` outline, offset 2px, with no halo or glow. It is drawn over the control's own raise or sink shadow, which does not change. Fields lift instead, as the next rule says. Links, navigation rows, and tabs use the base ring: `2px solid var(--focus)`, offset 2px. Inside a scrolling or clipping parent, the ring is inset (`-2px`), and a comment names the reason. Only `:focus-visible` shows a ring; pointer hover never does.
+- **Focus.** The ring's colour follows the role. Controls that act or set a value (button, quiet action, checkbox and radio, radio card, switch track, toggle button, segmented option, slider thumb, and dialog and drawer content) show a `2px solid var(--accent)` outline, offset 2px, with no halo or glow. It is drawn over the control's own raise or sink shadow, which does not change. Fields lift instead, as the next rule says. Links, navigation rows, tabs, listbox options, and list rows use the base ring: `2px solid var(--focus)`, offset 2px. Inside a scrolling or clipping parent, the ring is inset (`-2px`), and a comment names the reason. Only `:focus-visible` shows a ring; pointer hover never does.
 - **Field focus.** Fields (input, select, textarea) draw no ring. On `:focus-visible` the field lifts out of its well: the fill becomes `--field-focus` (`--control-thumb` by default), the shadow `--shadow-raise`, and the border `--accent` at 35% (`color-mix(in srgb, var(--accent) 35%, transparent)`). A `2px solid transparent` outline at offset 0 is invisible normally and draws as a ring in forced colors. The lifted fill must keep field text and placeholder at 4.5:1, on the page and on a surface. If a theme's field text would fall below that, set `--field-focus` to `--field`: the focused field keeps its resting fill, and the raise shadow and accent hairline still mark focus. An invalid field keeps its `--danger` border while focused, outside forced colors. The lift is below 3:1 against the resting field by choice; see [known gaps](decisions.md#known-gaps).
 - **Disabled.** Opacity 0.58, `cursor: not-allowed`, and no hover or press. Buttons drop their shadow; other controls keep theirs. Use the native `disabled` attribute. A link styled as a button has no disabled state: use `<button disabled>`.
 - **Invalid.** Fields only: `aria-invalid="true"` and a `--danger` border (not in forced colors; see [field focus](#rules-for-every-control)). Other controls show an invalid state through the [field wrapper](#field-wrapper)'s error text. Link the error text with `aria-describedby` or `aria-errormessage`.
@@ -75,7 +75,7 @@ Layer: Core. ui: `UiInput`. ui has no textarea; a textarea uses the same field r
 Layer: Core. ui: `UiSelect`.
 
 - **Anatomy.** A native `<select>` with the input's field recipe and a chevron on the right. Draw the chevron in `currentColor`, or with an 8px border corner in `--text-muted` turned 45°. Right padding leaves room for it.
-- **Picker.** Where `appearance: base-select` is supported, the open list is a floating layer: `--surface-raised`, 1px `--border-subtle`, `--radius-lg`, `--shadow-popover`, 4px padding, at least the select's width, and at most `min(20rem, 50dvh)` tall. Options are at least 32px tall (44px on coarse pointers), with `--space-2` `--space-3` padding and corners of `--radius-lg` minus 4px. Hover fills `--row-hover`. The checked option takes `--row-selected` and an `--accent` check at the end. Keyboard focus is an inset `--focus` ring, because the list scrolls. Other browsers keep the native picker.
+- **Picker.** Where `appearance: base-select` is supported, the open list is a floating layer: `--surface-raised`, a transparent 1px border, `--radius-lg`, `--shadow-popover`, 4px padding, at least the select's width, and at most `min(20rem, 50dvh)` tall. Options are at least 32px tall (44px on coarse pointers), with `--space-2` `--space-3` padding and corners of `--radius-lg` minus 4px. Hover fills `--row-hover`. An `--accent` check at the end marks the checked option. The check carries the state: the option's `--row-selected` fill equals `--surface-raised`. Keyboard focus is an inset `--focus` ring, because the list scrolls. Other browsers keep the native picker.
 - **States.** Rest, focus-visible, disabled, and invalid, as for the input.
 - **Keyboard and screen reader.** Native select behavior. A visible `<label>`.
 - **Motion.** None.
@@ -107,6 +107,7 @@ Layer: Core. ui: `UiRadioCardGroup`, `UiRadioCard`.
 - **Tokens.** Unselected: `--surface-raised`, `--shadow-raise`, transparent border, `--radius-lg`, `--space-3` padding. Hover: `--surface-hover` 45% into `--surface-raised`. Selected: `--field` fill and `--shadow-sink`, with the indicator filled `--accent` and an `--accent-text` check. The selected card has no accent ring.
 - **States.** Rest, hover, selected, focus-visible (the control ring over the card's raise or sink), and disabled.
 - **Keyboard and screen reader.** One Tab stop for the group; arrow keys change the selection. Name the group.
+- **Motion.** The fill changes over `--duration-fast` with `--ease-out`.
 - **Forced colors.** The selected indicator uses `Highlight` with `HighlightText`.
 
 ## Switch
@@ -127,6 +128,7 @@ Layer: Core. ui: `UiToggleButton`.
 - **Anatomy.** A `<button aria-pressed>` with a switch track at the start, then a label and an optional `--text-xs` muted description. `--radius-field` corners (a labelled card, so wrapped labels sit square), `--space-2` `--space-3` padding, `--surface-raised` fill, a 1px `--border-subtle` edge, and no shadow. The visible edge and the missing raise are a named exception; see [decisions](decisions.md).
 - **States.** Rest, hover (`--border` edge), pressed (the track turns on as in the switch and carries the state; the card takes `--accent` at 8% over `--surface-raised` and a hairline of `--accent` at 35%), focus-visible, and disabled.
 - **Keyboard and screen reader.** A native button; Space and Enter toggle `aria-pressed`.
+- **Motion.** The card's fill and edge change over `--duration-fast` with `--ease-out`; the track moves as the switch does.
 - **Forced colors.** As for the switch track.
 
 ## Segmented control
@@ -138,8 +140,8 @@ Layer: Core. ui: `UiSegmentedControl`.
 - **Tokens.** Labels are `--text-muted`. The pressed option's thumb is `--control-thumb` with `--shadow-raise` and no ring. Its label is `--segmented-current-text`: `--accent` where it reaches 4.5:1 on the thumb, on the page and on a surface, and otherwise the first of `--text`, black, and white that does. An icon-only option needs 3:1. Hover on an unpressed option shows the thumb at 45% and turns the label `--text`.
 - **States.** Rest, hover, pressed, focus-visible (an inset ring, so it hugs the thumb instead of crossing into the next option), and disabled.
 - **Keyboard and screen reader.** Each option is its own Tab stop; Space and Enter press it. Icon-only options use the label as `aria-label` and `title`.
-- **Motion.** When the reader changes the choice, one thumb glides from the old option to the new one. Start the new thumb's left and right edges where the old thumb was, then animate each edge home with CSS `ease`. The leading edge takes 260ms and the trailing edge 300ms, so the thumb stretches a little on the way. Labels cross-fade their colour over 260ms. If a glide is cut short, start the next one from the thumb's current position. There is no motion on first render, on a value restored from storage, or on a theme change: allow glides only after the first frame. Reduced motion moves the thumb at once.
-- **Forced colors.** The pressed option draws `Highlight` behind `HighlightText`.
+- **Motion.** Hover fades the label colour over `--duration-fast` with `--ease-out`. When the reader changes the choice, one thumb glides from the old option to the new one. Start the new thumb's left and right edges where the old thumb was, then animate each edge home with CSS `ease`. The leading edge takes 260ms and the trailing edge 300ms, so the thumb stretches a little on the way. Labels cross-fade their colour over 260ms. If a glide is cut short, start the next one from the thumb's current position. There is no motion on first render, on a value restored from storage, or on a theme change: allow glides only after the first frame. Reduced motion moves the thumb at once.
+- **Forced colors.** The pressed option draws `Highlight` behind `HighlightText`. Its focus ring is `CanvasText`: the option opts out of adjustment, and the ring sits on the track.
 
 ## Slider
 
@@ -148,7 +150,7 @@ Layer: Core. ui: `UiSlider`.
 - **Anatomy.** A 6px track with `--radius-sm` and `--surface-hover`, an `--accent` range, and a round thumb (16px, 18px, or 20px) with a 2px `--accent` edge and a `--surface-raised` fill.
 - **States.** Rest, dragging (`cursor: grabbing`), focus-visible on the thumb, and disabled.
 - **Keyboard and screen reader.** The thumb has `role="slider"`, `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, and a name. Arrow keys step; Home and End jump to the ends. A native `<input type="range">` styled to match is acceptable.
-- **Forced colors.** The thumb edge and range draw in system colors.
+- **Forced colors.** The range redraws in `Highlight` with `forced-color-adjust: none`. The thumb keeps the system colours.
 
 ## Progress
 
@@ -157,6 +159,7 @@ Layer: Core. ui: `UiProgress`.
 - **Anatomy.** A track about 9px tall with a 1px `--border-subtle` edge, `--radius-sm`, and `--surface-hover`, holding an `--accent` indicator moved with `translateX`.
 - **Keyboard and screen reader.** `role="progressbar"` with a name and `aria-valuenow`, or a native `<progress>`.
 - **Motion.** The indicator's transform moves over `--duration-fast` with `--ease-out`.
+- **Forced colors.** The indicator redraws in `Highlight` with `forced-color-adjust: none`.
 
 ## Score
 
@@ -164,6 +167,7 @@ Layer: Core. ui: `UiScore`.
 
 - **Anatomy.** A row of 8px pips with 3px gaps, then the value in medium weight and `/max` in muted regular weight, in tabular numbers. Empty pips have a 1px `--border` edge; filled pips are `--accent`.
 - **Keyboard and screen reader.** The pips are `aria-hidden`; the text value carries the score.
+- **Forced colors.** Filled pips redraw in `Highlight` with `forced-color-adjust: none`.
 
 ## Tabs
 
@@ -210,7 +214,7 @@ Layer: Core. ui: `UiFigure`.
 Layer: Core. ui: `UiDialog`.
 
 - **Anatomy.** A floating layer centred on an `--overlay` backdrop, at most 512px wide and 672px tall. It has a header (title in 18px semibold with an optional muted description, and a 44px close button), a body that scrolls, and an optional footer on `--surface` with its actions at the end. Rules between the parts are `--border-subtle`. On phones it becomes a bottom sheet with rounded top corners.
-- **Tokens.** `--surface-raised`, 1px `--border-subtle`, `--radius-lg`, `--shadow-popover`. The close button is a [quiet action](#quiet-action).
+- **Tokens.** `--surface-raised`, a transparent 1px border, `--radius-lg`, `--shadow-popover`. The close button is a [quiet action](#quiet-action).
 - **Keyboard and screen reader.** `role="dialog"`, `aria-modal="true"`, named by its title. Focus moves in on open and is trapped. Escape closes it, and focus returns to the trigger. A native `<dialog>` opened with `showModal()` provides most of this.
 - **Motion.** None by default.
 
@@ -218,7 +222,7 @@ Layer: Core. ui: `UiDialog`.
 
 Layer: Core. ui: `UiDrawer`.
 
-- **Anatomy.** A dialog fixed to the left edge, full height, `min(--sidebar + 48px, 100vw - 48px)` wide, with a header (title and close button) and a body that scrolls on its own. Its right edge is a 1px `--border-subtle` rule. The close button is a [quiet action](#quiet-action).
+- **Anatomy.** A dialog fixed to the left edge, full height, `min(--sidebar + 48px, 100vw - 48px)` wide, with a header (title and close button) and a body that scrolls on its own. It is a floating layer with square corners: `--surface-raised`, a transparent 1px border, and `--shadow-popover`. The close button is a [quiet action](#quiet-action).
 - **Keyboard and screen reader.** As for the dialog. Following an in-page link inside the drawer closes it and moves focus to the link's destination (given `tabindex="-1"` if it is not focusable), not back to the trigger. Modified clicks (a new tab or window) leave it open.
 - **Motion.** It slides in over `--duration` and out over `--duration-fast`, with `--ease-out`, while the overlay fades. Reduced motion shows and hides it at once.
 
@@ -229,10 +233,11 @@ Layer: Core. The mono font on rail rows is identity. ui: the rows in `UiSiteNav`
 - **Anatomy.** A `<nav>` with a name, holding links in rows: at least `--row` tall (`--control-lg` at tablet width), `0 --space-3` padding, `--radius-field` corners, `--text-sm`, and `--text-muted`. Groups have a `--text-xs` semibold muted label and 2px gaps between rows.
 - **States.** Hover: `--row-hover` fill and `--text`. Current page (`aria-current="page"`): `--nav-current` fill, `--shadow-nav-current`, `--nav-current-text`, and medium weight; hover keeps that fill. `--nav-current` is a faint accent tint: `--accent` at 8% over `--surface-raised` in light, and `--accent` at 14% over transparent in dark. `--nav-current-text` is the first of `--accent`, `--text`, black, and white that reaches 4.5:1 over the tinted fill, both on the page and on a surface (composite a translucent fill over each first). Selected tabs use the same fill and rule. Current location in the page (`aria-current="location"`): `--text` in medium weight, with a 3×14 `--accent` pip at the leading edge, inset 4px, and no fill. Focus-visible: an inset `--focus` ring, because the rail and the drawer scroll.
 - **Phone.** At tablet width a section rail becomes a drawer. Its trigger is a secondary button at `--control-lg` with a three-line menu glyph (14×10, 1.5px lines) before the label. Without JavaScript the list opens in place, so the trigger is a `<details>` summary with the secondary button classes and a chevron after the label. Only the chevron is local.
+- **Horizontal strip.** A section strip laid out in a row uses these rows and states unchanged, the location pip included.
 - **Keyboard and screen reader.** Plain links in Tab order.
 - **Motion.** Fill, colour, and shadow change over `--duration-fast` with `--ease-out`.
 - **Forced colors.** Fills and shadows drop. Only the current page (`aria-current="page"`) takes a 2px `Highlight` border on its leading edge. The location pip keeps its shape with `forced-color-adjust: none` and a `Highlight` fill, so page and location still differ.
-- **List selection.** A selected row in a list or table uses `--row-selected`, a 2px inset `--accent` bar on its leading edge, and medium weight, with `aria-selected="true"`. Forced colors replace the bar with a `Highlight` border.
+- **List selection.** A 2px inset `--accent` bar on the leading edge and medium weight mark a selected row in a list or table, with `aria-selected="true"`. The bar carries the state: the row's `--row-selected` fill equals `--surface-raised`. Forced colors replace the bar with a `Highlight` border.
 
 ## Code block
 
@@ -262,7 +267,7 @@ Layer: Identity. ui: `UiCapture`.
 
 Layer: Identity. ui: `UiSiteHeader`, `UiSiteAppearancePicker`.
 
-- **Anatomy.** A static header at least 64px tall on `--bg` with a solid 1px `--text` rule below it. At the start is the project switcher: a `<details>` whose summary, a [quiet action](#quiet-action), shows the mono, semibold project name after a `~/` mark in `--project` (drawn by CSS, so it is not read), then a chevron. Its menu is a floating layer listing the shared project registry in the order it defines, as navigation rows, with the current project marked `aria-current="page"`. At the end are the site links (`--text-muted`, at least 44px tall, `--text` on hover) and the appearance picker: an icon-only segmented control at `lg`.
+- **Anatomy.** A static header at least 64px tall on `--bg` with a solid 1px `--text` rule below it. At the start is the project switcher: a `<details>` whose summary, a [quiet action](#quiet-action), shows the mono, semibold project name after a `~/` mark in `--project` (drawn by CSS, so it is not read), then a chevron. Its menu is a floating layer, with the dialog's tokens, listing the shared project registry in the order it defines, as navigation rows, with the current project marked `aria-current="page"`. At the end are the site links (`--text-muted`, at least 44px tall, `--text` on hover) and the appearance picker: an icon-only segmented control at `lg`.
 - **Phone.** With three or more links, the links take a second row.
 - **Keyboard and screen reader.** The summary is named "Project: <name>". Escape closes the menu and returns focus to the summary; moving focus out of it closes it. The chevron turns 180° while the menu is open, over `--duration-fast` with `--ease-out`.
 

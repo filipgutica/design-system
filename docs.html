@@ -13,13 +13,15 @@
 .header a { display: inline-flex; align-items: center; min-height: var(--control-lg); font-size: var(--text-sm); }
 .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
 .sidebar { position: sticky; top: var(--space-6); align-self: start; display: grid; gap: var(--space-1); padding-block: var(--space-6); }
-.sidebar a { display: flex; align-items: center; min-height: var(--control-lg); padding-inline: var(--space-3); color: var(--text-muted); border-radius: var(--radius-field); font-size: var(--text-sm); }
-/* In-page location: a short accent pip and stronger text, without a fill. */
-.sidebar a { position: relative; }
-.sidebar a[aria-current="location"] { color: var(--text); font-weight: var(--weight-medium); }
-.sidebar a[aria-current="location"]::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--accent); }
-/* Forced colors drop the fill, so the pip redraws in the system highlight. */
-@media (forced-colors: active) { .sidebar a[aria-current="location"]::before { forced-color-adjust: none; background: Highlight; } }
+/* Navigation rows: components.html#navigation-list, unchanged. Only the rail's placement and spacing are local. */
+.navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-field); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+.navlist a:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); text-decoration: none; }
+.navlist a[aria-current="page"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); font-weight: var(--weight-medium); }
+.navlist a[aria-current="location"] { color: var(--text); font-weight: var(--weight-medium); }
+.navlist a[aria-current="location"]::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--accent); }
+/* Fills and shadows drop. The current page takes a system border; the in-page location keeps
+   its pip, redrawn in the system highlight, so the two still differ. */
+@media (forced-colors: active) { .navlist a[aria-current="page"] { border-inline-start: 2px solid Highlight; } .navlist a[aria-current="location"]::before { forced-color-adjust: none; background: Highlight; } }
 main { min-width: 0; display: grid; gap: var(--space-12); padding-block: var(--space-8) var(--space-16); }
 section { display: grid; gap: var(--space-4); min-width: 0; }
 h1, h2 { font-family: var(--font-mono); }
@@ -46,7 +48,7 @@ p { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-r
 .definitions dt { font-family: var(--font-mono); font-size: var(--text-sm); }
 .definitions dd { margin: 0; color: var(--text-muted); }
 footer { padding-block: var(--space-6); border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: var(--text-sm); }
-@media (max-width: 800px) { .layout { grid-template-columns: minmax(0, 1fr); gap: 0; } .sidebar { position: static; display: flex; flex-wrap: wrap; gap: var(--space-2); padding-block: var(--space-3); border-bottom: 1px solid var(--border-subtle); } .sidebar a { padding-inline: var(--space-2); } main { padding-top: var(--space-6); } .definitions { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); } .definitions dd { margin-bottom: var(--space-3); } }
+@media (max-width: 800px) { .navlist a { min-height: var(--control-lg); } .layout { grid-template-columns: minmax(0, 1fr); gap: 0; } .sidebar { position: static; display: flex; flex-wrap: wrap; gap: var(--space-2); padding-block: var(--space-3); border-bottom: 1px solid var(--border-subtle); } .sidebar a { padding-inline: var(--space-2); } main { padding-top: var(--space-6); } .definitions { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); } .definitions dd { margin-bottom: var(--space-3); } }
 @media (max-width: 640px) { .frame { width: calc(100% - var(--space-8)); } main { gap: var(--space-8); } }
 </style>
 </head>
@@ -54,7 +56,7 @@ footer { padding-block: var(--space-6); border-top: 1px solid var(--border-subtl
 <div class="frame">
 <header class="header"><a class="brand" href="docs.html">Documentation example</a><nav aria-label="Reference formats"><a href="reference.html">Application</a><a href="product.html">Product page</a></nav></header>
 <div class="layout">
-<nav class="sidebar" aria-label="Documentation"><a href="#start">Getting started</a><a href="#structure">Structure</a><a href="#interaction">Interaction</a></nav>
+<nav class="sidebar navlist" aria-label="Documentation"><a href="#start">Getting started</a><a href="#structure">Structure</a><a href="#interaction">Interaction</a></nav>
 <main>
 <section id="start"><h1>A smaller set of design decisions.</h1><p>Keep navigation, examples, and reference text in a balanced frame. The content stays left aligned and the first useful step is easy to find.</p><p class="meta">Illustrative setup command</p><div class="command"><pre><code id="command">npm install @example/ui</code></pre><button class="quiet-action" type="button" id="copy" aria-label="Copy installation command">Copy</button></div><p id="copy-status" role="status"></p></section>
 <section id="structure"><h2>Let the structure do the work</h2><p>Use readable prose and clear section boundaries. Examples can use the full article width without stretching every paragraph.</p><dl class="definitions"><dt>Frame</dt><dd>The navigation and article are centered together.</dd><dt>Measure</dt><dd>Running text has a comfortable reading width.</dd><dt>Evidence</dt><dd>Commands, examples, and caveats stay near the task.</dd></dl></section>

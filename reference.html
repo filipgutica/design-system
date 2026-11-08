@@ -77,33 +77,51 @@
   .search input::-webkit-search-cancel-button:hover { background: var(--text); }
   kbd { font-size: var(--text-xs); color: var(--text-muted); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 var(--space-1); line-height: 18px; background: var(--surface-raised); }
 
-  /* Tabs */
-  /* The strip scrolls, so it clips on every side: the padding keeps the selected fill's shadow whole. */
-  .tabs { display: flex; gap: var(--space-1); overflow-x: auto; padding: var(--space-1); }
-  .tab { height: var(--control-sm); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-field); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-sm) / 1 var(--font-sans); cursor: pointer; white-space: nowrap; }
-  .tab:hover { background: var(--row-hover); color: var(--text); }
-  /* Selected filters take the navigation row's lifted fill, so nav and tabs share one selected state. */
+  /* Tabs, for the Foundations specimens: components.html#tabs, unchanged. */
+  .tablist { display: flex; width: max-content; max-width: 100%; overflow-x: auto; padding: var(--space-1); }
+  .tab { flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-field); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-sans); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  .tab:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); }
+  /* The selected tab takes the navigation row's lifted fill and motion: one selected state for both. */
   .tab[aria-selected="true"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); }
-  /* .tabs scrolls sideways and clips anything outside it, so the ring sits inside the tab. */
-  .tab:is(:focus-visible, .is-focus) { outline-offset: -2px; }
-  .tab .count { color: var(--text-muted); margin-left: var(--space-1); font-variant-numeric: tabular-nums; }
+  /* Inset: the tab list scrolls sideways, which would clip an outer ring. */
+  .tab:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
 
-  /* Segmented control */
-  /* components.html#segmented-control, without the glide: a raised pill thumb on a sunk, undivided track. */
-  .segmented { --thumb: var(--control-thumb); display: inline-flex; border: 1px solid transparent; border-radius: var(--radius-md); background: var(--field); box-shadow: var(--shadow-sink); }
+  /* Segmented control: components.html#segmented-control, unchanged. The theme picker and the
+     monitor filters use it. */
+  /* Segmented control: a raised pill thumb on a sunk, undivided track. */
+  .segmented { --item: var(--control-md); --glide-lead: 260ms; --glide-trail: 300ms; display: inline-flex; flex: none; border: 1px solid transparent; border-radius: var(--radius-md); background: var(--field); box-shadow: var(--shadow-sink); isolation: isolate; }
   /* The fill alone marks the track. The transparent border keeps its size, and forced colors draw it. */
-  .segmented button { position: relative; isolation: isolate; height: 28px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: var(--weight-medium) var(--text-xs) / 1 var(--font-sans); cursor: pointer; }
-  .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -1; border-radius: var(--radius-md); }
-  .segmented button:hover:not(:disabled, [aria-pressed="true"]) { color: var(--text); }
-  .segmented button:hover:not(:disabled, [aria-pressed="true"])::before { background: color-mix(in srgb, var(--thumb) 45%, transparent); }
+  .segmented[data-size="sm"] { --item: var(--control-sm); font-size: var(--text-sm); }
+  .segmented[data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
+  .segmented button { --depth: var(--flat); position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: inherit; cursor: pointer; }
+  .segmented[data-icon-only] button { width: var(--item); padding: 0; }
+  /* The thumb is inset inside each full-size button, so it floats on the track and the hit area keeps its size. */
+  .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -2; border-radius: var(--radius-md); pointer-events: none; }
+  .segmented button:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"]) { color: var(--text); }
+  .segmented button:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"])::before { background: color-mix(in srgb, var(--control-thumb) 45%, transparent); }
   /* The pressed label reads at 4.5:1 on its thumb, and an icon at 3:1 (--segmented-current-text). */
   .segmented button[aria-pressed="true"] { color: var(--segmented-current-text); }
-  .segmented button[aria-pressed="true"]::before { background: var(--thumb); box-shadow: var(--shadow-raise); }
-  /* Forced colors drop shadows, so the pressed option takes the system highlight. */
+  .segmented button[aria-pressed="true"]::before { z-index: -1; background: var(--control-thumb); box-shadow: var(--shadow-raise); }
+  .segmented button:disabled { opacity: 0.58; cursor: not-allowed; }
+  /* Motion answers only the reader: hover, and a change of choice, which the script marks with data-slide and the old thumb's edges. */
+  @media (prefers-reduced-motion: no-preference) {
+    .segmented button:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"]) { transition: color var(--duration-fast) var(--ease-out); }
+    .segmented[data-slide] button { transition: color var(--glide-lead) ease; }
+    .segmented[data-slide="right"] button[aria-pressed="true"]::before { animation: glide-left var(--glide-trail) ease, glide-right var(--glide-lead) ease; }
+    .segmented[data-slide="left"] button[aria-pressed="true"]::before { animation: glide-left var(--glide-lead) ease, glide-right var(--glide-trail) ease; }
+  }
+  @keyframes glide-left { from { left: var(--slide-left); } }
+  @keyframes glide-right { from { right: var(--slide-right); } }
+  .filters .count { color: var(--text-muted); font-variant-numeric: tabular-nums; }
   @media (forced-colors: active) {
-    .tab[aria-selected="true"] { border: 2px solid Highlight; padding-inline: calc(var(--space-3) - 2px); }
+    /* The lifted fill drops, so the selected tab takes a system border; the padding absorbs it. */
+    .tab[aria-selected="true"] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }
     .segmented button[aria-pressed="true"] { forced-color-adjust: none; color: HighlightText; }
     .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
+    /* The pressed option opts out of adjustment, so its ring would keep the accent. The ring sits on the track, so it takes the track's text colour. */
+    .segmented button[aria-pressed="true"]:is(:focus-visible, .is-focus) { outline-color: CanvasText; }
+    /* The pressed option opts out of adjustment, so its count takes the label's system colour. */
+    .filters .count { color: inherit; }
   }
 
   /* Unchecked choices for the Borders specimen: components.html#checkbox-and-radio */
@@ -113,7 +131,7 @@
 
   /* Control focus: a thin accent ring with a 2px gap and no glow, over the control's own shadow. */
   :is(.btn, .quiet-action, .segmented button):is(:focus-visible, .is-focus) { outline: 2px solid var(--accent); outline-offset: 2px; }
-  /* Inside the button, the outline hugs the thumb instead of crossing into the next option. */
+  /* Inside a segmented control, the ring hugs the thumb instead of crossing into the next option. */
   .segmented button:is(:focus-visible, .is-focus) { outline-offset: -2px; }
 
   /* List */
@@ -293,7 +311,7 @@
   .header-rule { display: block; height: 0; border-top: 1px solid var(--text); }
   .elevation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--bg); }
   .elevation > div { display: grid; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--surface-raised); font-size: var(--text-sm); }
-  .elevation .floating { box-shadow: var(--shadow-popover); }
+  .elevation .floating { border: 1px solid transparent; box-shadow: var(--shadow-popover); }
   .elevation .panel-sample { border: 1px solid transparent; box-shadow: var(--shadow-raise); }
   .elevation .field-sample { border: 1px solid var(--field-edge); border-radius: var(--radius-field); background: var(--field); box-shadow: var(--shadow-sink); }
 
@@ -306,7 +324,8 @@
     .detail { position: static; }
   }
   @media (max-width: 800px) {
-    .btn[data-size], .copy, .tab, .row, .segmented button { min-height: var(--control-lg); min-width: var(--control-lg); }
+    .btn[data-size], .copy, .row, .segmented button { min-height: var(--control-lg); min-width: var(--control-lg); }
+    .tab { min-height: var(--control-lg); }
     .shell { grid-template-columns: 1fr; height: auto; }
     main { overflow: visible; }
     .sidebar { flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--border-subtle); padding: var(--space-2) var(--space-6); gap: var(--space-2); }
@@ -362,7 +381,7 @@
     </div>
     <div class="sidebar-foot">
       <nav class="nav" aria-label="Reference formats"><a href="components.html">Component catalogue</a><a href="docs.html">Documentation example</a><a href="product.html">Product page example</a></nav>
-      <div class="segmented" role="group" aria-label="Theme">
+      <div class="segmented" role="group" aria-label="Theme" data-size="sm">
         <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
         <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
         <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
@@ -373,11 +392,11 @@
   <main>
     <div class="toolbar" id="monitors">
       <h1>Monitors</h1>
-      <div class="tabs" role="tablist" aria-label="Filter monitors">
-        <button class="tab" role="tab" aria-selected="true" data-filter="all">All<span class="count">6</span></button>
-        <button class="tab" role="tab" aria-selected="false" data-filter="alerting">Alerting<span class="count">2</span></button>
-        <button class="tab" role="tab" aria-selected="false" data-filter="warning">Warning<span class="count">1</span></button>
-        <button class="tab" role="tab" aria-selected="false" data-filter="nodata">No data<span class="count">1</span></button>
+      <div class="segmented filters" role="group" aria-label="Status" data-size="sm">
+        <button type="button" aria-pressed="true" data-filter="all">All<span class="count">6</span></button>
+        <button type="button" aria-pressed="false" data-filter="alerting">Alerting<span class="count">2</span></button>
+        <button type="button" aria-pressed="false" data-filter="warning">Warning<span class="count">1</span></button>
+        <button type="button" aria-pressed="false" data-filter="nodata">No data<span class="count">1</span></button>
       </div>
       <span class="spacer"></span>
       <label class="search"><svg class="icon"><use href="#i-search"/></svg><input id="search" type="search" placeholder="Filter monitors" aria-label="Filter monitors"><kbd>/</kbd></label>
@@ -602,7 +621,7 @@
             <li class="spec"><div class="spec-meta"><code>1px --border-subtle</code><span class="use">Figures, dividers, and the rule above a section heading</span></div><i class="line-subtle"></i></li>
             <li class="spec"><div class="spec-meta"><code>1px --border</code><span class="use">Unchecked checkbox and radio edges</span></div><div class="cluster" inert><label class="check"><input type="checkbox">Unchecked</label><label class="check"><input type="radio" name="border-radio">Radio</label></div></li>
             <li class="spec"><div class="spec-meta"><code>1px --text</code><span class="use">Solid rule below the shared site header</span></div><i class="header-rule"></i></li>
-            <li class="spec"><div class="spec-meta"><code>--nav-current, --shadow-nav-current</code><span class="use">Current page and selected tab: a lifted fill with a faint accent tint, <code>--nav-current-text</code>, and no border or underline</span></div><div inert><div class="tabs" role="tablist" aria-label="Selected tab sample"><button class="tab" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
+            <li class="spec"><div class="spec-meta"><code>--nav-current, --shadow-nav-current</code><span class="use">Current page and selected tab: a lifted fill with a faint accent tint, <code>--nav-current-text</code>, and no border or underline</span></div><div inert><div class="tablist" role="tablist" aria-label="Selected tab sample"><button class="tab" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
             <li class="spec"><div class="spec-meta"><code>3×14 --accent pip</code><span class="use">Current location in the page, with medium weight and no fill</span></div><span class="pip-sample">Thresholds</span></li>
             <li class="spec"><div class="spec-meta"><code>1px transparent</code><span class="use">Borderless controls retain a border for forced colors; pressed segmented thumbs rise without a ring</span></div><div inert><div class="segmented" role="group" aria-label="Raised thumb sample"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false">Board</button></div></div></li>
             <li class="spec"><div class="spec-meta"><code>tint without a visible border</code><span class="use">Callouts keep a transparent 1px border for forced colors</span></div><div class="callout warning"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><p>No data for 42 minutes.</p></div></li>
@@ -626,7 +645,7 @@
             <li class="spec"><div class="spec-meta"><code>2px solid --accent, offset 2px</code><span class="use">Controls that act or set a value, quiet actions included: one ring with no glow, over their own raise or sink shadow, the same width as the link and navigation outline. Pointer hover never draws focus.</span></div><div inert><button class="btn secondary is-focus" type="button" data-size="sm">Focused</button></div></li>
             <li class="spec"><div class="spec-meta"><code>--field-focus, --shadow-raise, accent edge at 35%</code><span class="use">Fields lift out of their well instead of drawing a ring. A transparent 2px outline keeps a ring in forced colors. The cue is below 3:1 by choice.</span></div><div inert><label class="search is-focus"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" value="latency" aria-label="Focused field sample"></label></div></li>
             <li class="spec"><div class="spec-meta"><code>2px solid --focus, offset 2px</code><span class="use">Links, navigation rows, and tabs keep the base outline.</span></div><a class="is-focus" href="docs.html">Documentation example</a></li>
-            <li class="spec"><div class="spec-meta"><code>offset -2px</code><span class="use">Only inside a scrolling or clipping parent, or a segmented control, with a comment that names the reason</span></div><div inert><div class="tabs" role="tablist" aria-label="Inset focus sample"><button class="tab is-focus" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
+            <li class="spec"><div class="spec-meta"><code>offset -2px</code><span class="use">Only inside a scrolling or clipping parent, or a segmented control, with a comment that names the reason</span></div><div inert><div class="tablist" role="tablist" aria-label="Inset focus sample"><button class="tab is-focus" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
             <li class="spec" data-token="--duration-fast"><div class="spec-meta"><code>--duration-fast</code><span class="value"></span></div><span class="use">Hover and press</span></li>
             <li class="spec" data-token="--duration"><div class="spec-meta"><code>--duration</code><span class="value"></span></div><span class="use">Menus, panels, and the switch knob</span></li>
             <li class="spec" data-token="--ease-out"><div class="spec-meta"><code>--ease-out</code><span class="value"></span></div><span class="use">Animate opacity or transform only where it explains a state change</span></li>
@@ -815,19 +834,60 @@
     list.querySelector(`[data-id="${selected}"]`)?.focus();
   });
 
-  const setFilter = (value) => {
-    filter = value;
-    document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.filter === value)));
-    renderList();
+  // components.html's segmented helper, unchanged. Each group passes its own buttons, so the
+  // inert Foundations specimens keep their pinned states.
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  // Segmented control. Each pressed button draws its own thumb in CSS. A change of choice starts
+  // the new thumb at the old one's edges, and CSS animates each edge home. Glides start only after
+  // the first frame, so a restored value shows at once. A newer choice ends an older glide.
+  const segmented = (group, onChange) => {
+    let ready = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => { ready = true; }));
+    let glide = 0;
+    const buttons = [...group.querySelectorAll('button')];
+    const clear = () => { delete group.dataset.slide; group.style.removeProperty('--slide-left'); group.style.removeProperty('--slide-right'); };
+    const press = (to) => {
+      const from = buttons.find((b) => b.getAttribute('aria-pressed') === 'true');
+      if (from === to) return;
+      if (ready && from && !reduced.matches) {
+        // An interrupted glide starts from where its thumb is now, read before the DOM changes.
+        const thumb = getComputedStyle(from, '::before');
+        const a = from.getBoundingClientRect();
+        const fromLeft = a.left + parseFloat(thumb.left);
+        const fromRight = a.right - parseFloat(thumb.right);
+        const b = to.getBoundingClientRect();
+        clear();
+        group.style.setProperty('--slide-left', `${fromLeft - b.left}px`);
+        group.style.setProperty('--slide-right', `${b.right - fromRight}px`);
+        const direction = b.left + b.right > fromLeft + fromRight ? 'right' : 'left';
+        group.dataset.slide = direction;
+        const id = ++glide;
+        const end = () => { if (id === glide) clear(); };
+        requestAnimationFrame(() => {
+          const trailing = group.getAnimations({ subtree: true }).find((x) => x.animationName === (direction === 'right' ? 'glide-left' : 'glide-right'));
+          if (trailing) trailing.finished.then(end, end); else end();
+        });
+      } else clear();
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === to)));
+      onChange?.(to);
+    };
+    group.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b && !b.disabled) press(b); });
+    return press;
   };
-  document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => setFilter(tab.dataset.filter)));
+
+  const filters = document.querySelector('.filters');
+  const pressFilter = segmented(filters, (b) => { filter = b.dataset.filter; renderList(); });
   const search = document.getElementById('search');
   search.addEventListener('input', () => { query = search.value.trim().toLowerCase(); renderList(); });
   document.addEventListener('keydown', (e) => {
     const editing = e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]');
     if (e.key === '/' && !editing) { e.preventDefault(); search.focus(); }
   });
-  document.getElementById('clear-filter').addEventListener('click', () => { query = ''; search.value = ''; setFilter('all'); });
+  document.getElementById('clear-filter').addEventListener('click', () => {
+    query = ''; search.value = '';
+    pressFilter(filters.querySelector('[data-filter="all"]'));
+    renderList();
+  });
 
   // Foundations: resolved token values and contrast.
   const foundations = document.getElementById('foundations');
@@ -882,19 +942,21 @@
   };
 
   // Theme control: system removes the attribute so prefers-color-scheme decides.
-  const setTheme = (choice) => {
+  const themeGroup = document.querySelector('[aria-label="Theme"]');
+  const pressTheme = segmented(themeGroup, (b) => {
+    const choice = b.dataset.themeChoice;
     if (choice === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', choice);
-    document.querySelectorAll('[data-theme-choice]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeChoice === choice)));
     try { localStorage.setItem('dl-theme', choice); } catch (e) {}
     renderFoundations();
-  };
-  document.querySelectorAll('[data-theme-choice]').forEach((b) => b.addEventListener('click', () => setTheme(b.dataset.themeChoice)));
+  });
   // In System mode an OS appearance change swaps the values without a click.
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderFoundations);
 
   let saved = 'system';
   try { saved = localStorage.getItem('dl-theme') || 'system'; } catch (e) {}
-  setTheme(saved);
+  // The saved choice is pressed before the first frame, so it shows without a glide.
+  pressTheme(themeGroup.querySelector(`[data-theme-choice="${saved}"]`) || themeGroup.querySelector('button'));
+  renderFoundations();
   renderList();
 })();
 </script>
