@@ -331,9 +331,9 @@
   .example-stage > * { min-width: 0; }
   /* The frame draws the edge, so the source is flat and full width, with one hairline above it.
      Copy comes first in DOM order and is placed in the source's top right corner. */
-  .example .code { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; max-width: none; border-width: 1px 0 0; border-color: var(--border-subtle); border-radius: 0; box-shadow: none; }
-  .example .code pre { grid-row: 1; grid-column: 1; }
-  .example .code .copy { grid-row: 1; grid-column: 2; margin: var(--space-1); }
+  .example > .code { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; max-width: none; border-width: 1px 0 0; border-color: var(--border-subtle); border-radius: 0; box-shadow: none; }
+  .example > .code > pre { grid-row: 1; grid-column: 1; }
+  .example > .code > .copy { grid-row: 1; grid-column: 2; margin: var(--space-1); }
 
   /* ================= Identity: terminal folio ================= */
 
