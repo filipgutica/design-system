@@ -16,13 +16,17 @@
   .sidebar { border-right: 1px solid var(--border-subtle); background: var(--surface); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-4); min-height: 0; }
   .workspace { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2); font-weight: var(--weight-semibold); }
   .workspace .mark { width: 20px; height: 20px; border-radius: var(--radius-sm); background: var(--text); color: var(--bg); display: grid; place-items: center; font-size: var(--text-xs); }
-  .nav { display: grid; gap: 2px; }
-  .nav-label { font-size: var(--text-xs); color: var(--text-muted); padding: var(--space-2) var(--space-2) var(--space-1); }
-  .nav a { display: flex; align-items: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-2); border-radius: var(--radius-field); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: background var(--duration-fast) var(--ease-out); }
-  .nav a:hover { background: var(--row-hover); color: var(--text); }
-  .nav a[aria-current="page"] { background: var(--nav-current); color: var(--nav-current-text); font-weight: var(--weight-medium); box-shadow: var(--shadow-nav-current); }
-  @media (forced-colors: active) { .nav a[aria-current="page"] { border-inline-start: 2px solid Highlight; } }
-  .nav .count { margin-left: auto; font-size: var(--text-xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  /* Navigation rows: components.html#navigation-list, unchanged. The sidebar adds icons and counts. */
+  .navlist { display: grid; gap: 2px; width: min(100%, 240px); }
+  .navlist .group-label { padding: 0 var(--space-3) var(--space-1); color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--weight-semibold); }
+  .navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-field); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  .navlist a:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); text-decoration: none; }
+  .navlist a[aria-current="page"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); font-weight: var(--weight-medium); }
+  /* Inset: the rail and the drawer scroll. */
+  .navlist a:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  @media (forced-colors: active) { .navlist a[aria-current="page"] { border-inline-start: 2px solid Highlight; } }
+  .sidebar .navlist a { gap: var(--space-2); }
+  .sidebar .navlist .count { margin-left: auto; font-size: var(--text-xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
   .sidebar-foot { margin-top: auto; }
 
   /* Main */
@@ -38,7 +42,7 @@
   .lede { color: var(--text-muted); max-width: var(--measure); }
   .muted { color: var(--text-muted); }
   .mono { font-family: var(--font-mono); }
-  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .caption { color: var(--text-muted); font-size: var(--text-xs); }
 
   /* Icons */
@@ -60,7 +64,6 @@
   .quiet-action:is(:hover, .is-hover):where(:not(:disabled)) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
   .quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 18%, transparent); }
   .quiet-action:disabled { opacity: 0.58; cursor: not-allowed; }
-  .copy { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-sm); padding: 0 var(--space-3); color: var(--text-muted); font-size: var(--text-sm); }
   /* .is-focus pins the focus state in the Focus and motion specimens. */
   .is-focus { outline: 2px solid var(--focus); outline-offset: 2px; }
 
@@ -123,9 +126,9 @@
     .filters .count { color: inherit; }
   }
 
-  /* Unchecked choices for the Borders specimen: components.html#checkbox-and-radio */
-  .cluster .check { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-md); }
-  .check input { appearance: none; flex: none; width: 18px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); }
+  /* Unchecked choices for the Borders specimen: components.html#checkbox-and-radio, unchanged. */
+  .check { display: inline-flex; align-items: center; gap: 9px; min-height: var(--control-md); cursor: pointer; }
+  .check input { --depth: none; appearance: none; display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); cursor: inherit; }
   .check input[type="radio"] { border-radius: 50%; }
 
   /* Control focus: a thin accent ring with a 2px gap and no glow, over the control's own shadow. */
@@ -181,12 +184,12 @@
   .chart .line { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linejoin: round; }
   .chart .area { fill: color-mix(in srgb, var(--accent) 10%, transparent); stroke: none; }
 
-  /* Badge: the same tone supplies a 22% tint, readable text, and a 6px dot. */
-  .badge { display: inline-flex; align-items: center; gap: 6px; height: 20px; padding: 0 var(--space-2); border: 1px solid transparent; border-radius: var(--radius-pill); font-size: var(--text-xs); font-weight: var(--weight-medium); background: var(--surface-hover); color: var(--text-muted); white-space: nowrap; }
-  .badge:is(.warning, .success, .danger, .info) { background: color-mix(in srgb, var(--tone) 22%, var(--surface-raised)); color: light-dark(color-mix(in srgb, var(--tone) 75%, var(--text)), color-mix(in srgb, var(--tone) 85%, var(--text))); }
-  .badge:is(.warning, .success, .danger, .info)::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-  .badge.warning { --tone: var(--warning); }
+  /* Badge: components.html#badge, unchanged. The same tone supplies a 22% tint, readable text, and a 6px dot. */
+  .badge { display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 3px 9px; border: 1px solid transparent; border-radius: var(--radius-pill); background: var(--surface-hover); color: var(--text-muted); font: var(--weight-medium) var(--text-xs) / 1.25 var(--font-sans); white-space: nowrap; }
+  .badge:is(.success, .warning, .danger, .info) { background: color-mix(in srgb, var(--tone) 22%, var(--surface-raised)); color: light-dark(color-mix(in srgb, var(--tone) 75%, var(--text)), color-mix(in srgb, var(--tone) 85%, var(--text))); }
+  .badge:is(.success, .warning, .danger, .info)::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .badge.success { --tone: var(--success); }
+  .badge.warning { --tone: var(--warning); }
   .badge.danger { --tone: var(--danger); }
   .badge.info { --tone: var(--info); }
 
@@ -205,25 +208,43 @@
   .props dd { margin: 0; overflow-wrap: anywhere; }
   .props .mono { font-family: var(--font-mono); font-size: var(--text-xs); }
 
-  /* Callout */
-  .callout { display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3); border: 1px solid transparent; border-radius: var(--radius-lg); font-size: var(--text-sm); background: var(--surface); color: var(--text); max-width: var(--measure); }
-  .callout .icon { margin-top: 2px; color: var(--text-muted); }
-  .callout.warning { background: var(--warning-soft); }
-  .callout.warning .icon { color: var(--warning); }
+  /* Alert: components.html#alert, unchanged. */
+  .alert { display: flex; align-items: flex-start; gap: var(--space-3); max-width: var(--measure); padding: var(--space-3) var(--space-4); border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface); color: var(--text); font-size: var(--text-sm); }
+  .alert .icon { margin-top: 2px; color: var(--text-muted); }
+  .alert.success { background: var(--success-soft); } .alert.success .icon { color: var(--success); }
+  .alert.warning { background: var(--warning-soft); } .alert.warning .icon { color: var(--warning); }
+  .alert.danger { background: var(--danger-soft); } .alert.danger .icon { color: var(--danger); }
+  .alert.info { background: var(--info-soft); } .alert.info .icon { color: var(--info); }
 
-  /* Code block */
-  .code { border: 1px solid transparent; box-shadow: var(--shadow-surface); border-radius: var(--radius-lg); background: var(--code-bg); min-width: 0; }
-  .code-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3); border-bottom: 1px solid var(--border-subtle); font-size: var(--text-xs); color: var(--text-muted); }
-  .code pre { margin: 0; padding: var(--space-3); overflow: auto; font-size: var(--text-xs); line-height: 1.6; color: var(--code-text); max-height: 320px; }
-  .code .k { color: var(--code-key); }
-  .code .s { color: var(--code-string); }
-  .code .n { color: var(--code-number); }
-  .code .c { color: var(--code-comment); }
+  /* Code block: components.html#code-block, unchanged. */
+  .code { width: 100%; max-width: var(--measure); min-width: 0; overflow: hidden; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--code-bg); color: var(--code-text); box-shadow: var(--shadow-surface); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  .code-head { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; padding: 4px var(--space-1) 4px var(--space-3); border-bottom: 1px solid var(--border-subtle); background: var(--surface-raised); font-size: var(--text-xs); }
+  .code-head b { font-weight: var(--weight-semibold); }
+  .code-head .lang { color: var(--text-muted); }
+  /* Copy is a quiet action; this sets its size and place. */
+  .copy { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: var(--control-lg); min-height: var(--control-lg); margin-left: auto; padding: var(--space-1) 6px; color: inherit; }
+  /* The code block has its own palette, so its Copy keeps the plate's text colour on hover. */
+  .code .copy:is(:hover, .is-hover) { color: inherit; }
+  /* Inset: the code block clips its content. */
+  .code pre:is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: -2px; }
+  .code .copy.quiet-action:is(:focus-visible, .is-focus) { outline-offset: -2px; }
+  .code pre { margin: 0; padding: var(--space-4); overflow: auto; max-height: 32rem; font-size: var(--text-code); line-height: 1.65; tab-size: 2; }
+  /* Each line is a baseline-aligned row, so a prompt or line number sits on the text's baseline. */
+  .code .line { display: flex; align-items: baseline; min-height: 1.65em; }
+  .code .line > span { white-space: pre; }
+  .code .ln { min-width: 2.5em; padding-right: 1em; flex: none; text-align: right; color: var(--text-muted); user-select: none; }
+  .code .k { color: var(--code-key); } .code .s { color: var(--code-string); } .code .n { color: var(--code-number); } .code .c { color: var(--code-comment); }
+  .code.compact { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .code.compact pre { padding: var(--space-2) var(--space-3); }
+  .code.compact .copy { margin: var(--space-1); }
 
-  /* Command plate: dark in both themes and tinted with the hue; the $ prompt is drawn by CSS, so copied and spoken text omit it. */
-  .terminal { margin: 0; box-shadow: var(--shadow-surface); border: 1px solid var(--command-border); border-radius: var(--radius-lg); background: var(--command-bg); overflow: hidden; }
-  .terminal pre { margin: 0; padding: var(--space-3) var(--space-4); overflow-x: auto; color: var(--terminal-text); font-size: var(--text-code); }
-  .terminal pre::before { content: "$ " / ""; color: var(--project-dark); }
+  /* Command plate: components.html#command-plate, unchanged. */
+  /* Rings on the plate use --project-dark, so the control ring on Copy reads on the dark plate. */
+  .code.command { --code-text: var(--terminal-text); --accent: var(--project-dark); --focus: var(--project-dark); border-color: var(--command-border); background: var(--command-bg); color: var(--terminal-text); }
+  .code.command .code-head { border-color: var(--command-border); background: transparent; color: var(--terminal-caption-text); }
+  .code.command .code-head .lang { color: var(--terminal-caption-text); }
+  /* The prompt is drawn by CSS, so copied and spoken text omit it. */
+  .code.command .line::before { content: "$ " / ""; flex: none; white-space: pre; color: var(--project-dark); user-select: none; }
 
   /* Table */
   .table-wrap { overflow-x: auto; }
@@ -304,9 +325,9 @@
   .shape-box { display: block; width: 96px; height: 56px; border: 1px solid var(--border); background: var(--surface-raised); }
   .line-subtle { display: block; height: 0; border-top: 1px solid var(--border-subtle); }
   .line-border { display: block; height: 0; border-top: 1px solid var(--border); }
-  .pip-sample { position: relative; display: inline-flex; align-items: center; height: var(--control-sm); padding: 0 var(--space-3); font-size: var(--text-sm); font-weight: var(--weight-medium); }
+  .pip-sample { position: relative; display: inline-flex; align-items: center; min-height: var(--row); padding: 0 var(--space-3); font-size: var(--text-sm); font-weight: var(--weight-medium); }
   .pip-sample::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--accent); }
-  .nav-current-sample { display: inline-flex; align-items: center; height: var(--control-sm); padding: 0 var(--space-3); border-radius: var(--radius-field); background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); font-size: var(--text-sm); font-weight: var(--weight-medium); }
+  .nav-current-sample { display: inline-flex; align-items: center; min-height: var(--row); padding: 0 var(--space-3); border-radius: var(--radius-field); background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); font-size: var(--text-sm); font-weight: var(--weight-medium); }
   .header-rule { display: block; height: 0; border-top: 1px solid var(--text); }
   .elevation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--bg); }
   .elevation > div { display: grid; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--surface-raised); font-size: var(--text-sm); }
@@ -324,12 +345,12 @@
     .detail { position: static; }
   }
   @media (max-width: 800px) {
-    .btn[data-size], .copy, .row, .segmented button { min-height: var(--control-lg); min-width: var(--control-lg); }
+    .btn[data-size], .row, .segmented button { min-height: var(--control-lg); min-width: var(--control-lg); }
     .tab { min-height: var(--control-lg); }
     .shell { grid-template-columns: 1fr; height: auto; }
     main { overflow: visible; }
     .sidebar { flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--border-subtle); padding: var(--space-2) var(--space-6); gap: var(--space-2); }
-    .sidebar .nav, .sidebar .nav-label { display: none; }
+    .sidebar .navlist { display: none; }
     .sidebar-foot { margin: 0 0 0 auto; }
     .toolbar .search { order: 3; flex: 1 1 100%; }
     .toolbar .search input { width: 100%; }
@@ -372,15 +393,14 @@
   <aside class="sidebar" aria-label="Workspace">
     <div class="workspace"><span class="mark" aria-hidden="true">A</span>Analytics</div>
     <div>
-      <div class="nav-label">Workspace</div>
-      <nav class="nav" aria-label="Main">
+      <nav class="navlist" aria-label="Main"><span class="group-label">Workspace</span>
         <a href="#monitors" aria-current="page"><svg class="icon"><use href="#i-list"/></svg>Monitors<span class="count">6</span></a>
         <a href="components.html"><svg class="icon"><use href="#i-chart"/></svg>Components</a>
         <a href="#foundations"><svg class="icon"><use href="#i-doc"/></svg>Foundations</a>
       </nav>
     </div>
     <div class="sidebar-foot">
-      <nav class="nav" aria-label="Reference formats"><a href="components.html">Component catalogue</a><a href="docs.html">Documentation example</a><a href="product.html">Product page example</a></nav>
+      <nav class="navlist" aria-label="Reference formats"><a href="components.html">Component catalogue</a><a href="docs.html">Documentation example</a><a href="product.html">Product page example</a></nav>
       <div class="segmented" role="group" aria-label="Theme" data-size="sm">
         <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
         <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
@@ -456,12 +476,12 @@
             <li class="spec" data-token="--text-3xl"><div class="spec-meta"><code>--text-3xl</code><span class="value"></span><span class="use">Documentation title, in mono</span></div><p class="spec-sample t-doc-title">Design language</p></li>
             <li class="spec" data-token="--text-2xl"><div class="spec-meta"><code>--text-2xl</code><span class="value"></span><span class="use">Largest application title</span></div><p class="spec-sample" style="font-size:var(--text-2xl)">Quiet surfaces, clear hierarchy</p></li>
             <li class="spec" data-token="--text-xl"><div class="spec-meta"><code>--text-xl</code><span class="value"></span><span class="use">Section heading, in mono</span></div><p class="spec-sample" style="font-size:var(--text-xl)">Quiet surfaces, clear hierarchy</p></li>
-            <li class="spec" data-token="--text-lg"><div class="spec-meta"><code>--text-lg</code><span class="value"></span></div><p class="spec-sample" style="font-size:var(--text-lg)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--text-lg"><div class="spec-meta"><code>--text-lg</code><span class="value"></span><span class="use">Subheadings (h3 and below) and large controls</span></div><p class="spec-sample" style="font-size:var(--text-lg)">Quiet surfaces, clear hierarchy</p></li>
             <li class="spec" data-token="--text-reading"><div class="spec-meta"><code>--text-reading</code><span class="value"></span><span class="use">Paragraphs and article text, with <code>--leading</code> and <code>--measure</code></span></div><p class="spec-sample" style="font-size:var(--text-reading)">Quiet surfaces, clear hierarchy</p></li>
             <li class="spec" data-token="--text-md"><div class="spec-meta"><code>--text-md</code><span class="value"></span><span class="use">Controls and dense application content</span></div><p class="spec-sample" style="font-size:var(--text-md)">Quiet surfaces, clear hierarchy</p></li>
             <li class="spec" data-token="--text-sm"><div class="spec-meta"><code>--text-sm</code><span class="value"></span><span class="use">Secondary text and figure captions</span></div><p class="spec-sample" style="font-size:var(--text-sm)">Quiet surfaces, clear hierarchy</p></li>
-            <li class="spec" data-token="--text-xs"><div class="spec-meta"><code>--text-xs</code><span class="value"></span></div><p class="spec-sample" style="font-size:var(--text-xs)">Quiet surfaces, clear hierarchy</p></li>
-            <li class="spec" data-token="--text-code"><div class="spec-meta"><code>--text-code</code><span class="value"></span></div><p class="spec-sample"><code class="t-code">latency_p95 &gt; 300</code></p></li>
+            <li class="spec" data-token="--text-xs"><div class="spec-meta"><code>--text-xs</code><span class="value"></span><span class="use">Badges, navigation group labels, and code block headers</span></div><p class="spec-sample" style="font-size:var(--text-xs)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--text-code"><div class="spec-meta"><code>--text-code</code><span class="value"></span><span class="use">Inline code, source code, and command plates</span></div><p class="spec-sample"><code class="t-code">latency_p95 &gt; 300</code></p></li>
           </ul>
 
           <h4>Line height, weight, and tracking</h4>
@@ -483,12 +503,8 @@
             <li class="spec"><div class="spec-meta"><span>Reading text and links</span><code>--text-reading --leading --measure</code><span class="use">Underline links in prose</span></div><p class="spec-sample t-reading">A shared language for personal products and tools. The <a href="docs.html">documentation example</a> shows it in a full page.</p></li>
             <li class="spec"><div class="spec-meta"><span>Secondary text</span><code>--text-sm --text-muted</code></div><p class="spec-sample t-secondary">Updated 4 minutes ago by the nightly sync.</p></li>
             <li class="spec"><div class="spec-meta"><span>Inline code</span><code>--font-mono --text-code</code></div><p class="spec-sample">Set <code class="t-code">--measure</code> on reading text.</p></li>
-            <li class="spec"><div class="spec-meta"><span>Shell command</span><code>--command-bg --project-dark</code><span class="use">A command plate tinted with the hue, with the <code>$</code> prompt drawn by CSS</span></div><figure class="terminal spec-sample"><pre tabindex="0" role="region" aria-label="Sample install command">pnpm install --frozen-lockfile</pre></figure></li>
-            <li class="spec"><div class="spec-meta"><span>Source code</span><code>--code-bg --code-*</code><span class="use">A theme-matched well with syntax colors and no prompt</span></div><div class="code spec-sample"><pre><span class="c">// Sample monitor</span>
-{
-  <span class="k">"metric"</span>: <span class="s">"latency_p95"</span>,
-  <span class="k">"threshold"</span>: <span class="n">300</span>
-}</pre></div></li>
+            <li class="spec"><div class="spec-meta"><span>Shell command</span><code>--command-bg --project-dark</code><span class="use">A command plate tinted with the hue, with the <code>$</code> prompt drawn by CSS</span></div><div class="code command compact spec-sample"><pre tabindex="0" role="region" aria-label="Sample install command"><code><span class="line"><span>pnpm install --frozen-lockfile</span></span></code></pre></div></li>
+            <li class="spec"><div class="spec-meta"><span>Source code</span><code>--code-bg --code-*</code><span class="use">A theme-matched well with syntax colors and no prompt</span></div><div class="code spec-sample"><pre tabindex="0" role="region" aria-label="Sample monitor"><code><span class="line"><span><span class="c">// Sample monitor</span></span></span><span class="line"><span>{</span></span><span class="line"><span>  <span class="k">"metric"</span>: <span class="s">"latency_p95"</span>,</span></span><span class="line"><span>  <span class="k">"threshold"</span>: <span class="n">300</span></span></span><span class="line"><span>}</span></span></code></pre></div></li>
           </ul>
         </section>
 
@@ -501,15 +517,15 @@
             <li class="swatch" data-token="--bg"><i class="chip" aria-hidden="true"></i><code>--bg</code><span class="value"></span><span class="use">Page canvas</span></li>
             <li class="swatch" data-token="--surface"><i class="chip" aria-hidden="true"></i><code>--surface</code><span class="value"></span><span class="use">Wells: code, screenshots, figures</span></li>
             <li class="swatch" data-token="--surface-raised"><i class="chip" aria-hidden="true"></i><code>--surface-raised</code><span class="value"></span><span class="use">Panels and floating layers</span></li>
-            <li class="swatch" data-token="--surface-hover"><i class="chip" aria-hidden="true"></i><code>--surface-hover</code><span class="value"></span><span class="use">Neutral badges and control tracks</span></li>
+            <li class="swatch" data-token="--surface-hover"><i class="chip" aria-hidden="true"></i><code>--surface-hover</code><span class="value"></span><span class="use">Neutral badges, slider and progress tracks, and radio card hover</span></li>
             <li class="swatch" data-token="--field"><i class="chip" aria-hidden="true"></i><code>--field</code><span class="value"></span><span class="use">Sunk inputs, selects, tracks, and selected radio cards</span></li>
             <li class="swatch" data-token="--field-edge"><i class="chip" aria-hidden="true"></i><code>--field-edge</code><span class="value"></span><span class="use">Field border: transparent in light, a faint edge in dark</span></li>
-            <li class="swatch" data-token="--control-thumb"><i class="chip" aria-hidden="true"></i><code>--control-thumb</code><span class="value"></span><span class="use">Secondary buttons and segmented thumbs</span></li>
+            <li class="swatch" data-token="--control-thumb"><i class="chip" aria-hidden="true"></i><code>--control-thumb</code><span class="value"></span><span class="use">Secondary buttons, segmented thumbs, and the focused field's default fill</span></li>
             <li class="swatch" data-token="--field-focus"><i class="chip" aria-hidden="true"></i><code>--field-focus</code><span class="value"></span><span class="use">A focused field's lifted fill; <code>--field</code> where field text would miss 4.5:1 on the lift</span></li>
             <li class="swatch" data-token="--nav-current"><i class="chip" aria-hidden="true"></i><code>--nav-current</code><span class="value"></span><span class="use">Current navigation row and selected tab, with <code>--shadow-nav-current</code></span></li>
             <li class="swatch" data-token="--nav-current-text"><i class="chip" aria-hidden="true"></i><code>--nav-current-text</code><span class="value"></span><span class="use">Text on the current row and selected tab: the first of <code>--accent</code>, <code>--text</code>, black, and white that reaches 4.5:1 on the tinted fill</span></li>
             <li class="swatch" data-token="--segmented-current-text"><i class="chip" aria-hidden="true"></i><code>--segmented-current-text</code><span class="value"></span><span class="use">The selected segmented label: the first of <code>--accent</code>, <code>--text</code>, black, and white that reaches 4.5:1 on the thumb (3:1 for an icon)</span></li>
-            <li class="swatch" data-token="--row-hover"><i class="chip" aria-hidden="true"></i><code>--row-hover</code><span class="value"></span><span class="use">Navigation row hover</span></li>
+            <li class="swatch" data-token="--row-hover"><i class="chip" aria-hidden="true"></i><code>--row-hover</code><span class="value"></span><span class="use">Hover on navigation rows, tabs, ghost buttons, and listbox options</span></li>
             <li class="swatch" data-token="--row-selected"><i class="chip" aria-hidden="true"></i><code>--row-selected</code><span class="value"></span><span class="use">Selected list row</span></li>
             <li class="swatch" data-token="--overlay"><i class="chip" aria-hidden="true"></i><code>--overlay</code><span class="value"></span><span class="use">Backdrop behind dialogs and drawers</span></li>
           </ul>
@@ -519,7 +535,7 @@
             <li class="swatch" data-token="--text" data-on="--bg --surface-raised" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--text</code><span class="value"></span><span class="ratio"></span><span class="use">Essential labels and instructions</span></li>
             <li class="swatch" data-token="--text-muted" data-on="--bg --surface" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--text-muted</code><span class="value"></span><span class="ratio"></span><span class="use">Secondary information and metadata</span></li>
             <li class="swatch" data-token="--border-subtle"><i class="chip" aria-hidden="true"></i><code>--border-subtle</code><span class="value"></span><span class="use">Figures and dividers</span></li>
-            <li class="swatch" data-token="--border" data-on="--bg --surface-hover" data-min="3"><i class="chip" aria-hidden="true"></i><code>--border</code><span class="value"></span><span class="ratio"></span><span class="use">Unchecked choices and switch edges</span></li>
+            <li class="swatch" data-token="--border" data-on="--bg --surface-hover" data-min="3"><i class="chip" aria-hidden="true"></i><code>--border</code><span class="value"></span><span class="ratio"></span><span class="use">Unchecked checkbox and radio edges; the off switch track mixes it into <code>--field</code></span></li>
           </ul>
 
           <h4>Identity, links, and focus</h4>
@@ -529,23 +545,23 @@
             <li class="swatch" data-token="--accent" data-on="--bg --surface-raised" data-min="3"><i class="chip" aria-hidden="true"></i><code>--accent</code><span class="value"></span><span class="ratio"></span><span class="use">Primary action fill, marks, current items, checked controls; 4.5:1 where it colors text</span></li>
             <li class="swatch" data-token="--accent-text" data-on="--accent --button-hover" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--accent-text</code><span class="value"></span><span class="ratio"></span><span class="use">Primary button label</span></li>
             <li class="swatch" data-token="--button-hover" data-fg="var(--accent-text)" data-on="--button-hover" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--button-hover</code><span class="value"></span><span class="ratio"></span><span class="use">Primary button hover</span></li>
-            <li class="swatch" data-token="--accent-hover"><i class="chip" aria-hidden="true"></i><code>--accent-hover</code><span class="value"></span></li>
+            <li class="swatch" data-token="--accent-hover"><i class="chip" aria-hidden="true"></i><code>--accent-hover</code><span class="value"></span><span class="use">No core component reads it; it mirrors <code>--color-accent-hover</code> in <code>@filipgutica/ui</code></span></li>
             <li class="swatch" data-token="--link" data-on="--bg --surface-raised" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--link</code><span class="value"></span><span class="ratio"></span><span class="use">Links</span></li>
-            <li class="swatch" data-token="--focus" data-on="--bg --surface" data-min="3"><i class="chip" aria-hidden="true"></i><code>--focus</code><span class="value"></span><span class="ratio"></span><span class="use">Link and navigation focus</span></li>
+            <li class="swatch" data-token="--focus" data-on="--bg --surface" data-min="3"><i class="chip" aria-hidden="true"></i><code>--focus</code><span class="value"></span><span class="ratio"></span><span class="use">Focus on links, navigation rows, tabs, listbox options, and list rows</span></li>
           </ul>
 
           <h4>Status</h4>
-          <p class="note">Status colors mean state and go on icons beside a text label. Callouts use the soft-tint tokens. Badges mix 22% tone over the raised surface and 75% tone with text in light, 85% in dark.</p>
+          <p class="note">Status colors mean state and go on icons beside a text label. Alerts use the soft-tint tokens. Badges mix 22% tone over the raised surface and 75% tone with text in light, 85% in dark.</p>
           <div class="cluster"><span class="badge success">Healthy</span><span class="badge warning">Warning</span><span class="badge danger">Alerting</span><span class="badge info">Running</span><span class="badge">No data</span></div>
           <ul class="swatches">
             <li class="swatch" data-token="--success" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--success</code><span class="value"></span><span class="ratio"></span></li>
-            <li class="swatch" data-token="--success-soft" data-fg="var(--text)" data-on="--success-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--success-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Callout text on its tint</span></li>
+            <li class="swatch" data-token="--success-soft" data-fg="var(--text)" data-on="--success-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--success-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Alert text on its tint</span></li>
             <li class="swatch" data-token="--warning" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--warning</code><span class="value"></span><span class="ratio"></span></li>
-            <li class="swatch" data-token="--warning-soft" data-fg="var(--text)" data-on="--warning-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--warning-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Callout text on its tint</span></li>
+            <li class="swatch" data-token="--warning-soft" data-fg="var(--text)" data-on="--warning-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--warning-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Alert text on its tint</span></li>
             <li class="swatch" data-token="--danger" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--danger</code><span class="value"></span><span class="ratio"></span></li>
-            <li class="swatch" data-token="--danger-soft" data-fg="var(--text)" data-on="--danger-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--danger-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Callout text on its tint</span></li>
+            <li class="swatch" data-token="--danger-soft" data-fg="var(--text)" data-on="--danger-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--danger-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Alert text on its tint</span></li>
             <li class="swatch" data-token="--info" data-on="--bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--info</code><span class="value"></span><span class="ratio"></span></li>
-            <li class="swatch" data-token="--info-soft" data-fg="var(--text)" data-on="--info-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--info-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Callout text on its tint</span></li>
+            <li class="swatch" data-token="--info-soft" data-fg="var(--text)" data-on="--info-soft" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--info-soft</code><span class="value"></span><span class="ratio"></span><span class="use">Alert text on its tint</span></li>
           </ul>
 
           <h4>Code and terminal</h4>
@@ -563,7 +579,7 @@
             <li class="swatch" data-token="--terminal"><i class="chip" aria-hidden="true"></i><code>--terminal</code><span class="value"></span><span class="use">Terminal capture plate, in both themes</span></li>
             <li class="swatch" data-token="--terminal-text" data-on="--terminal" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--terminal-text</code><span class="value"></span><span class="ratio"></span></li>
             <li class="swatch" data-token="--terminal-border"><i class="chip" aria-hidden="true"></i><code>--terminal-border</code><span class="value"></span><span class="use">Terminal plate edge</span></li>
-            <li class="swatch" data-token="--terminal-caption"><i class="chip" aria-hidden="true"></i><code>--terminal-caption</code><span class="value"></span></li>
+            <li class="swatch" data-token="--terminal-caption"><i class="chip" aria-hidden="true"></i><code>--terminal-caption</code><span class="value"></span><span class="use">Status-line caption under a terminal capture</span></li>
             <li class="swatch" data-token="--terminal-caption-text" data-on="--terminal-caption" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--terminal-caption-text</code><span class="value"></span><span class="ratio"></span></li>
           </ul>
         </section>
@@ -607,9 +623,9 @@
           <p class="note">Pill buttons, rounded fields and toggle cards, large-radius panels, and inline corners. Cards never take a pill.</p>
           <ul class="specs">
             <li class="spec" data-token="--radius-sm"><div class="spec-meta"><code>--radius-sm</code><span class="value"></span><span class="use">Inline elements and checkboxes</span></div><i class="shape-box" style="border-radius:var(--radius-sm)"></i></li>
-            <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Inputs, selects, textareas, navigation rows, and toggle cards</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
-            <li class="spec" data-token="--radius-md"><div class="spec-meta"><code>--radius-md</code><span class="value"></span><span class="use">Buttons, segmented controls, and their thumbs</span></div><i class="shape-box" style="border-radius:var(--radius-md)"></i></li>
-            <li class="spec" data-token="--radius-lg"><div class="spec-meta"><code>--radius-lg</code><span class="value"></span><span class="use">Wells, plates, panels, callouts, and floating layers</span></div><i class="shape-box" style="border-radius:var(--radius-lg)"></i></li>
+            <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Inputs, selects, textareas, navigation rows, tabs, and toggle cards</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
+            <li class="spec" data-token="--radius-md"><div class="spec-meta"><code>--radius-md</code><span class="value"></span><span class="use">Buttons, quiet actions, segmented controls, and their thumbs</span></div><i class="shape-box" style="border-radius:var(--radius-md)"></i></li>
+            <li class="spec" data-token="--radius-lg"><div class="spec-meta"><code>--radius-lg</code><span class="value"></span><span class="use">Wells, plates, panels, radio cards, alerts, and floating layers</span></div><i class="shape-box" style="border-radius:var(--radius-lg)"></i></li>
             <li class="spec" data-token="--radius-pill"><div class="spec-meta"><code>--radius-pill</code><span class="value"></span><span class="use">Status badges and switch tracks</span></div><i class="shape-box" style="border-radius:var(--radius-pill)"></i></li>
           </ul>
         </section>
@@ -623,8 +639,8 @@
             <li class="spec"><div class="spec-meta"><code>1px --text</code><span class="use">Solid rule below the shared site header</span></div><i class="header-rule"></i></li>
             <li class="spec"><div class="spec-meta"><code>--nav-current, --shadow-nav-current</code><span class="use">Current page and selected tab: a lifted fill with a faint accent tint, <code>--nav-current-text</code>, and no border or underline</span></div><div inert><div class="tablist" role="tablist" aria-label="Selected tab sample"><button class="tab" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
             <li class="spec"><div class="spec-meta"><code>3×14 --accent pip</code><span class="use">Current location in the page, with medium weight and no fill</span></div><span class="pip-sample">Thresholds</span></li>
-            <li class="spec"><div class="spec-meta"><code>1px transparent</code><span class="use">Borderless controls retain a border for forced colors; pressed segmented thumbs rise without a ring</span></div><div inert><div class="segmented" role="group" aria-label="Raised thumb sample"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false">Board</button></div></div></li>
-            <li class="spec"><div class="spec-meta"><code>tint without a visible border</code><span class="use">Callouts keep a transparent 1px border for forced colors</span></div><div class="callout warning"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><p>No data for 42 minutes.</p></div></li>
+            <li class="spec"><div class="spec-meta"><code>1px transparent</code><span class="use">Borderless controls retain a border for forced colors; pressed segmented thumbs raise without a ring</span></div><div inert><div class="segmented" role="group" aria-label="Raised thumb sample"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false">Board</button></div></div></li>
+            <li class="spec"><div class="spec-meta"><code>tint without a visible border</code><span class="use">Alerts keep a transparent 1px border for forced colors</span></div><div class="alert warning"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><p>No data for 42 minutes.</p></div></li>
           </ul>
         </section>
 
@@ -695,7 +711,7 @@
   };
   MONITORS.forEach((m, i) => { m.data = series(m, 11 + i * 7); });
 
-  const icon = (id) => `<svg class="icon"><use href="#${id}"/></svg>`;
+  const icon = (id) => `<svg class="icon" aria-hidden="true"><use href="#${id}"/></svg>`;
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
   const pathFor = (data, w, h, max, pad = 0) => {
@@ -799,7 +815,7 @@
       <figure class="chart-wrap">${chart(m)}
         <figcaption class="caption">Last 24 hours. The dashed line is the threshold.</figcaption>
       </figure>
-      ${m.status === 'nodata' ? `<div class="callout warning">${icon('i-alert')}<p>No data for 42 minutes. Check ingestion before you trust this monitor.</p></div>` : ''}
+      ${m.status === 'nodata' ? `<div class="alert warning">${icon('i-alert')}<p>No data for 42 minutes. Check ingestion before you trust this monitor.</p></div>` : ''}
       <dl class="props">
         <dt>Current</dt><dd class="mono num">${m.value}</dd>
         <dt>Condition</dt><dd class="mono">${m.op} ${m.threshold} ${m.unit} for 10m</dd>
@@ -807,8 +823,8 @@
         <dt>Metric</dt><dd class="mono">${m.metric}</dd>
       </dl>
       <div class="code">
-        <div class="code-head"><span>Sample query</span><button class="quiet-action copy" type="button">${icon('i-copy')}<span>Copy</span></button></div>
-        <pre>${highlight(code)}</pre>
+        <div class="code-head"><b>Sample query</b><span class="lang">JSON</span><button class="quiet-action copy" type="button">${icon('i-copy')}<span>Copy</span></button></div>
+        <pre tabindex="0" role="region" aria-label="Sample query"><code>${code.split('\n').map((line) => `<span class="line"><span>${highlight(line)}</span></span>`).join('')}</code></pre>
       </div>
       <div class="cluster"><button class="btn secondary" type="button" data-size="sm">Open in explorer</button><button class="btn ghost" type="button" data-size="sm">Mute</button></div>`;
     const copy = detail.querySelector('.copy');
