@@ -32,7 +32,7 @@ h2::before { content: "## " / ""; color: var(--accent); }
 main > section + section { padding-top: var(--space-6); border-top: 1px solid var(--border-subtle); }
 p { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-reading); }
 /* Command plate: dark in both themes and tinted with the hue. Rings use the light hue, and text the terminal colour, so both read on the dark plate. */
-.command { box-shadow: var(--shadow-raise); --focus: var(--project-dark); --accent: var(--project-dark); --text: var(--terminal-text); display: flex; align-items: center; gap: var(--space-3); max-width: var(--measure); padding: var(--space-1) var(--space-3); border: 1px solid var(--command-border); border-radius: var(--radius-lg); background: var(--command-bg); color: var(--terminal-text); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+.command { box-shadow: var(--shadow-surface); --focus: var(--project-dark); --accent: var(--project-dark); --text: var(--terminal-text); display: flex; align-items: center; gap: var(--space-3); max-width: var(--measure); padding: var(--space-1) var(--space-3); border: 1px solid var(--command-border); border-radius: var(--radius-lg); background: var(--command-bg); color: var(--terminal-text); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 /* The prompt is drawn by CSS, so it is not copied and screen readers skip it. */
 .command code::before { content: "$ " / ""; color: var(--project-dark); }
 .command pre { min-width: 0; flex: 1; margin: 0; overflow-x: auto; font-size: var(--text-sm); }

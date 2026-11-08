@@ -18,7 +18,6 @@
    */
 
   /* ---------- Shared recipes ---------- */
-  :root { --flat: 0 0 0 0 transparent; }
   .icon { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .muted { color: var(--text-muted); }
@@ -32,19 +31,19 @@
   .btn:is(:hover, .is-hover):not(:disabled) { background: var(--button-hover); }
   .btn.secondary { background: var(--control-thumb); color: var(--text); }
   .btn.secondary:is(:hover, .is-hover):not(:disabled) { background: color-mix(in srgb, var(--text) 8%, var(--control-thumb)); }
-  .btn.ghost { --depth: var(--flat); background: transparent; color: var(--text-muted); }
+  .btn.ghost { --depth: none; background: transparent; color: var(--text-muted); }
   .btn.ghost:is(:hover, .is-hover):not(:disabled) { background: var(--row-hover); color: var(--text); }
   /* Danger rises like the other filled variants; its text mixes the hue toward --text, as status badges do. */
   .btn.danger { background: var(--danger-soft); color: light-dark(color-mix(in srgb, var(--danger) 75%, var(--text)), color-mix(in srgb, var(--danger) 85%, var(--text))); }
   .btn.danger:is(:hover, .is-hover):not(:disabled) { background: color-mix(in srgb, var(--danger) 10%, var(--danger-soft)); }
-  .btn.text { --depth: var(--flat); min-height: auto; padding: var(--space-1); background: transparent; color: var(--link); text-decoration: underline; text-underline-offset: 0.2em; }
+  .btn.text { --depth: none; min-height: auto; padding: var(--space-1); background: transparent; color: var(--link); text-decoration: underline; text-underline-offset: 0.2em; }
   .btn.text:is(:hover, .is-hover):not(:disabled) { background: transparent; }
   /* A press sinks the button 1px and changes its fill, so the click reads at a glance. */
   .btn:not(.secondary, .ghost, .danger, .text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--button-hover); }
   .btn:is(.secondary, .ghost):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--field); }
   .btn.danger:is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: color-mix(in srgb, var(--danger) 16%, var(--danger-soft)); }
   .btn:not(.text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { --depth: var(--shadow-sink); transform: translateY(1px); }
-  .btn:disabled { --depth: var(--flat); opacity: 0.58; cursor: not-allowed; }
+  .btn:disabled { --depth: none; opacity: 0.58; cursor: not-allowed; }
   /* A link styled as a button keeps no underline. It has no disabled state: use <button disabled>. */
   a.btn { text-decoration: none; }
   /* Busy also sets disabled, so it takes no hover or press. */
@@ -107,7 +106,7 @@
   /* Checkbox and radio: native inputs drawn with tokens. */
   .choices { display: flex; flex-wrap: wrap; gap: var(--space-4); }
   .check { display: inline-flex; align-items: center; gap: 9px; min-height: var(--control-md); cursor: pointer; }
-  .check input { --depth: var(--flat); appearance: none; display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); cursor: inherit; }
+  .check input { --depth: none; appearance: none; display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); cursor: inherit; }
   .check[data-size="sm"] input { width: 16px; height: 16px; }
   .check[data-size="lg"] input { width: 20px; height: 20px; }
   .check input[type="radio"] { border-radius: 50%; }
@@ -144,7 +143,7 @@
   .switch:is(:focus-visible, .is-focus) { outline: none; }
 
   /* Toggle button */
-  .toggle { --w: 44px; --h: 22px; --inset: 2px; --depth: var(--flat); display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 1px solid var(--border-subtle); border-radius: var(--radius-field); background: var(--surface-raised); color: var(--text); font: var(--text-md) / var(--leading-tight) var(--font-sans); text-align: left; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out); }
+  .toggle { --w: 44px; --h: 22px; --inset: 2px; --depth: none; display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 1px solid var(--border-subtle); border-radius: var(--radius-field); background: var(--surface-raised); color: var(--text); font: var(--text-md) / var(--leading-tight) var(--font-sans); text-align: left; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out); }
   .toggle[data-size="sm"] { --w: 35.2px; --h: 17.6px; --inset: 1.6px; min-height: var(--control-sm); font-size: var(--text-sm); }
   .toggle[data-size="lg"] { --w: 52.8px; --h: 26.4px; --inset: 2.4px; min-height: var(--control-lg); font-size: var(--text-lg); }
   .toggle:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"]) { border-color: var(--border); }
@@ -159,7 +158,7 @@
   /* The fill alone marks the track. The transparent border keeps its size, and forced colors draw it. */
   .segmented[data-size="sm"] { --item: var(--control-sm); font-size: var(--text-sm); }
   .segmented[data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
-  .segmented button { --depth: var(--flat); position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: inherit; cursor: pointer; }
+  .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: inherit; cursor: pointer; }
   .segmented[data-icon-only] button { width: var(--item); padding: 0; }
   /* The thumb is inset inside each full-size button, so it floats on the track and the hit area keeps its size. */
   .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -2; border-radius: var(--radius-md); pointer-events: none; }
@@ -237,7 +236,7 @@
   .alert.info { background: var(--info-soft); } .alert.info .icon { color: var(--info); }
 
   /* Surface and card */
-  .surface, .card { min-width: 0; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-raise); }
+  .surface, .card { min-width: 0; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-surface); }
   .surface { padding: var(--space-4); }
   .surface[data-padding="compact"] { padding: var(--space-3); }
   .card { width: min(100%, 360px); overflow: hidden; }
@@ -304,7 +303,7 @@
   @media (forced-colors: active) { .rows [role="option"][aria-selected="true"] { border-inline-start: 2px solid Highlight; } }
 
   /* Code block: a source well */
-  .code { width: 100%; max-width: var(--measure); min-width: 0; overflow: hidden; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--code-bg); color: var(--code-text); box-shadow: var(--shadow-raise); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  .code { width: 100%; max-width: var(--measure); min-width: 0; overflow: hidden; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--code-bg); color: var(--code-text); box-shadow: var(--shadow-surface); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .code-head { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; padding: 4px var(--space-1) 4px var(--space-3); border-bottom: 1px solid var(--border-subtle); background: var(--surface-raised); font-size: var(--text-xs); }
   .code-head b { font-weight: var(--weight-semibold); }
   .code-head .lang { color: var(--text-muted); }
@@ -339,7 +338,7 @@
      both page appearances, so the capture scopes its own tab, text, and focus colours. */
   .capture {
     --nav-current: color-mix(in srgb, var(--project-dark) 14%, transparent);
-    --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%);
+    --shadow-nav-current: var(--terminal-shadow-nav-current);
     --row-hover: color-mix(in srgb, var(--terminal-text) 4%, transparent);
     --nav-current-text: var(--project-dark);
     --text: var(--terminal-text);
@@ -347,7 +346,7 @@
     --accent: var(--project-dark);
     --focus: var(--project-dark);
     --border-subtle: var(--terminal-border);
-    width: 100%; max-width: 640px; min-width: 0; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--terminal); color: var(--terminal-text); box-shadow: var(--shadow-raise);
+    width: 100%; max-width: 640px; min-width: 0; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--terminal); color: var(--terminal-text); box-shadow: var(--shadow-surface);
   }
   .capture-head { display: flex; align-items: center; min-width: 0; }
   .capture .tablist { flex: 1; width: auto; padding-inline: var(--space-2); }

@@ -8,7 +8,7 @@ Each section has the same parts: anatomy, tokens, states, keyboard and screen re
 
 | Layer | What it holds | A new project |
 | --- | --- | --- |
-| Core | Tokens, depth (raise and sink), controls and their states, focus, motion, accessibility, forced colors | Adopts it as is |
+| Core | Tokens, depth, controls and their states, focus, motion, accessibility, forced colors | Adopts it as is |
 | Identity | The terminal folio look: the `~/name` header, the project registry, mono display headings, `##` section marks, terminal plates, captures, and the mono section rail | Replaces it with its own |
 
 The identity layer reads only the identity tokens (`--project`, `--project-dark`, `--font-sans`, `--font-mono`) and the terminal tokens. A core component never depends on an identity component.
@@ -17,7 +17,7 @@ The identity layer reads only the identity tokens (`--project`, `--project-dark`
 
 - **Sizes.** `sm`, `md`, and `lg` use `--control-sm`, `--control-md`, and `--control-lg` for height, with `--text-sm`, `--text-md`, and `--text-lg`. At tablet width (`max-width: 800px`) touch targets use `--control-lg`.
 - **Borders.** Every control keeps a 1px border, transparent unless its section says otherwise, so forced colors can draw an edge.
-- **Depth.** A resting raised control uses `--shadow-raise`. A field, a track, or a pressed control uses `--shadow-sink`.
+- **Depth.** Each control takes its shadow from the [depth tiers](DESIGN.md#depth).
 - **Press.** Only a button has a pressed state; see [Button](#button). A [quiet action](#quiet-action) tints on press without sinking. Other controls have no `:active` treatment: they show their latched state as their section says.
 - **Focus.** The ring's colour follows the role. Controls that act or set a value (button, quiet action, checkbox and radio, radio card, switch track, toggle button, segmented option, slider thumb, and dialog and drawer content) show a `2px solid var(--accent)` outline, offset 2px, with no halo or glow. It is drawn over the control's own raise or sink shadow, which does not change. Fields lift instead, as the next rule says. Links, navigation rows, tabs, listbox options, and list rows use the base ring: `2px solid var(--focus)`, offset 2px. Inside a scrolling or clipping parent, the ring is inset (`-2px`), and a comment names the reason. Only `:focus-visible` shows a ring; pointer hover never does.
 - **Field focus.** Fields (input, select, textarea) draw no ring. On `:focus-visible` the field lifts out of its well: the fill becomes `--field-focus` (`--control-thumb` by default), the shadow `--shadow-raise`, and the border `--accent` at 35% (`color-mix(in srgb, var(--accent) 35%, transparent)`). A `2px solid transparent` outline at offset 0 is invisible normally and draws as a ring in forced colors. The lifted fill must keep field text and placeholder at 4.5:1, on the page and on a surface. If a theme's field text would fall below that, set `--field-focus` to `--field`: the focused field keeps its resting fill, and the raise shadow and accent hairline still mark focus. An invalid field keeps its `--danger` border while focused, outside forced colors. The lift is below 3:1 against the resting field by choice; see [known gaps](decisions.md#known-gaps).
@@ -199,7 +199,7 @@ Layer: Core. ui: `UiAlert`.
 
 Layer: Core. ui: `UiSurface`, `UiCard`.
 
-- **Anatomy.** A panel: `--surface-raised`, transparent 1px border, `--radius-lg`, and `--shadow-raise`. A card adds a header (title in `--text-md` medium weight, with actions at the end), a body, and an optional footer above a `--border-subtle` rule in `--text-sm` muted text. Header and body padding is `--space-4`; padding is compact (`--space-3`) or default (`--space-4`).
+- **Anatomy.** A panel: `--surface-raised`, transparent 1px border, `--radius-lg`, and `--shadow-surface`. A card adds a header (title in `--text-md` medium weight, with actions at the end), a body, and an optional footer above a `--border-subtle` rule in `--text-sm` muted text. Header and body padding is `--space-4`; padding is compact (`--space-3`) or default (`--space-4`).
 - **Use.** A few parallel, self-contained options that a reader compares. Do not nest panels.
 
 ## Figure
@@ -243,7 +243,7 @@ Layer: Core. The mono font on rail rows is identity. ui: the rows in `UiSiteNav`
 
 Layer: Core. ui: `UiCodeBlock`.
 
-- **Anatomy.** A source code well: `--code-bg`, transparent 1px border, `--radius-lg`, `--shadow-raise`. An optional header (at least 40px, `--surface-raised`, `--text-xs`, a `--border-subtle` rule below) holds the title in semibold, the language in muted text, and a Copy button. The `<pre>` has `--space-4` padding, scrolls in both directions, is at most 32rem tall, and sets `--font-mono` at `--text-code` with a line height of 1.65. Line numbers are muted and right-aligned. Syntax uses the `--code-*` tokens. A compact variant puts the code and the Copy button on one row, with no header.
+- **Anatomy.** A source code well: `--code-bg`, transparent 1px border, `--radius-lg`, `--shadow-surface`. An optional header (at least 40px, `--surface-raised`, `--text-xs`, a `--border-subtle` rule below) holds the title in semibold, the language in muted text, and a Copy button. The `<pre>` has `--space-4` padding, scrolls in both directions, is at most 32rem tall, and sets `--font-mono` at `--text-code` with a line height of 1.65. Line numbers are muted and right-aligned. Syntax uses the `--code-*` tokens. A compact variant puts the code and the Copy button on one row, with no header.
 - **Phone text.** Set `text-size-adjust: 100%` (and `-webkit-text-size-adjust`) on the block, and align each line's items to the baseline, so iOS Safari does not enlarge one line.
 - **Copy.** Copies the code text only: no line numbers or prompts, and one line per row joined with newlines. A [quiet action](#quiet-action) at least 44×44 with an accessible name. Announce the result in a polite live region; in the compact variant the success message is visually hidden.
 - **Keyboard and screen reader.** The `<pre>` is focusable when it scrolls. Its focus ring and the Copy button's ring are inset, because the block clips its content.
@@ -261,7 +261,7 @@ Layer: Identity. ui: `UiCapture`.
 
 - **Anatomy.** A panel whose header holds mono tabs (one for each capture) and a Full size [quiet action](#quiet-action) at the end. The screen is the neutral `--terminal` plate, and a mono status-line caption sits below it on `--terminal-caption` with `--terminal-caption-text`. Full size opens the capture in a dialog.
 - **Keyboard and screen reader.** Tabs follow the tabs spec. Full size opens the selected capture in a modal dialog named after it, and focus returns to the button when the dialog closes. Without JavaScript the button is hidden. Focus rings are inset, because the panel clips its content. Without JavaScript, every capture is listed under its own heading.
-- **Header.** The whole panel, header included, is the `--terminal` plate in both page appearances, with a 1px `--terminal-border` edge. It scopes its own palette so the tabs read on it: current fill `--project-dark` at 14% over transparent, with a `0 1px 2px rgb(0 0 0 / 25%)` lift, hover `--terminal-text` at 4%, selected text, accent, and focus `--project-dark`, text `--terminal-text`, muted text `--terminal-caption-text`, and dividers `--terminal-border`. The tab list keeps its 4px block padding, and the Full size control stays centred on the tab row.
+- **Header.** The whole panel, header included, is the `--terminal` plate in both page appearances, with a 1px `--terminal-border` edge. It scopes its own palette so the tabs read on it: current fill `--project-dark` at 14% over transparent, with a `--terminal-shadow-nav-current` lift, hover `--terminal-text` at 4%, selected text, accent, and focus `--project-dark`, text `--terminal-text`, muted text `--terminal-caption-text`, and dividers `--terminal-border`. The tab list keeps its 4px block padding, and the Full size control stays centred on the tab row.
 
 ## Site header
 

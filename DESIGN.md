@@ -16,7 +16,7 @@ The language has a reusable core and a replaceable identity layer.
 
 | Layer | What it holds | A new project |
 | --- | --- | --- |
-| Core | Tokens, depth (raise and sink), controls and their states, focus, motion, accessibility, and forced colors | Adopts it as is |
+| Core | Tokens, depth, controls and their states, focus, motion, accessibility, and forced colors | Adopts it as is |
 | Identity | The terminal folio look of the personal sites: the `~/name` header, the project registry, mono display headings, `##` section marks, and terminal plates | Replaces it with its own |
 
 A new project keeps `tokens.css` unchanged and sets the identity inputs (`--project`, `--project-dark`, `--font-sans`, `--font-mono`, and `--accent-text` when the hue needs it) on `:root` in its own stylesheet. [Component specs](components.md) mark each component Core or Identity, and [decisions](decisions.md) record why each choice was made and which options were rejected. Read both before you build or change a component.
@@ -63,7 +63,7 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 
 ### Character
 
-Controls use soft depth and familiar shapes: borderless surfaces that rise at rest and sink when pressed or filled in.
+Controls use quiet depth and familiar shapes: borderless surfaces with one tight shadow at rest that sink when pressed or filled in.
 
 - **Quiet surfaces, clear hierarchy.** Neutral paper and graphite backgrounds, with color reserved for the project hue, links, and meaningful states. Contrast, type, alignment, and proximity carry the structure.
 - **Purposeful space.** Compact elements within a group, larger gaps between groups. Every gap should help a reader understand a relationship.
@@ -115,15 +115,30 @@ Controls use soft depth and familiar shapes: borderless surfaces that rise at re
   | Role | Use for | Fill | Border | Radius | Shadow |
   | --- | --- | --- | --- | --- | --- |
   | Page | The canvas | `--bg` | None | None | None |
-  | Well | Source code, screenshots, figures, and inset previews | `--surface` | Source code: transparent 1px; figures: `--border-subtle` | `--radius-lg` | Source code: `--shadow-raise`; figures: none |
-  | Panel | Cards, forms, charts, and detail views | `--surface-raised` | Transparent 1px | `--radius-lg` | `--shadow-raise` |
+  | Well | Source code, screenshots, figures, and inset previews | `--surface` | Source code: transparent 1px; figures: `--border-subtle` | `--radius-lg` | Source code: `--shadow-surface`; figures: none |
+  | Panel | Cards, forms, charts, and detail views | `--surface-raised` | Transparent 1px | `--radius-lg` | `--shadow-surface` |
   | Field | Inputs, selects, textareas, segmented and switch tracks, and selected radio cards | `--field` | `--field-edge` for fields; transparent 1px otherwise | Fields: `--radius-field`; tracks: `--radius-md`; radio cards: `--radius-lg` | `--shadow-sink` |
   | Floating layer | Menus, popovers, pickers, and dialogs | `--surface-raised` | Transparent 1px; the shadow's ring draws the edge | `--radius-lg` | `--shadow-popover` |
 
 - Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--field-edge`. `--border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--border-subtle` edge and no rest raise. Invalid fields show a `--danger` edge, except in forced colors, where the system edge wins. Figures and dividers use `--border-subtle`.
 - Radii: `--radius-sm` for inline elements and checkboxes; `--radius-field` for fields, navigation rows, and toggle cards; `--radius-md` (a pill) for buttons and segmented controls; `--radius-lg` for wells, plates, panels, radio cards, callouts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
 - Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
-- `--shadow-raise` gives panels, source code, buttons, and segmented thumbs soft depth; `--shadow-sink` insets fields, tracks, and pressed controls. Floating layers keep `--shadow-popover`. Stable hover states keep normal content quiet.
+- [Depth](#depth) gives each role its shadow. Stable hover states keep normal content quiet.
+
+### Depth
+
+Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow value, including the dark ones. Pages and components use the tokens and write no shadow of their own. Only zero-blur lines in a token colour are exempt: focus rings, dividers, and selection bars.
+
+| Tier | Token | Use for |
+| --- | --- | --- |
+| Control | `--shadow-raise` | Idle buttons, unselected radio cards, switch knobs, segmented thumbs, and focused fields |
+| Container | `--shadow-surface` | Panels, cards, source code, command plates, and terminal captures |
+| Pressed or well | `--shadow-sink` | Fields, tracks, pressed buttons, and selected radio cards |
+| Selected row | `--shadow-nav-current` | The current navigation row and the selected tab |
+| Floating | `--shadow-popover` | Menus, popovers, pickers, and dialogs |
+
+- Idle controls and containers take no outer light highlight and no blur wider than 2px. In dark mode, controls take a faint inset top edge and containers a faint 1px ring, so no halo shows.
+- A pressed button sinks and moves 1px down; see [Button](components.md#button).
 
 ### Components
 

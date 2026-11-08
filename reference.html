@@ -45,18 +45,17 @@
   .icon { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
   /* Buttons and quiet actions: components.html#button and #quiet-action, unchanged. The page adds layout only. */
-  :root { --flat: 0 0 0 0 transparent; }
   .btn { --depth: var(--shadow-raise); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--control-md); padding: 0 var(--space-3); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--accent); color: var(--accent-text); box-shadow: var(--depth); font: var(--weight-medium) var(--text-md) / 1.25 var(--font-sans); letter-spacing: -0.01em; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
   .btn[data-size="sm"] { min-height: var(--control-sm); padding: 0 10px; font-size: var(--text-sm); }
   .btn:is(:hover, .is-hover):not(:disabled) { background: var(--button-hover); }
   .btn.secondary { background: var(--control-thumb); color: var(--text); }
   .btn.secondary:is(:hover, .is-hover):not(:disabled) { background: color-mix(in srgb, var(--text) 8%, var(--control-thumb)); }
-  .btn.ghost { --depth: var(--flat); background: transparent; color: var(--text-muted); }
+  .btn.ghost { --depth: none; background: transparent; color: var(--text-muted); }
   .btn.ghost:is(:hover, .is-hover):not(:disabled) { background: var(--row-hover); color: var(--text); }
   .btn:not(.secondary, .ghost, .danger, .text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--button-hover); }
   .btn:is(.secondary, .ghost):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { background: var(--field); }
   .btn:not(.text):is(:active, [aria-pressed="true"], .is-active):not(:disabled) { --depth: var(--shadow-sink); transform: translateY(1px); }
-  .btn:disabled { --depth: var(--flat); opacity: 0.58; cursor: not-allowed; }
+  .btn:disabled { --depth: none; opacity: 0.58; cursor: not-allowed; }
   :where(.quiet-action) { border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
   .quiet-action:is(:hover, .is-hover):where(:not(:disabled)) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
   .quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 18%, transparent); }
@@ -93,7 +92,7 @@
   /* The fill alone marks the track. The transparent border keeps its size, and forced colors draw it. */
   .segmented[data-size="sm"] { --item: var(--control-sm); font-size: var(--text-sm); }
   .segmented[data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
-  .segmented button { --depth: var(--flat); position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: inherit; cursor: pointer; }
+  .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--text-muted); font: inherit; cursor: pointer; }
   .segmented[data-icon-only] button { width: var(--item); padding: 0; }
   /* The thumb is inset inside each full-size button, so it floats on the track and the hit area keeps its size. */
   .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -2; border-radius: var(--radius-md); pointer-events: none; }
@@ -192,7 +191,7 @@
   .badge.info { --tone: var(--info); }
 
   /* Panel */
-  .panel { background: var(--surface-raised); border: 1px solid transparent; box-shadow: var(--shadow-raise); border-radius: var(--radius-lg); min-width: 0; }
+  .panel { background: var(--surface-raised); border: 1px solid transparent; box-shadow: var(--shadow-surface); border-radius: var(--radius-lg); min-width: 0; }
   .detail { position: sticky; top: 72px; display: grid; }
   .detail > * { padding: var(--space-4); }
   .detail > * + * { border-top: 1px solid var(--border-subtle); }
@@ -213,7 +212,7 @@
   .callout.warning .icon { color: var(--warning); }
 
   /* Code block */
-  .code { border: 1px solid transparent; box-shadow: var(--shadow-raise); border-radius: var(--radius-lg); background: var(--code-bg); min-width: 0; }
+  .code { border: 1px solid transparent; box-shadow: var(--shadow-surface); border-radius: var(--radius-lg); background: var(--code-bg); min-width: 0; }
   .code-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3); border-bottom: 1px solid var(--border-subtle); font-size: var(--text-xs); color: var(--text-muted); }
   .code pre { margin: 0; padding: var(--space-3); overflow: auto; font-size: var(--text-xs); line-height: 1.6; color: var(--code-text); max-height: 320px; }
   .code .k { color: var(--code-key); }
@@ -222,7 +221,7 @@
   .code .c { color: var(--code-comment); }
 
   /* Command plate: dark in both themes and tinted with the hue; the $ prompt is drawn by CSS, so copied and spoken text omit it. */
-  .terminal { margin: 0; box-shadow: var(--shadow-raise); border: 1px solid var(--command-border); border-radius: var(--radius-lg); background: var(--command-bg); overflow: hidden; }
+  .terminal { margin: 0; box-shadow: var(--shadow-surface); border: 1px solid var(--command-border); border-radius: var(--radius-lg); background: var(--command-bg); overflow: hidden; }
   .terminal pre { margin: 0; padding: var(--space-3) var(--space-4); overflow-x: auto; color: var(--terminal-text); font-size: var(--text-code); }
   .terminal pre::before { content: "$ " / ""; color: var(--project-dark); }
 
@@ -248,7 +247,7 @@
   .defs { display: grid; gap: var(--space-3); align-content: start; }
   /* Card grid: 2–4 parallel, self-contained items. Raised panel surface, same inner order. */
   .card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
-  .card { background: var(--surface-raised); border: 1px solid transparent; box-shadow: var(--shadow-raise); border-radius: var(--radius-lg); padding: var(--space-4); min-width: 0; }
+  .card { background: var(--surface-raised); border: 1px solid transparent; box-shadow: var(--shadow-surface); border-radius: var(--radius-lg); padding: var(--space-4); min-width: 0; }
   /* Content row stretches so rule lines align along the bottom of each row. */
   .defs.card { grid-template-rows: auto 1fr auto; }
   .defs dl { align-content: start; }
@@ -312,7 +311,8 @@
   .elevation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--bg); }
   .elevation > div { display: grid; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--surface-raised); font-size: var(--text-sm); }
   .elevation .floating { border: 1px solid transparent; box-shadow: var(--shadow-popover); }
-  .elevation .panel-sample { border: 1px solid transparent; box-shadow: var(--shadow-raise); }
+  .elevation > .btn { justify-self: start; }
+  .elevation .panel-sample { border: 1px solid transparent; box-shadow: var(--shadow-surface); }
   .elevation .field-sample { border: 1px solid var(--field-edge); border-radius: var(--radius-field); background: var(--field); box-shadow: var(--shadow-sink); }
 
 
@@ -604,7 +604,7 @@
 
         <section class="foundation" id="shape" aria-labelledby="shape-title">
           <h3 id="shape-title">Shape</h3>
-          <p class="note">Pill buttons, rounded fields and toggle cards, soft panels, and inline corners. Cards never take a pill.</p>
+          <p class="note">Pill buttons, rounded fields and toggle cards, large-radius panels, and inline corners. Cards never take a pill.</p>
           <ul class="specs">
             <li class="spec" data-token="--radius-sm"><div class="spec-meta"><code>--radius-sm</code><span class="value"></span><span class="use">Inline elements and checkboxes</span></div><i class="shape-box" style="border-radius:var(--radius-sm)"></i></li>
             <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Inputs, selects, textareas, navigation rows, and toggle cards</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
@@ -630,12 +630,14 @@
 
         <section class="foundation" id="elevation" aria-labelledby="elevation-title">
           <h3 id="elevation-title">Elevation</h3>
-          <p class="note">Panels rise; fields sink. Floating layers keep their dialog shadow, including its border.</p>
+          <p class="note">Controls raise, containers take a quiet edge, and fields sink. Floating layers keep their dialog shadow, including its border.</p>
           <ul class="specs">
-            <li class="spec" data-token="--shadow-raise"><div class="spec-meta"><code>--shadow-raise</code><span class="value"></span><span class="use">Panels, cards, buttons, source code, and command plates</span></div><div class="elevation"><div class="panel-sample"><strong>Panel</strong><span class="muted">Raised surface, transparent border</span></div></div></li>
+            <li class="spec" data-token="--shadow-raise"><div class="spec-meta"><code>--shadow-raise</code><span class="value"></span><span class="use">Idle controls: buttons, unselected radio cards, switch knobs, segmented thumbs, and focused fields</span></div><div class="elevation"><button type="button" class="btn secondary">Button</button></div></li>
+            <li class="spec" data-token="--shadow-surface"><div class="spec-meta"><code>--shadow-surface</code><span class="value"></span><span class="use">Containers: panels, cards, source code, command plates, and terminal captures</span></div><div class="elevation"><div class="panel-sample"><strong>Panel</strong><span class="muted">Raised surface, transparent border</span></div></div></li>
             <li class="spec" data-token="--shadow-sink"><div class="spec-meta"><code>--shadow-sink</code><span class="value"></span><span class="use">Fields, tracks, pressed buttons, and selected radio cards</span></div><div class="elevation"><div class="field-sample"><strong>Sunk field</strong><span class="muted">--field</span></div></div></li>
             <li class="spec" data-token="--shadow-nav-current"><div class="spec-meta"><code>--shadow-nav-current</code><span class="value"></span><span class="use">The lift under the current navigation row and the selected tab</span></div><div class="elevation"><span class="nav-current-sample">Monitors</span></div></li>
             <li class="spec" data-token="--shadow-popover"><div class="spec-meta"><code>--shadow-popover</code><span class="value"></span><span class="use">Menus, popovers, pickers, and dialogs</span></div><div class="elevation"><div class="floating"><strong>Floating layer</strong><span class="muted">Raised surface, dialog shadow</span></div></div></li>
+            <li class="spec" data-token="--terminal-shadow-nav-current"><div class="spec-meta"><code>--terminal-shadow-nav-current</code><span class="value"></span><span class="use">The selected tab's lift in a terminal capture header, which stays dark in both appearances</span></div></li>
           </ul>
         </section>
 

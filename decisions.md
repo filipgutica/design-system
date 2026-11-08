@@ -4,7 +4,7 @@ Each entry records a choice this language made, the options it rejected, and why
 
 | Decision | Layer | Chosen | Rejected, and why |
 | --- | --- | --- | --- |
-| Control depth | Core | Quiet soft: borderless controls that rise softly at rest and sink when pressed. A transparent 1px border stays for forced colors. | The earlier crisp, bordered look. |
+| Depth | Core | Quiet lift: borderless controls take one tight shadow at rest (`--shadow-raise`) and sink when pressed. Containers take a fainter edge (`--shadow-surface`). No outer light highlight, and no blur wider than 2px. A transparent 1px border stays for forced colors. | A dual raise (a dark blur below and a light highlight above) on controls and containers alike: cards looked heavy, idle buttons looked too raised, and dark mode showed a fuzzy halo. Before that, a crisp, bordered look. |
 | Primary button | Core | Filled with the project hue (`--accent`), with `--accent-text`. | Plain ink (black in light, white in dark) looked too severe. Graphite ink looked disabled. |
 | Danger button | Core | A raised `--danger-soft` button with danger-tinted text, mixed toward `--text` as status badges are. Hover and press deepen the tint, and press sinks it. The label must read at 4.5:1 on all three fills; where the mix misses, it falls back to `--text`, black, or white. | A flat button with `--text` and a hover border read as a pink secondary button, and pressing it showed nothing. |
 | Pressed button | Core | Every variant but text sinks 1px, takes `--shadow-sink`, and changes its fill. Press is a button state: other controls show their latched state, and quiet actions tint without sinking. | The sink shadow alone was too faint to show a click, especially on secondary and ghost. |
