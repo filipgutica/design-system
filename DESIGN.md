@@ -121,7 +121,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | Floating layer | Menus, popovers, pickers, and dialogs | `--surface-raised` | Transparent 1px; the shadow's ring draws the edge | `--radius-lg` | `--shadow-popover` |
 
 - Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--field-edge`. `--border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--border-subtle` edge and no rest raise. Invalid fields show a `--danger` edge, except in forced colors, where the system edge wins. Figures and dividers use `--border-subtle`.
-- Radii: `--radius-sm` for inline elements and checkboxes; `--radius-field` for fields, navigation rows, and toggle cards; `--radius-md` (a pill) for buttons and segmented controls; `--radius-lg` for wells, plates, panels, radio cards, callouts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
+- Radii: `--radius-sm` for inline elements and checkboxes; `--radius-field` for fields, navigation rows, tabs, and toggle cards; `--radius-md` (a pill) for buttons and segmented controls; `--radius-lg` for wells, plates, panels, radio cards, alerts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
 - Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
 - [Depth](#depth) gives each role its shadow. Stable hover states keep normal content quiet.
 

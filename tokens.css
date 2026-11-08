@@ -86,7 +86,7 @@
   --terminal-caption: #13171a; /* ui: --color-terminal-caption */
   --terminal-caption-text: #c9d0d6; /* ui: --color-terminal-caption-text */
   /* The terminal capture's header stays dark in both appearances, so its selected tab keeps the dark lift. */
-  --terminal-shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%); /* ui: no token; src/site.css sets this value on the capture */
+  --terminal-shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%); /* ui: --shadow-nav-current-dark */
 
   /* Source code wells */
   --code-bg: var(--surface); /* ui: --color-code */
