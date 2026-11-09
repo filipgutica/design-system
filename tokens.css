@@ -244,13 +244,15 @@
 /* Minimal base. Component styles live in components.html. The base sits in a layer, so any
    page or component rule outranks it whatever its specificity. A layered !important outranks an
    unlayered one, so reduced-motion exceptions belong here too. */
+/* The page's own background and text colour stay outside the layer. A host that wraps the page in
+   its own unlayered reset, such as an artifact viewer, would otherwise keep its body colours while
+   the tokens switch to dark, leaving token-coloured text on the wrong background. */
+body { background: var(--bg); color: var(--text); }
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
   body {
     margin: 0;
-    background: var(--bg);
-    color: var(--text);
     font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
