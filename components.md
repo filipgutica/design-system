@@ -53,7 +53,7 @@ Layer: Core. ui: the `fg-quiet-action` class.
 
 - **Use.** An icon or short text action inside a component: code block and command list Copy, capture Full size, dialog and drawer close, and the project trigger. Use a [button](#button) for an action that stands on its own.
 - **Anatomy.** A native `<button>`, or the `<summary>` of a menu. Transparent fill, a transparent 1px border, `--radius-md`, and `--text-muted`. The content is centred in the box. An icon-only action holds an SVG icon, never a text glyph such as ×, because a font draws a glyph's ink off the centre of its box. Give the shared recipe zero specificity (`:where()`), so each component sets the action's size, place, and resting colour.
-- **States.** Hover turns the text `--text` and fills `currentColor` at 12% over transparent. Pressed fills `currentColor` at 18%, with no sink. Focus-visible is the control ring, inset where the parent clips. An open menu keeps its trigger at the 12% tint, below the press. The code block's Copy keeps the block's text colour on hover. A disabled quiet action follows the shared [disabled](#rules-for-every-control) rule.
+- **States.** Hover turns the text `--text` and fills `currentColor` at 12% over transparent. Pressed fills `currentColor` at 18%, with no sink. Focus-visible is the focus ring, inset where the parent clips. An open menu keeps its trigger at the 12% tint, below the press. The code block's Copy keeps the block's text colour on hover. A disabled quiet action follows the shared [disabled](#rules-for-every-control) rule.
 - **Keyboard and screen reader.** Native button behavior. An icon-only action needs `aria-label`.
 - **Motion.** Fill and colour change over `--duration-fast` with `--ease-out`.
 - **Forced colors.** The transparent border draws as the system edge.
@@ -95,7 +95,7 @@ Layer: Core. ui: `UiCheckbox`. ui has no standalone radio; radio cards cover rad
 
 - **Anatomy.** A `<label>` around the box and its text, with a gap of about 9px. The box is 16px at `sm`, 18px at `md`, and 20px at `lg`. Checkbox corners are `--radius-sm`; a radio is round. The row is at least the control height.
 - **Tokens.** Unchecked: `--surface-raised` fill and a 1px `--border` edge. Checked: `--accent` fill and edge, with a check mark in `--accent-text`. A checked radio shows a 5px `--accent` ring around a `--surface-raised` centre.
-- **States.** Rest, checked, focus-visible (the control ring on the box), and disabled.
+- **States.** Rest, checked, focus-visible (the focus ring on the box), and disabled.
 - **Keyboard and screen reader.** Native `<input type="checkbox">` or `type="radio"`. Space toggles a checkbox. Arrow keys move between radios in a named `radiogroup` or `<fieldset>`.
 - **Forced colors.** Native inputs keep system colors. A custom-drawn box redraws in `Highlight` when checked.
 
@@ -105,7 +105,7 @@ Layer: Core. ui: `UiRadioCardGroup`, `UiRadioCard`.
 
 - **Anatomy.** A grid of cards (`repeat(auto-fit, minmax(160px, 1fr))`, `--space-3` gap). Each card is a `<label>` with a title, an optional muted description, and a 16px round indicator in the top right corner. The native radio stays inside the card.
 - **Tokens.** Unselected: `--surface-raised`, `--shadow-raise`, transparent border, `--radius-lg`, `--space-3` padding. Hover: `--surface-hover` 45% into `--surface-raised`. Selected: `--field` fill and `--shadow-sink`, with the indicator filled `--accent` and an `--accent-text` check. The selected card has no accent ring.
-- **States.** Rest, hover, selected, focus-visible (the control ring over the card's raise or sink), and disabled.
+- **States.** Rest, hover, selected, focus-visible (the focus ring over the card's raise or sink), and disabled.
 - **Keyboard and screen reader.** One Tab stop for the group; arrow keys change the selection. Name the group.
 - **Motion.** The fill changes over `--duration-fast` with `--ease-out`.
 - **Forced colors.** The selected indicator uses `Highlight` with `HighlightText`.
@@ -116,7 +116,7 @@ Layer: Core. ui: `UiSwitch`.
 
 - **Anatomy.** A `<button role="switch" aria-checked>` that contains the track, and a separate `<label for>` with an optional description. The button's hit area is at least 32px wide and the control height tall. The track is 44×22 with a pill radius; the knob is 18px, inset 2px. `sm` scales both by 0.8 and `lg` by 1.2.
 - **Tokens.** Off track: `--border` 90% into `--field`, `--shadow-sink`, transparent 1px border. Knob: `--surface-raised` with `--shadow-raise`. On: `--accent` track, `--accent-text` knob moved 22px to the right.
-- **States.** Off, on, focus-visible (the control ring goes on the track, not the hit area), and disabled.
+- **States.** Off, on, focus-visible (the focus ring goes on the track, not the hit area), and disabled.
 - **Keyboard and screen reader.** Space and Enter toggle it. The label names it; the description is linked with `aria-describedby`.
 - **Motion.** The knob's transform and the track's fill change over `--duration` with `--ease-out`.
 - **Forced colors.** Track: `ButtonText` edge on `Canvas`, with a `ButtonText` knob. On: `Highlight` track with a `HighlightText` knob.
