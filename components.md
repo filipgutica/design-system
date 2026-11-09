@@ -65,9 +65,9 @@ Layer: Core. ui: `UiInput`. ui has no textarea; a textarea uses the same field r
 - **Anatomy.** A native `<input>` or `<textarea>`. Full width, line height 1.35. Input heights follow the control size, and horizontal padding is about 9px, 10px, or 11px.
 - **Tokens.** Fill `--field`, text `--text`, placeholder `--text-muted` at full opacity, corners `--radius-field`, border 1px `--field-edge` (transparent in light, a faint edge in dark), shadow `--shadow-sink`.
 - **States.** Rest, focus-visible (the field lift from [field focus](#rules-for-every-control)), disabled, and invalid (`--danger` border, kept while focused). A textarea keeps the same padding at the top and bottom as at the sides, and resizes vertically only.
-- **Keyboard and screen reader.** Each field has a visible `<label>`. A field inside a [field wrapper](#field-wrapper) gets its description and error ids from it.
+- **Keyboard and screen reader.** Each field has a visible `<label>`. A search field is the one exception: its leading magnifier and an accessible name that names the search (`aria-label`, or a visually hidden `<label>`) stand in for the visible label. A field inside a [field wrapper](#field-wrapper) gets its description and error ids from it.
 - **Motion.** None.
-- **Search.** `type="search"` keeps the native clear button, quieted to a 12px cross drawn with a `mask` (1.5px round strokes) and filled `--text-muted`, with `--space-2` before it. Hover fills it `--text`.
+- **Search.** `type="search"` keeps the native clear button, quieted to a 12px cross drawn with a `mask` (1.5px round strokes) and filled `--text-muted`, with `--space-2` before it. Hover fills it `--text`. The cross sits at the input's trailing edge, so inside a field wrapper with an icon or key hint the input takes the free space (`flex: 1`, `min-width: 0`) and the wrapper carries the width. In forced colors the cross opts out of adjustment and fills `CanvasText`, so the mask keeps a visible fill.
 - **Forced colors.** The border draws as the system field edge, and the outline draws the focus ring in the system colour. The system edge replaces the `--danger` edge, so the invalid state relies on its error text there; see [known gaps](decisions.md#known-gaps).
 
 ## Select

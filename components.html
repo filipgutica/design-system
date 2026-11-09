@@ -463,6 +463,8 @@
     /* The lifted fill drops, so the selected tab takes a system border; the padding absorbs it. */
     .tab[aria-selected="true"] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }
     .check input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; }
+    /* The masked search cross would lose its fill, so it opts out and takes the system text colour. */
+    .input[type="search"]::-webkit-search-cancel-button, .input[type="search"]::-webkit-search-cancel-button:hover { forced-color-adjust: none; background: CanvasText; }
     .check input[type="checkbox"]:checked::before { border-color: HighlightText; }
     .check input[type="radio"]:checked { background: HighlightText; }
     .radio-card input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; color: HighlightText; }
