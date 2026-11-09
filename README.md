@@ -11,11 +11,13 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | Path | What it holds |
 | --- | --- |
 | `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
-| `tokens/graphite-indigo.json` | The Graphite Indigo token values |
-| `scripts/build-tokens.mjs` | The token generator |
-| `tests/` | Guard tests for the payload and the tokens |
+| `tokens/graphite-indigo.json` | The Graphite Indigo token values: the only place a value lives |
+| `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css` and `dist/` |
+| `dist/` | Generated token files for the class flavour, theme overrides, JSON, and JavaScript |
+| `fonts/` | IBM Plex latin `woff2` files, `fonts.css`, and their OFL licences |
+| `tests/` | Guard tests for the payload and the tokens, and the React smoke test |
 
-`language/tokens.css` is a hand copy of the token values. The generator does not write it yet. Its command line still reads ui's `src/theme.css` and writes ui's files, so run it in ui until the JSON takes in the values that only `theme.css` defines. Until then, `tests/token-agreement.test.mjs` holds `tokens.css` to the JSON wherever both define a value.
+To change a value, edit the JSON and run `pnpm tokens:build`. `pnpm tokens:check` fails when a generated file is stale.
 
 ## Install
 
@@ -23,7 +25,17 @@ Filip's design language for any framework: the spec, the tokens, the component c
 npm install @filipgutica/design-system
 ```
 
-Read files from `node_modules/@filipgutica/design-system/language/`. For example, link `language/tokens.css` from a standalone HTML page.
+| Import | What it is |
+| --- | --- |
+| `@filipgutica/design-system/tokens.css` | The tokens with their standalone names. Dark mode follows `prefers-color-scheme`; set `data-theme="light"` or `"dark"` on `<html>` to override it. |
+| `@filipgutica/design-system/class/base.css`, `class/themes/*.css` | The same values with `@filipgutica/ui`'s names, for apps that toggle a `.dark` class on `<html>`. Use one flavour per app. |
+| `@filipgutica/design-system/themes/*.css` | A theme's identity inputs (hue pair and fonts), loaded after `tokens.css`. |
+| `@filipgutica/design-system/fonts.css` | IBM Plex Sans and Mono. |
+| `@filipgutica/design-system` | `tokens` (resolved values per theme and mode) and `cssVar(name)`, with types. |
+| `@filipgutica/design-system/tokens.json` | The resolved values as JSON. |
+| `@filipgutica/design-system/language/*` | The spec, catalogue, and example pages. |
+
+In a React app, import `tokens.css` and `fonts.css` once in the entry and write `var(--text)` in styles, or `cssVar('text')` in TypeScript. `tests/react-smoke/` is a working example.
 
 ## Develop
 
@@ -33,7 +45,7 @@ pnpm install --frozen-lockfile
 pnpm verify
 ```
 
-`pnpm verify` runs the tests, `pnpm pack --dry-run`, and `publint`.
+`pnpm verify` checks the generated files, runs the tests and the React smoke test, then `pnpm pack --dry-run` and `publint`. The smoke test needs Chromium: `pnpm exec playwright install chromium`.
 
 ## Release
 
@@ -47,8 +59,8 @@ Commits follow Conventional Commits, and CI checks them with commitlint. Do not 
 
 ## History
 
-`language/` came from `host-config/design-language/` in [filip-stack](https://github.com/filipgutica/filip-stack), with its history. The token JSON and generator came from [ui](https://github.com/filipgutica/ui).
+`language/` came from `host-config/design-language/` in [filip-stack](https://github.com/filipgutica/filip-stack), with its history. The token JSON, generator, and fonts came from [ui](https://github.com/filipgutica/ui).
 
 ## License
 
-MIT. The editor theme in `language/themes/graphite-indigo/` derives from Visual Studio Code's default themes; see its `LICENSE` and `THIRD_PARTY_NOTICES.md`.
+MIT. The IBM Plex fonts in `fonts/` are under the SIL Open Font License; see the `OFL-*.txt` files beside them. The editor theme in `language/themes/graphite-indigo/` derives from Visual Studio Code's default themes; see its `LICENSE` and `THIRD_PARTY_NOTICES.md`.

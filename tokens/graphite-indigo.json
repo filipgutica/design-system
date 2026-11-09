@@ -1,7 +1,27 @@
 {
   "groups": [
     {
-      "comment": "Neutral paper and graphite surfaces.",
+      "comment": "Identity layer: a project swaps these four lines. --project is the light-theme hue;\n--project-dark is the dark-theme hue, also used on dark plates in both themes.",
+      "identity": true,
+      "tokens": {
+        "project": [
+          "#4b45d1",
+          "{project-dark}"
+        ],
+        "project-dark": "#a5a1ff",
+        "font-sans": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
+        "font-mono": "\"IBM Plex Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace"
+      }
+    },
+    {
+      "comment": "Core roles: only the identity lines above feed them. Neutral paper and graphite surfaces.",
+      "notes": {
+        "field": "The well: segmented and switch tracks, pressed buttons, selected radio cards, and disabled fields.",
+        "field-bg": "Fields (input, select, textarea, search): a white fill with a faint edge in light, the sunk well in dark.\nDark fields stay sunk in the well. It sits within about 1.01:1 of the canvas, so the edge carries the shape.",
+        "nav-current": "Selected rows lift and take a faint accent tint, so the selection reads on near-white panels too.",
+        "nav-current-text": "Text on the current nav row, selected tab, and selected list row: the first of --accent, --text, black, and white\nthat reaches 4.5:1 over --nav-current, on the page and on a surface.",
+        "segmented-current-text": "The selected segmented label: the first of --accent, --text, black, and white that reaches\n4.5:1 on the thumb. An icon-only option needs 3:1."
+      },
       "tokens": {
         "bg": [
           "#f4f5f6",
@@ -19,6 +39,29 @@
           "#e2e5e8",
           "#20262b"
         ],
+        "field": [
+          "{surface-hover}",
+          "color-mix(in srgb, {bg} 87.5%, black)"
+        ],
+        "field-bg": [
+          "{surface-raised}",
+          "{field}"
+        ],
+        "field-edge": "{border-subtle}",
+        "field-shadow": [
+          "none",
+          "{shadow-sink}"
+        ],
+        "control-thumb": [
+          "{surface-raised}",
+          "color-mix(in srgb, {surface-raised} 88%, white)"
+        ],
+        "nav-current": [
+          "color-mix(in srgb, {accent} 14%, {surface-raised})",
+          "color-mix(in srgb, {accent} 20%, transparent)"
+        ],
+        "nav-current-text": "{accent}",
+        "segmented-current-text": "{accent}",
         "row-hover": [
           "#e2e5e8",
           "#20262b"
@@ -39,28 +82,30 @@
         "text-muted": [
           "#50575e",
           "#9aa3ab"
+        ],
+        "overlay": [
+          "rgb(0 0 0 / 42%)",
+          "rgb(0 0 0 / 62%)"
         ]
       }
     },
     {
-      "comment": "Project hue for primary actions, selection, and the one focus ring; links stay separate.",
+      "comment": "The hue fills primary actions and marks selection; links keep --link.",
+      "notes": {
+        "focus": "One focus ring for every role: the accent, at 3:1 or more on --bg, --surface, and --surface-raised\nin both themes. Fields mark focus with their own accent edge instead; see components.md."
+      },
       "tokens": {
-        "project": [
-          "#4b45d1",
-          "#a5a1ff"
-        ],
-        "project-dark": "#a5a1ff",
         "accent": "{project}",
         "accent-text": "{bg}",
         "accent-hover": "{text}",
+        "button-hover": "color-mix(in srgb, {accent} 85%, {text})",
         "link": [
           "#0b5f7c",
           "#67c1df"
         ],
         "focus": "{accent}",
         "focus-width": "2px",
-        "focus-offset": "3px",
-        "button-hover": "color-mix(in srgb, {accent} 85%, {text})"
+        "focus-offset": "3px"
       }
     },
     {
@@ -101,7 +146,10 @@
       }
     },
     {
-      "comment": "Code",
+      "comment": "Identity layer, derived: terminal folio plates. Commands take the hue; captures stay neutral.\nA project without terminal plates leaves these unused.",
+      "notes": {
+        "terminal-shadow-nav-current": "The terminal capture's header stays dark in both appearances, so its selected tab keeps the dark lift."
+      },
       "tokens": {
         "command-bg": [
           "color-mix(in srgb, {project} 25%, #101010)",
@@ -116,6 +164,12 @@
         "terminal-border": "#2a3036",
         "terminal-caption": "#13171a",
         "terminal-caption-text": "#c9d0d6",
+        "terminal-shadow-nav-current": "0 1px 2px rgb(0 0 0 / 25%)"
+      }
+    },
+    {
+      "comment": "Source code wells",
+      "tokens": {
         "code-bg": "{surface}",
         "code-text": "{text}",
         "code-key": [
@@ -137,10 +191,8 @@
       }
     },
     {
-      "comment": "Self-hosted IBM Plex latin faces (OFL); system fallbacks.",
+      "comment": "Type scale. The identity block names the families.",
       "tokens": {
-        "font-sans": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
-        "font-mono": "\"IBM Plex Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",
         "text-xs": "0.75rem",
         "text-sm": "0.8125rem",
         "text-md": "0.875rem",
@@ -161,7 +213,7 @@
       }
     },
     {
-      "comment": "Space: 4px rhythm.",
+      "comment": "Space: a 4px rhythm (0.25rem at the default 16px root).",
       "tokens": {
         "space-1": "0.25rem",
         "space-2": "0.5rem",
@@ -194,18 +246,39 @@
       "tokens": {
         "radius-sm": "6px",
         "radius-md": "999px",
-        "radius-field": "10px",
         "radius-lg": "16px",
+        "radius-field": "10px",
         "radius-pill": "999px"
       }
     },
     {
-      "comment": "Elevation: floating layers only (menus, popovers, dialogs).",
+      "comment": "Elevation: DESIGN.md#depth assigns each tier. Idle controls and surfaces take no outer light\nhighlight and no blur wider than 2px.",
+      "notes": {
+        "field-shadow-focus": "A focused field's inset line inside its accent or danger edge. It takes each theme's accent and danger."
+      },
       "tokens": {
+        "shadow-raise": [
+          "0 1px 2px rgb(16 24 40 / 12%), 0 0 0 1px rgb(16 24 40 / 6%)",
+          "inset 0 1px 0 rgb(255 255 255 / 7%), 0 1px 2px rgb(0 0 0 / 45%)"
+        ],
+        "shadow-surface": [
+          "0 1px 2px rgb(16 24 40 / 6%), 0 0 0 1px rgb(16 24 40 / 6%)",
+          "0 0 0 1px rgb(255 255 255 / 6%)"
+        ],
+        "shadow-sink": [
+          "inset 1.2px 1.2px 3.6px rgb(130 142 158 / 35%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 80%)",
+          "inset 1.2px 1.2px 3.6px rgb(0 0 0 / 55%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 5%)"
+        ],
         "shadow-popover": [
           "0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px {border-subtle}",
           "0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px {border-subtle}"
-        ]
+        ],
+        "shadow-nav-current": [
+          "0 1px 3px rgb(130 142 158 / 40%)",
+          "{terminal-shadow-nav-current}"
+        ],
+        "field-shadow-focus": "inset 0 0 0 2px color-mix(in srgb, {accent} 18%, transparent)",
+        "field-shadow-focus-invalid": "inset 0 0 0 2px color-mix(in srgb, {danger} 18%, transparent)"
       }
     },
     {
@@ -214,6 +287,17 @@
         "duration-fast": "120ms",
         "duration": "180ms",
         "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
+      }
+    },
+    {
+      "comment": "Library only: @filipgutica/ui variables with no design-language token. tokens.css leaves them out.",
+      "standalone": false,
+      "tokens": {
+        "color-shadow": [
+          "rgb(16 24 40 / 10%)",
+          "rgb(0 0 0 / 32%)"
+        ],
+        "shadow-control": "none"
       }
     }
   ],
@@ -276,13 +360,37 @@
       "--color-command-bg": "command-bg",
       "--color-command-border": "command-border"
     },
+    "baseRoles": {
+      "--color-well": "field",
+      "--color-field-bg": "field-bg",
+      "--color-field-edge": "field-edge",
+      "--shadow-field": "field-shadow",
+      "--color-control-thumb": "control-thumb",
+      "--color-nav-current": "nav-current",
+      "--color-overlay": "overlay",
+      "--shadow-field-focus": "field-shadow-focus",
+      "--shadow-field-focus-invalid": "field-shadow-focus-invalid"
+    },
     "aliases": {
       "font-sans": "--font-ui",
       "radius-sm": "--radius-inline",
       "radius-md": "--radius-control",
       "radius-field": "--radius-field",
-      "radius-lg": "--radius-panel"
+      "radius-lg": "--radius-panel",
+      "terminal-shadow-nav-current": "--shadow-nav-current-dark"
     },
+    "fallbacks": {
+      "nav-current-text": "--color-nav-current-text",
+      "segmented-current-text": "--color-segmented-current-text"
+    },
+    "lightOnly": [
+      "--color-focus",
+      "--color-field-edge",
+      "--shadow-control",
+      "--shadow-nav-current-dark",
+      "--shadow-field-focus",
+      "--shadow-field-focus-invalid"
+    ],
     "extras": [
       "text-3xl",
       "text-reading",

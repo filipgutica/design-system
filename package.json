@@ -6,17 +6,34 @@
   "sideEffects": [
     "**/*.css"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/tokens.d.ts",
+      "default": "./dist/tokens.js"
+    },
+    "./tokens.css": "./language/tokens.css",
+    "./class/base.css": "./dist/class/base.css",
+    "./class/themes/*.css": "./dist/class/themes/*.css",
+    "./themes/*.css": "./dist/themes/*.css",
+    "./tokens.json": "./dist/tokens.json",
+    "./fonts.css": "./fonts/fonts.css",
+    "./fonts/*": "./fonts/*",
+    "./language/*": "./language/*",
+    "./package.json": "./package.json"
+  },
   "files": [
     "language/",
-    "tokens/",
-    "scripts/build-tokens.mjs"
+    "dist/",
+    "fonts/"
   ],
   "scripts": {
     "prepublishOnly": "pnpm verify",
     "release": "semantic-release",
     "release:dry-run": "semantic-release --dry-run --no-ci",
+    "tokens:build": "node scripts/build-tokens.mjs",
+    "tokens:check": "node scripts/build-tokens.mjs --check",
     "test": "node --test tests/*.test.mjs",
-    "verify": "pnpm test && pnpm pack --dry-run && publint"
+    "verify": "pnpm tokens:check && pnpm test && pnpm pack --dry-run && publint"
   },
   "engines": {
     "node": ">=22.12"
