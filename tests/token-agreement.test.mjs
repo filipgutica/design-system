@@ -69,9 +69,14 @@ const compare = ({ css, data }) => {
 
   const uncovered = []
   const disagreements = []
-  for (const [, name, ui] of rootBody.matchAll(/^\s*(--[\w-]+):[^;]+;\s*\/\*\s*ui:\s*(.+?)\s*\*\/\s*$/gm)) {
+  const uiComments = Object.fromEntries(
+    [...rootBody.matchAll(/^\s*(--[\w-]+):[^;]+;\s*\/\*\s*ui:\s*(.+?)\s*\*\/\s*$/gm)].map(([, name, ui]) => [name, ui]),
+  )
+  // Every declaration is checked, so one without a "ui:" comment counts as uncovered instead of escaping both checks.
+  for (const name of Object.keys(light)) {
+    const ui = uiComments[name] ?? ''
     // "var(--color-x, var(--color-accent))" is a use-site fallback in ui, not a variable it declares.
-    const variables = ui.startsWith('var(') ? [] : ui.split(/,\s*/)
+    const variables = ui === '' || ui.startsWith('var(') ? [] : ui.split(/,\s*/)
     const covered = variables.map((variable) => [variable, tokenFor(variable)]).filter(([, token]) => token !== undefined)
     if (covered.length === 0) uncovered.push(name)
     for (const [variable, token] of covered) {
@@ -90,6 +95,12 @@ test('the agreement check catches a tokens.css value that drifts from its JSON t
 
   // Lines that reference --bg, such as --accent-text, drift with it.
   assert.ok(compare({ css: drifted, data: tokenData }).disagreements.includes('--bg (--color-bg, light): tokens.css #ffffff, JSON #f4f5f6'))
+})
+
+test('the agreement check counts a tokens.css line without a ui: comment as uncovered', () => {
+  const unannotated = tokensCss.replace('--page-max: 960px; /* ui: --page-max */', '--page-max: 1000px;')
+
+  assert.ok(compare({ css: unannotated, data: tokenData }).uncovered.includes('--page-max'))
 })
 
 test('every tokens.css line backed by a JSON token has its light and dark value', () => {
