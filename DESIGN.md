@@ -55,7 +55,7 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 | Context | Variable names to write |
 | --- | --- |
 | Standalone HTML | The `tokens.css` names. Import or inline `tokens.css`, and copy component styles from `components.html`. |
-| Site on `@filipgutica/ui` | The library variable in the `ui:` comment beside each `tokens.css` line, such as `--color-muted` for `--text-muted`. Some names are unchanged, such as `--text-sm`. When a comment names several, use the first. A `tokens.css` name that its comment does not list is undefined on a library site, and `var()` falls back without an error. The library draws the base focus ring only inside `.fg-site-docs`; elsewhere, write it yourself, exactly `outline: 2px solid var(--color-focus); outline-offset: 2px`. |
+| Site on `@filipgutica/ui` | The library variable in the `ui:` comment beside each `tokens.css` line, such as `--color-muted` for `--text-muted`. Some names are unchanged, such as `--text-sm`. When a comment names several, use the first. A `tokens.css` name that its comment does not list is undefined on a library site, and `var()` falls back without an error. The library draws the base focus ring only inside `.fg-site-docs`; elsewhere, write it yourself, exactly `outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset)`. |
 | Other repository | That repository's own tokens and components, matched to these roles by meaning. |
 | Inline visual | The host's supplied CSS variables and font, with no separate page shell. |
 
@@ -86,7 +86,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 - Existing products retain their theme preferences and persistence contracts. Where a standalone choice is needed, System removes the override and explicit Light/Dark choices set it. Wrap storage access in try/catch.
 - Use neutral `--bg`, `--surface`, and `--surface-raised` (paper in light, graphite in dark) to separate regions. Use `--text` and `--text-muted` for the main hierarchy.
 - Each project sets one hue, and `--accent` follows it. The hue fills the one primary action in each decision group, and marks identity and selection: current items, the selected tab's text, and checked or selected controls. It is never a fill for secondary buttons, cards, or wells. Check it at 3:1 for marks and bars, and at 4.5:1 wherever it colours text, on every surface it sits on. `--accent-text` on an `--accent` fill must reach 4.5:1 for each hue; a hue that misses does not colour text or carry a label there.
-- `--link` identifies links; underline prose links. `--focus` is the text colour (`--text`) and outlines keyboard focus on every role (see [focus](components.md#rules-for-every-control)). Where color marks a checked or selected state, use `--accent`; `--link` and `--focus` never mark one.
+- `--link` identifies links; underline prose links. `--focus` is the accent (`--accent`) and outlines keyboard focus on every role but fields, which turn their edge the accent instead (see [focus](components.md#rules-for-every-control)). Where color marks a checked or selected state, use `--accent` as a fill, tint, or mark; `--link` never marks one, and a focus ring marks only focus, never selection.
 - Navigation and selection: the current page, the selected tab, and a selected list row take the same quiet lifted fill, tinted with the accent, with accent text where it reaches 4.5:1 on that fill (another readable colour otherwise), and no underline or bar; an in-page location takes a short accent pip without a fill. Keep raised-control hover and keyboard focus separate from these states. [Component specs](components.md#navigation-list) give the values.
 - Status colors mean state and have a text or icon label. Status surfaces are soft tints of their status color (the `--*-soft` tokens). Outside badges, the danger button label, and field error text, status foreground colors go on icons; numbers and labels beside them stay in `--text` or `--text-muted`. Keep restrained syntax colors separate from the action palette.
 - Verify light and dark appearance where supported, regardless of whether a switch is visible. Check text contrast rather than assuming a muted token is accessible at every size.
@@ -118,7 +118,8 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | Page | The canvas and example stages | `--bg` | None | None | None |
   | Well | Source code, screenshots, figures, and inset previews other than example stages | `--surface` | Source code: transparent 1px; figures: `--border-subtle` | `--radius-lg` | Source code: `--shadow-surface`; figures: none |
   | Panel | Cards, forms, charts, and detail views | `--surface-raised` | Transparent 1px | `--radius-lg` | `--shadow-surface` |
-  | Field | Inputs, selects, textareas, segmented and switch tracks, and selected radio cards | `--field` | `--field-edge` for fields; transparent 1px otherwise | Fields: `--radius-field`; tracks: `--radius-md`; radio cards: `--radius-lg` | `--shadow-sink` |
+  | Field | Inputs, selects, textareas, and search fields | `--field-bg`; disabled: `--field` | `--field-edge` | `--radius-field` | `--field-shadow`; disabled: none |
+  | Track | Segmented and switch tracks, and selected radio cards | `--field` | Transparent 1px | Tracks: `--radius-md`; radio cards: `--radius-lg` | `--shadow-sink` |
   | Floating layer | Menus, popovers, pickers, and dialogs | `--surface-raised` | Transparent 1px; the shadow's ring draws the edge | `--radius-lg` | `--shadow-popover` |
 
 - Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--field-edge`. `--border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--border-subtle` edge and no rest raise. Invalid fields show a `--danger` edge, except in forced colors, where the system edge wins. Figures, example frames, and dividers use `--border-subtle`.
@@ -128,13 +129,13 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
 ### Depth
 
-Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow value, including the dark ones. Pages and components use the tokens and write no shadow of their own. Only zero-blur lines in a token colour are exempt: focus rings and dividers.
+Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow value, including the dark ones. Pages and components use the tokens and write no shadow of their own. Only zero-blur lines in a token colour, or in a token mixed with `transparent`, are exempt: focus rings, a focused field's inset line, and dividers.
 
 | Tier | Token | Use for |
 | --- | --- | --- |
-| Control | `--shadow-raise` | Idle buttons, unselected radio cards, switch knobs, segmented thumbs, and focused fields |
+| Control | `--shadow-raise` | Idle buttons, unselected radio cards, switch knobs, and segmented thumbs |
 | Container | `--shadow-surface` | Panels, cards, source code (not inside an example frame), command plates, and terminal captures |
-| Pressed or well | `--shadow-sink` | Fields, tracks, pressed buttons, and selected radio cards |
+| Pressed or well | `--shadow-sink` | Tracks, pressed buttons, selected radio cards, and fields in dark (through `--field-shadow`; light fields take none) |
 | Selected row | `--shadow-nav-current` | The current navigation row, the selected tab, and a selected list row |
 | Floating | `--shadow-popover` | Menus, popovers, pickers, and dialogs |
 
@@ -158,7 +159,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 ### Interaction and motion
 
 - Show visible focus and accessible names. A visual simplification must preserve useful controls, caveats, and keyboard paths.
-- Every focusable element draws one ring, `outline: 2px solid var(--focus); outline-offset: 2px`, with no glow, over its own raise or sink shadow. The `tokens.css` base sets it. `--focus` is the text colour, so the ring never puts a hue around another hue; a dark plate sets `--focus: var(--terminal-text)`. Do not give a role its own ring colour. Fields (input, select, textarea) take the same ring and also lift out of their well onto the control surface. [Component specs](components.md#rules-for-every-control) give the values. Use an inset offset (`-2px`) only where a scrolling or clipping parent would cut the ring, or inside a segmented control; add a comment that names the reason. Keep the focus default in `@layer base`, so a component's own focus rule can refine it. Pointer hover never draws the outline.
+- Every focusable element but a field draws one ring, `outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset)`, with no glow, over its own raise or sink shadow. The `tokens.css` base sets it. `--focus` is the accent, which reaches 3:1 on `--bg`, `--surface`, and `--surface-raised` in both themes; a dark plate sets `--focus: var(--project-dark)`. Do not give a role its own ring colour. Fields (input, select, textarea, search) draw no ring: focus turns the edge `--accent` with a 2px inset line of the accent at 18%, and the fill stays. [Component specs](components.md#rules-for-every-control) give the values. Use an inset offset (`calc(var(--focus-width) * -1)`) only where a scrolling or clipping parent would cut the ring, or inside a segmented control; add a comment that names the reason. Keep the focus default in `@layer base`, so a component's own focus rule can refine it. Pointer hover never draws the outline.
 - Keep product navigation distinct from in-page section links. Current-page and current-section indicators serve different purposes. Open sibling project links in the same tab; indicate a new tab only when the link opens one.
 - Use `--duration-fast` for hover/press and `--duration` for menus/panels. Animate opacity or transform only where it explains a state change. A component spec may set its own timing, as the segmented control's glide does.
 - Keep content visible without reveal effects, entrance sequences, or continuous decorative animation. Honor reduced motion, including anchor scrolling.

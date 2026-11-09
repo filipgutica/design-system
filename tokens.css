@@ -37,11 +37,13 @@
   --surface: #e9ebed; /* ui: --color-surface */
   --surface-raised: #fbfbfc; /* ui: --color-surface-raised, --color-input-bg */
   --surface-hover: #e2e5e8; /* ui: --color-surface-muted */
+  /* The well: segmented and switch tracks, pressed buttons, selected radio cards, and disabled fields. */
   --field: var(--surface-hover); /* ui: --color-well */
-  --field-edge: transparent; /* ui: --color-field-edge */
+  /* Fields (input, select, textarea, search): a white fill with a faint edge in light, the sunk well in dark. */
+  --field-bg: var(--surface-raised); /* ui: --color-field-bg */
+  --field-edge: var(--border-subtle); /* ui: --color-field-edge */
+  --field-shadow: none; /* ui: --shadow-field */
   --control-thumb: var(--surface-raised); /* ui: --color-control-thumb */
-  /* A focused field's fill. Set it to var(--field) if field text or placeholder misses 4.5:1 on the lift. */
-  --field-focus: var(--control-thumb); /* ui: var(--color-field-focus-bg, var(--color-control-thumb)) */
   /* Selected rows lift and take a faint accent tint, so the selection reads on near-white panels too. */
   --nav-current: color-mix(in srgb, var(--accent) 14%, var(--surface-raised)); /* ui: --color-nav-current */
   /* Text on the current nav row, selected tab, and selected list row: the first of --accent, --text, black, and white
@@ -64,8 +66,11 @@
   --accent-hover: var(--text); /* ui: --color-accent-hover */
   --button-hover: color-mix(in srgb, var(--accent) 85%, var(--text)); /* ui: --color-button-hover */
   --link: #0b5f7c; /* ui: --color-link */
-  /* One focus ring in the text colour for every role, so the ring never puts a hue around another hue. */
-  --focus: var(--text); /* ui: --color-focus */
+  /* One focus ring for every role: the accent, at 3:1 or more on --bg, --surface, and --surface-raised
+     in both themes. Fields mark focus with their own accent edge instead; see components.md. */
+  --focus: var(--accent); /* ui: --color-focus */
+  --focus-width: 2px; /* ui: --focus-width */
+  --focus-offset: 3px; /* ui: --focus-offset */
 
   /* Status: only for state, never for decoration. */
   --success: #157249; /* ui: --color-success */
@@ -168,8 +173,9 @@
     --surface-raised: #181d21;
     --surface-hover: #20262b;
     --field: color-mix(in srgb, var(--bg) 87.5%, black);
-    /* The dark well sits within about 1.01:1 of the canvas, so fields take a faint edge. */
-    --field-edge: var(--border-subtle);
+    /* Dark fields stay sunk in the well. It sits within about 1.01:1 of the canvas, so the edge carries the shape. */
+    --field-bg: var(--field);
+    --field-shadow: var(--shadow-sink);
     --control-thumb: color-mix(in srgb, var(--surface-raised) 88%, white);
     --nav-current: color-mix(in srgb, var(--accent) 20%, transparent);
     --row-hover: #20262b;
@@ -209,7 +215,8 @@
   --surface-raised: #181d21;
   --surface-hover: #20262b;
   --field: color-mix(in srgb, var(--bg) 87.5%, black);
-  --field-edge: var(--border-subtle);
+  --field-bg: var(--field);
+  --field-shadow: var(--shadow-sink);
   --control-thumb: color-mix(in srgb, var(--surface-raised) 88%, white);
   --nav-current: color-mix(in srgb, var(--accent) 20%, transparent);
   --row-hover: #20262b;
@@ -263,7 +270,7 @@ body { background: var(--bg); color: var(--text); }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
   p a, dd a { text-decoration: underline; text-underline-offset: 0.18em; }
-  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  :focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; scroll-behavior: auto !important; }
     /* A busy spinner slows instead of stopping, so the busy state stays visible. */
