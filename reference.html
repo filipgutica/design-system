@@ -81,7 +81,7 @@
   /* Input */
   .search { display: flex; align-items: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-2); border: 1px solid var(--field-edge); border-radius: var(--radius-field); background: var(--field-bg); box-shadow: var(--field-shadow); color: var(--text-muted); width: 248px; min-width: 0; }
   /* The field takes the field focus, an accent edge with a muted accent line inside and no ring, so the input inside it draws nothing. */
-  .search:is(:has(input:focus-visible), .is-focus) { outline: none; border-color: var(--accent); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent); }
+  .search:is(:has(input:focus-visible), .is-focus) { outline: none; border-color: var(--accent); box-shadow: var(--field-shadow-focus); }
   .search input { border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--text-sm); flex: 1; min-width: 0; }
   .search input::placeholder { color: var(--text-muted); }
   /* The native clear button, quieted to a thin muted cross drawn with a mask. */
@@ -358,6 +358,8 @@
   .elevation .panel-sample { border: 1px solid transparent; box-shadow: var(--shadow-surface); }
   .elevation .well-sample { border: 1px solid transparent; background: var(--field); box-shadow: var(--shadow-sink); }
   .elevation .field-sample { border: 1px solid var(--field-edge); border-radius: var(--radius-field); background: var(--field-bg); box-shadow: var(--field-shadow); }
+  .elevation .focus-sample { border-color: var(--accent); box-shadow: var(--field-shadow-focus); }
+  .elevation .focus-invalid-sample { border-color: var(--danger); box-shadow: var(--field-shadow-focus-invalid); }
 
 
   .mobile-only { display: none; }
@@ -679,6 +681,8 @@
             <li class="spec" data-token="--shadow-surface"><div class="spec-meta"><code>--shadow-surface</code><span class="value"></span><span class="use">Containers: panels, cards, source code, command plates, and terminal captures</span></div><div class="elevation"><div class="panel-sample"><strong>Panel</strong><span class="muted">Raised surface, transparent border</span></div></div></li>
             <li class="spec" data-token="--shadow-sink"><div class="spec-meta"><code>--shadow-sink</code><span class="value"></span><span class="use">Wells: tracks, pressed buttons, selected radio cards, and dark fields</span></div><div class="elevation"><div class="well-sample"><strong>Well</strong><span class="muted">--field</span></div></div></li>
             <li class="spec" data-token="--field-shadow"><div class="spec-meta"><code>--field-shadow</code><span class="value"></span><span class="use">Fields at rest: none in light, where the white fill and edge carry the shape; <code>--shadow-sink</code> in dark. Disabled fields drop it</span></div><div class="elevation"><div class="field-sample"><strong>Field</strong><span class="muted">--field-bg</span></div></div></li>
+            <li class="spec" data-token="--field-shadow-focus"><div class="spec-meta"><code>--field-shadow-focus</code><span class="value"></span><span class="use">A focused field's 2px inset line: the accent at 18%, inside its <code>--accent</code> edge</span></div><div class="elevation"><div class="field-sample focus-sample"><strong>Focused field</strong><span class="muted">--accent edge</span></div></div></li>
+            <li class="spec" data-token="--field-shadow-focus-invalid"><div class="spec-meta"><code>--field-shadow-focus-invalid</code><span class="value"></span><span class="use">A focused invalid field's inset line: <code>--danger</code> at 18%, inside its <code>--danger</code> edge</span></div><div class="elevation"><div class="field-sample focus-invalid-sample"><strong>Focused invalid field</strong><span class="muted">--danger edge</span></div></div></li>
             <li class="spec" data-token="--shadow-nav-current"><div class="spec-meta"><code>--shadow-nav-current</code><span class="value"></span><span class="use">The lift under the current navigation row and the selected tab</span></div><div class="elevation"><span class="nav-current-sample">Monitors</span></div></li>
             <li class="spec" data-token="--shadow-popover"><div class="spec-meta"><code>--shadow-popover</code><span class="value"></span><span class="use">Menus, popovers, pickers, and dialogs</span></div><div class="elevation"><div class="floating"><strong>Floating layer</strong><span class="muted">Raised surface, dialog shadow</span></div></div></li>
             <li class="spec" data-token="--terminal-shadow-nav-current"><div class="spec-meta"><code>--terminal-shadow-nav-current</code><span class="value"></span><span class="use">The selected tab's lift in a terminal capture header, which stays dark in both appearances</span></div></li>

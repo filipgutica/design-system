@@ -158,6 +158,9 @@
   --shadow-sink: inset 1.2px 1.2px 3.6px rgb(130 142 158 / 35%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 80%); /* ui: --shadow-sink */
   --shadow-popover: 0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px var(--border-subtle); /* ui: --shadow-dialog */
   --shadow-nav-current: 0 1px 3px rgb(130 142 158 / 40%); /* ui: --shadow-nav-current */
+  /* A focused field's inset line inside its accent or danger edge. It takes each theme's accent and danger. */
+  --field-shadow-focus: inset 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent); /* ui: --shadow-field-focus */
+  --field-shadow-focus-invalid: inset 0 0 0 2px color-mix(in srgb, var(--danger) 18%, transparent); /* ui: --shadow-field-focus-invalid */
 
   /* Motion */
   --duration-fast: 120ms; /* ui: --duration-fast */
