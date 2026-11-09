@@ -2,7 +2,7 @@
 
 One section for each component in the design language. Write any framework's version of a component from its section. [`components.html`](components.html) shows each state as static markup, and [`tokens.css`](tokens.css) holds the values. The [decisions](decisions.md) record why each choice was made. `@filipgutica/ui` is the Vue implementation; the `ui:` line in each section names its component, for comparison only.
 
-Each section has the same parts: anatomy, tokens, states, keyboard and screen reader, motion, and forced colors. Sizes are in CSS pixels. A percentage mix means `color-mix(in srgb, A n%, B)`.
+Each section has the same parts: anatomy, tokens, states, keyboard and screen reader, motion, and forced colors. Sizes are in CSS pixels at the default 16px root font size. Type, spacing, and control sizes are set in rem (pixels ÷ 16), so they follow the reader's font-size setting; borders, focus rings, and shadows stay in pixels. A percentage mix means `color-mix(in srgb, A n%, B)`.
 
 ## Layers
 

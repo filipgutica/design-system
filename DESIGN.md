@@ -94,6 +94,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 ### Layout and spacing
 
 - Use the `--space-*` rhythm and flex/grid `gap`. Use smaller gaps within a group and larger gaps between groups. Documentation sections use `--space-12`, stepping down to `--space-8` on phones. Product sections use `--space-24` total separation, stepping down to `--space-16` at tablet width. Give each section gap one owner so adjoining padding does not double it.
+- Size type, spacing, and controls in rem through the `--text-*`, `--space-*`, and `--control-*` tokens, so text and controls follow the reader's font-size setting. A literal that sizes text, padding, a gap, or a line height is rem too (pixels ÷ 16). Keep hairlines, focus rings, shadows, and breakpoints in px.
 - Product pages use `--page-wide`; documentation uses `--page-max`, optionally combined with a thin navigation column. Center the combined shell, not only the article inside an edge-pinned sidebar.
 - Tool and docs introductions stay compact. Preserve the direct route to install commands and useful captures.
 - Use two named breakpoints. Write desktop styles first, then override them at these widths:

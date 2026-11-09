@@ -98,42 +98,42 @@
   --code-comment: #626772; /* ui: --color-syntax-comment */
 
   /* Type scale. The identity block names the families. */
-  --text-xs: 12px; /* ui: --text-xs */
-  --text-sm: 13px; /* ui: --text-sm */
-  --text-md: 14px; /* ui: --text-md */
-  --text-lg: 16px; /* ui: --text-lg */
-  --text-xl: 20px; /* ui: --text-xl */
-  --text-2xl: 24px; /* ui: --text-2xl */
-  --text-3xl: 44px; /* ui: --text-3xl */
-  --text-reading: 16px; /* ui: --text-reading */
-  --text-display: 56px; /* ui: --text-display */
-  --text-display-sm: 34px; /* ui: --text-display-sm */
+  --text-xs: 0.75rem; /* ui: --text-xs */
+  --text-sm: 0.8125rem; /* ui: --text-sm */
+  --text-md: 0.875rem; /* ui: --text-md */
+  --text-lg: 1rem; /* ui: --text-lg */
+  --text-xl: 1.25rem; /* ui: --text-xl */
+  --text-2xl: 1.5rem; /* ui: --text-2xl */
+  --text-3xl: 2.75rem; /* ui: --text-3xl */
+  --text-reading: 1rem; /* ui: --text-reading */
+  --text-display: 3.5rem; /* ui: --text-display */
+  --text-display-sm: 2.125rem; /* ui: --text-display-sm */
   --leading-tight: 1.25; /* ui: --leading-tight */
   --leading: 1.6; /* ui: --leading */
   --weight-regular: 400; /* ui: --weight-regular */
   --weight-medium: 500; /* ui: --weight-medium */
   --weight-semibold: 600; /* ui: --weight-semibold */
   --tracking-tight: -0.03em; /* ui: --tracking-tight */
-  --text-code: 13.5px; /* ui: --text-code */
+  --text-code: 0.84375rem; /* ui: --text-code */
 
-  /* Space: 4px rhythm. */
-  --space-1: 4px; /* ui: --space-1 */
-  --space-2: 8px; /* ui: --space-2 */
-  --space-3: 12px; /* ui: --space-3 */
-  --space-4: 16px; /* ui: --space-4 */
-  --space-5: 20px; /* ui: --space-5 */
-  --space-6: 24px; /* ui: --space-6 */
-  --space-8: 32px; /* ui: --space-8 */
-  --space-12: 48px; /* ui: --space-12 */
-  --space-16: 64px; /* ui: --space-16 */
-  --space-20: 80px; /* ui: --space-20 */
-  --space-24: 96px; /* ui: --space-24 */
+  /* Space: a 4px rhythm (0.25rem at the default 16px root). */
+  --space-1: 0.25rem; /* ui: --space-1 */
+  --space-2: 0.5rem; /* ui: --space-2 */
+  --space-3: 0.75rem; /* ui: --space-3 */
+  --space-4: 1rem; /* ui: --space-4 */
+  --space-5: 1.25rem; /* ui: --space-5 */
+  --space-6: 1.5rem; /* ui: --space-6 */
+  --space-8: 2rem; /* ui: --space-8 */
+  --space-12: 3rem; /* ui: --space-12 */
+  --space-16: 4rem; /* ui: --space-16 */
+  --space-20: 5rem; /* ui: --space-20 */
+  --space-24: 6rem; /* ui: --space-24 */
 
   /* Size */
-  --control-sm: 32px; /* ui: --control-sm */
-  --control-md: 36px; /* ui: --control-md */
-  --control-lg: 44px; /* ui: --control-lg */
-  --row: 36px; /* ui: --row */
+  --control-sm: 2rem; /* ui: --control-sm */
+  --control-md: 2.25rem; /* ui: --control-md */
+  --control-lg: 2.75rem; /* ui: --control-lg */
+  --row: 2.25rem; /* ui: --row */
   --measure: 68ch; /* ui: --measure */
   --page-max: 960px; /* ui: --page-max */
   --page-wide: 1120px; /* ui: --page-wide */
