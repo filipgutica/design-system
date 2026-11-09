@@ -1,0 +1,298 @@
+{
+  "groups": [
+    {
+      "comment": "Neutral paper and graphite surfaces.",
+      "tokens": {
+        "bg": [
+          "#f4f5f6",
+          "#0d1012"
+        ],
+        "surface": [
+          "#e9ebed",
+          "#13171a"
+        ],
+        "surface-raised": [
+          "#fbfbfc",
+          "#181d21"
+        ],
+        "surface-hover": [
+          "#e2e5e8",
+          "#20262b"
+        ],
+        "row-hover": [
+          "#e2e5e8",
+          "#20262b"
+        ],
+        "row-selected": "{surface-raised}",
+        "border-subtle": [
+          "#d3d8dd",
+          "#262d33"
+        ],
+        "border": [
+          "#6d747b",
+          "#78818a"
+        ],
+        "text": [
+          "#101315",
+          "#e6e9eb"
+        ],
+        "text-muted": [
+          "#50575e",
+          "#9aa3ab"
+        ]
+      }
+    },
+    {
+      "comment": "Project hue for primary actions, selection, and the one focus ring; links stay separate.",
+      "tokens": {
+        "project": [
+          "#4b45d1",
+          "#a5a1ff"
+        ],
+        "project-dark": "#a5a1ff",
+        "accent": "{project}",
+        "accent-text": "{bg}",
+        "accent-hover": "{text}",
+        "link": [
+          "#0b5f7c",
+          "#67c1df"
+        ],
+        "focus": "{accent}",
+        "focus-width": "2px",
+        "focus-offset": "3px",
+        "button-hover": "color-mix(in srgb, {accent} 85%, {text})"
+      }
+    },
+    {
+      "comment": "Status: only for state, never for decoration.",
+      "tokens": {
+        "success": [
+          "#157249",
+          "#4cc38a"
+        ],
+        "warning": [
+          "#86532e",
+          "#e2a54b"
+        ],
+        "danger": [
+          "#bd342b",
+          "#f0776c"
+        ],
+        "info": [
+          "#175cd3",
+          "#84adff"
+        ],
+        "success-soft": [
+          "#d9e5e1",
+          "#172d25"
+        ],
+        "warning-soft": [
+          "#e7e2de",
+          "#2f281b"
+        ],
+        "danger-soft": [
+          "#efe4e4",
+          "#312020"
+        ],
+        "info-soft": [
+          "#d9e3f2",
+          "#202938"
+        ]
+      }
+    },
+    {
+      "comment": "Code",
+      "tokens": {
+        "command-bg": [
+          "color-mix(in srgb, {project} 25%, #101010)",
+          "color-mix(in srgb, {project} 16%, black)"
+        ],
+        "command-border": [
+          "transparent",
+          "color-mix(in srgb, {project} 28%, black)"
+        ],
+        "terminal": "#0a0c0e",
+        "terminal-text": "#e6e9eb",
+        "terminal-border": "#2a3036",
+        "terminal-caption": "#13171a",
+        "terminal-caption-text": "#c9d0d6",
+        "code-bg": "{surface}",
+        "code-text": "{text}",
+        "code-key": [
+          "#715b42",
+          "#d8c2a5"
+        ],
+        "code-string": [
+          "#346347",
+          "#a8bd9c"
+        ],
+        "code-number": [
+          "#86532e",
+          "#d5b98c"
+        ],
+        "code-comment": [
+          "#626772",
+          "#a0a6b1"
+        ]
+      }
+    },
+    {
+      "comment": "Self-hosted IBM Plex latin faces (OFL); system fallbacks.",
+      "tokens": {
+        "font-sans": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
+        "font-mono": "\"IBM Plex Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",
+        "text-xs": "0.75rem",
+        "text-sm": "0.8125rem",
+        "text-md": "0.875rem",
+        "text-lg": "1rem",
+        "text-xl": "1.25rem",
+        "text-2xl": "1.5rem",
+        "text-3xl": "2.75rem",
+        "text-reading": "1rem",
+        "text-display": "3.5rem",
+        "text-display-sm": "2.125rem",
+        "leading-tight": "1.25",
+        "leading": "1.6",
+        "weight-regular": "400",
+        "weight-medium": "500",
+        "weight-semibold": "600",
+        "tracking-tight": "-0.03em",
+        "text-code": "0.84375rem"
+      }
+    },
+    {
+      "comment": "Space: 4px rhythm.",
+      "tokens": {
+        "space-1": "0.25rem",
+        "space-2": "0.5rem",
+        "space-3": "0.75rem",
+        "space-4": "1rem",
+        "space-5": "1.25rem",
+        "space-6": "1.5rem",
+        "space-8": "2rem",
+        "space-12": "3rem",
+        "space-16": "4rem",
+        "space-20": "5rem",
+        "space-24": "6rem"
+      }
+    },
+    {
+      "comment": "Size",
+      "tokens": {
+        "control-sm": "2rem",
+        "control-md": "2.25rem",
+        "control-lg": "2.75rem",
+        "row": "2.25rem",
+        "measure": "68ch",
+        "page-max": "960px",
+        "page-wide": "1120px",
+        "sidebar": "224px"
+      }
+    },
+    {
+      "comment": "Shape",
+      "tokens": {
+        "radius-sm": "6px",
+        "radius-md": "999px",
+        "radius-field": "10px",
+        "radius-lg": "16px",
+        "radius-pill": "999px"
+      }
+    },
+    {
+      "comment": "Elevation: floating layers only (menus, popovers, dialogs).",
+      "tokens": {
+        "shadow-popover": [
+          "0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px {border-subtle}",
+          "0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px {border-subtle}"
+        ]
+      }
+    },
+    {
+      "comment": "Motion",
+      "tokens": {
+        "duration-fast": "120ms",
+        "duration": "180ms",
+        "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
+      }
+    }
+  ],
+  "library": {
+    "roles": {
+      "--color-project": "project",
+      "--color-project-dark": "project-dark",
+      "--color-bg": "bg",
+      "--color-surface": "surface",
+      "--color-surface-raised": "surface-raised",
+      "--color-surface-muted": "surface-hover",
+      "--color-text": "text",
+      "--color-muted": "text-muted",
+      "--color-link": "link",
+      "--color-accent": "accent",
+      "--color-accent-text": "accent-text",
+      "--color-focus": "focus",
+      "--color-border": "border",
+      "--color-border-subtle": "border-subtle",
+      "--color-button-bg": "accent",
+      "--color-button-text": "accent-text",
+      "--color-button-hover": "button-hover",
+      "--color-input-bg": "surface-raised",
+      "--color-input-text": "text",
+      "--color-input-border": "border",
+      "--color-input-placeholder": "text-muted",
+      "--color-row-hover": "row-hover",
+      "--color-row-selected": "row-selected",
+      "--color-row-selected-text": "text",
+      "--color-code": "code-bg",
+      "--color-code-text": "code-text",
+      "--color-syntax-comment": "code-comment",
+      "--color-syntax-keyword": "code-key",
+      "--color-syntax-string": "code-string",
+      "--color-syntax-number": "code-number",
+      "--color-syntax-function": "code-key",
+      "--color-syntax-type": "code-number",
+      "--color-syntax-variable": "code-text",
+      "--color-syntax-operator": "text-muted",
+      "--color-syntax-punctuation": "text-muted",
+      "--color-syntax-tag": "code-key",
+      "--color-syntax-attribute": "code-number",
+      "--color-error": "danger",
+      "--color-warning": "warning",
+      "--color-success": "success",
+      "--color-info": "info",
+      "--color-progress": "accent",
+      "--color-error-surface": "danger-soft",
+      "--color-warning-surface": "warning-soft",
+      "--color-success-surface": "success-soft",
+      "--color-info-surface": "info-soft",
+      "--shadow-dialog": "shadow-popover",
+      "--color-status-text": "text",
+      "--color-terminal": "terminal",
+      "--color-terminal-text": "terminal-text",
+      "--color-terminal-border": "terminal-border",
+      "--color-terminal-caption": "terminal-caption",
+      "--color-terminal-caption-text": "terminal-caption-text",
+      "--color-accent-hover": "accent-hover",
+      "--color-command-bg": "command-bg",
+      "--color-command-border": "command-border"
+    },
+    "aliases": {
+      "font-sans": "--font-ui",
+      "radius-sm": "--radius-inline",
+      "radius-md": "--radius-control",
+      "radius-field": "--radius-field",
+      "radius-lg": "--radius-panel"
+    },
+    "extras": [
+      "text-3xl",
+      "text-reading",
+      "text-display",
+      "text-display-sm",
+      "tracking-tight",
+      "space-20",
+      "space-24",
+      "row",
+      "page-wide"
+    ]
+  }
+}
