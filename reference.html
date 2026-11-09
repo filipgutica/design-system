@@ -303,10 +303,11 @@
   .value { font-family: var(--font-mono); color: var(--text-muted); overflow-wrap: anywhere; }
   .use { color: var(--text-muted); }
   .spec-sample { min-width: 0; overflow-wrap: anywhere; }
-  .t-display, .t-doc-title, .t-app-title, .t-section { font-family: var(--font-mono); font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
+  .t-display, .t-doc-title, .t-section { font-family: var(--font-mono); font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
   .t-display { font-size: var(--text-display); }
   .t-doc-title { font-size: var(--text-3xl); }
-  .t-app-title { font-size: var(--text-2xl); }
+  /* Application titles are sans, as the toolbar title is. */
+  .t-app-title { font-size: var(--text-2xl); font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
   /* The ## mark is decorative: the empty alt text after the slash keeps screen readers from reading it. */
   .t-section { font-size: var(--text-xl); padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
   .t-section::before { content: "## " / ""; color: var(--accent); }
@@ -501,7 +502,7 @@
           <ul class="specs">
             <li class="spec"><div class="spec-meta"><span>Documentation title</span><code>--font-mono --text-3xl</code></div><p class="spec-sample t-doc-title">Design language</p></li>
             <li class="spec"><div class="spec-meta"><span>Section heading</span><code>--font-mono --text-xl</code><span class="use">Documentation, CLI tool, article, and product pages: a <code>##</code> mark in <code>--accent</code> and a <code>--border-subtle</code> rule above</span></div><p class="spec-sample t-section">Typography</p></li>
-            <li class="spec"><div class="spec-meta"><span>Application title</span><code>--font-mono --text-2xl</code><span class="use">Or smaller</span></div><p class="spec-sample t-app-title">Monitors</p></li>
+            <li class="spec"><div class="spec-meta"><span>Application title</span><code>--font-sans --text-2xl</code><span class="use">Or smaller; the toolbar title on this page uses <code>--text-md</code></span></div><p class="spec-sample t-app-title">Monitors</p></li>
             <li class="spec"><div class="spec-meta"><span>Application section heading</span><code>--font-sans --text-lg</code><span class="use">Up to <code>--text-xl</code>, or smaller in a dense panel. No mark and no rule</span></div><p class="spec-sample t-sub">Alerting monitors</p></li>
             <li class="spec"><div class="spec-meta"><span>Subheading (h3 and below)</span><code>--font-sans --text-lg</code></div><p class="spec-sample t-sub">Install the command line tool</p></li>
             <li class="spec"><div class="spec-meta"><span>Reading text and links</span><code>--text-reading --leading --measure</code><span class="use">Underline links in prose</span></div><p class="spec-sample t-reading">A shared language for personal products and tools. The <a href="docs.html">documentation example</a> shows it in a full page.</p></li>
