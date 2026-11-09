@@ -52,7 +52,7 @@ Layer: Core. ui: `UiButton`.
 Layer: Core. ui: the `fg-quiet-action` class.
 
 - **Use.** An icon or short text action inside a component: code block and command list Copy, capture Full size, dialog and drawer close, and the project trigger. Use a [button](#button) for an action that stands on its own.
-- **Anatomy.** A native `<button>`, or the `<summary>` of a menu. Transparent fill, a transparent 1px border, `--radius-md`, and `--text-muted`. Give the shared recipe zero specificity (`:where()`), so each component sets the action's size, place, and resting colour.
+- **Anatomy.** A native `<button>`, or the `<summary>` of a menu. Transparent fill, a transparent 1px border, `--radius-md`, and `--text-muted`. The content is centred in the box. An icon-only action holds an SVG icon, never a text glyph such as ×, because a font draws a glyph's ink off the centre of its box. Give the shared recipe zero specificity (`:where()`), so each component sets the action's size, place, and resting colour.
 - **States.** Hover turns the text `--text` and fills `currentColor` at 12% over transparent. Pressed fills `currentColor` at 18%, with no sink. Focus-visible is the control ring, inset where the parent clips. An open menu keeps its trigger at the 12% tint, below the press. The code block's Copy keeps the block's text colour on hover. A disabled quiet action follows the shared [disabled](#rules-for-every-control) rule.
 - **Keyboard and screen reader.** Native button behavior. An icon-only action needs `aria-label`.
 - **Motion.** Fill and colour change over `--duration-fast` with `--ease-out`.

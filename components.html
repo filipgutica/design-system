@@ -55,8 +55,10 @@
   /* Quiet action: an icon or short text action inside a component, such as Copy, Full size, a dialog or
      drawer close, or a menu trigger. One recipe gives each the same edge, hover, press, and focus, with no sink.
      The tint mixes currentColor, so it reads on a light panel and on a dark plate.
+     The recipe centres its content, so an icon-only action's SVG sits on the box centre. Use an SVG icon,
+     never a text glyph such as ×: a font draws a glyph's ink off its box centre.
      :where keeps the base below each component's own size and layout. */
-  :where(.quiet-action) { border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  :where(.quiet-action) { display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
   .quiet-action:is(:hover, .is-hover):where(:not(:disabled)) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
   .quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 18%, transparent); }
   .quiet-action:disabled { opacity: 0.58; cursor: not-allowed; }
@@ -264,7 +266,7 @@
   .dialog-body { min-height: 0; overflow: auto; padding: var(--space-4); }
   .dialog-foot { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--border-subtle); background: var(--surface); }
   /* The close button is a quiet action; this sets its size only. */
-  .close { display: inline-grid; flex: none; place-items: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; color: var(--text-muted); font-size: 22px; line-height: 1; }
+  .close { flex: none; width: var(--control-lg); min-height: var(--control-lg); padding: 0; color: var(--text-muted); }
   .drawer { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(calc(var(--sidebar) + var(--space-12)), 100%); height: 260px; overflow: hidden; padding: 0; border: 1px solid transparent; background: var(--surface-raised); color: var(--text); box-shadow: var(--shadow-popover); }
   dialog.drawer { position: fixed; inset: 0 auto 0 0; height: 100dvh; max-height: none; margin: 0; }
   dialog.drawer::backdrop { background: var(--overlay); }
@@ -543,6 +545,7 @@
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-close" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
   <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></symbol>
   <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></symbol>
   <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></symbol>
@@ -649,10 +652,10 @@
     <header><h3 id="quiet-action-title">Quiet action</h3><span class="badge">Core</span><a href="components.md#quiet-action">Spec</a></header>
     <p class="note">One recipe for Copy, Full size, dialog and drawer close, and the project trigger. Each component sets only its size and place.</p>
     <div class="row"><h4>Icon</h4><div class="states">
-      <div class="state"><button class="quiet-action close" type="button" aria-label="Close">×</button><span class="caption">Rest</span></div>
-      <div class="state" inert><button class="quiet-action close is-hover" type="button" aria-label="Close">×</button><span class="caption">Hover</span></div>
-      <div class="state" inert><button class="quiet-action close is-focus" type="button" aria-label="Close">×</button><span class="caption">Focus visible</span></div>
-      <div class="state" inert><button class="quiet-action close is-active" type="button" aria-label="Close">×</button><span class="caption">Pressed</span></div>
+      <div class="state"><button class="quiet-action close" type="button" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button><span class="caption">Rest</span></div>
+      <div class="state" inert><button class="quiet-action close is-hover" type="button" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button><span class="caption">Hover</span></div>
+      <div class="state" inert><button class="quiet-action close is-focus" type="button" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button><span class="caption">Focus visible</span></div>
+      <div class="state" inert><button class="quiet-action close is-active" type="button" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button><span class="caption">Pressed</span></div>
     </div></div>
     <div class="row"><h4>Text</h4><div class="states">
       <div class="state"><button class="quiet-action copy" type="button"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button><span class="caption">Rest</span></div>
@@ -901,7 +904,7 @@
       <div class="state"><button class="btn secondary" type="button" data-open="live-dialog">Open dialog</button><span class="caption">Opens a native modal dialog</span></div>
     </div></div>
     <div class="row"><h4>In place</h4><div class="states">
-      <div class="state wide" inert><div class="dialog" role="dialog" aria-labelledby="dlg-static-title" aria-describedby="dlg-static-desc"><div class="dialog-head"><div><h4 id="dlg-static-title">Delete monitor</h4><p id="dlg-static-desc">This removes its history.</p></div><button class="quiet-action close" type="button" aria-label="Close dialog">×</button></div><div class="dialog-body">API p95 latency stops alerting at once.</div><div class="dialog-foot"><button class="btn secondary" type="button">Cancel</button><button class="btn danger" type="button">Delete</button></div></div><span class="caption">Static specimen; the real one sits over an <code>--overlay</code> backdrop</span></div>
+      <div class="state wide" inert><div class="dialog" role="dialog" aria-labelledby="dlg-static-title" aria-describedby="dlg-static-desc"><div class="dialog-head"><div><h4 id="dlg-static-title">Delete monitor</h4><p id="dlg-static-desc">This removes its history.</p></div><button class="quiet-action close" type="button" aria-label="Close dialog"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="dialog-body">API p95 latency stops alerting at once.</div><div class="dialog-foot"><button class="btn secondary" type="button">Cancel</button><button class="btn danger" type="button">Delete</button></div></div><span class="caption">Static specimen; the real one sits over an <code>--overlay</code> backdrop</span></div>
     </div></div>
   </section>
 
@@ -912,7 +915,7 @@
       <div class="state"><button class="btn secondary menu-glyph" type="button" data-size="lg" data-open="live-drawer">Contents</button><span class="caption">Phone trigger: opens a side drawer</span></div>
     </div></div>
     <div class="row"><h4>In place</h4><div class="states">
-      <div class="state wide" inert><div class="drawer" role="dialog" aria-labelledby="drw-static-title"><div class="drawer-head"><h4 id="drw-static-title">Contents</h4><button class="quiet-action close" type="button" aria-label="Close drawer">×</button></div><div class="drawer-body"><nav class="navlist" aria-label="Contents, static"><a href="#button" aria-current="page">Button</a><a href="#select">Select</a><a href="#switch">Switch</a></nav></div></div><span class="caption">Static specimen</span></div>
+      <div class="state wide" inert><div class="drawer" role="dialog" aria-labelledby="drw-static-title"><div class="drawer-head"><h4 id="drw-static-title">Contents</h4><button class="quiet-action close" type="button" aria-label="Close drawer"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="drawer-body"><nav class="navlist" aria-label="Contents, static"><a href="#button" aria-current="page">Button</a><a href="#select">Select</a><a href="#switch">Switch</a></nav></div></div><span class="caption">Static specimen</span></div>
     </div></div>
   </section>
 
@@ -1025,16 +1028,16 @@
 </div>
 
 <dialog class="dialog" id="live-dialog" aria-labelledby="live-dialog-title" aria-describedby="live-dialog-desc">
-  <div class="dialog-head"><div><h4 id="live-dialog-title">Delete monitor</h4><p id="live-dialog-desc">This removes its history.</p></div><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close dialog">×</button></form></div>
+  <div class="dialog-head"><div><h4 id="live-dialog-title">Delete monitor</h4><p id="live-dialog-desc">This removes its history.</p></div><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close dialog"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
   <div class="dialog-body">API p95 latency stops alerting at once. Escape closes this dialog and returns focus to its trigger.</div>
   <form class="dialog-foot" method="dialog"><button class="btn secondary" type="submit">Cancel</button><button class="btn danger" type="submit">Delete</button></form>
 </dialog>
 <dialog class="dialog capture-viewer" id="capture-viewer" aria-labelledby="capture-viewer-title">
-  <div class="dialog-head"><h4 id="capture-viewer-title">Capture</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close full size capture">×</button></form></div>
+  <div class="dialog-head"><h4 id="capture-viewer-title">Capture</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close full size capture"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
   <div class="dialog-body" id="capture-viewer-body"></div>
 </dialog>
 <dialog class="drawer" id="live-drawer" aria-labelledby="live-drawer-title">
-  <div class="drawer-head"><h4 id="live-drawer-title">Contents</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close drawer">×</button></form></div>
+  <div class="drawer-head"><h4 id="live-drawer-title">Contents</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close drawer"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
   <div class="drawer-body"><nav class="navlist" aria-label="Contents"><a href="#button">Button</a><a href="#segmented-control">Segmented control</a><a href="#navigation-list" aria-current="page">Navigation list</a></nav></div>
 </dialog>
 
