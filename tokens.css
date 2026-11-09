@@ -58,13 +58,14 @@
   --text-muted: #50575e; /* ui: --color-muted, --color-input-placeholder, --color-syntax-operator, --color-syntax-punctuation */
   --overlay: rgb(0 0 0 / 42%); /* ui: --color-overlay */
 
-  /* The hue fills primary actions and marks selection and control focus; links keep --link and --focus. */
+  /* The hue fills primary actions and marks selection; links keep --link. */
   --accent: var(--project); /* ui: --color-accent, --color-button-bg, --color-progress */
   --accent-text: var(--bg); /* ui: --color-accent-text, --color-button-text */
   --accent-hover: var(--text); /* ui: --color-accent-hover */
   --button-hover: color-mix(in srgb, var(--accent) 85%, var(--text)); /* ui: --color-button-hover */
   --link: #0b5f7c; /* ui: --color-link */
-  --focus: var(--link); /* ui: --color-focus */
+  /* One focus ring in the text colour for every role, so the ring never puts a hue around another hue. */
+  --focus: var(--text); /* ui: --color-focus */
 
   /* Status: only for state, never for decoration. */
   --success: #157249; /* ui: --color-success */

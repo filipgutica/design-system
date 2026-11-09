@@ -149,7 +149,7 @@
   .toggle[data-size="sm"] { --w: 35.2px; --h: 17.6px; --inset: 1.6px; min-height: var(--control-sm); font-size: var(--text-sm); }
   .toggle[data-size="lg"] { --w: 52.8px; --h: 26.4px; --inset: 2.4px; min-height: var(--control-lg); font-size: var(--text-lg); }
   .toggle:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"]) { border-color: var(--border); }
-  /* The switch carries the on state; the card takes the selected rows' faint tint and a focused field's hairline. */
+  /* The switch carries the on state; the card takes the selected rows' faint tint and an accent hairline. */
   .toggle[aria-pressed="true"] { border-color: color-mix(in srgb, var(--accent) 35%, transparent); background: color-mix(in srgb, var(--accent) 8%, var(--surface-raised)); }
   .toggle:disabled { opacity: 0.58; cursor: not-allowed; }
   .toggle-text { display: grid; }
@@ -194,8 +194,8 @@
   .range:disabled { opacity: 0.58; cursor: not-allowed; }
   /* The ring goes on the thumb, not the full-width input. */
   .range:is(:focus-visible, .is-focus) { outline: none; }
-  .range:is(:focus-visible, .is-focus)::-webkit-slider-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .range:is(:focus-visible, .is-focus)::-moz-range-thumb { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .range:is(:focus-visible, .is-focus)::-webkit-slider-thumb { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .range:is(:focus-visible, .is-focus)::-moz-range-thumb { outline: 2px solid var(--focus); outline-offset: 2px; }
 
   /* Progress and score */
   .progress { width: 220px; max-width: 100%; height: 9px; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--surface-hover); }
@@ -340,8 +340,8 @@
   /* ================= Identity: terminal folio ================= */
 
   /* Command plate: dark in both themes and tinted with the project hue. */
-  /* Rings on the plate use --project-dark, so the control ring on Copy reads on the dark plate. */
-  .code.command { --code-text: var(--terminal-text); --accent: var(--project-dark); --focus: var(--project-dark); border-color: var(--command-border); background: var(--command-bg); color: var(--terminal-text); }
+  /* The plate is dark in both themes, so its focus ring takes the plate's text colour. */
+  .code.command { --code-text: var(--terminal-text); --focus: var(--terminal-text); border-color: var(--command-border); background: var(--command-bg); color: var(--terminal-text); }
   .code.command .code-head { border-color: var(--command-border); background: transparent; color: var(--terminal-caption-text); }
   .code.command .code-head .lang { color: var(--terminal-caption-text); }
   /* The prompt is drawn by CSS, so copied and spoken text omit it. */
@@ -357,7 +357,7 @@
     --text: var(--terminal-text);
     --text-muted: var(--terminal-caption-text);
     --accent: var(--project-dark);
-    --focus: var(--project-dark);
+    --focus: var(--terminal-text);
     --border-subtle: var(--terminal-border);
     width: 100%; max-width: 640px; min-width: 0; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--terminal); color: var(--terminal-text); box-shadow: var(--shadow-surface);
   }
@@ -437,18 +437,17 @@
   .site-footer nav { display: flex; flex-wrap: wrap; gap: 0 var(--space-5); }
 
   /* ---------- Focus, forced colors, and touch ---------- */
-  /* Controls that act or set a value: a 2px accent ring with a 2px gap and no glow, over the
-     control's own raise or sink. Links, navigation rows, tabs, listbox options, and list rows keep the --focus ring; fields lift. */
+  /* One ring for every role: 2px of --focus (the text colour) with a 2px gap and no glow, over the
+     control's own raise or sink. The tokens.css base draws it on links; these rules pin it and move
+     it to the visible part of composite controls. */
   :is(.btn, .quiet-action, .check input, .segmented button, .toggle):is(:focus-visible, .is-focus),
   :is(.dialog, .drawer):focus-visible,
   .switch:is(:focus-visible, .is-focus) .switch-track,
-  .radio-card:has(input:is(:focus-visible, .is-focus)) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .radio-card:has(input:is(:focus-visible, .is-focus)) { outline: 2px solid var(--focus); outline-offset: 2px; }
   /* Inside a segmented control, the ring hugs the thumb instead of crossing into the next option. */
   .segmented button:is(:focus-visible, .is-focus) { outline-offset: -2px; }
-  /* Fields lift out of the well onto the control surface, with a faint accent hairline and no ring.
-     The cue is below 3:1 by choice (decisions.md, Known gaps). The transparent outline is drawn
-     only in forced colors, so the field keeps a ring there. */
-  :is(.input, .select, .textarea):is(:focus-visible, .is-focus) { outline: 2px solid transparent; outline-offset: 0; border-color: color-mix(in srgb, var(--accent) 35%, transparent); background-color: var(--field-focus); box-shadow: var(--shadow-raise); }
+  /* Fields take the same ring and also lift out of the well onto the control surface. */
+  :is(.input, .select, .textarea):is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: 2px; background-color: var(--field-focus); box-shadow: var(--shadow-raise); }
   :is(.input, .select, .textarea)[aria-invalid="true"]:is(:focus-visible, .is-focus) { border-color: var(--danger); }
 
   @media (forced-colors: active) {
@@ -462,6 +461,8 @@
     .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
     /* The pressed option opts out of adjustment, so its ring would keep the accent. The ring sits on the track, so it takes the track's text colour. */
     .segmented button[aria-pressed="true"]:is(:focus-visible, .is-focus) { outline-color: CanvasText; }
+    /* A checked box and the switch track opt out of adjustment too, so their ring would keep the author colour. */
+    .check input:is(:focus-visible, .is-focus), .switch:is(:focus-visible, .is-focus) .switch-track { outline-color: CanvasText; }
     .switch-track, .toggle-track { forced-color-adjust: none; border-color: ButtonText; background: Canvas; }
     .switch-track::after, .toggle-track::after { forced-color-adjust: none; background: ButtonText; }
     :is(.switch[aria-checked="true"] .switch-track, .toggle[aria-pressed="true"] .toggle-track) { border-color: Highlight; background: Highlight; }
@@ -961,7 +962,7 @@
     <div class="row"><h4>Commands</h4><div class="states">
       <div class="state wide"><div class="code command compact"><pre tabindex="0" role="region" aria-label="Install command"><code id="cmd-install"><span class="line"><span>brew install filipgutica/tap/filip-stack</span></span></code></pre><button class="quiet-action copy" type="button" data-copy="cmd-install" aria-label="Copy install command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, live; the <code>$</code> is drawn by CSS</span></div>
       <div class="state wide"><div class="code command"><div class="code-head"><b>Set up</b><button class="quiet-action copy" type="button" data-copy="cmd-setup"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="Set up commands"><code id="cmd-setup"><span class="line"><span>pnpm install --frozen-lockfile</span></span><span class="line"><span>pnpm check</span></span></code></pre></div><span class="caption">With a header, two lines</span></div>
-      <div class="state wide" inert><div class="code command compact"><pre><code><span class="line"><span>filip-stack apply</span></span></code></pre><button class="quiet-action copy is-focus" type="button" aria-label="Copy apply command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Focus visible on Copy, in <code>--project-dark</code></span></div>
+      <div class="state wide" inert><div class="code command compact"><pre><code><span class="line"><span>filip-stack apply</span></span></code></pre><button class="quiet-action copy is-focus" type="button" aria-label="Copy apply command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Focus visible on Copy, in <code>--terminal-text</code></span></div>
     </div></div>
   </section>
 
