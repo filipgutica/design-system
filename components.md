@@ -247,24 +247,22 @@ Layer: Core. ui: `UiCodeBlock`.
 - **Phone text.** Set `text-size-adjust: 100%` (and `-webkit-text-size-adjust`) on the block, and align each line's items to the baseline, so iOS Safari does not enlarge one line.
 - **Copy.** Copies the code text only: no line numbers or prompts, and one line per row joined with newlines. A [quiet action](#quiet-action) at least 44×44 with an accessible name. Announce the result in a polite live region; in the compact variant the success message is visually hidden.
 - **Keyboard and screen reader.** The `<pre>` is focusable when it scrolls. Its focus ring and the Copy button's ring are inset, because the block clips its content.
-- **In an example.** Inside an [example](#example) the block has no header, radius, border, or shadow, and spans the frame's width.
 
-## Example
+### With a live example
 
-Layer: Core. ui: `UiExample`.
+ui: `UiExample`.
 
-- **Use.** Documentation that shows a live component above the code that makes it. Use a [code block](#code-block) for code with no live result, and a [figure](#figure) for a static picture.
-- **Anatomy.** One frame: a `<figure>` with a 1px `--border-subtle` edge, `--radius-lg`, no shadow, and its content clipped to the corners. The stage comes first and holds the live preview, centred, at least 8rem tall, with `--space-8` padding. The source follows directly below the stage, after one `--border-subtle` hairline. There is no header row and no language label. An optional caption follows the frame, as a [figure](#figure) caption does.
-- **Tokens.** Frame edge `--border-subtle` and corners `--radius-lg`. Stage `--bg`. Hairline `--border-subtle`. Source `--code-bg` and the `--code-*` syntax tokens.
+- **Use.** Documentation that shows a live component above the code that makes it. Use the plain code block for code with no live result, and a [figure](#figure) for a static picture.
+- **Anatomy.** One frame: a `<figure>` with a 1px `--border-subtle` edge, `--radius-lg`, no shadow, and its content clipped to the corners. The stage comes first and holds the live preview, centred, at least 8rem tall, with `--space-8` padding. The code block follows directly below the stage, after one `--border-subtle` hairline. There is no header row and no language label. An optional caption follows the frame, as a [figure](#figure) caption does.
+- **Tokens.** Frame edge `--border-subtle` and corners `--radius-lg`. Stage `--bg`. Hairline `--border-subtle`.
 - **Stage.** The stage sits on the page background, not in a well or a panel. This is a named exception to the container [depth](DESIGN.md#depth) tier: a preview shows each component on the surface it sits on in a page; see [decisions](decisions.md).
-- **Source.** A [code block](#code-block) with its padding and type. Inside the frame it has no radius, border, or shadow of its own, and it spans the frame's full width, not `--measure`.
-- **Copy.** The [code block](#code-block)'s Copy, icon-only and named "Copy code", in the source's top right corner. It comes before the `<pre>` in DOM order, so the reader reaches it before the code.
-- **States.** The frame has no states. Components on the stage show their own states, and Copy shows the quiet action's states.
-- **Long code.** The `<pre>` scrolls inside the code block's 32rem maximum height, and sideways for long lines. It is focusable and named (for example, "Example source") when it scrolls.
-- **Keyboard and screen reader.** Tab order is the stage's controls, then Copy, then the `<pre>`. Focus rings on Copy and the `<pre>` are inset, because the frame clips its content.
+- **Source.** Inside the frame the code block has no radius, border, or shadow of its own, and it spans the frame's full width, not `--measure`.
+- **Copy.** Icon-only and named "Copy code", in the source's top right corner. It comes before the `<pre>` in DOM order, so the reader reaches it before the code.
+- **States.** The frame has no states. Components on the stage show their own states.
+- **Keyboard and screen reader.** Tab order is the stage's controls, then Copy, then the `<pre>`. Name the `<pre>` for its role, for example "Example source", when it scrolls. Focus rings on Copy and the `<pre>` are inset, because the frame clips its content.
 - **Motion.** None of its own.
 - **Responsive.** The frame takes its container's width. The stage stays above the source at every width. On phones the stage padding is `--space-6` by `--space-4`. Wide content scrolls inside the stage or the `<pre>`, never the page.
-- **Forced colors.** The frame edge and the hairline draw in the system colour. Copy's transparent border draws as the system button edge.
+- **Forced colors.** The frame edge and the hairline draw in the system colour.
 
 ## Command plate
 
@@ -289,7 +287,7 @@ Layer: Identity. ui: `UiSiteHeader`, `UiSiteAppearancePicker`.
 - **Phone.** With three or more links, the links take a second row.
 - **Keyboard and screen reader.** The summary is named "Project: <name>". Escape closes the menu and returns focus to the summary; moving focus out of it closes it. The chevron turns 180° while the menu is open, over `--duration-fast` with `--ease-out`.
 
-## Folio type and page helpers
+## Page type and helpers
 
 Layer: Identity. ui: `site.css` helpers.
 

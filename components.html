@@ -326,7 +326,7 @@
   .code.compact pre { padding: var(--space-2) var(--space-3); }
   .code.compact .copy { margin: var(--space-1); }
 
-  /* Example: a live stage over its source, in one frame. */
+  /* Code block with a live example: a live stage over its source, in one frame. */
   .example { width: 100%; min-width: 0; margin: 0; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--bg); }
   /* The stage sits on the page background, so the preview shows components on the surface they sit on in a page. */
   .example-stage { display: grid; place-items: safe center; min-height: 8rem; overflow-x: auto; padding: var(--space-8); }
@@ -400,7 +400,7 @@
   .site-links a { display: inline-flex; align-items: center; min-height: var(--control-lg); color: var(--text-muted); text-decoration: none; }
   .site-links a:hover { color: var(--text); }
 
-  /* Folio type and page helpers */
+  /* Page type and helpers */
   .folio-h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); letter-spacing: var(--tracking-tight); }
   .folio-h2::before { content: "## " / ""; color: var(--accent); }
   .folio-display { font: var(--weight-semibold) var(--text-display) / 1.08 var(--font-mono); letter-spacing: var(--tracking-tight); }
@@ -578,11 +578,11 @@
 <nav class="toc" aria-label="Components">
   <div class="navlist" role="group" aria-labelledby="toc-core">
     <span class="group-label" id="toc-core">Core</span>
-    <a href="#button">Button</a><a href="#quiet-action">Quiet action</a><a href="#text-input-and-textarea">Text input and textarea</a><a href="#select">Select</a><a href="#field-wrapper">Field wrapper</a><a href="#checkbox-and-radio">Checkbox and radio</a><a href="#radio-card-group">Radio card group</a><a href="#switch">Switch</a><a href="#toggle-button">Toggle button</a><a href="#segmented-control">Segmented control</a><a href="#slider">Slider</a><a href="#progress">Progress</a><a href="#score">Score</a><a href="#tabs">Tabs</a><a href="#badge">Badge</a><a href="#alert">Alert</a><a href="#surface-and-card">Surface and card</a><a href="#figure">Figure</a><a href="#dialog">Dialog</a><a href="#drawer">Drawer</a><a href="#navigation-list">Navigation list</a><a href="#code-block">Code block</a><a href="#example">Example</a>
+    <a href="#button">Button</a><a href="#quiet-action">Quiet action</a><a href="#text-input-and-textarea">Text input and textarea</a><a href="#select">Select</a><a href="#field-wrapper">Field wrapper</a><a href="#checkbox-and-radio">Checkbox and radio</a><a href="#radio-card-group">Radio card group</a><a href="#switch">Switch</a><a href="#toggle-button">Toggle button</a><a href="#segmented-control">Segmented control</a><a href="#slider">Slider</a><a href="#progress">Progress</a><a href="#score">Score</a><a href="#tabs">Tabs</a><a href="#badge">Badge</a><a href="#alert">Alert</a><a href="#surface-and-card">Surface and card</a><a href="#figure">Figure</a><a href="#dialog">Dialog</a><a href="#drawer">Drawer</a><a href="#navigation-list">Navigation list</a><a href="#code-block">Code block</a>
   </div>
   <div class="navlist" role="group" aria-labelledby="toc-identity">
     <span class="group-label" id="toc-identity">Identity</span>
-    <a href="#command-plate">Command plate</a><a href="#terminal-capture">Terminal capture</a><a href="#site-header">Site header</a><a href="#folio-type-and-page-helpers">Folio type and page helpers</a>
+    <a href="#command-plate">Command plate</a><a href="#terminal-capture">Terminal capture</a><a href="#site-header">Site header</a><a href="#page-type-and-helpers">Page type and helpers</a>
   </div>
 </nav>
 
@@ -943,16 +943,12 @@
       <div class="state wide"><div class="code"><div class="code-head"><b>monitor.ts</b><span class="lang">TypeScript</span><button class="quiet-action copy" type="button" data-copy="code-src"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="monitor.ts"><code id="code-src"><span class="line"><span class="ln">1</span><span><span class="k">const</span> threshold = <span class="n">300</span> <span class="c">// ms at p95</span></span></span><span class="line"><span class="ln">2</span><span><span class="k">export const</span> name = <span class="s">'API p95 latency'</span></span></span></code></pre></div><span class="caption">Header, line numbers, and Copy, live</span></div>
       <div class="state wide" inert><div class="code compact"><pre><code><span class="line"><span>import { threshold } from './monitor'</span></span></code></pre><button class="quiet-action copy is-focus" type="button" aria-label="Copy import"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, with focus visible on Copy</span></div>
     </div></div>
+    <div class="row"><h4>With a live example</h4><div class="states">
+      <div class="state wide"><figure class="example"><div class="example-stage"><div style="display:flex;gap:var(--space-2);flex-wrap:wrap"><button class="btn secondary" type="button">Cancel</button><button class="btn" type="button">Save monitor</button></div></div><div class="code"><button class="quiet-action copy" type="button" data-copy="example-src" aria-label="Copy code" title="Copy code"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button><pre tabindex="0" role="region" aria-label="Example source"><code id="example-src"><span class="line"><span>&lt;<span class="k">button</span> class=<span class="s">"btn secondary"</span> type=<span class="s">"button"</span>&gt;Cancel&lt;/<span class="k">button</span>&gt;</span></span><span class="line"><span>&lt;<span class="k">button</span> class=<span class="s">"btn"</span> type=<span class="s">"button"</span>&gt;Save monitor&lt;/<span class="k">button</span>&gt;</span></span></code></pre></div></figure><span class="caption">Live: the stage on the page background, the source below one hairline, and Copy in its corner</span></div>
+    </div></div>
     <p class="sr-only" role="status" id="copy-status"></p>
   </section>
 
-  <!-- Example -->
-  <section class="component" id="example" data-layer="Core" aria-labelledby="example-title">
-    <header><h3 id="example-title">Example</h3><span class="badge">Core</span><a href="components.md#example">Spec</a></header>
-    <div class="row"><h4>Stage over source</h4><div class="states">
-      <div class="state wide"><figure class="example"><div class="example-stage"><div style="display:flex;gap:var(--space-2);flex-wrap:wrap"><button class="btn secondary" type="button">Cancel</button><button class="btn" type="button">Save monitor</button></div></div><div class="code"><button class="quiet-action copy" type="button" data-copy="example-src" aria-label="Copy code" title="Copy code"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button><pre tabindex="0" role="region" aria-label="Example source"><code id="example-src"><span class="line"><span>&lt;<span class="k">button</span> class=<span class="s">"btn secondary"</span> type=<span class="s">"button"</span>&gt;Cancel&lt;/<span class="k">button</span>&gt;</span></span><span class="line"><span>&lt;<span class="k">button</span> class=<span class="s">"btn"</span> type=<span class="s">"button"</span>&gt;Save monitor&lt;/<span class="k">button</span>&gt;</span></span></code></pre></div></figure><span class="caption">Live: the stage on the page background, the source below one hairline, and Copy in its corner</span></div>
-    </div></div>
-  </section>
 
   <section class="layer-head" aria-labelledby="identity-title">
     <h2 id="identity-title">Identity: terminal folio</h2>
@@ -997,9 +993,9 @@
     </div></div>
   </section>
 
-  <!-- Folio type and page helpers -->
-  <section class="component" id="folio-type-and-page-helpers" data-layer="Identity" aria-labelledby="folio-title">
-    <header><h3 id="folio-title">Folio type and page helpers</h3><span class="badge">Identity</span><a href="components.md#folio-type-and-page-helpers">Spec</a></header>
+  <!-- Page type and helpers -->
+  <section class="component" id="page-type-and-helpers" data-layer="Identity" aria-labelledby="page-type-title">
+    <header><h3 id="page-type-title">Page type and helpers</h3><span class="badge">Identity</span><a href="components.md#page-type-and-helpers">Spec</a></header>
     <div class="row"><h4>Headings</h4><div class="states">
       <div class="state wide"><p class="folio-display">~/annoterm</p><span class="caption">Display title, mono</span></div>
       <div class="state wide"><p class="folio-h2">Install</p><span class="caption">Section heading with its <code>##</code> mark</span></div>
@@ -1020,7 +1016,7 @@
       <div class="state wide"><table class="cmdlist"><thead><tr><th scope="col">Command</th><th scope="col">Use it for</th><td></td></tr></thead><tbody><tr><td><code id="cl-status">filip-stack status</code></td><td>Compare host files with the repository.</td><td><button class="quiet-action copy" type="button" data-copy="cl-status" aria-label="Copy filip-stack status"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></td></tr><tr><td><code id="cl-apply">filip-stack apply</code></td><td>Install the current host config.</td><td><button class="quiet-action copy" type="button" data-copy="cl-apply" aria-label="Copy filip-stack apply"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></td></tr></tbody></table></div>
     </div></div>
     <div class="row"><h4>Footer</h4><div class="states">
-      <div class="state wide"><div class="site-footer"><a href="#folio-type-and-page-helpers">Made by Filip</a><nav aria-label="Projects, footer"><a href="#folio-type-and-page-helpers">annoterm</a><a href="#folio-type-and-page-helpers">ui</a></nav></div></div>
+      <div class="state wide"><div class="site-footer"><a href="#page-type-and-helpers">Made by Filip</a><nav aria-label="Projects, footer"><a href="#page-type-and-helpers">annoterm</a><a href="#page-type-and-helpers">ui</a></nav></div></div>
     </div></div>
   </section>
 </main>
