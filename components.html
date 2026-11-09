@@ -481,6 +481,10 @@
   :is(.input, .select, .textarea)[aria-invalid="true"]:is(:focus-visible, .is-focus) { border-color: var(--danger); box-shadow: var(--field-shadow-focus-invalid); }
   /* The search wrapper takes the field focus, so the input inside it draws nothing. */
   .search:is(:has(input:focus-visible), .is-focus) { outline: none; border-color: var(--accent); box-shadow: var(--field-shadow-focus); }
+  /* A search wrapper follows the shared invalid and disabled field states through the input it holds. */
+  .search:has(input[aria-invalid="true"]) { border-color: var(--danger); }
+  .search:has(input[aria-invalid="true"]):is(:has(input:focus-visible), .is-focus) { border-color: var(--danger); box-shadow: var(--field-shadow-focus-invalid); }
+  .search:has(input:disabled) { background: var(--field); box-shadow: none; opacity: 0.58; cursor: not-allowed; }
 
   @media (forced-colors: active) {
     /* The inset accent line drops, so a focused field draws the system ring just inside its edge. */
