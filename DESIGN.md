@@ -75,7 +75,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
 - Use `--font-sans` for prose, h3 and below, labels, and controls, and `--font-mono` for code, identifiers, and keys. The identity layer decides where else mono appears.
 - Controls and dense application content use `--text-md`; secondary text uses `--text-sm`. Paragraphs and substantial article text use `--text-reading` with `--leading`. Bound reading text with `--measure` and introductory copy to a slightly shorter line.
-- Documentation titles use `--text-3xl`; section headings use `--text-xl` and sit above their content. Application titles use `--text-2xl` or smaller, and application section headings use `--font-sans` at `--text-lg` or smaller.
+- Documentation titles use `--text-3xl`; section headings use `--text-xl` and sit above their content. Application titles use `--text-2xl` or smaller, and application section headings use `--font-sans` at `--text-xl` or smaller.
 - Use `--weight-regular`, `--weight-medium`, and `--weight-semibold`. Keep the source text's case; never transform it. Sentence case and restrained tracking make hierarchy easier to scan.
 - Use `--text-muted` for secondary information and metadata, and `--text` for essential labels and instructions.
 
