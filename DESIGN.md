@@ -87,8 +87,8 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 - Use neutral `--bg`, `--surface`, and `--surface-raised` (paper in light, graphite in dark) to separate regions. Use `--text` and `--text-muted` for the main hierarchy.
 - Each project sets one hue, and `--accent` follows it. The hue fills the one primary action in each decision group, and marks identity and selection: current items, the selected tab's text, and checked or selected controls. It is never a fill for secondary buttons, cards, or wells. Check it at 3:1 for marks and bars, and at 4.5:1 wherever it colours text, on every surface it sits on. `--accent-text` on an `--accent` fill must reach 4.5:1 for each hue; a hue that misses does not colour text or carry a label there.
 - `--link` identifies links; underline prose links. `--focus` is the text colour (`--text`) and outlines keyboard focus on every role (see [focus](components.md#rules-for-every-control)). Where color marks a checked or selected state, use `--accent`; `--link` and `--focus` never mark one.
-- Navigation and selection: the current page and the selected tab take the same quiet lifted fill, tinted faintly with the accent, with accent text where it reaches 4.5:1 on that fill (another readable colour otherwise), and no underline; an in-page location takes a short accent pip without a fill; a selected list row takes a 2px accent bar on its leading edge. Keep raised-control hover and keyboard focus separate from these states. [Component specs](components.md#navigation-list) give the values.
-- Status colors mean state and have a text or icon label. Status surfaces are soft tints of their status color (the `--*-soft` tokens). Outside badges and the danger button label, status foreground colors go on icons; numbers and labels beside them stay in `--text` or `--text-muted`. Keep restrained syntax colors separate from the action palette.
+- Navigation and selection: the current page, the selected tab, and a selected list row take the same quiet lifted fill, tinted with the accent, with accent text where it reaches 4.5:1 on that fill (another readable colour otherwise), and no underline or bar; an in-page location takes a short accent pip without a fill. Keep raised-control hover and keyboard focus separate from these states. [Component specs](components.md#navigation-list) give the values.
+- Status colors mean state and have a text or icon label. Status surfaces are soft tints of their status color (the `--*-soft` tokens). Outside badges, the danger button label, and field error text, status foreground colors go on icons; numbers and labels beside them stay in `--text` or `--text-muted`. Keep restrained syntax colors separate from the action palette.
 - Verify light and dark appearance where supported, regardless of whether a switch is visible. Check text contrast rather than assuming a muted token is accessible at every size.
 
 ### Layout and spacing
@@ -128,14 +128,14 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
 ### Depth
 
-Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow value, including the dark ones. Pages and components use the tokens and write no shadow of their own. Only zero-blur lines in a token colour are exempt: focus rings, dividers, and selection bars.
+Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow value, including the dark ones. Pages and components use the tokens and write no shadow of their own. Only zero-blur lines in a token colour are exempt: focus rings and dividers.
 
 | Tier | Token | Use for |
 | --- | --- | --- |
 | Control | `--shadow-raise` | Idle buttons, unselected radio cards, switch knobs, segmented thumbs, and focused fields |
 | Container | `--shadow-surface` | Panels, cards, source code (not inside an example frame), command plates, and terminal captures |
 | Pressed or well | `--shadow-sink` | Fields, tracks, pressed buttons, and selected radio cards |
-| Selected row | `--shadow-nav-current` | The current navigation row and the selected tab |
+| Selected row | `--shadow-nav-current` | The current navigation row, the selected tab, and a selected list row |
 | Floating | `--shadow-popover` | Menus, popovers, pickers, and dialogs |
 
 - Idle controls and containers take no outer light highlight and no blur wider than 2px. In dark mode, controls take a faint inset top edge and containers a faint 1px ring, so no halo shows.

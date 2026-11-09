@@ -149,7 +149,7 @@
   .toggle[data-size="sm"] { --w: 2.2rem; --h: 1.1rem; --inset: 0.1rem; min-height: var(--control-sm); font-size: var(--text-sm); }
   .toggle[data-size="lg"] { --w: 3.3rem; --h: 1.65rem; --inset: 0.15rem; min-height: var(--control-lg); font-size: var(--text-lg); }
   .toggle:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"]) { border-color: var(--border); }
-  /* The switch carries the on state; the card takes the selected rows' faint tint and an accent hairline. */
+  /* The switch carries the on state; the card takes a faint 8% accent tint and an accent hairline. */
   .toggle[aria-pressed="true"] { border-color: color-mix(in srgb, var(--accent) 35%, transparent); background: color-mix(in srgb, var(--accent) 8%, var(--surface-raised)); }
   .toggle:disabled { opacity: 0.58; cursor: not-allowed; }
   .toggle-text { display: grid; }
@@ -299,9 +299,15 @@
   details.rail[open] > .navlist { margin-top: var(--space-2); }
   /* List selection */
   .rows { display: grid; width: min(100%, 360px); }
-  .rows [role="option"] { display: flex; align-items: center; min-height: var(--row); padding: 0 var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-sm); }
+  .rows [role="option"] { position: relative; display: flex; align-items: center; min-height: var(--row); padding: 0 var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-sm); }
+  /* Dividers are straight lines inset by the row padding, so they never follow a rounded corner.
+     A filled row (hovered or selected) hides the divider above it and the one below it. */
+  .rows [role="option"] + [role="option"]::before { content: ""; position: absolute; inset: 0 var(--space-3) auto; border-top: 1px solid var(--border-subtle); }
+  .rows [role="option"]:is(:hover, .is-hover, [aria-selected="true"])::before,
+  .rows [role="option"]:is(:hover, .is-hover, [aria-selected="true"]) + [role="option"]::before { display: none; }
   .rows [role="option"]:is(:hover, .is-hover) { background: var(--row-hover); }
-  .rows [role="option"][aria-selected="true"] { background: var(--row-selected); box-shadow: inset 2px 0 0 var(--accent); font-weight: var(--weight-medium); }
+  /* The selected row takes the navigation row's current recipe; it comes after hover, so hover keeps the fill. */
+  .rows [role="option"][aria-selected="true"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); font-weight: var(--weight-medium); }
   @media (forced-colors: active) { .rows [role="option"][aria-selected="true"] { border-inline-start: 2px solid Highlight; } }
 
   /* Code block: a source well */
@@ -936,7 +942,7 @@
       <div class="state"><details class="rail"><summary class="btn secondary rail-summary" data-size="lg">On this page</summary><nav class="navlist" aria-label="On this page, no JavaScript"><a href="#navigation-list" aria-current="location">Rows</a><a href="#code-block">Next section</a></nav></details><span class="caption">No-JavaScript fallback, live</span></div>
     </div></div>
     <div class="row"><h4>List selection</h4><div class="states">
-      <div class="state wide" inert><div class="rows" role="listbox" aria-label="Monitors"><div role="option" aria-selected="false">5xx error rate</div><div role="option" aria-selected="true">API p95 latency</div><div role="option" aria-selected="false" class="is-hover">Request volume</div></div><span class="caption">Selected row, and hover on the next</span></div>
+      <div class="state wide" inert><div class="rows" role="listbox" aria-label="Monitors"><div role="option" aria-selected="false">Active consumers</div><div role="option" aria-selected="false">5xx error rate</div><div role="option" aria-selected="true">API p95 latency</div><div role="option" aria-selected="false" class="is-hover">Request volume</div></div><span class="caption">Selected row, and hover on the next</span></div>
     </div></div>
   </section>
 

@@ -43,8 +43,8 @@
   /* A focused field's fill. Set it to var(--field) if field text or placeholder misses 4.5:1 on the lift. */
   --field-focus: var(--control-thumb); /* ui: var(--color-field-focus-bg, var(--color-control-thumb)) */
   /* Selected rows lift and take a faint accent tint, so the selection reads on near-white panels too. */
-  --nav-current: color-mix(in srgb, var(--accent) 8%, var(--surface-raised)); /* ui: --color-nav-current */
-  /* Text on the current nav row and selected tab: the first of --accent, --text, black, and white
+  --nav-current: color-mix(in srgb, var(--accent) 14%, var(--surface-raised)); /* ui: --color-nav-current */
+  /* Text on the current nav row, selected tab, and selected list row: the first of --accent, --text, black, and white
      that reaches 4.5:1 over --nav-current, on the page and on a surface. */
   --nav-current-text: var(--accent); /* ui: var(--color-nav-current-text, var(--color-accent)) */
   /* The selected segmented label: the first of --accent, --text, black, and white that reaches
@@ -171,7 +171,7 @@
     /* The dark well sits within about 1.01:1 of the canvas, so fields take a faint edge. */
     --field-edge: var(--border-subtle);
     --control-thumb: color-mix(in srgb, var(--surface-raised) 88%, white);
-    --nav-current: color-mix(in srgb, var(--accent) 14%, transparent);
+    --nav-current: color-mix(in srgb, var(--accent) 20%, transparent);
     --row-hover: #20262b;
     --border-subtle: #262d33;
     --border: #78818a;
@@ -211,7 +211,7 @@
   --field: color-mix(in srgb, var(--bg) 87.5%, black);
   --field-edge: var(--border-subtle);
   --control-thumb: color-mix(in srgb, var(--surface-raised) 88%, white);
-  --nav-current: color-mix(in srgb, var(--accent) 14%, transparent);
+  --nav-current: color-mix(in srgb, var(--accent) 20%, transparent);
   --row-hover: #20262b;
   --border-subtle: #262d33;
   --border: #78818a;
