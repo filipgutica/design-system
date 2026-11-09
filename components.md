@@ -74,7 +74,7 @@ Layer: Core. ui: `UiInput`. ui has no textarea; a textarea uses the same field r
 
 Layer: Core. ui: `UiSelect`.
 
-- **Anatomy.** A native `<select>` with the input's field recipe and a chevron on the right. Draw the chevron in `currentColor`, or with an 8px border corner in `--text-muted` turned 45°. Right padding leaves room for it.
+- **Anatomy.** A native `<select>` with the input's field recipe and a chevron on the right. Draw the chevron in `currentColor`, or with an 8px border corner in `--text-muted` turned 45°. Right padding leaves room for it at every size.
 - **Picker.** Where `appearance: base-select` is supported, the open list is a floating layer: `--surface-raised`, a transparent 1px border, `--radius-lg`, `--shadow-popover`, 4px padding, at least the select's width, and at most `min(20rem, 50dvh)` tall. Options are at least 32px tall (44px on coarse pointers), with `--space-2` `--space-3` padding and corners of `--radius-lg` minus 4px. Hover fills `--row-hover`. An `--accent` check at the end marks the checked option. The check carries the state: the option's `--row-selected` fill equals `--surface-raised`. Keyboard focus is the focus ring, inset because the list scrolls. Other browsers keep the native picker.
 - **States.** Rest, focus-visible, disabled, and invalid, as for the input.
 - **Keyboard and screen reader.** Native select behavior. A visible `<label>`.
@@ -93,7 +93,7 @@ Layer: Core. ui: `UiField`.
 
 Layer: Core. ui: `UiCheckbox`. ui has no standalone radio; radio cards cover radio choices there.
 
-- **Anatomy.** A `<label>` around the box and its text, with a gap of about 9px. The box is 16px at `sm`, 18px at `md`, and 20px at `lg`. Checkbox corners are `--radius-sm`; a radio is round. The row is at least the control height.
+- **Anatomy.** A `<label>` around the box and its text, with a gap of about 9px. The box is 16px at `sm`, 18px at `md`, and 20px at `lg`. Checkbox corners are `--radius-sm`; a radio is round. The row is at least the control height of its size, and the label takes that size's text: `--text-sm` at `sm`, `--text-md` at `md`, and `--text-lg` at `lg`.
 - **Tokens.** Unchecked: `--surface-raised` fill and a 1px `--border` edge. Checked: `--accent` fill and edge, with a check mark in `--accent-text`. A checked radio shows a 5px `--accent` ring around a `--surface-raised` centre.
 - **States.** Rest, checked, focus-visible (the focus ring on the box), and disabled.
 - **Keyboard and screen reader.** Native `<input type="checkbox">` or `type="radio"`. Space toggles a checkbox. Arrow keys move between radios in a named `radiogroup` or `<fieldset>`.
