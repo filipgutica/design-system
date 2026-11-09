@@ -39,6 +39,8 @@ figure { margin: 0; min-width: 0; }
 figcaption { margin-top: var(--space-3); font-size: var(--text-sm); color: var(--text-muted); }
 .workflow { display: grid; gap: var(--space-6); padding-block: var(--space-12); border-top: 1px solid var(--border-subtle); }
 .workflow > h2 { max-width: 24ch; font-size: var(--text-3xl); }
+/* Page-level product sections take the decorative ## mark; headings inside the product view do not. */
+.workflow > h2::before { content: "## " / ""; color: var(--accent); }
 .workflow > p { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-reading); }
 .evidence { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-8); align-items: start; }
 .checks { margin: 0; padding: var(--space-2) var(--space-6); list-style: none; font-size: var(--text-sm); }

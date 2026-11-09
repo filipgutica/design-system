@@ -27,8 +27,8 @@ section { display: grid; gap: var(--space-4); min-width: 0; }
 h1, h2 { font-family: var(--font-mono); }
 h1 { font-size: var(--text-3xl); max-width: 24ch; }
 h2 { font-size: var(--text-xl); }
-/* The ## mark is decorative; the empty alternative text keeps it out of the accessible name. */
-h2::before { content: "## " / ""; color: var(--accent); }
+/* The ## mark goes on page-level section headings only. It is decorative; the empty alternative text keeps it out of the accessible name. */
+main > section > h2::before { content: "## " / ""; color: var(--accent); }
 main > section + section { padding-top: var(--space-6); border-top: 1px solid var(--border-subtle); }
 p { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-reading); }
 /* Command plate: dark in both themes and tinted with the hue. Text and the focus ring take the terminal colour, so both read on the dark plate. */

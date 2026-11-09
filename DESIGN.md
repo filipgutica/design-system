@@ -75,7 +75,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
 - Use `--font-sans` for prose, h3 and below, labels, and controls, and `--font-mono` for code, identifiers, and keys. The identity layer decides where else mono appears.
 - Controls and dense application content use `--text-md`; secondary text uses `--text-sm`. Paragraphs and substantial article text use `--text-reading` with `--leading`. Bound reading text with `--measure` and introductory copy to a slightly shorter line.
-- Documentation titles use `--text-3xl`; section headings use `--text-xl` and sit above their content. Application titles use `--text-2xl` or smaller.
+- Documentation titles use `--text-3xl`; section headings use `--text-xl` and sit above their content. Application titles use `--text-2xl` or smaller, and application section headings use `--font-sans` at `--text-lg` or smaller.
 - Use `--weight-regular`, `--weight-medium`, and `--weight-semibold`. Keep the source text's case; never transform it. Sentence case and restrained tracking make hierarchy easier to scan.
 - Use `--text-muted` for secondary information and metadata, and `--text` for essential labels and instructions.
 
@@ -177,9 +177,9 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 
 The personal sites are terminal tools that read Markdown and paths, so their identity comes from that world. A new project replaces this section with its own identity and keeps the core.
 
-- **Mono identity.** `--font-mono` (IBM Plex Mono) sets identity, page and section headings, navigation rails, metadata, captions, and the footer. `@filipgutica/ui` self-hosts IBM Plex; elsewhere the tokens fall back to the system stack.
-- **Headings.** Documentation titles and section headings are mono. A section heading starts with a `##` mark in `--accent` (decorative, so screen readers skip it), with a `--border-subtle` rule above the section. Product pages and tool homes may use a mono `--text-display` title, stepping down to `--text-display-sm` on phones; keep a short heading measure, place supporting copy and the primary action nearby, and let the first product image enter the initial desktop viewport.
-- **Hue marks.** The hue also draws the `~/` header mark, the `##` section mark, step numbers, and the `$` prompt.
+- **Mono identity.** `--font-mono` (IBM Plex Mono) sets identity, page titles, the section headings of documentation, tool, article, and product pages, navigation rails, metadata, captions, and the footer. `@filipgutica/ui` self-hosts IBM Plex; elsewhere the tokens fall back to the system stack.
+- **Headings.** Documentation titles are mono. Page-level section headings (h2) on documentation, tool, article, and product pages are mono, start with a `##` mark in `--accent` (decorative, so screen readers skip it), and have a `--border-subtle` rule above the section. Application and inline-visualization section headings, and every h3 or lower, are plain `--font-sans` with no mark. Product pages and tool homes may use a mono `--text-display` title, stepping down to `--text-display-sm` on phones; keep a short heading measure, place supporting copy and the primary action nearby, and let the first product image enter the initial desktop viewport.
+- **Hue marks.** The hue also draws the `~/` header mark, the `##` mark on documentation, tool, article, and product section headings, step numbers, and the `$` prompt.
 - **Header.** Personal product sites share a compact static header: a mono `~/name` identity with the `~/` in `--accent`, a project switcher, useful page links, appearance controls, and a solid `--text` rule below. Use the shared project registry for names, order, and destinations. Keep a gallery's existing application navigation structure.
 - **Appearance.** Personal pages share the built-in System/Light/Dark choice, through the header's picker. An explicitly selected custom gallery theme overrides that choice until the reader selects a built-in appearance. Preserve installed themes.
 - **Terminal plates.** Commands sit on a dark plate tinted with the project hue (`--command-bg`), in both themes. A shell command gets a `$` prompt in `--project-dark`, drawn by CSS so it never enters copied or accessible text. Short commands use a headerless compact row with an accessible Copy control. Terminal captures keep the neutral `--terminal` plate, with a mono status-line caption below the screen; tabs on a capture switch to mono.
@@ -191,6 +191,7 @@ The personal sites are terminal tools that read Markdown and paths, so their ide
 - Multiple cards around ordinary prose, ornamental grids, glows, gradients, pill-shaped cards, and hover lifts.
 - Tinted wells or panels used for decoration. The hue-tinted command plate is the one tinted surface, because it carries the project's identity.
 - Display typography on dense tool screens, or tiny application typography on a product landing page.
+- The `##` mark on every section of an application screen, where it repeats down the page and competes with the data.
 - Large blank gaps that push the action or evidence away from the introduction.
 - Centered long paragraphs, excessively faint text, and horizontal page overflow.
 - Theme controls added automatically to inline charts and explainers.
