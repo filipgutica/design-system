@@ -375,7 +375,10 @@
   dialog.capture-viewer { width: min(960px, calc(100% - var(--space-8))); }
   .capture-viewer .dialog-head h4 { font-family: var(--font-mono); }
   .capture-viewer .dialog-body { padding: 0; }
-  .screen { margin: 0; padding: var(--space-4); overflow-x: auto; background: var(--terminal); color: var(--terminal-text); font-size: var(--text-code); line-height: 1.5; }
+  /* The full-size viewer clones the screen outside .capture, so it carries its own plate focus. */
+  .screen { --focus: var(--terminal-text); margin: 0; padding: var(--space-4); overflow-x: auto; background: var(--terminal); color: var(--terminal-text); font-size: var(--text-code); line-height: 1.5; }
+  /* Inset: the capture and the viewer body clip the screen's edges. */
+  .screen:is(:focus-visible, .is-focus) { outline-offset: -2px; }
   .screen .hi { color: var(--project-dark); }
   .screen .dim { color: var(--terminal-caption-text); }
   .capture-caption { padding: var(--space-1) var(--space-4); background: var(--terminal-caption); color: var(--terminal-caption-text); font: var(--text-xs) / var(--leading) var(--font-mono); overflow-wrap: anywhere; }
