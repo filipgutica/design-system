@@ -36,6 +36,5 @@ Each entry records a choice this language made, the options it rejected, and why
 
 ## Known gaps
 
-- Field focus now meets the 3:1 that WCAG 2.2 asks of a focus indicator: a 2px ink ring around the field replaces the 35% accent edge, which measured 1.6–1.7:1 against `--bg` in light. The lift alone stays about 1.2:1 against the resting field in light and 1.6:1 in dark, so the ring carries focus. `@filipgutica/ui` still draws the lift and the 35% edge with no ring, and its `--color-focus` still follows the link colour, until it adopts this ring.
-- `@filipgutica/ui` still sets type, spacing, and control sizes in px, so its sites ignore the reader's font-size setting until it adopts the rem sizes.
+- Field focus now meets the 3:1 that WCAG 2.2 asks of a focus indicator: a 2px ink ring around the field replaces the 35% accent edge, which measured 1.6–1.7:1 against `--bg` in light. The lift alone stays about 1.2:1 against the resting field in light and 1.6:1 in dark, so the ring carries focus.
 - In forced colors (high contrast), an invalid field shows the system edge, not the `--danger` edge, focused or not; the error text carries the state. A visible high-contrast invalid edge needs an error colour validated against high-contrast fills.
