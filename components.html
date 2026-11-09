@@ -1212,6 +1212,7 @@
   document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.open).showModal()));
   // Following an in-page link closes the drawer, then focus moves to the destination instead of the trigger.
   // Every close path slides the drawer out first. Under reduced motion there is no animation, so it closes at once.
+  // A slide that is cancelled, such as by turning on reduced motion mid-slide, still closes the drawer.
   document.querySelectorAll('dialog.drawer').forEach((drawer) => {
     let destination = null;
     const slideOut = () => {
@@ -1221,9 +1222,11 @@
       const finish = (e) => {
         if (e.target !== drawer || e.pseudoElement || e.animationName !== 'drawer-out') return;
         drawer.removeEventListener('animationend', finish);
+        drawer.removeEventListener('animationcancel', finish);
         drawer.close();
       };
       drawer.addEventListener('animationend', finish);
+      drawer.addEventListener('animationcancel', finish);
     };
     drawer.addEventListener('cancel', (e) => { e.preventDefault(); slideOut(); });
     drawer.querySelector('form[method="dialog"]')?.addEventListener('submit', (e) => { e.preventDefault(); slideOut(); });
