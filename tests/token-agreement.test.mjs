@@ -1,57 +1,16 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { declarations, read, resolveCss, ruleBody } from './css.mjs'
 
-// language/tokens.css is a hand copy until the generator emits it. Until then, each of its
-// lines must carry the same light and dark value as the JSON token behind its "ui:" variable,
-// named the way the generator names them: a library role, an alias, or a same-name variable.
-// Lines with no JSON token are the roles ui still defines only in its theme.css; they must
-// equal the recorded list, so the gap cannot grow silently.
-const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
+// Each language/tokens.css line must carry the same light and dark value as the JSON token behind its
+// "ui:" variable, named the way the generator names them: a library role or base role, an alias, or a
+// same-name variable. A use-site fallback, var(--color-x, var(--color-y)), is checked through
+// --color-y. Every line must be covered, so a "ui:" comment cannot name a variable the JSON lacks.
 const tokensCss = read('language/tokens.css')
 const tokenData = JSON.parse(read('tokens/graphite-indigo.json'))
 
-const themeCssOnlyRoles = [
-  '--field',
-  '--field-bg',
-  '--field-edge',
-  '--field-shadow',
-  '--control-thumb',
-  '--nav-current',
-  '--nav-current-text',
-  '--segmented-current-text',
-  '--overlay',
-  '--terminal-shadow-nav-current',
-  '--shadow-raise',
-  '--shadow-surface',
-  '--shadow-sink',
-  '--shadow-nav-current',
-  '--field-shadow-focus',
-  '--field-shadow-focus-invalid',
-]
-
 const LIGHT = 0
 const DARK = 1
-
-// The body of the first rule with this selector, nested braces included.
-const ruleBody = (css, selector) => {
-  const open = css.indexOf(`${selector} {`) + selector.length + 1
-  assert.ok(open > selector.length, `tokens.css has no "${selector}" rule`)
-  let depth = 0
-  for (let i = open; i < css.length; i += 1) {
-    if (css[i] === '{') depth += 1
-    if (css[i] === '}' && (depth -= 1) === 0) return css.slice(open + 1, i)
-  }
-  throw new Error(`"${selector}" rule is not closed`)
-}
-
-const declarations = (body) => Object.fromEntries(
-  [...body.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)].map(([, name, value]) => [name, value.trim()]),
-)
-
-// Follows var(--name) to a literal through the declarations of one mode.
-const resolveCss = (values, value) =>
-  value.replace(/var\((--[\w-]+)\)/g, (match, name) => (values[name] === undefined ? match : resolveCss(values, values[name])))
 
 const compare = ({ css, data }) => {
   const rootBody = ruleBody(css, ':root')
@@ -63,9 +22,10 @@ const compare = ({ css, data }) => {
     const value = Array.isArray(tokens[name]) ? tokens[name][mode] : tokens[name]
     return value.replace(/\{([\w-]+)\}/g, (_, target) => resolveJson(target, mode))
   }
+  const roles = { ...data.library.roles, ...data.library.baseRoles }
   const aliasToken = Object.fromEntries(Object.entries(data.library.aliases).map(([token, variable]) => [variable, token]))
   const tokenFor = (variable) =>
-    data.library.roles[variable] ?? aliasToken[variable] ?? (tokens[variable.slice(2)] === undefined ? undefined : variable.slice(2))
+    roles[variable] ?? aliasToken[variable] ?? (tokens[variable.slice(2)] === undefined ? undefined : variable.slice(2))
 
   const uncovered = []
   const disagreements = []
@@ -75,15 +35,15 @@ const compare = ({ css, data }) => {
   // Every declaration is checked, so one without a "ui:" comment counts as uncovered instead of escaping both checks.
   for (const name of Object.keys(light)) {
     const ui = uiComments[name] ?? ''
-    // "var(--color-x, var(--color-accent))" is a use-site fallback in ui, not a variable it declares.
-    const variables = ui === '' || ui.startsWith('var(') ? [] : ui.split(/,\s*/)
+    const fallback = ui.match(/^var\(--[\w-]+,\s*var\((--[\w-]+)\)\)$/)
+    const variables = fallback ? [fallback[1]] : ui === '' ? [] : ui.split(/,\s*/)
     const covered = variables.map((variable) => [variable, tokenFor(variable)]).filter(([, token]) => token !== undefined)
     if (covered.length === 0) uncovered.push(name)
     for (const [variable, token] of covered) {
       for (const [mode, values] of modes) {
-        const hand = resolveCss(values, values[name])
+        const css = resolveCss(values, values[name])
         const generated = resolveJson(token, mode)
-        if (hand !== generated) disagreements.push(`${name} (${variable}, ${mode === LIGHT ? 'light' : 'dark'}): tokens.css ${hand}, JSON ${generated}`)
+        if (css !== generated) disagreements.push(`${name} (${variable}, ${mode === LIGHT ? 'light' : 'dark'}): tokens.css ${css}, JSON ${generated}`)
       }
     }
   }
@@ -107,8 +67,8 @@ test('every tokens.css line backed by a JSON token has its light and dark value'
   assert.deepEqual(compare({ css: tokensCss, data: tokenData }).disagreements, [])
 })
 
-test('only the recorded theme.css-only roles have no JSON token', () => {
-  assert.deepEqual(compare({ css: tokensCss, data: tokenData }).uncovered, themeCssOnlyRoles)
+test('every tokens.css line has a JSON token', () => {
+  assert.deepEqual(compare({ css: tokensCss, data: tokenData }).uncovered, [])
 })
 
 test('both dark rules in tokens.css declare the same values', () => {

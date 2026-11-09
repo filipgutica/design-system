@@ -1,23 +1,27 @@
-// Emits the Graphite Indigo theme from tokens/graphite-indigo.json, the only place its values live.
+// Emits every token file from tokens/graphite-indigo.json, the only place token values live.
 //
-//   node scripts/build-tokens.mjs                      write both files
-//   node scripts/build-tokens.mjs --check              fail when a file is stale
-//   node scripts/build-tokens.mjs --tokens-out <path>  write the standalone tokens elsewhere
+//   node scripts/build-tokens.mjs           write every output
+//   node scripts/build-tokens.mjs --check   fail when an output is stale
 //
-// Library theme: --color-* roles for @filipgutica/ui, opt-in through
-// @filipgutica/ui/themes/graphite-indigo.css. Standalone tokens: the design-language
-// vocabulary (--bg, --text, ...) for pages that do not use the library. Each standalone
-// token line names the library variables for the same value, so --check also fails when
-// that map is stale, names a variable the library does not define, or names a
-// hand-written theme.css variable whose value differs from the token.
-import { readFileSync, writeFileSync } from 'node:fs'
+// Two CSS flavours come from the same values:
+// - Standalone (language/tokens.css, dist/themes/*.css): the design-language names (--bg, --text, ...).
+//   Dark mode follows prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it.
+// - Class (dist/class/base.css, dist/class/themes/*.css): @filipgutica/ui's names (--color-*, ...).
+//   Dark mode is a .dark class on <html>.
+// dist/tokens.json and dist/tokens.js carry the standalone values, resolved, for code.
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const LIGHT = 0
 const DARK = 1
 const reference = /\{([\w-]+)\}/g
+const THEME = 'graphite-indigo'
 
 const flatTokens = (data) => Object.fromEntries(data.groups.flatMap(({ tokens }) => Object.entries(tokens)))
+
+// The groups tokens.css declares: every group but the library-only one.
+const standaloneGroups = (data) => data.groups.filter(({ standalone }) => standalone !== false)
 
 const valueFor = (tokens, name, mode) => {
   const value = tokens[name]
@@ -27,7 +31,8 @@ const valueFor = (tokens, name, mode) => {
 
 const block = (indent, declarations) => declarations.map(([name, value]) => `${indent}${name}: ${value};`)
 
-const variablesIn = (css) => new Set([...css.matchAll(/(--[\w-]+)\s*:/g)].map(([, name]) => name))
+// A comment whose later lines line up under the first line's text, as tokens.css writes them.
+const comment = (indent, text) => `${indent}/* ${text.split('\n').join(`\n${indent}   `)} */`
 
 // Dark blocks list only what differs from light, compared after references resolve.
 const darkOverrides = (names, resolve) => names
@@ -35,55 +40,135 @@ const darkOverrides = (names, resolve) => names
   .filter(([, light, dark]) => light !== dark)
   .map(([name, , dark]) => [name, dark])
 
+// [variable, token] pairs for every library variable the JSON defines, in class-base order. Tokens
+// with no role, base role, alias, or fallback reach the library as a variable of the same name.
+const libraryVariables = (data) => {
+  const { roles, baseRoles, aliases, fallbacks, extras } = data.library
+  const named = new Set([...Object.values(roles), ...Object.values(baseRoles), ...Object.keys(aliases), ...Object.keys(fallbacks)])
+  const sameName = Object.keys(flatTokens(data)).filter((name) => !named.has(name)).map((name) => [`--${name}`, name])
+  return {
+    // The class base: every variable but the extras, which only the opt-in theme declares. Fallbacks
+    // are not variables: ui writes them at the use site, so subtree overrides of their fallback stay live.
+    base: [
+      ...Object.entries(roles),
+      ...Object.entries(baseRoles),
+      ...Object.entries(aliases).map(([token, variable]) => [variable, token]),
+      ...sameName.filter(([, name]) => !extras.includes(name)),
+    ],
+    sameName,
+  }
+}
+
+// A token's first variable is its canonical one.
+const canonicalVariables = (pairs) => {
+  const variableOf = new Map()
+  for (const [variable, token] of pairs) if (!variableOf.has(token)) variableOf.set(token, variable)
+  return variableOf
+}
+
+// Resolves a token for the class flavour: a reference to a token with a variable stays a live var(),
+// so overrides flow through derived values; any other reference is inlined.
+const classResolver = ({ tokens, variableOf }) => {
+  const resolve = (name, mode) => valueFor(tokens, name, mode).replace(
+    reference,
+    (_, target) => variableOf.has(target) ? `var(${variableOf.get(target)})` : resolve(target, mode),
+  )
+  return resolve
+}
+
+// Declarations for [variable, token] pairs. A variable that shares its token with an earlier one points at it.
+const classDeclarations = ({ pairs, variableOf, resolve, mode }) => pairs.map(([variable, token]) =>
+  [variable, variableOf.get(token) === variable ? resolve(token, mode) : `var(${variableOf.get(token)})`])
+
+const classHeader = (lines) => [
+  `/* Generated from tokens/${THEME}.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
+  ...lines.map((line) => ` * ${line}`),
+].join('\n').concat(' */')
+
+const classFile = ({ header, light, dark }) => [
+  classHeader(header),
+  '',
+  ':root {',
+  '  color-scheme: light;',
+  ...block('  ', light),
+  '}',
+  '',
+  ':root.dark {',
+  '  color-scheme: dark;',
+  ...block('  ', dark),
+  '}',
+  '',
+].join('\n')
+
 export const renderLibraryTheme = (data) => {
   const tokens = flatTokens(data)
   const { roles, extras } = data.library
-  const roleOfToken = new Map()
-  for (const [role, token] of Object.entries(roles)) if (!roleOfToken.has(token)) roleOfToken.set(token, role)
+  const pairs = Object.entries(roles)
+  const variableOf = canonicalVariables(pairs)
+  const resolve = classResolver({ tokens, variableOf })
+  return classFile({
+    header: [
+      'Opt-in Graphite Indigo roles for the class flavour. Import after class/base.css (theme.css in @filipgutica/ui).',
+      'Dark mode uses the same .dark class as the base. Keep exactly one :root.dark block:',
+      'sites copy it into a <noscript> prefers-color-scheme rule.',
+    ],
+    light: [
+      ...classDeclarations({ pairs, variableOf, resolve, mode: LIGHT }),
+      ...extras.map((name) => [`--${name}`, resolve(name, LIGHT)]),
+    ],
+    // Repeat every role in dark mode: the base's :root.dark otherwise outranks
+    // this theme's light :root aliases and values shared by both modes.
+    dark: classDeclarations({ pairs, variableOf, resolve, mode: DARK }),
+  })
+}
 
-  // A reference stays a live var() when its target has a role, so custom themes flow
-  // through derived values. Otherwise the target's value is inlined.
-  const resolve = (name, mode) => valueFor(tokens, name, mode).replace(
-    reference,
-    (_, target) => roleOfToken.has(target) ? `var(${roleOfToken.get(target)})` : resolve(target, mode),
-  )
-  const roleNames = Object.keys(roles)
-  const resolveRole = (role, mode) => {
-    const canonicalRole = roleOfToken.get(roles[role])
-    return canonicalRole === role ? resolve(roles[role], mode) : `var(${canonicalRole})`
+export const renderClassBase = (data) => {
+  const { base } = libraryVariables(data)
+  const variableOf = canonicalVariables(base)
+  const resolve = classResolver({ tokens: flatTokens(data), variableOf })
+  // The dark block repeats every colour and shadow, as ui's theme.css always has, except the light-only
+  // ones: they follow other variables through var(), so a light override reaches dark too.
+  const { lightOnly } = data.library
+  const darkPairs = base.filter(([variable]) => /^--(color|shadow)-/.test(variable) && !lightOnly.includes(variable))
+  return classFile({
+    header: [
+      'Base tokens for the class flavour: toggle .dark on <html> for dark mode.',
+      'Keep exactly one :root.dark block: sites copy it into a <noscript> prefers-color-scheme rule.',
+    ],
+    light: classDeclarations({ pairs: base, variableOf, resolve, mode: LIGHT }),
+    dark: classDeclarations({ pairs: darkPairs, variableOf, resolve, mode: DARK }),
+  })
+}
+
+// The library variables that carry each token, for the "ui:" comments: its roles (the general one
+// first), an alias for a renamed token, or a variable of the same name. A use-site fallback is written
+// as ui writes it, var(--color-x, <its value>).
+const libraryNamesFor = (data) => {
+  const { roles, baseRoles, aliases, fallbacks } = data.library
+  const { base, sameName } = libraryVariables(data)
+  const resolve = classResolver({ tokens: flatTokens(data), variableOf: canonicalVariables(base) })
+  const sameNameTokens = new Set(sameName.map(([, name]) => name))
+  return (name) => {
+    if (fallbacks[name] !== undefined) return `var(${fallbacks[name]}, ${resolve(name, LIGHT)})`
+    const names = Object.entries({ ...roles, ...baseRoles }).filter(([, token]) => token === name).map(([role]) => role)
+      .sort((a, b) => Number(b === `--color-${name}`) - Number(a === `--color-${name}`))
+    if (aliases[name] !== undefined) names.push(aliases[name])
+    if (sameNameTokens.has(name)) names.push(`--${name}`)
+    return names.join(', ')
   }
-
-  const light = [
-    ...roleNames.map((role) => [role, resolveRole(role, LIGHT)]),
-    ...extras.map((name) => [`--${name}`, resolve(name, LIGHT)]),
-  ]
-  // Repeat every role in dark mode: theme.css's :root.dark otherwise outranks
-  // this theme's light :root aliases and values shared by both modes.
-  const dark = roleNames.map((role) => [role, resolveRole(role, DARK)])
-
-  return [
-    '/* Generated from themes/graphite-indigo.json by scripts/graphite-indigo.mjs. Do not edit.',
-    ' * Opt-in Graphite Indigo roles for @filipgutica/ui. Import after theme.css.',
-    ' * Dark mode uses the same .dark class as theme.css. Keep exactly one :root.dark block:',
-    ' * sites copy it into a <noscript> prefers-color-scheme rule. */',
-    '',
-    ':root {',
-    '  color-scheme: light;',
-    ...block('  ', light),
-    '}',
-    '',
-    ':root.dark {',
-    '  color-scheme: dark;',
-    ...block('  ', dark),
-    '}',
-    '',
-  ].join('\n')
 }
 
 const standaloneHeader = `/*
- * Design language tokens. Generated from themes/graphite-indigo.json in
- * @filipgutica/ui; edit that file and run \`pnpm themes:build\`. Values live there.
+ * Design language tokens. Generated from tokens/${THEME}.json by scripts/build-tokens.mjs in
+ * @filipgutica/design-system: edit the JSON and run \`pnpm tokens:build\`. Do not edit this file.
  * DESIGN.md names these tokens; it never repeats their values.
+ *
+ * Two layers. The identity block at the top of :root is the project's own: its hue
+ * pair and fonts. A new project keeps this file unchanged and sets those lines on
+ * :root in its own stylesheet, loaded after this one. The dark blocks switch
+ * --project to --project-dark, so the override needs no dark rule. Check
+ * --accent-text at 4.5:1 on the new hue and override it too when it falls short.
+ * The terminal plate tokens also belong to the identity layer; every other line is core.
  *
  * Standalone HTML: import or inline this file.
  * Inline visuals: inherit the host font and theme variables; see DESIGN.md.
@@ -96,82 +181,57 @@ const standaloneHeader = `/*
  */
 `
 
-const standaloneBase = `/* Minimal base. Component styles live in reference.html. */
-*, *::before, *::after { box-sizing: border-box; }
-[hidden] { display: none !important; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-h1, h2, h3, h4, p { margin: 0; }
-h1, h2, h3, h4 { font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); text-wrap: balance; }
-code, kbd, pre { font-family: var(--font-mono); }
-table, .num { font-variant-numeric: tabular-nums; }
-a { color: var(--link); text-decoration: none; }
-a:hover { text-decoration: underline; }
-p a, dd a { text-decoration: underline; text-underline-offset: 0.18em; }
-:focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; scroll-behavior: auto !important; }
+const standaloneBase = `/* Minimal base. Component styles live in components.html. The base sits in a layer, so any
+   page or component rule outranks it whatever its specificity. A layered !important outranks an
+   unlayered one, so reduced-motion exceptions belong here too. */
+/* The page's own background and text colour stay outside the layer. A host that wraps the page in
+   its own unlayered reset, such as an artifact viewer, would otherwise keep its body colours while
+   the tokens switch to dark, leaving token-coloured text on the wrong background. */
+body { background: var(--bg); color: var(--text); }
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, p { margin: 0; }
+  h1, h2, h3, h4 { font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); text-wrap: balance; }
+  code, kbd, pre { font-family: var(--font-mono); }
+  table, .num { font-variant-numeric: tabular-nums; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p a, dd a { text-decoration: underline; text-underline-offset: 0.18em; }
+  :focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; scroll-behavior: auto !important; }
+    /* A busy spinner slows instead of stopping, so the busy state stays visible. */
+    [aria-busy="true"]::before { animation-duration: 1.4s !important; }
+  }
 }
 `
 
-// The library variables that carry each token: its roles, a fixed alias for a renamed
-// token, or a variable of the same name. libraryCss is theme.css, the library's base theme.
-const libraryNamesFor = (data, libraryCss) => {
-  const defined = new Set([...variablesIn(libraryCss), ...variablesIn(renderLibraryTheme(data))])
-  const { roles, aliases } = data.library
+const standaloneResolver = (data) => {
   const tokens = flatTokens(data)
-  // Aliases and same-name variables take their values from the hand-written theme.css, not
-  // from this file, so compare them: 1rem is 16px, and quote style does not matter.
-  const handWritten = {}
-  for (const [, variable, value] of libraryCss.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) handWritten[variable] ??= value.trim()
-  const normalize = (value) => value.replace(/'/g, '"').replace(/([\d.]+)rem\b/g, (_, rem) => `${Number(rem) * 16}px`)
-  const assertSameValue = (name, variable) => {
-    const value = handWritten[variable]
-    const token = valueFor(tokens, name, LIGHT)
-    if (value !== undefined && normalize(value) !== normalize(token)) {
-      throw new Error(`Token "${name}" is ${token}, but ${variable} in theme.css is ${value}`)
-    }
-  }
-  return (name) => {
-    // The general variable leads; the rest are component roles that share its value.
-    const names = Object.entries(roles).filter(([, token]) => token === name).map(([role]) => role)
-      .sort((a, b) => Number(b === `--color-${name}`) - Number(a === `--color-${name}`))
-    const alias = aliases[name]
-    if (alias !== undefined) {
-      if (!defined.has(alias)) throw new Error(`Alias for "${name}" names ${alias}, which the library does not define`)
-      assertSameValue(name, alias)
-      names.push(alias)
-    }
-    if (names.length === 0 && defined.has(`--${name}`)) {
-      assertSameValue(name, `--${name}`)
-      names.push(`--${name}`)
-    }
-    // A token sites cannot reach through the library does not belong in the shared vocabulary.
-    if (names.length === 0) {
-      throw new Error(`Token "${name}" has no library variable; add a role, an alias, or an extra`)
-    }
-    return names.join(', ')
-  }
+  return (name, mode) => valueFor(tokens, name, mode).replace(reference, (_, target) => `var(--${target})`)
 }
 
-export const renderStandaloneTokens = ({ data, libraryCss }) => {
-  const tokens = flatTokens(data)
-  const resolve = (name, mode) => valueFor(tokens, name, mode).replace(reference, (_, target) => `var(--${target})`)
-  const names = Object.keys(tokens)
-  const dark = darkOverrides(names, resolve).map(([name, value]) => [`--${name}`, value])
-  const libraryNames = libraryNamesFor(data, libraryCss)
+const standaloneNames = (data) => standaloneGroups(data).flatMap(({ tokens }) => Object.keys(tokens))
 
-  const groups = data.groups.map(({ comment, tokens: group }) => [
+export const renderStandaloneTokens = (data) => {
+  const resolve = standaloneResolver(data)
+  const dark = darkOverrides(standaloneNames(data), resolve).map(([name, value]) => [`--${name}`, value])
+  const libraryNames = libraryNamesFor(data)
+
+  const groups = standaloneGroups(data).map(({ comment: groupComment, notes = {}, tokens }) => [
     '',
-    `  /* ${comment} */`,
-    ...Object.keys(group).map((name) => `  --${name}: ${resolve(name, LIGHT)}; /* ui: ${libraryNames(name)} */`),
+    comment('  ', groupComment),
+    ...Object.keys(tokens).flatMap((name) => [
+      ...(notes[name] === undefined ? [] : [comment('  ', notes[name])]),
+      `  --${name}: ${resolve(name, LIGHT)}; /* ui: ${libraryNames(name)} */`,
+    ]),
   ])
-  const darkLines = (indent) => block(indent, dark)
 
   return [
     standaloneHeader,
@@ -183,52 +243,105 @@ export const renderStandaloneTokens = ({ data, libraryCss }) => {
     '@media (prefers-color-scheme: dark) {',
     '  :root:not([data-theme="light"]) {',
     '    color-scheme: dark;',
-    ...darkLines('    '),
+    ...block('    ', dark),
     '  }',
     '}',
     '',
     ':root[data-theme="dark"] {',
     '  color-scheme: dark;',
-    ...darkLines('  '),
+    ...block('  ', dark),
     '}',
     '',
     standaloneBase,
   ].join('\n')
 }
 
+// The identity inputs only, to load after tokens.css. Its dark blocks already switch
+// --project to --project-dark, so a theme needs no dark rule.
+export const renderStandaloneTheme = (data) => {
+  const resolve = standaloneResolver(data)
+  const identity = data.groups.filter(({ identity: isIdentity }) => isIdentity).flatMap(({ tokens }) => Object.keys(tokens))
+  return [
+    `/* Generated from tokens/${THEME}.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
+    ` * The ${THEME} identity inputs for tokens.css. Load after tokens.css. */`,
+    '',
+    ':root {',
+    ...block('  ', identity.map((name) => [`--${name}`, resolve(name, LIGHT)])),
+    '}',
+    '',
+  ].join('\n')
+}
+
+// Standalone token values with every reference substituted, as getComputedStyle reports them.
+export const resolvedTokens = (data) => {
+  const tokens = flatTokens(data)
+  const resolve = (name, mode) => valueFor(tokens, name, mode).replace(reference, (_, target) => resolve(target, mode))
+  const names = standaloneNames(data)
+  const values = (mode) => Object.fromEntries(names.map((name) => [name, resolve(name, mode)]))
+  return { themes: { [THEME]: { light: values(LIGHT), dark: values(DARK) } } }
+}
+
+const generatedNote = `Generated from tokens/${THEME}.json by scripts/build-tokens.mjs. Do not edit.`
+const cssVarDoc = "/** The var() reference for a token, such as cssVar('text') for 'var(--text)'. */"
+
+export const renderTokensJs = (data) => [
+  `// ${generatedNote}`,
+  `export const tokens = ${JSON.stringify(resolvedTokens(data), null, 2)}`,
+  '',
+  cssVarDoc,
+  'export const cssVar = (name) => `var(--${name})`',
+  '',
+].join('\n')
+
+export const renderTokensDts = (data) => [
+  `// ${generatedNote}`,
+  '/** A token name: its CSS variable in tokens.css without the leading dashes. */',
+  `export type TokenName =\n${standaloneNames(data).map((name) => `  | '${name}'`).join('\n')}`,
+  '',
+  `export type ThemeName = '${THEME}'`,
+  '',
+  '/** Resolved values, as getComputedStyle reports them on the root element. */',
+  'export declare const tokens: {',
+  '  themes: Record<ThemeName, { light: Record<TokenName, string>, dark: Record<TokenName, string> }>',
+  '}',
+  '',
+  cssVarDoc,
+  'export declare const cssVar: <Name extends TokenName>(name: Name) => `var(--${Name})`',
+  '',
+].join('\n')
+
+export const outputs = (data) => [
+  ['language/tokens.css', renderStandaloneTokens(data)],
+  [`dist/themes/${THEME}.css`, renderStandaloneTheme(data)],
+  ['dist/class/base.css', renderClassBase(data)],
+  [`dist/class/themes/${THEME}.css`, renderLibraryTheme(data)],
+  ['dist/tokens.json', `${JSON.stringify(resolvedTokens(data), null, 2)}\n`],
+  ['dist/tokens.js', renderTokensJs(data)],
+  ['dist/tokens.d.ts', renderTokensDts(data)],
+]
+
 const run = () => {
   const root = fileURLToPath(new URL('..', import.meta.url))
-  const libraryPath = `${root}src/themes/graphite-indigo.css`
-  const tokensPath = `${root}themes/graphite-indigo.tokens.css`
-  const args = process.argv.slice(2)
-  const check = args.includes('--check')
-  const outIndex = args.indexOf('--tokens-out')
-  const tokensOut = outIndex === -1 ? tokensPath : args[outIndex + 1]
-  if (!tokensOut) throw new Error('--tokens-out needs a path')
-
-  const data = JSON.parse(readFileSync(`${root}tokens/graphite-indigo.json`, 'utf8'))
-  const libraryCss = readFileSync(`${root}src/theme.css`, 'utf8')
-  const outputs = [
-    [libraryPath, renderLibraryTheme(data)],
-    [tokensOut, renderStandaloneTokens({ data, libraryCss })],
-  ]
+  const check = process.argv.slice(2).includes('--check')
+  const data = JSON.parse(readFileSync(`${root}tokens/${THEME}.json`, 'utf8'))
 
   const stale = []
-  for (const [path, content] of outputs) {
+  for (const [path, content] of outputs(data)) {
     if (!check) {
-      writeFileSync(path, content)
+      mkdirSync(dirname(`${root}${path}`), { recursive: true })
+      writeFileSync(`${root}${path}`, content)
       continue
     }
     let current
     try {
-      current = readFileSync(path, 'utf8')
+      current = readFileSync(`${root}${path}`, 'utf8')
     } catch {
       // A missing file is stale.
     }
     if (current !== content) stale.push(path)
   }
   if (stale.length > 0) {
-    console.error(`Stale generated files. Run "pnpm themes:build":\n${stale.map((path) => `  ${path}`).join('\n')}`)
+    console.error(`Stale generated files. Run "pnpm tokens:build":\n${stale.map((path) => `  ${path}`).join('\n')}`)
     process.exitCode = 1
   }
 }

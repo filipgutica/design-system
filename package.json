@@ -6,17 +6,35 @@
   "sideEffects": [
     "**/*.css"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/tokens.d.ts",
+      "default": "./dist/tokens.js"
+    },
+    "./tokens.css": "./language/tokens.css",
+    "./class/base.css": "./dist/class/base.css",
+    "./class/themes/*.css": "./dist/class/themes/*.css",
+    "./themes/*.css": "./dist/themes/*.css",
+    "./tokens.json": "./dist/tokens.json",
+    "./fonts.css": "./fonts/fonts.css",
+    "./fonts/*": "./fonts/*",
+    "./language/*": "./language/*",
+    "./package.json": "./package.json"
+  },
   "files": [
     "language/",
-    "tokens/",
-    "scripts/build-tokens.mjs"
+    "dist/",
+    "fonts/"
   ],
   "scripts": {
     "prepublishOnly": "pnpm verify",
     "release": "semantic-release",
     "release:dry-run": "semantic-release --dry-run --no-ci",
+    "tokens:build": "node scripts/build-tokens.mjs",
+    "tokens:check": "node scripts/build-tokens.mjs --check",
     "test": "node --test tests/*.test.mjs",
-    "verify": "pnpm test && pnpm pack --dry-run && publint"
+    "test:react": "tsc -p tests/react-smoke && playwright test -c tests/react-smoke",
+    "verify": "pnpm tokens:check && pnpm test && pnpm test:react && pnpm pack --dry-run && publint"
   },
   "engines": {
     "node": ">=22.12"
@@ -38,9 +56,17 @@
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
+    "@playwright/test": "^1.65.0",
     "@semantic-release/commit-analyzer": "13.0.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
     "conventional-changelog-conventionalcommits": "^9.3.1",
     "publint": "^0.3.24",
-    "semantic-release": "^25.0.9"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "semantic-release": "^25.0.9",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.6"
   }
 }

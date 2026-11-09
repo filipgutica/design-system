@@ -29,6 +29,8 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      - name: Install Chromium for the React smoke test
+        run: pnpm exec playwright install --with-deps chromium
       - name: Validate Conventional Commits
         run: pnpm exec commitlint --from "${{ github.event.before }}" --to "${{ github.sha }}" --verbose
       - run: pnpm verify

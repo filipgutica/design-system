@@ -1,0 +1,282 @@
+/*
+ * Design language tokens: a snapshot of the Graphite Indigo values in @filipgutica/ui.
+ * Most lines come from its generated themes/graphite-indigo.tokens.css (edit
+ * themes/graphite-indigo.json and run `pnpm themes:build`); the control, field, nav,
+ * button, and command roles come from its src/theme.css. Values live there.
+ * DESIGN.md names these tokens; it never repeats their values.
+ *
+ * Two layers. The identity block at the top of :root is the project's own: its hue
+ * pair and fonts. A new project keeps this file unchanged and sets those lines on
+ * :root in its own stylesheet, loaded after this one. The dark blocks switch
+ * --project to --project-dark, so the override needs no dark rule. Check
+ * --accent-text at 4.5:1 on the new hue and override it too when it falls short.
+ * The terminal plate tokens also belong to the identity layer; every other line is core.
+ *
+ * Standalone HTML: import or inline this file.
+ * Inline visuals: inherit the host font and theme variables; see DESIGN.md.
+ * Repos: map these names onto the repository's own token system.
+ * Sites on @filipgutica/ui: use the variable named in each line's "ui:" comment.
+ * When a line names several, use the first; the others are component roles with the same value.
+ *
+ * Theme states: bare :root is light. prefers-color-scheme picks dark unless
+ * data-theme="light" is set. data-theme="dark" forces dark.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Identity layer: a project swaps these four lines. --project is the light-theme hue;
+     --project-dark is the dark-theme hue, also used on dark plates in both themes. */
+  --project: #4b45d1; /* ui: --color-project */
+  --project-dark: #a5a1ff; /* ui: --color-project-dark */
+  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif; /* ui: --font-ui */
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; /* ui: --font-mono */
+
+  /* Core roles: only the identity lines above feed them. Neutral paper and graphite surfaces. */
+  --bg: #f4f5f6; /* ui: --color-bg */
+  --surface: #e9ebed; /* ui: --color-surface */
+  --surface-raised: #fbfbfc; /* ui: --color-surface-raised, --color-input-bg */
+  --surface-hover: #e2e5e8; /* ui: --color-surface-muted */
+  /* The well: segmented and switch tracks, pressed buttons, selected radio cards, and disabled fields. */
+  --field: var(--surface-hover); /* ui: --color-well */
+  /* Fields (input, select, textarea, search): a white fill with a faint edge in light, the sunk well in dark. */
+  --field-bg: var(--surface-raised); /* ui: --color-field-bg */
+  --field-edge: var(--border-subtle); /* ui: --color-field-edge */
+  --field-shadow: none; /* ui: --shadow-field */
+  --control-thumb: var(--surface-raised); /* ui: --color-control-thumb */
+  /* Selected rows lift and take a faint accent tint, so the selection reads on near-white panels too. */
+  --nav-current: color-mix(in srgb, var(--accent) 14%, var(--surface-raised)); /* ui: --color-nav-current */
+  /* Text on the current nav row, selected tab, and selected list row: the first of --accent, --text, black, and white
+     that reaches 4.5:1 over --nav-current, on the page and on a surface. */
+  --nav-current-text: var(--accent); /* ui: var(--color-nav-current-text, var(--color-accent)) */
+  /* The selected segmented label: the first of --accent, --text, black, and white that reaches
+     4.5:1 on the thumb. An icon-only option needs 3:1. */
+  --segmented-current-text: var(--accent); /* ui: var(--color-segmented-current-text, var(--color-accent)) */
+  --row-hover: #e2e5e8; /* ui: --color-row-hover */
+  --row-selected: var(--surface-raised); /* ui: --color-row-selected */
+  --border-subtle: #d3d8dd; /* ui: --color-border-subtle */
+  --border: #6d747b; /* ui: --color-border, --color-input-border */
+  --text: #101315; /* ui: --color-text, --color-input-text, --color-row-selected-text, --color-status-text */
+  --text-muted: #50575e; /* ui: --color-muted, --color-input-placeholder, --color-syntax-operator, --color-syntax-punctuation */
+  --overlay: rgb(0 0 0 / 42%); /* ui: --color-overlay */
+
+  /* The hue fills primary actions and marks selection; links keep --link. */
+  --accent: var(--project); /* ui: --color-accent, --color-button-bg, --color-progress */
+  --accent-text: var(--bg); /* ui: --color-accent-text, --color-button-text */
+  --accent-hover: var(--text); /* ui: --color-accent-hover */
+  --button-hover: color-mix(in srgb, var(--accent) 85%, var(--text)); /* ui: --color-button-hover */
+  --link: #0b5f7c; /* ui: --color-link */
+  /* One focus ring for every role: the accent, at 3:1 or more on --bg, --surface, and --surface-raised
+     in both themes. Fields mark focus with their own accent edge instead; see components.md. */
+  --focus: var(--accent); /* ui: --color-focus */
+  --focus-width: 2px; /* ui: --focus-width */
+  --focus-offset: 3px; /* ui: --focus-offset */
+
+  /* Status: only for state, never for decoration. */
+  --success: #157249; /* ui: --color-success */
+  --warning: #86532e; /* ui: --color-warning */
+  --danger: #bd342b; /* ui: --color-error */
+  --info: #175cd3; /* ui: --color-info */
+  --success-soft: #d9e5e1; /* ui: --color-success-surface */
+  --warning-soft: #e7e2de; /* ui: --color-warning-surface */
+  --danger-soft: #efe4e4; /* ui: --color-error-surface */
+  --info-soft: #d9e3f2; /* ui: --color-info-surface */
+
+  /* Identity layer, derived: terminal folio plates. Commands take the hue; captures stay neutral.
+     A project without terminal plates leaves these unused. */
+  --command-bg: color-mix(in srgb, var(--project) 25%, #101010); /* ui: --color-command-bg */
+  --command-border: transparent; /* ui: --color-command-border */
+  --terminal: #0a0c0e; /* ui: --color-terminal */
+  --terminal-text: #e6e9eb; /* ui: --color-terminal-text */
+  --terminal-border: #2a3036; /* ui: --color-terminal-border */
+  --terminal-caption: #13171a; /* ui: --color-terminal-caption */
+  --terminal-caption-text: #c9d0d6; /* ui: --color-terminal-caption-text */
+  /* The terminal capture's header stays dark in both appearances, so its selected tab keeps the dark lift. */
+  --terminal-shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%); /* ui: --shadow-nav-current-dark */
+
+  /* Source code wells */
+  --code-bg: var(--surface); /* ui: --color-code */
+  --code-text: var(--text); /* ui: --color-code-text, --color-syntax-variable */
+  --code-key: #715b42; /* ui: --color-syntax-keyword, --color-syntax-function, --color-syntax-tag */
+  --code-string: #346347; /* ui: --color-syntax-string */
+  --code-number: #86532e; /* ui: --color-syntax-number, --color-syntax-type, --color-syntax-attribute */
+  --code-comment: #626772; /* ui: --color-syntax-comment */
+
+  /* Type scale. The identity block names the families. */
+  --text-xs: 0.75rem; /* ui: --text-xs */
+  --text-sm: 0.8125rem; /* ui: --text-sm */
+  --text-md: 0.875rem; /* ui: --text-md */
+  --text-lg: 1rem; /* ui: --text-lg */
+  --text-xl: 1.25rem; /* ui: --text-xl */
+  --text-2xl: 1.5rem; /* ui: --text-2xl */
+  --text-3xl: 2.75rem; /* ui: --text-3xl */
+  --text-reading: 1rem; /* ui: --text-reading */
+  --text-display: 3.5rem; /* ui: --text-display */
+  --text-display-sm: 2.125rem; /* ui: --text-display-sm */
+  --leading-tight: 1.25; /* ui: --leading-tight */
+  --leading: 1.6; /* ui: --leading */
+  --weight-regular: 400; /* ui: --weight-regular */
+  --weight-medium: 500; /* ui: --weight-medium */
+  --weight-semibold: 600; /* ui: --weight-semibold */
+  --tracking-tight: -0.03em; /* ui: --tracking-tight */
+  --text-code: 0.84375rem; /* ui: --text-code */
+
+  /* Space: a 4px rhythm (0.25rem at the default 16px root). */
+  --space-1: 0.25rem; /* ui: --space-1 */
+  --space-2: 0.5rem; /* ui: --space-2 */
+  --space-3: 0.75rem; /* ui: --space-3 */
+  --space-4: 1rem; /* ui: --space-4 */
+  --space-5: 1.25rem; /* ui: --space-5 */
+  --space-6: 1.5rem; /* ui: --space-6 */
+  --space-8: 2rem; /* ui: --space-8 */
+  --space-12: 3rem; /* ui: --space-12 */
+  --space-16: 4rem; /* ui: --space-16 */
+  --space-20: 5rem; /* ui: --space-20 */
+  --space-24: 6rem; /* ui: --space-24 */
+
+  /* Size */
+  --control-sm: 2rem; /* ui: --control-sm */
+  --control-md: 2.25rem; /* ui: --control-md */
+  --control-lg: 2.75rem; /* ui: --control-lg */
+  --row: 2.25rem; /* ui: --row */
+  --measure: 68ch; /* ui: --measure */
+  --page-max: 960px; /* ui: --page-max */
+  --page-wide: 1120px; /* ui: --page-wide */
+  --sidebar: 224px; /* ui: --sidebar */
+
+  /* Shape */
+  --radius-sm: 6px; /* ui: --radius-inline */
+  --radius-md: 999px; /* ui: --radius-control */
+  --radius-lg: 16px; /* ui: --radius-panel */
+  --radius-field: 10px; /* ui: --radius-field */
+  --radius-pill: 999px; /* ui: --radius-pill */
+
+  /* Elevation: DESIGN.md#depth assigns each tier. Idle controls and surfaces take no outer light
+     highlight and no blur wider than 2px. */
+  --shadow-raise: 0 1px 2px rgb(16 24 40 / 12%), 0 0 0 1px rgb(16 24 40 / 6%); /* ui: --shadow-raise */
+  --shadow-surface: 0 1px 2px rgb(16 24 40 / 6%), 0 0 0 1px rgb(16 24 40 / 6%); /* ui: --shadow-surface */
+  --shadow-sink: inset 1.2px 1.2px 3.6px rgb(130 142 158 / 35%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 80%); /* ui: --shadow-sink */
+  --shadow-popover: 0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px var(--border-subtle); /* ui: --shadow-dialog */
+  --shadow-nav-current: 0 1px 3px rgb(130 142 158 / 40%); /* ui: --shadow-nav-current */
+  /* A focused field's inset line inside its accent or danger edge. It takes each theme's accent and danger. */
+  --field-shadow-focus: inset 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent); /* ui: --shadow-field-focus */
+  --field-shadow-focus-invalid: inset 0 0 0 2px color-mix(in srgb, var(--danger) 18%, transparent); /* ui: --shadow-field-focus-invalid */
+
+  /* Motion */
+  --duration-fast: 120ms; /* ui: --duration-fast */
+  --duration: 180ms; /* ui: --duration */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1); /* ui: --ease-out */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0d1012;
+    --surface: #13171a;
+    --surface-raised: #181d21;
+    --surface-hover: #20262b;
+    --field: color-mix(in srgb, var(--bg) 87.5%, black);
+    /* Dark fields stay sunk in the well. It sits within about 1.01:1 of the canvas, so the edge carries the shape. */
+    --field-bg: var(--field);
+    --field-shadow: var(--shadow-sink);
+    --control-thumb: color-mix(in srgb, var(--surface-raised) 88%, white);
+    --nav-current: color-mix(in srgb, var(--accent) 20%, transparent);
+    --row-hover: #20262b;
+    --border-subtle: #262d33;
+    --border: #78818a;
+    --text: #e6e9eb;
+    --text-muted: #9aa3ab;
+    --project: var(--project-dark);
+    --overlay: rgb(0 0 0 / 62%);
+    --command-bg: color-mix(in srgb, var(--project) 16%, black);
+    --command-border: color-mix(in srgb, var(--project) 28%, black);
+    --link: #67c1df;
+    --success: #4cc38a;
+    --warning: #e2a54b;
+    --danger: #f0776c;
+    --info: #84adff;
+    --success-soft: #172d25;
+    --warning-soft: #2f281b;
+    --danger-soft: #312020;
+    --info-soft: #202938;
+    --code-key: #d8c2a5;
+    --code-string: #a8bd9c;
+    --code-number: #d5b98c;
+    --code-comment: #a0a6b1;
+    --shadow-raise: inset 0 1px 0 rgb(255 255 255 / 7%), 0 1px 2px rgb(0 0 0 / 45%);
+    --shadow-surface: 0 0 0 1px rgb(255 255 255 / 6%);
+    --shadow-sink: inset 1.2px 1.2px 3.6px rgb(0 0 0 / 55%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 5%);
+    --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border-subtle);
+    --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d1012;
+  --surface: #13171a;
+  --surface-raised: #181d21;
+  --surface-hover: #20262b;
+  --field: color-mix(in srgb, var(--bg) 87.5%, black);
+  --field-bg: var(--field);
+  --field-shadow: var(--shadow-sink);
+  --control-thumb: color-mix(in srgb, var(--surface-raised) 88%, white);
+  --nav-current: color-mix(in srgb, var(--accent) 20%, transparent);
+  --row-hover: #20262b;
+  --border-subtle: #262d33;
+  --border: #78818a;
+  --text: #e6e9eb;
+  --text-muted: #9aa3ab;
+  --project: var(--project-dark);
+  --overlay: rgb(0 0 0 / 62%);
+  --command-bg: color-mix(in srgb, var(--project) 16%, black);
+  --command-border: color-mix(in srgb, var(--project) 28%, black);
+  --link: #67c1df;
+  --success: #4cc38a;
+  --warning: #e2a54b;
+  --danger: #f0776c;
+  --info: #84adff;
+  --success-soft: #172d25;
+  --warning-soft: #2f281b;
+  --danger-soft: #312020;
+  --info-soft: #202938;
+  --code-key: #d8c2a5;
+  --code-string: #a8bd9c;
+  --code-number: #d5b98c;
+  --code-comment: #a0a6b1;
+  --shadow-raise: inset 0 1px 0 rgb(255 255 255 / 7%), 0 1px 2px rgb(0 0 0 / 45%);
+  --shadow-surface: 0 0 0 1px rgb(255 255 255 / 6%);
+  --shadow-sink: inset 1.2px 1.2px 3.6px rgb(0 0 0 / 55%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 5%);
+  --shadow-popover: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--border-subtle);
+  --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%);
+}
+
+/* Minimal base. Component styles live in components.html. The base sits in a layer, so any
+   page or component rule outranks it whatever its specificity. A layered !important outranks an
+   unlayered one, so reduced-motion exceptions belong here too. */
+/* The page's own background and text colour stay outside the layer. A host that wraps the page in
+   its own unlayered reset, such as an artifact viewer, would otherwise keep its body colours while
+   the tokens switch to dark, leaving token-coloured text on the wrong background. */
+body { background: var(--bg); color: var(--text); }
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, p { margin: 0; }
+  h1, h2, h3, h4 { font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); text-wrap: balance; }
+  code, kbd, pre { font-family: var(--font-mono); }
+  table, .num { font-variant-numeric: tabular-nums; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p a, dd a { text-decoration: underline; text-underline-offset: 0.18em; }
+  :focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; scroll-behavior: auto !important; }
+    /* A busy spinner slows instead of stopping, so the busy state stays visible. */
+    [aria-busy="true"]::before { animation-duration: 1.4s !important; }
+  }
+}

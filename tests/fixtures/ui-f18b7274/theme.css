@@ -1,0 +1,223 @@
+@import "./fonts.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --font-ui: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 0.875rem;
+  --text-code: 0.84375rem;
+  --text-lg: 1rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --leading-tight: 1.25;
+  --leading: 1.6;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --control-sm: 2rem;
+  --control-md: 2.25rem;
+  --control-lg: 2.75rem;
+  --measure: 68ch;
+  --page-max: 960px;
+  --sidebar: 224px;
+  --color-bg: #f4f5f6;
+  --color-surface: #e9ebed;
+  --color-surface-raised: #fbfbfc;
+  --color-surface-muted: #e2e5e8;
+  --color-well: var(--color-surface-muted);
+  --color-control-thumb: var(--color-surface-raised);
+  /* Selected rows lift and take a faint accent tint, so the selection reads on near-white panels too. */
+  --color-nav-current: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface-raised));
+  --shadow-nav-current: 0 1px 3px rgb(130 142 158 / 40%);
+  /* The selected-row lift for always-dark regions, such as the capture header, in either appearance. */
+  --shadow-nav-current-dark: 0 1px 2px rgb(0 0 0 / 25%);
+  --color-text: #101315;
+  --color-muted: #50575e;
+  --color-link: #0b5f7c;
+  --color-accent: var(--color-project);
+  /* One focus ring for every control, in the accent: the accent reaches 3:1 on the page and its surfaces. */
+  --color-focus: var(--color-accent);
+  --focus-width: 2px;
+  --focus-offset: 3px;
+  --color-border: #6d747b;
+  --color-border-subtle: #d3d8dd;
+  /* Fields: a raised fill with a subtle edge in light. Dark fields stay in the well, where the edge
+   * outlines a fill within 1.1:1 of the canvas and panels. */
+  --color-field-bg: var(--color-surface-raised);
+  --color-field-edge: var(--color-border-subtle);
+  --color-button-bg: var(--color-accent);
+  --color-button-text: var(--color-accent-text);
+  --color-button-hover: color-mix(in srgb, var(--color-accent) 85%, var(--color-text));
+  --color-input-bg: #fbfbfc;
+  --color-input-text: #101315;
+  --color-input-border: #6d747b;
+  --color-input-placeholder: #50575e;
+  --color-row-hover: #e2e5e8;
+  --color-row-selected: var(--color-surface-raised);
+  --color-row-selected-text: #101315;
+  --color-code: var(--color-surface);
+  --color-code-text: var(--color-text);
+  --color-syntax-comment: #626772;
+  --color-syntax-keyword: #715b42;
+  --color-syntax-string: #346347;
+  --color-syntax-number: #86532e;
+  --color-syntax-function: #715b42;
+  --color-syntax-type: #86532e;
+  --color-syntax-variable: var(--color-text);
+  --color-syntax-operator: #50575e;
+  --color-syntax-punctuation: #50575e;
+  --color-syntax-tag: #715b42;
+  --color-syntax-attribute: #86532e;
+  --color-error: #bd342b;
+  --color-warning: #86532e;
+  --color-success: #157249;
+  --color-info: #175cd3;
+  --color-progress: var(--color-project);
+  --color-shadow: rgb(16 24 40 / 10%);
+  --color-overlay: rgb(0 0 0 / 42%);
+  --color-error-surface: #efe4e4;
+  --color-warning-surface: #e7e2de;
+  --color-success-surface: #d9e5e1;
+  --color-info-surface: #d9e3f2;
+  --radius-inline: 6px;
+  --radius-control: 999px;
+  --radius-panel: 16px;
+  --radius-field: 10px;
+  --radius-pill: 999px;
+  --duration-fast: 120ms;
+  --duration: 180ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --shadow-control: none;
+  --shadow-dialog: 0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px var(--color-border-subtle);
+  /* Depth tiers. Component CSS uses only these tokens.
+   * Raise: idle controls. Surface: containers. Sink: pressed controls and wells.
+   * Nav-current: the selected row. Dialog: floating layers. Raise and surface use one tight
+   * shadow with no outer light highlight and no blur past 2px. */
+  --shadow-raise: 0 1px 2px rgb(16 24 40 / 12%), 0 0 0 1px rgb(16 24 40 / 6%);
+  --shadow-surface: 0 1px 2px rgb(16 24 40 / 6%), 0 0 0 1px rgb(16 24 40 / 6%);
+  --shadow-sink: inset 1.2px 1.2px 3.6px rgb(130 142 158 / 35%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 80%);
+  /* Fields: no depth at rest in light. Focus draws a faint inset line in the edge's hue inside the 1px edge. */
+  --shadow-field: none;
+  --shadow-field-focus: inset 0 0 0 2px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  --shadow-field-focus-invalid: inset 0 0 0 2px color-mix(in srgb, var(--color-error) 18%, transparent);
+
+  --color-project: #4b45d1;
+  --color-accent-text: var(--color-bg);
+  --color-accent-hover: var(--color-text);
+  --color-project-dark: #a5a1ff;
+  --color-status-text: #101315;
+  /* Commands carry the project hue; terminal captures keep their neutral palette. */
+  --color-command-bg: color-mix(in srgb, var(--color-project) 25%, #101010);
+  --color-command-border: transparent;
+  --color-terminal: #0a0c0e;
+  --color-terminal-text: #e6e9eb;
+  --color-terminal-border: #2a3036;
+  --color-terminal-caption: #13171a;
+  --color-terminal-caption-text: #c9d0d6;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --color-bg: #0d1012;
+  --color-surface: #13171a;
+  --color-surface-raised: #181d21;
+  --color-surface-muted: #20262b;
+  --color-well: color-mix(in srgb, var(--color-bg) 87.5%, black);
+  --color-control-thumb: color-mix(in srgb, var(--color-surface-raised) 88%, white);
+  --color-nav-current: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  --shadow-nav-current: var(--shadow-nav-current-dark);
+  --color-text: #e6e9eb;
+  --color-muted: #9aa3ab;
+  --color-link: #67c1df;
+  --color-accent: var(--color-project);
+  --color-border: #78818a;
+  --color-border-subtle: #262d33;
+  --color-field-bg: var(--color-well);
+  --color-button-bg: var(--color-accent);
+  --color-button-text: var(--color-accent-text);
+  --color-button-hover: color-mix(in srgb, var(--color-accent) 85%, var(--color-text));
+  --color-input-bg: #181d21;
+  --color-input-text: #e6e9eb;
+  --color-input-border: #78818a;
+  --color-input-placeholder: #9aa3ab;
+  --color-row-hover: #20262b;
+  --color-row-selected: var(--color-surface-raised);
+  --color-row-selected-text: #e6e9eb;
+  --color-code: var(--color-surface);
+  --color-code-text: var(--color-text);
+  --color-syntax-comment: #a0a6b1;
+  --color-syntax-keyword: #d8c2a5;
+  --color-syntax-string: #a8bd9c;
+  --color-syntax-number: #d5b98c;
+  --color-syntax-function: #d8c2a5;
+  --color-syntax-type: #d5b98c;
+  --color-syntax-variable: var(--color-text);
+  --color-syntax-operator: #9aa3ab;
+  --color-syntax-punctuation: #9aa3ab;
+  --color-syntax-tag: #d8c2a5;
+  --color-syntax-attribute: #d5b98c;
+  --color-error: #f0776c;
+  --color-warning: #e2a54b;
+  --color-success: #4cc38a;
+  --color-info: #84adff;
+  --color-progress: var(--color-project);
+  --color-shadow: rgb(0 0 0 / 32%);
+  --color-overlay: rgb(0 0 0 / 62%);
+  --shadow-dialog: 0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px var(--color-border-subtle);
+  --shadow-raise: inset 0 1px 0 rgb(255 255 255 / 7%), 0 1px 2px rgb(0 0 0 / 45%);
+  --shadow-surface: 0 0 0 1px rgb(255 255 255 / 6%);
+  --shadow-sink: inset 1.2px 1.2px 3.6px rgb(0 0 0 / 55%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 5%);
+  --shadow-field: var(--shadow-sink);
+
+  --color-project: #a5a1ff;
+  --color-accent-text: var(--color-bg);
+  --color-accent-hover: var(--color-text);
+  --color-project-dark: #a5a1ff;
+  --color-error-surface: #312020;
+  --color-warning-surface: #2f281b;
+  --color-success-surface: #172d25;
+  --color-info-surface: #202938;
+  --color-status-text: #e6e9eb;
+  --color-command-bg: color-mix(in srgb, var(--color-project) 16%, black);
+  --color-command-border: color-mix(in srgb, var(--color-project) 28%, black);
+  --color-terminal: #0a0c0e;
+  --color-terminal-text: #e6e9eb;
+  --color-terminal-border: #2a3036;
+  --color-terminal-caption: #13171a;
+  --color-terminal-caption-text: #c9d0d6;
+}
+
+@theme inline {
+  --color-ui-bg: var(--color-bg);
+  --color-ui-surface: var(--color-surface);
+  --color-ui-surface-raised: var(--color-surface-raised);
+  --color-ui-surface-muted: var(--color-surface-muted);
+  --color-ui-text: var(--color-text);
+  --color-ui-muted: var(--color-muted);
+  --color-ui-link: var(--color-link);
+  --color-ui-accent: var(--color-accent);
+  --color-ui-focus: var(--color-focus);
+  --color-ui-border: var(--color-border);
+  --color-ui-border-subtle: var(--color-border-subtle);
+  --color-ui-error: var(--color-error);
+  --color-ui-warning: var(--color-warning);
+  --color-ui-success: var(--color-success);
+  --color-ui-info: var(--color-info);
+  --radius-ui-inline: var(--radius-inline);
+  --radius-ui-control: var(--radius-control);
+  --radius-ui-field: var(--radius-field);
+  --radius-ui-panel: var(--radius-panel);
+}
