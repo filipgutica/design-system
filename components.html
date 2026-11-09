@@ -96,9 +96,14 @@
     @media (pointer: coarse) { .select option { min-height: var(--control-lg); } }
   }
   :is(.input, .select, .textarea)[aria-invalid="true"] { border-color: var(--danger); }
+  /* Search: a field wrapper with a leading magnifier. The wrapper carries the field look and the width;
+     the input inside takes the free space, so the clear cross sits at the trailing edge. */
+  .search { display: flex; align-items: center; gap: var(--space-2); height: var(--control-sm); padding: 0 var(--space-2); border: 1px solid var(--field-edge); border-radius: var(--radius-field); background: var(--field); box-shadow: var(--shadow-sink); color: var(--text-muted); min-width: 0; }
+  .search input { border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--text-sm); flex: 1; min-width: 0; }
+  .search input::placeholder { color: var(--text-muted); }
   /* The native search clear button, quieted to a thin muted cross drawn with a mask. */
-  .input[type="search"]::-webkit-search-cancel-button { width: 0.75rem; height: 0.75rem; margin-inline-start: var(--space-2); background: var(--text-muted); cursor: pointer; -webkit-appearance: none; appearance: none; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 2.5l7 7m0-7l-7 7' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
-  .input[type="search"]::-webkit-search-cancel-button:hover { background: var(--text); }
+  .search input::-webkit-search-cancel-button { width: 0.75rem; height: 0.75rem; margin-inline-start: var(--space-2); background: var(--text-muted); cursor: pointer; -webkit-appearance: none; appearance: none; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 2.5l7 7m0-7l-7 7' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .search input::-webkit-search-cancel-button:hover { background: var(--text); }
   :is(.input, .select, .textarea):disabled { opacity: 0.58; cursor: not-allowed; }
   /* A static drawing of the open picker; a native select cannot be pinned open. */
   .picker { display: grid; width: 220px; max-width: 100%; margin: 0; padding: var(--space-1); list-style: none; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: var(--shadow-popover); }
@@ -473,13 +478,15 @@
   /* Fields take the same ring and also lift out of the well onto the control surface. */
   :is(.input, .select, .textarea):is(:focus-visible, .is-focus) { outline: 2px solid var(--focus); outline-offset: 2px; background-color: var(--field-focus); box-shadow: var(--shadow-raise); }
   :is(.input, .select, .textarea)[aria-invalid="true"]:is(:focus-visible, .is-focus) { border-color: var(--danger); }
+  /* The search wrapper takes the field ring and lift, so the input inside it draws nothing. */
+  .search:is(:has(input:focus-visible), .is-focus) { outline: 2px solid var(--focus); outline-offset: 2px; background: var(--field-focus); box-shadow: var(--shadow-raise); }
 
   @media (forced-colors: active) {
     /* The lifted fill drops, so the selected tab takes a system border; the padding absorbs it. */
     .tab[aria-selected="true"] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }
     .check input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; }
     /* The masked search cross would lose its fill, so it opts out and takes the system text colour. */
-    .input[type="search"]::-webkit-search-cancel-button, .input[type="search"]::-webkit-search-cancel-button:hover { forced-color-adjust: none; background: CanvasText; }
+    .search input::-webkit-search-cancel-button, .search input::-webkit-search-cancel-button:hover { forced-color-adjust: none; background: CanvasText; }
     .check input[type="checkbox"]:checked::before { border-color: HighlightText; }
     .check input[type="radio"]:checked { background: HighlightText; }
     .radio-card input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; color: HighlightText; }
@@ -540,7 +547,7 @@
   .caption { color: var(--text-muted); font-size: var(--text-xs); }
   .wide { flex-basis: 100%; }
   /* Fields fill their container; the catalogue gives each specimen a preferred width. */
-  .state > :is(.field, .input, .select, .textarea) { width: 220px; }
+  .state > :is(.field, .input, .select, .textarea, .search) { width: 220px; }
 
   @media (max-width: 800px) {
     .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
@@ -576,6 +583,7 @@
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></symbol>
   <symbol id="i-close" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
   <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></symbol>
   <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></symbol>
@@ -707,7 +715,7 @@
       <div class="state" inert><div class="field"><label class="field-label" for="in-invalid">Service</label><input class="input" id="in-invalid" aria-invalid="true" aria-errormessage="in-invalid-error"><p class="field-error" id="in-invalid-error">Enter a service name.</p></div><span class="caption">Invalid</span></div>
     </div></div>
     <div class="row"><h4>Search</h4><div class="states">
-      <div class="state"><input class="input" type="search" aria-label="Search monitors" value="latency"><span class="caption">Live; focus it to show the clear cross, which darkens on hover</span></div>
+      <div class="state"><label class="search"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" aria-label="Search monitors" value="latency"></label><span class="caption">Live; focus it to show the clear cross, which darkens on hover</span></div>
     </div></div>
     <div class="row"><h4>Sizes</h4><div class="states">
       <div class="state" inert><input class="input" data-size="sm" aria-label="Small input" placeholder="Small"><span class="caption">sm</span></div>
