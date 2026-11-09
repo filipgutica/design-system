@@ -132,9 +132,9 @@
 
   /* Switch: a button with role="switch"; the label sits beside it. */
   .switch-row { display: inline-flex; align-items: center; gap: var(--space-2); }
-  .switch { --w: 44px; --h: 22px; --inset: 2px; display: inline-flex; align-items: center; justify-content: center; flex: none; min-width: var(--control-sm); min-height: var(--control-md); padding: 0; border: 0; background: transparent; cursor: pointer; }
-  .switch[data-size="sm"] { --w: 35.2px; --h: 17.6px; --inset: 1.6px; min-height: var(--control-sm); }
-  .switch[data-size="lg"] { --w: 52.8px; --h: 26.4px; --inset: 2.4px; min-height: var(--control-lg); }
+  .switch { --w: 2.75rem; --h: 1.375rem; --inset: 0.125rem; display: inline-flex; align-items: center; justify-content: center; flex: none; min-width: var(--control-sm); min-height: var(--control-md); padding: 0; border: 0; background: transparent; cursor: pointer; }
+  .switch[data-size="sm"] { --w: 2.2rem; --h: 1.1rem; --inset: 0.1rem; min-height: var(--control-sm); }
+  .switch[data-size="lg"] { --w: 3.3rem; --h: 1.65rem; --inset: 0.15rem; min-height: var(--control-lg); }
   .switch-track, .toggle-track { --depth: var(--shadow-sink); position: relative; flex: none; width: var(--w); height: var(--h); border: 1px solid transparent; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--border) 90%, var(--field)); box-shadow: var(--depth); transition: background-color var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out); }
   .switch-track::after, .toggle-track::after { content: ""; position: absolute; top: calc(var(--inset) - 1px); left: calc(var(--inset) - 1px); width: calc(var(--h) - 2 * var(--inset)); height: calc(var(--h) - 2 * var(--inset)); border-radius: var(--radius-pill); background: var(--surface-raised); box-shadow: var(--shadow-raise); transition: transform var(--duration) var(--ease-out), background-color var(--duration) var(--ease-out); }
   :is(.switch[aria-checked="true"] .switch-track, .toggle[aria-pressed="true"] .toggle-track) { border-color: var(--accent); background: var(--accent); }
@@ -145,9 +145,9 @@
   .switch:is(:focus-visible, .is-focus) { outline: none; }
 
   /* Toggle button */
-  .toggle { --w: 44px; --h: 22px; --inset: 2px; --depth: none; display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 1px solid var(--border-subtle); border-radius: var(--radius-field); background: var(--surface-raised); color: var(--text); font: var(--text-md) / var(--leading-tight) var(--font-sans); text-align: left; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out); }
-  .toggle[data-size="sm"] { --w: 35.2px; --h: 17.6px; --inset: 1.6px; min-height: var(--control-sm); font-size: var(--text-sm); }
-  .toggle[data-size="lg"] { --w: 52.8px; --h: 26.4px; --inset: 2.4px; min-height: var(--control-lg); font-size: var(--text-lg); }
+  .toggle { --w: 2.75rem; --h: 1.375rem; --inset: 0.125rem; --depth: none; display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 1px solid var(--border-subtle); border-radius: var(--radius-field); background: var(--surface-raised); color: var(--text); font: var(--text-md) / var(--leading-tight) var(--font-sans); text-align: left; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out); }
+  .toggle[data-size="sm"] { --w: 2.2rem; --h: 1.1rem; --inset: 0.1rem; min-height: var(--control-sm); font-size: var(--text-sm); }
+  .toggle[data-size="lg"] { --w: 3.3rem; --h: 1.65rem; --inset: 0.15rem; min-height: var(--control-lg); font-size: var(--text-lg); }
   .toggle:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"]) { border-color: var(--border); }
   /* The switch carries the on state; the card takes the selected rows' faint tint and an accent hairline. */
   .toggle[aria-pressed="true"] { border-color: color-mix(in srgb, var(--accent) 35%, transparent); background: color-mix(in srgb, var(--accent) 8%, var(--surface-raised)); }
