@@ -334,7 +334,7 @@
 
   /* Code block: a source well */
   .code { width: 100%; max-width: var(--measure); min-width: 0; overflow: hidden; border: 1px solid transparent; border-radius: var(--radius-lg); background: var(--code-bg); color: var(--code-text); box-shadow: var(--shadow-surface); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-  .code-head { display: flex; align-items: center; gap: var(--space-3); min-height: 2.5rem; padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3); border-bottom: 1px solid var(--border-subtle); background: var(--surface-raised); font-size: var(--text-xs); }
+  .code-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); min-height: 2.5rem; padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3); border-bottom: 1px solid var(--border-subtle); background: var(--surface-raised); font-size: var(--text-xs); }
   .code-head b { font-weight: var(--weight-semibold); }
   .code-head .lang { color: var(--text-muted); }
   /* Copy is a quiet action; this sets its size and place. */
@@ -434,7 +434,7 @@
   /* Page type and helpers */
   .folio-h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); letter-spacing: var(--tracking-tight); }
   .folio-h2::before { content: "## " / ""; color: var(--accent); }
-  .folio-display { font: var(--weight-semibold) var(--text-display) / 1.08 var(--font-mono); letter-spacing: var(--tracking-tight); }
+  .folio-display { font: var(--weight-semibold) var(--text-display) / 1.08 var(--font-mono); letter-spacing: var(--tracking-tight); overflow-wrap: anywhere; }
   .steps { display: grid; gap: var(--space-5); max-width: var(--measure); margin: 0; padding: 0; list-style: none; counter-reset: step; }
   .steps li { position: relative; display: grid; gap: var(--space-1); padding-left: var(--space-12); counter-increment: step; }
   .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: var(--space-8); font: var(--weight-semibold) var(--text-lg) / var(--leading-tight) var(--font-mono); color: var(--accent); text-align: right; }
@@ -544,6 +544,9 @@
   /* The column may shrink below a specimen's content, so a scrolling tab list scrolls instead of widening the page. */
   .state { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); align-content: start; justify-items: start; min-width: 0; max-width: 100%; }
   .state > :first-child { max-width: 100%; }
+  /* Layout only: a segmented control scrolls inside its column at large text sizes, labels on one line. */
+  :is(.state, .page-head) > .segmented { max-width: 100%; overflow-x: auto; white-space: nowrap; }
+  :is(.state, .page-head) > .segmented button { flex: none; }
   .caption { color: var(--text-muted); font-size: var(--text-xs); }
   .wide { flex-basis: 100%; }
   /* Fields fill their container; the catalogue gives each specimen a preferred width. */
@@ -561,6 +564,7 @@
     /* Touch: unsized controls grow to --control-lg. Size specimens keep their sizes. */
     .btn:not([data-size]), .segmented:not([data-size]) button, .navlist a, .tab { min-height: var(--control-lg); }
     .input:not([data-size]), .select:not([data-size]), .range:not([data-size]) { height: var(--control-lg); }
+    .search { height: var(--control-lg); }
     .check:not([data-size]), .switch:not([data-size]), .toggle:not([data-size]) { min-height: var(--control-lg); }
     .folio-display { font-size: var(--text-display-sm); }
   }
