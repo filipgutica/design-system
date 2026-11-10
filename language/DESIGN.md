@@ -130,12 +130,12 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | --- | --- | --- | --- |
   | Acts, or sets a value on one line | Pill | `--radius-control` | Buttons, quiet actions, and segmented controls with their thumbs |
   | Small state mark | Pill | `--radius-pill` | Status badges, switch tracks and knobs, slider and progress tracks, score pips, and the in-page location pip |
-  | A place, or a row you pick | 6px | `--radius-inline` | Navigation rows, group labels, breadcrumb links, tabs, list rows, checkboxes, and keyboard keys |
+  | A place, or a row you pick | 6px | `--radius-inline` | Navigation rows outside a floating menu, group labels, breadcrumb links, tabs, list rows, checkboxes, and keyboard keys |
   | Something you type in, or a control whose label wraps | 10px | `--radius-field` | Inputs, selects, textareas, search fields, toggle cards, and pager links |
   | Holds other things | 16px | `--radius-panel` | Wells, plates, panels, cards, radio cards, alerts, code blocks, example frames, and floating layers |
 
   - A pill never holds text that can wrap. A control whose label can wrap, such as a toggle card or a radio card, is a rectangle.
-  - Nested rectangles are concentric: a rectangle that sits closer to a rounded container's edge than the container's radius takes that radius minus the gap. Option rows in a select picker, `--space-1` inside a 16px panel, take `calc(var(--radius-panel) - var(--space-1))`. A shape with more room than that, such as a field in a dialog, keeps the radius of its role. Two exceptions wait on the owner (see [open questions](decisions.md#open-questions)): rows in the project menu keep `--radius-inline`, and the skip link, a floating layer, keeps `--radius-field`.
+  - Nested rectangles are concentric: a rectangle that sits closer to a rounded container's edge than the container's radius takes that radius minus the gap. Option rows in a select picker and the rows of a floating menu, such as the project menu, each `--space-1` inside a 16px panel, take `calc(var(--radius-panel) - var(--space-1))`, 12px. A shape with more room than that, such as a field in a dialog, keeps the radius of its role. One exception waits on the owner (see [open questions](decisions.md#open-questions)): the skip link, a floating layer, keeps `--radius-field`.
   - Round marks (radios, slider thumbs, badge dots, and the busy spinner) take `50%`, a fill inside a shape inherits its corners, and an edge that meets another shape takes `0`. A page writes no other literal radius.
 - Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
 - [Depth](#depth) gives each role its shadow. Stable hover states keep normal content quiet.
