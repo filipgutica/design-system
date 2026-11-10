@@ -261,23 +261,25 @@ test('index.json and llms.txt list every component, and their site links resolve
   }
 })
 
-// The space above and below a label's ink, in CSS pixels. The page renders at deviceScaleFactor 4; the
-// screenshot is decoded in a canvas, and a pixel inside the label's text columns counts as ink when it
-// is nearer the text colour than the fill beside the text.
-const inkGaps = async (page: Page, selector: string) => {
+// Where a control's label ink starts and ends, and where the control's box does, in viewport CSS pixels.
+// The page renders at deviceScaleFactor 4, so one device pixel is 1/4 CSS px. The screenshot covers the
+// label's text line from 4px before the text; it is decoded in a canvas, and a pixel in the text's
+// columns counts as ink when it is nearer the text colour than the fill 4px before the text.
+const labelInk = async (page: Page, selector: string) => {
   const control = page.locator(selector).first()
   await control.scrollIntoViewIfNeeded()
-  const box = (await control.boundingBox())!
-  const label = await control.evaluate((el) => {
+  const { box, line, color } = await control.evaluate((el) => {
     const text = [...el.childNodes].find((node) => node.nodeType === Node.TEXT_NODE && node.textContent!.trim())!
     const range = document.createRange()
     range.selectNodeContents(text)
     const r = el.getBoundingClientRect()
     const t = range.getBoundingClientRect()
-    return { left: t.left - r.left, right: t.right - r.left, ink: getComputedStyle(el).color.match(/[\d.]+/g)!.slice(0, 3).map(Number) }
+    return { box: { top: r.top, bottom: r.bottom }, line: { left: t.left, right: t.right, top: t.top, bottom: t.bottom }, color: getComputedStyle(el).color.match(/[\d.]+/g)!.slice(0, 3).map(Number) }
   })
-  const png = await page.screenshot({ clip: box, scale: 'device' })
-  return page.evaluate(async ({ data, label }) => {
+  // A whole-pixel clip keeps each device row at an exact CSS position.
+  const clip = { x: Math.floor(line.left) - 4, y: Math.floor(line.top) - 4, width: Math.ceil(line.right - line.left) + 8, height: Math.ceil(line.bottom - line.top) + 8 }
+  const png = await page.screenshot({ clip, scale: 'device' })
+  const rows = await page.evaluate(async ({ data, from, to, color }) => {
     const image = new Image()
     image.src = `data:image/png;base64,${data}`
     await image.decode()
@@ -287,22 +289,21 @@ const inkGaps = async (page: Page, selector: string) => {
     const context = canvas.getContext('2d')!
     context.drawImage(image, 0, 0)
     const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data
-    // One device pixel is 1/4 CSS px. The clip's edges round to whole device pixels, so dividing the
-    // canvas size by a fractional box size would skew every gap.
-    const scale = 4
     const at = (x: number, y: number) => [0, 1, 2].map((i) => pixels[(y * canvas.width + x) * 4 + i])
     const distance = (a: number[], b: number[]) => a.reduce((sum, value, i) => sum + Math.abs(value - b[i]), 0)
-    const fill = at(Math.max(0, Math.round((label.left - 3) * scale)), Math.round(canvas.height / 2))
+    const fill = at(0, Math.round(canvas.height / 2))
     let top = -1
     let bottom = -1
     for (let y = 0; y < canvas.height; y++) {
-      for (let x = Math.round(label.left * scale); x < Math.round(label.right * scale); x++) {
+      for (let x = from; x < to; x++) {
         const pixel = at(x, y)
-        if (distance(pixel, fill) > 60 && distance(pixel, label.ink) < distance(pixel, fill)) { if (top < 0) top = y; bottom = y }
+        if (distance(pixel, fill) > 60 && distance(pixel, color) < distance(pixel, fill)) { if (top < 0) top = y; bottom = y + 1 }
       }
     }
-    return { above: top / scale, below: (canvas.height - 1 - bottom) / scale }
-  }, { data: png.toString('base64'), label })
+    return { top, bottom }
+  }, { data: png.toString('base64'), from: Math.round((line.left - clip.x) * 4), to: Math.round((line.right - clip.x) * 4), color })
+  expect(rows.top, `${selector}: no ink found`).toBeGreaterThanOrEqual(0)
+  return { box, top: clip.y + rows.top / 4, bottom: clip.y + rows.bottom / 4 }
 }
 
 for (const colorScheme of ['light', 'dark'] as const) {
@@ -313,9 +314,23 @@ for (const colorScheme of ['light', 'dark'] as const) {
     for (const [path, selector, text] of [['', '.page-head .strip a[aria-current="page"]', 'Overview'], ['components.html', 'main [role="tab"][aria-selected="true"]', 'Overview']]) {
       await page.goto(path)
       await expect(page.locator(selector).first()).toHaveText(text)
-      const { above, below } = await inkGaps(page, selector)
-      expect(above, `${selector}: no ink found`).toBeGreaterThan(0)
+      const { box, top, bottom } = await labelInk(page, selector)
+      const above = top - box.top
+      const below = box.bottom - bottom
       expect(Math.abs(above - below), `${selector}: ${above}px above the ink, ${below}px below`).toBeLessThanOrEqual(0.5)
+    }
+    await context.close()
+  })
+
+  test(`the breadcrumb's labels sit level with the header strip in ${colorScheme}`, async ({ browser }) => {
+    const context = await browser.newContext({ colorScheme, viewport: { width: 1280, height: 900 }, deviceScaleFactor: 4, baseURL: test.info().project.use.baseURL })
+    const page = await context.newPage()
+    await page.goto('foundations.html')
+    // The current crumb and the current strip row both read "Foundations", so their cap tops should match.
+    const pill = await labelInk(page, '.page-head .strip a[aria-current="page"]')
+    for (const selector of ['.crumbs [aria-current="page"]', '.crumbs a']) {
+      const crumb = await labelInk(page, selector)
+      expect(Math.abs(crumb.top - pill.top), `${selector}: ink starts at ${crumb.top}px, the strip's at ${pill.top}px`).toBeLessThanOrEqual(0.5)
     }
     await context.close()
   })
