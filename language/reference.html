@@ -19,7 +19,7 @@
   /* Navigation rows: components.html#navigation-list, unchanged. The sidebar adds icons and counts. */
   .navlist { display: grid; gap: 0.125rem; width: min(100%, 240px); }
   .navlist .group-label { padding: 0 var(--space-3) var(--space-1); color: var(--color-muted); font-size: var(--text-xs); font-weight: var(--weight-semibold); }
-  .navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-field); color: var(--color-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  .navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-inline); color: var(--color-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
   .navlist a:is(:hover, .is-hover) { background: var(--color-row-hover); color: var(--color-text); text-decoration: none; }
   /* The Foundations specimens share the current-page and location rules, forced colors included. */
   .navlist a[aria-current="page"], .nav-current-sample { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); font-weight: var(--weight-medium); }
@@ -98,11 +98,13 @@
   kbd { font-size: var(--text-xs); color: var(--color-muted); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-inline); padding: 0 var(--space-1); line-height: 1.125rem; background: var(--color-surface-raised); }
 
   /* Tabs, for the Foundations specimens: components.html#tabs, unchanged. */
-  .tablist { display: flex; width: max-content; max-width: 100%; overflow-x: auto; padding: var(--space-1); }
-  .tab { flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-field); background: transparent; color: var(--color-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-ui); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  .tablist { --glide-lead: 260ms; --glide-trail: 300ms; display: flex; width: max-content; max-width: 100%; overflow-x: auto; padding: var(--space-1); isolation: isolate; }
+  .tab { position: relative; flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-inline); background: transparent; color: var(--color-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-ui); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
   .tab:is(:hover, .is-hover) { background: var(--color-row-hover); color: var(--color-text); }
-  /* The selected tab takes the navigation row's lifted fill and motion: one selected state for both. */
-  .tab[aria-selected="true"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); }
+  /* The selected tab takes the navigation row's lifted fill: one selected state for both. The fill is a
+     ::before layer behind the label; in the catalogue it glides between tabs. */
+  .tab[aria-selected="true"] { background: transparent; color: var(--color-nav-current-text); }
+  .tab[aria-selected="true"]::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); pointer-events: none; }
   /* Inset: the tab list scrolls sideways, which would clip an outer ring. */
   .tab:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
 
@@ -140,6 +142,7 @@
   @media (forced-colors: active) {
     /* The lifted fill drops, so the selected tab takes a system border; the padding absorbs it. */
     .tab[aria-selected="true"] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }
+    .tab[aria-selected="true"]::before { content: none; }
     .segmented button[aria-pressed="true"] { forced-color-adjust: none; color: HighlightText; }
     .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
     /* The pressed option opts out of adjustment, so its ring would keep the accent. The ring sits on the track, so it takes the track's text colour. */
@@ -353,7 +356,7 @@
   .line-border { display: block; height: 0; border-top: 1px solid var(--color-border); }
   /* The pip and current-row samples take their state from the navigation row rules above. */
   .pip-sample { position: relative; display: inline-flex; align-items: center; min-height: var(--row); padding: 0 var(--space-3); font-size: var(--text-sm); }
-  .nav-current-sample { display: inline-flex; align-items: center; min-height: var(--row); padding: 0 var(--space-3); border-radius: var(--radius-field); font-size: var(--text-sm); }
+  .nav-current-sample { display: inline-flex; align-items: center; min-height: var(--row); padding: 0 var(--space-3); border-radius: var(--radius-inline); font-size: var(--text-sm); }
   .header-rule { display: block; height: 0; border-top: 1px solid var(--color-text); }
   .elevation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); padding: var(--space-6); border-radius: var(--radius-panel); background: var(--color-bg); }
   .elevation > div { display: grid; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-panel); background: var(--color-surface-raised); font-size: var(--text-sm); }
@@ -427,7 +430,7 @@
   <aside class="sidebar" aria-label="Workspace">
     <div class="workspace"><span class="mark" aria-hidden="true">A</span>Analytics</div>
     <nav class="navlist" aria-label="Main"><span class="group-label">Workspace</span>
-      <a href="#monitors" aria-current="page"><svg class="icon"><use href="#i-list"/></svg>Monitors<span class="count">6</span></a>
+      <a href="reference.html" aria-current="page"><svg class="icon"><use href="#i-list"/></svg>Monitors<span class="count">6</span></a>
       <a href="components.html"><svg class="icon"><use href="#i-chart"/></svg>Components</a>
       <a href="#foundations"><svg class="icon"><use href="#i-doc"/></svg>Foundations</a>
     </nav>
@@ -655,8 +658,8 @@
           <h3 id="shape-title">Shape</h3>
           <p class="note">Pill buttons, rounded fields and toggle cards, large-radius panels, and inline corners. Cards never take a pill.</p>
           <ul class="specs">
-            <li class="spec" data-token="--radius-inline"><div class="spec-meta"><code>--radius-inline</code><span class="value"></span><span class="use">Inline elements and checkboxes</span></div><i class="shape-box" style="border-radius:var(--radius-inline)"></i></li>
-            <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Inputs, selects, textareas, navigation rows, tabs, and toggle cards</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
+            <li class="spec" data-token="--radius-inline"><div class="spec-meta"><code>--radius-inline</code><span class="value"></span><span class="use">Inline elements, checkboxes, navigation rows, list-selection rows, and tabs</span></div><i class="shape-box" style="border-radius:var(--radius-inline)"></i></li>
+            <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Inputs, selects, textareas, toggle cards, and pager links</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
             <li class="spec" data-token="--radius-control"><div class="spec-meta"><code>--radius-control</code><span class="value"></span><span class="use">Buttons, quiet actions, segmented controls, and their thumbs</span></div><i class="shape-box" style="border-radius:var(--radius-control)"></i></li>
             <li class="spec" data-token="--radius-panel"><div class="spec-meta"><code>--radius-panel</code><span class="value"></span><span class="use">Wells, plates, panels, radio cards, alerts, and floating layers</span></div><i class="shape-box" style="border-radius:var(--radius-panel)"></i></li>
             <li class="spec" data-token="--radius-pill"><div class="spec-meta"><code>--radius-pill</code><span class="value"></span><span class="use">Status badges and switch tracks</span></div><i class="shape-box" style="border-radius:var(--radius-pill)"></i></li>
@@ -670,8 +673,8 @@
             <li class="spec"><div class="spec-meta"><code>1px --color-border-subtle</code><span class="use">Figures, dividers, and the rule above a section heading</span></div><i class="line-subtle"></i></li>
             <li class="spec"><div class="spec-meta"><code>1px --color-border</code><span class="use">Unchecked checkbox and radio edges</span></div><div class="cluster" inert><label class="check"><input type="checkbox">Unchecked</label><label class="check"><input type="radio" name="border-radio">Radio</label></div></li>
             <li class="spec"><div class="spec-meta"><code>1px --color-text</code><span class="use">Solid rule below the shared site header</span></div><i class="header-rule"></i></li>
-            <li class="spec"><div class="spec-meta"><code>--color-nav-current, --shadow-nav-current</code><span class="use">Current page, selected tab, and selected list row: a lifted fill with a faint accent tint, <code>--color-nav-current-text</code>, and no border or underline</span></div><div inert><div class="tablist" role="tablist" aria-label="Selected tab sample"><button class="tab" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
-            <li class="spec"><div class="spec-meta"><code>3×14 --color-accent pip</code><span class="use">Current location in the page, with medium weight and no fill</span></div><span class="pip-sample">Thresholds</span></li>
+            <li class="spec"><div class="spec-meta"><code>--color-nav-current, --shadow-nav-current</code><span class="use">Current page, a section rail's current section, selected tab, and selected list row: a lifted fill with a faint accent tint, <code>--color-nav-current-text</code>, and no border or underline</span></div><div inert><div class="tablist" role="tablist" aria-label="Selected tab sample"><button class="tab" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Settings</button></div></div></li>
+            <li class="spec"><div class="spec-meta"><code>3×14 --color-accent pip</code><span class="use">Current location in a strip or contents list, with medium weight and no fill</span></div><span class="pip-sample">Thresholds</span></li>
             <li class="spec"><div class="spec-meta"><code>1px transparent</code><span class="use">Borderless controls retain a border for forced colors; pressed segmented thumbs raise without a ring</span></div><div inert><div class="segmented" role="group" aria-label="Raised thumb sample"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false">Board</button></div></div></li>
             <li class="spec"><div class="spec-meta"><code>tint without a visible border</code><span class="use">Alerts keep a transparent 1px border for forced colors</span></div><div class="alert warning"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><p>No data for 42 minutes.</p></div></li>
           </ul>
@@ -956,14 +959,12 @@
   // Foundations: resolved token values and contrast.
   const foundations = document.getElementById('foundations');
 
-  // Main navigation: Monitors is the current page until the reader follows a link into Foundations.
-  // Foundations is a location in this page, so it takes the location pip instead of the page fill.
-  const monitorsLink = document.querySelector('.navlist a[href="#monitors"]');
+  // Main navigation: Monitors links to this page, so it stays the current page (aria-current="page").
+  // Foundations is a location in this page, so it takes the location pip while the reader is there.
   const foundationsLink = document.querySelector('.navlist a[href="#foundations"]');
   const markLocation = () => {
     const target = document.getElementById(location.hash.slice(1));
     const inFoundations = Boolean(target && foundations.contains(target));
-    if (inFoundations) monitorsLink.removeAttribute('aria-current'); else monitorsLink.setAttribute('aria-current', 'page');
     if (inFoundations) foundationsLink.setAttribute('aria-current', 'location'); else foundationsLink.removeAttribute('aria-current');
   };
   addEventListener('hashchange', markLocation);

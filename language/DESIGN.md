@@ -87,7 +87,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 - Use neutral `--color-bg`, `--color-surface`, and `--color-surface-raised` (paper in light, graphite in dark) to separate regions. Use `--color-text` and `--color-muted` for the main hierarchy.
 - Each project sets one hue, and `--color-accent` follows it. The hue fills the one primary action in each decision group, and marks identity and selection: current items, the selected tab's text, and checked or selected controls. It is never a fill for secondary buttons, cards, or wells. Check it at 3:1 for marks and bars, and at 4.5:1 wherever it colours text, on every surface it sits on. `--color-accent-text` on an `--color-accent` fill must reach 4.5:1 for each hue; a hue that misses does not colour text or carry a label there.
 - `--color-link` identifies links; underline prose links. `--color-focus` is the accent (`--color-accent`) and outlines keyboard focus on every role but fields, which turn their edge the accent instead (see [focus](components.md#rules-for-every-control)). Where color marks a checked or selected state, use `--color-accent` as a fill, tint, or mark; `--color-link` never marks one, and a focus ring marks only focus, never selection.
-- Navigation and selection: the current page, the selected tab, and a selected list row take the same quiet lifted fill, tinted with the accent, with accent text where it reaches 4.5:1 on that fill (another readable colour otherwise), and no underline or bar; an in-page location takes a short accent pip without a fill. Keep raised-control hover and keyboard focus separate from these states. [Component specs](components.md#navigation-list) give the values.
+- Navigation and selection: the current page, the selected tab, and a selected list row take the same quiet lifted fill, tinted with the accent, with accent text where it reaches 4.5:1 on that fill (another readable colour otherwise), and no underline or bar. An in-page location takes a short accent pip without a fill in strips and contents lists; in a section rail it takes the current page's fill instead. Keep raised-control hover and keyboard focus separate from these states. [Component specs](components.md#navigation-list) give the values.
 - Status colors mean state and have a text or icon label. Status surfaces are soft tints of their status color (the `--color-*-surface` tokens). Outside badges, the danger button label, and field error text, status foreground colors go on icons; numbers and labels beside them stay in `--color-text` or `--color-muted`. Keep restrained syntax colors separate from the action palette.
 - Verify light and dark appearance where supported, regardless of whether a switch is visible. Check text contrast rather than assuming a muted token is accessible at every size.
 
@@ -105,7 +105,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | Phone | `@media (max-width: 640px)` | Side gutters drop from `--space-6` to `--space-4`, and section gaps take their phone step. |
 
   Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. One documented exception: the tool-home hero (`.fg-site-hero` in `@filipgutica/ui`) splits at `@media (min-width: 1024px)`, with the title across the top, the lede on the left, and the install block and facts on the right. Below 1024px it stacks in source order. `@filipgutica/ui` also ships 680px rules for its own site header, prose title and definitions (`max-width: 680px`, with `min-width: 681px` for frame padding); they belong to the library, so pages add no viewport breakpoint beyond the table and the hero split. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.
-- Navigation can become a drawer or a native scrolling section strip. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line; `UiSiteNav` does this. Keep wide code, tables, and charts scrolling inside their containers.
+- [Navigation](#navigation) is a strip of 6 links or fewer, or a section rail that moves into a drawer at tablet width. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line; `UiSiteNav` does this. Keep wide code, tables, and charts scrolling inside their containers.
 - Keep main headings, actions, and product evidence visible on load. Scrolling should reveal more content without being required to make existing content appear.
 
 ### Surfaces
@@ -123,7 +123,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | Floating layer | Menus, popovers, pickers, and dialogs | `--color-surface-raised` | Transparent 1px; the shadow's ring draws the edge | `--radius-panel` | `--shadow-dialog` |
 
 - Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--color-field-edge`. `--color-border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--color-border-subtle` edge and no rest raise. Invalid fields show a `--color-error` edge, except in forced colors, where the system edge wins. Figures, example frames, and dividers use `--color-border-subtle`.
-- Radii: `--radius-inline` for inline elements and checkboxes; `--radius-field` for fields, navigation rows, tabs, and toggle cards; `--radius-control` (a pill) for buttons and segmented controls; `--radius-panel` for wells, example frames, plates, panels, radio cards, alerts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
+- Radii: `--radius-inline` for inline elements, checkboxes, navigation rows, list-selection rows, and tabs; `--radius-field` for fields, toggle cards, and pager links; `--radius-control` (a pill) for buttons and segmented controls; `--radius-panel` for wells, example frames, plates, panels, radio cards, alerts, and floating layers; `--radius-pill` for badges and switch tracks. Navigation rows inside a floating menu, such as the project menu, keep `--radius-inline`; option rows in a select picker take the panel radius minus `--space-1`.
 - Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
 - [Depth](#depth) gives each role its shadow. Stable hover states keep normal content quiet.
 
@@ -156,11 +156,53 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 - Examples: show a live component on a stage above its code, in one frame, with Copy in the code's corner. The stage sits on the page background. See [code block with a live example](components.md#with-a-live-example).
 - A screenshot opens at full size when clicked; use a native accessible trigger and restore its focus on close.
 
+### Navigation
+
+[`components.md`](components.md) specifies each navigation component. These rules decide which one a page uses and how they agree.
+
+- **Levels.** Each level has one component and one marker.
+
+  | Level | Answers | Component | Marker |
+  | --- | --- | --- | --- |
+  | Global | Which site? | Site header and project switcher | `aria-current="page"` on the registry row |
+  | Local | Which page of this site? | Section rail, or a navigation strip of 6 links or fewer | `aria-current="page"`: the lifted fill |
+  | In-page | Where am I on this page? | Section rail rows that point to `#id` | `aria-current="location"`: the lifted fill in a rail, a pip in strips and contents lists |
+  | Sequential | What comes next? | Pager | `rel="prev"` and `rel="next"` |
+  | Path | How do I get back up? | Breadcrumbs, only at depth 3 or more, or for a page outside its site's shell | The current page as text with `aria-current="page"` |
+  | Find | Where is X? | Find field that filters the rail | A live match count |
+
+- **`aria-current`.**
+  - `page` goes on the link whose path matches the URL, ignoring the hash, and on one link in each landmark at most.
+  - `location` goes on the in-page link for the section in view.
+  - A link carries one marker, and page outranks location. Never put `page` on a link to `#id`.
+  - Use `step` for wizards and `true` for other sets.
+- **Choosing a component.**
+  - A link (a navigation row or a strip) when the destination has its own URL.
+  - Tabs for panels about one object when no URL changes.
+  - A segmented control when the choice changes how the same content shows.
+  - Never mix URL-changing items and panel items in one set, and never give links `role="tab"`.
+- **Landmarks.**
+  - Give every `<nav>` a unique name, and leave "navigation" out of it, because screen readers add that word.
+  - Order: skip link, banner (the header), local navigation, `main`, contentinfo. Focus follows that order. At tablet width the Find and Menu buttons come before `main`.
+- **Scroll offset.**
+  - One offset: `html { scroll-padding-top }`, equal to any sticky bar plus `--space-4`. Sections do not set `scroll-margin-top`.
+  - Use `scroll-behavior: smooth` only under `prefers-reduced-motion: no-preference`.
+- **Location tracking.**
+  - The current section is the last tracked heading, in page order, whose top has passed the scroll-padding inset. At the bottom of the page, the last tracked heading is current.
+  - After a jump (a click, a hash change, or a deep link), the target stays current until the reader scrolls away from where it landed.
+  - A group heading counts as its group's first row.
+- **Single-key shortcuts.**
+  - Allowed only with an off switch, saved in storage and wrapped in `try`/`catch` (WCAG 2.1.4).
+  - Ignored while focus is in an editable element or a modal dialog is open.
+  - Shown with a visible [keyboard key](components.md#keyboard-key) hint and `aria-keyshortcuts`.
+  - The only shortcut is `/`, which focuses Find.
+- **No command palette.** Find covers a single-page catalogue and a small site; see [decisions](decisions.md).
+
 ### Interaction and motion
 
 - Show visible focus and accessible names. A visual simplification must preserve useful controls, caveats, and keyboard paths.
 - Every focusable element but a field draws one ring, `outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset)`, with no glow, over its own raise or sink shadow. The `tokens.css` base sets it. `--color-focus` is the accent, which reaches 3:1 on `--color-bg`, `--color-surface`, and `--color-surface-raised` in both themes; a dark plate sets `--color-focus: var(--color-project-dark)`. Do not give a role its own ring colour. Fields (input, select, textarea, search) draw no ring: focus turns the edge `--color-accent` with a 2px inset line (`--shadow-field-focus`), and the fill stays. [Component specs](components.md#rules-for-every-control) give the values. Use an inset offset (`calc(var(--focus-width) * -1)`) only where a scrolling or clipping parent would cut the ring, or inside a segmented control; add a comment that names the reason. Keep the focus default in `@layer base`, so a component's own focus rule can refine it. Pointer hover never draws the outline.
-- Keep product navigation distinct from in-page section links. Current-page and current-section indicators serve different purposes. Open sibling project links in the same tab; indicate a new tab only when the link opens one.
+- Keep product navigation distinct from in-page section links. Current page and current section are different markers (`aria-current="page"` and `"location"`); see [Navigation](#navigation). Open sibling project links in the same tab; indicate a new tab only when the link opens one.
 - Use `--duration-fast` for hover/press and `--duration` for menus/panels. Animate opacity or transform only where it explains a state change. A component spec may set its own timing, as the segmented control's glide does.
 - Keep content visible without reveal effects, entrance sequences, or continuous decorative animation. Honor reduced motion, including anchor scrolling.
 - An interactive figure first renders as complete static content, so it reads the same without JavaScript; enhancement adds controls, not information. Give each state a text label and announce live results politely. A lesson needs one interactive figure at most; keep the rest static.

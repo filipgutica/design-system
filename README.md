@@ -15,7 +15,7 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css` and `dist/` |
 | `dist/` | Generated token files for the class flavour, theme overrides, JSON, and JavaScript |
 | `fonts/` | IBM Plex latin `woff2` files, `fonts.css`, and their OFL licences |
-| `tests/` | Guard tests for the payload and the tokens, and the React smoke test |
+| `tests/` | Guard tests for the payload and the tokens, the React smoke test, and the catalogue's behaviour tests |
 
 To change a value, edit the JSON and run `pnpm tokens:build`. `pnpm tokens:check` fails when a generated file is stale.
 
@@ -45,7 +45,7 @@ pnpm install --frozen-lockfile
 pnpm verify
 ```
 
-`pnpm verify` checks the generated files, runs the tests and the React smoke test, then `pnpm pack --dry-run` and `publint`. The smoke test needs Chromium: `pnpm exec playwright install chromium`.
+`pnpm verify` checks the generated files, runs the tests, the React smoke test, and the catalogue tests (Find, shortcuts, location, drawer, overflow, and axe), then `pnpm pack --dry-run` and `publint`. The browser tests need Chromium: `pnpm exec playwright install chromium`.
 
 ## Release
 

@@ -34,7 +34,8 @@
     "tokens:check": "node scripts/build-tokens.mjs --check",
     "test": "node --test tests/*.test.mjs",
     "test:react": "tsc -p tests/react-smoke && playwright test -c tests/react-smoke",
-    "verify": "pnpm tokens:check && pnpm test && pnpm test:react && pnpm pack --dry-run && publint"
+    "test:catalogue": "tsc -p tests/catalogue && playwright test -c tests/catalogue",
+    "verify": "pnpm tokens:check && pnpm test && pnpm test:react && pnpm test:catalogue && pnpm pack --dry-run && publint"
   },
   "engines": {
     "node": ">=22.12"
@@ -54,6 +55,7 @@
   },
   "homepage": "https://github.com/filipgutica/design-system#readme",
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@playwright/test": "^1.65.0",

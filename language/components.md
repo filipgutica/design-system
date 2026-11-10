@@ -13,6 +13,23 @@ Each section has the same parts: anatomy, tokens, states, keyboard and screen re
 
 The identity layer reads only the identity tokens (`--color-project`, `--color-project-dark`, `--font-ui`, `--font-mono`) and the terminal tokens. A core component never depends on an identity component.
 
+## Groups
+
+The sections follow the catalogue's purpose groups, in this order. Each component keeps its layer.
+
+| Group | Components |
+| --- | --- |
+| Actions | Button, quiet action |
+| Selection | Checkbox and radio, radio card group, switch, toggle button, segmented control |
+| Inputs | Text input and textarea, select, field wrapper, slider |
+| Feedback and status | Progress, score, badge, alert |
+| Containers and overlays | Surface and card, figure, dialog, drawer |
+| Navigation | Navigation list, section rail, find field, breadcrumbs, pager, tabs, skip link, keyboard key |
+| Code and examples | Code block |
+| Identity | Command plate, terminal capture, site header, page type and helpers |
+
+A control's **States** line names each interactive state it has. In `components.html` each control section lists the same states in `data-states`, and the Control states table shows them; a test checks the three agree.
+
 ## Rules for every control
 
 - **Sizes.** `sm`, `md`, and `lg` use `--control-sm`, `--control-md`, and `--control-lg` for height, with `--text-sm`, `--text-md`, and `--text-lg`. At tablet width (`max-width: 800px`) touch targets use `--control-lg`.
@@ -40,7 +57,7 @@ Layer: Core. ui: `UiButton`.
   | Danger | `--color-error-surface` fill, `--color-error` mixed 75% with `--color-text` (85% in dark), `--shadow-raise` | `--color-error` 10% into `--color-error-surface` | `--color-error` 16% into `--color-error-surface`, `--shadow-sink` |
   | Text | Transparent, `--color-link`, underlined, 4px padding | No change | No change |
 
-- **States.** Pressed also moves the button 1px down, for every variant but text, and applies to `aria-pressed="true"`. Busy sets `aria-busy="true"` and `disabled`, so the button takes no hover or press, with `cursor: wait`. It shows a 14px spinner before the label: a 2px `currentColor` ring with a transparent right edge, turning once every 700ms. Keep the label while busy.
+- **States.** Rest, hover, pressed, focus-visible, disabled, and busy. Pressed also moves the button 1px down, for every variant but text, and applies to `aria-pressed="true"`. Busy sets `aria-busy="true"` and `disabled`, so the button takes no hover or press, with `cursor: wait`. It shows a 14px spinner before the label: a 2px `currentColor` ring with a transparent right edge, turning once every 700ms. Keep the label while busy.
 - **Danger label.** Check the label at 4.5:1 on the rest, hover, and pressed fills. Where the mix misses, use the first of `--color-text`, black, and white that reads on all three.
 - **Use.** One primary action for each decision group. The hue fill marks that action; every other action is secondary, ghost, or text.
 - **Keyboard and screen reader.** Native button behavior: Enter and Space activate it. An icon-only button needs `aria-label`.
@@ -57,37 +74,6 @@ Layer: Core. ui: the `fg-quiet-action` class.
 - **Keyboard and screen reader.** Native button behavior. An icon-only action needs `aria-label`.
 - **Motion.** Fill and colour change over `--duration-fast` with `--ease-out`.
 - **Forced colors.** The transparent border draws as the system edge.
-
-## Text input and textarea
-
-Layer: Core. ui: `UiInput`. ui has no textarea; a textarea uses the same field recipe.
-
-- **Anatomy.** A native `<input>` or `<textarea>`. Full width, line height 1.35. Input heights follow the control size, and horizontal padding is about 9px, 10px, or 11px.
-- **Tokens.** Fill `--color-field-bg` (`--color-surface-raised` in light, the sunk `--color-well` well in dark), text `--color-text`, placeholder `--color-muted` at full opacity, corners `--radius-field`, border 1px `--color-field-edge` (`--color-border-subtle`), shadow `--shadow-field` (none in light, `--shadow-sink` in dark).
-- **States.** Rest, focus-visible (the accent edge and inset line from [field focus](#rules-for-every-control)), disabled (the `--color-well` well, no shadow), invalid (`--color-error` border), and invalid while focused (`--color-error` border and a `--color-error` inset line). A textarea keeps the same padding at the top and bottom as at the sides, and resizes vertically only.
-- **Keyboard and screen reader.** Each field has a visible `<label>`. A search field is the one exception: its leading magnifier and an accessible name that names the search (`aria-label`, or a visually hidden `<label>`) stand in for the visible label. A field inside a [field wrapper](#field-wrapper) gets its description and error ids from it.
-- **Motion.** None.
-- **Search.** `type="search"` keeps the native clear button, quieted to a 12px cross drawn with a `mask` (1.5px round strokes) and filled `--color-muted`, with `--space-2` before it. Hover fills it `--color-text`. The cross sits at the input's trailing edge, so inside a field wrapper with an icon or key hint the input takes the free space (`flex: 1`, `min-width: 0`) and the wrapper carries the width. The wrapper carries the field fill, edge, shadow, and focus, so the input inside it draws nothing. In forced colors the cross opts out of adjustment and fills `CanvasText`, so the mask keeps a visible fill.
-- **Forced colors.** The border draws as the system field edge. The inset line drops, so a focused field draws a `Highlight` outline just inside its edge. The system edge replaces the `--color-error` edge, so the invalid state relies on its error text there; see [known gaps](decisions.md#known-gaps).
-
-## Select
-
-Layer: Core. ui: `UiSelect`.
-
-- **Anatomy.** A native `<select>` with the input's field recipe and a chevron on the right. Draw the chevron in `currentColor`, or with an 8px border corner in `--color-muted` turned 45°. Right padding leaves room for it at every size.
-- **Picker.** Where `appearance: base-select` is supported, the open list is a floating layer: `--color-surface-raised`, a transparent 1px border, `--radius-panel`, `--shadow-dialog`, 4px padding, at least the select's width, and at most `min(20rem, 50dvh)` tall. Options are at least 32px tall (44px on coarse pointers), with `--space-2` `--space-3` padding and corners of `--radius-panel` minus 4px. Hover fills `--color-row-hover`. An `--color-accent` check at the end marks the checked option. The check carries the state: the option's `--color-row-selected` fill equals `--color-surface-raised`. Keyboard focus is the focus ring, inset because the list scrolls. Other browsers keep the native picker.
-- **States.** Rest, focus-visible, disabled, invalid, and invalid while focused, as for the input.
-- **Keyboard and screen reader.** Native select behavior. A visible `<label>`.
-- **Motion.** None.
-- **Forced colors.** The closed field as for the input, including the `Highlight` focus outline. The picker is native.
-
-## Field wrapper
-
-Layer: Core. ui: `UiField`.
-
-- **Anatomy.** A grid with a 6px gap: label, control, then a description or an error. The error replaces the description.
-- **Tokens.** Label `--text-sm` semibold `--color-text`. Description `--text-sm` `--color-muted`. Error `--text-sm` `--color-error`.
-- **Keyboard and screen reader.** The label's `for` names the control. The control points `aria-describedby` at the description, and `aria-errormessage` at the error with `aria-invalid="true"`.
 
 ## Checkbox and radio
 
@@ -136,12 +122,44 @@ Layer: Core. ui: `UiToggleButton`.
 Layer: Core. ui: `UiSegmentedControl`.
 
 - **Use.** Two to five short options that apply at once, such as a view mode or the System, Light, and Dark appearance choice. Use a select for longer lists and radio cards for options that need descriptions.
-- **Anatomy.** A `role="group"` with an accessible name, containing one `<button aria-pressed>` for each option. The track is undivided: `--color-well` fill, `--shadow-sink`, a transparent 1px border, and `--radius-control`. Each button is the full control height with `--space-3` padding (square when icon-only). Its thumb is a `::before` layer inset 2px inside the button, behind the label.
+- **Anatomy.** A `role="group"` with an accessible name, containing one `<button aria-pressed>` for each option. The track is undivided: `--color-well` fill, `--shadow-sink`, a transparent 1px border, and `--radius-control`. Each button is the full control height (`--item`) with `--space-3` padding, and square when icon-only. At tablet width an unsized control sets `--item` to `--control-lg`, so its buttons grow to the touch size and icon-only options stay square. Its thumb is a `::before` layer inset 2px inside the button, behind the label.
 - **Tokens.** Labels are `--color-muted`. The pressed option's thumb is `--color-control-thumb` with `--shadow-raise` and no ring. Its label is `--color-segmented-current-text`: `--color-accent` where it reaches 4.5:1 on the thumb, on the page and on a surface, and otherwise the first of `--color-text`, black, and white that does. An icon-only option needs 3:1. Hover on an unpressed option shows the thumb at 45% and turns the label `--color-text`.
 - **States.** Rest, hover, pressed, focus-visible (an inset ring, so it hugs the thumb instead of crossing into the next option), and disabled.
 - **Keyboard and screen reader.** Each option is its own Tab stop; Space and Enter press it. Icon-only options use the label as `aria-label` and `title`.
 - **Motion.** Hover fades the label colour over `--duration-fast` with `--ease-out`. When the reader changes the choice, one thumb glides from the old option to the new one. Start the new thumb's left and right edges where the old thumb was, then animate each edge home with CSS `ease`. The leading edge takes 260ms and the trailing edge 300ms, so the thumb stretches a little on the way. Labels cross-fade their colour over 260ms. If a glide is cut short, start the next one from the thumb's current position. There is no motion on first render, on a value restored from storage, or on a theme change: allow glides only after the first frame. Reduced motion moves the thumb at once.
 - **Forced colors.** The pressed option draws `Highlight` behind `HighlightText`. Its focus ring is `CanvasText`: the option opts out of adjustment, and the ring sits on the track.
+
+## Text input and textarea
+
+Layer: Core. ui: `UiInput`. ui has no textarea; a textarea uses the same field recipe.
+
+- **Anatomy.** A native `<input>` or `<textarea>`. Full width, line height 1.35. Input heights follow the control size, and horizontal padding is about 9px, 10px, or 11px.
+- **Tokens.** Fill `--color-field-bg` (`--color-surface-raised` in light, the sunk `--color-well` well in dark), text `--color-text`, placeholder `--color-muted` at full opacity, corners `--radius-field`, border 1px `--color-field-edge` (`--color-border-subtle`), shadow `--shadow-field` (none in light, `--shadow-sink` in dark).
+- **States.** Rest, focus-visible (the accent edge and inset line from [field focus](#rules-for-every-control)), disabled (the `--color-well` well, no shadow), invalid (`--color-error` border), and invalid while focused (`--color-error` border and a `--color-error` inset line). A textarea keeps the same padding at the top and bottom as at the sides, and resizes vertically only.
+- **Keyboard and screen reader.** Each field has a visible `<label>`. A search field is the one exception: its leading magnifier and an accessible name that names the search (`aria-label`, or a visually hidden `<label>`) stand in for the visible label. A field inside a [field wrapper](#field-wrapper) gets its description and error ids from it.
+- **Motion.** None.
+- **Search.** `type="search"` keeps the native clear button, quieted to a 12px cross drawn with a `mask` (1.5px round strokes) and filled `--color-muted`, with `--space-2` before it. Hover fills it `--color-text`. The cross sits at the input's trailing edge, so inside a field wrapper with an icon or key hint the input takes the free space (`flex: 1`, `min-width: 0`) and the wrapper carries the width. The wrapper carries the field fill, edge, shadow, and focus, so the input inside it draws nothing. In forced colors the cross opts out of adjustment and fills `CanvasText`, so the mask keeps a visible fill.
+- **Forced colors.** The border draws as the system field edge. The inset line drops, so a focused field draws a `Highlight` outline just inside its edge. The system edge replaces the `--color-error` edge, so the invalid state relies on its error text there; see [known gaps](decisions.md#known-gaps).
+
+## Select
+
+Layer: Core. ui: `UiSelect`.
+
+- **Anatomy.** A native `<select>` with the input's field recipe and a chevron on the right. Draw the chevron in `currentColor`, or with an 8px border corner in `--color-muted` turned 45°. Right padding leaves room for it at every size.
+- **Picker.** Where `appearance: base-select` is supported, the open list is a floating layer: `--color-surface-raised`, a transparent 1px border, `--radius-panel`, `--shadow-dialog`, 4px padding, at least the select's width, and at most `min(20rem, 50dvh)` tall. Options are at least 32px tall (44px on coarse pointers), with `--space-2` `--space-3` padding and corners of `--radius-panel` minus 4px. Hover fills `--color-row-hover`. An `--color-accent` check at the end marks the checked option. The check carries the state: the option's `--color-row-selected` fill equals `--color-surface-raised`. Keyboard focus is the focus ring, inset because the list scrolls. Other browsers keep the native picker.
+- **States.** Rest, focus-visible, disabled, invalid, and invalid while focused, as for the input.
+- **Keyboard and screen reader.** Native select behavior. A visible `<label>`.
+- **Motion.** None.
+- **Forced colors.** The closed field as for the input, including the `Highlight` focus outline. The picker is native.
+
+## Field wrapper
+
+Layer: Core. ui: `UiField`.
+
+- **Anatomy.** A grid with a 6px gap: label, control, then a description or an error. The error replaces the description.
+- **Tokens.** Label `--text-sm` semibold `--color-text`. Description `--text-sm` `--color-muted`. Error `--text-sm` `--color-error`.
+- **States.** Rest, and invalid: the error replaces the description, and the control takes its own invalid state.
+- **Keyboard and screen reader.** The label's `for` names the control. The control points `aria-describedby` at the description, and `aria-errormessage` at the error with `aria-invalid="true"`.
 
 ## Slider
 
@@ -168,16 +186,6 @@ Layer: Core. ui: `UiScore`.
 - **Anatomy.** A row of 8px pips with 3px gaps, then the value in medium weight and `/max` in muted regular weight, in tabular numbers. Empty pips have a 1px `--color-border` edge; filled pips are `--color-accent`.
 - **Keyboard and screen reader.** The pips are `aria-hidden`; the text value carries the score.
 - **Forced colors.** Filled pips redraw in `Highlight` with `forced-color-adjust: none`.
-
-## Tabs
-
-Layer: Core. ui: `UiTabs`.
-
-- **Anatomy.** A `role="tablist"` with no rule below it and a 12px gap below it. It scrolls sideways when needed, and a 24px mask fades each clipped edge. Scrolling clips on every side, so the list has 4px (`--space-1`) padding all round: it keeps the selected tab's shadow whole and its fill off the frame edge. Each tab is a borderless button at least `--control-md` tall (`--control-lg` on phones), with `--space-2` `--space-3` padding, `--radius-field` corners, medium weight, and `--color-muted`.
-- **States.** Hover fills `--color-row-hover` and turns the text `--color-text`. The selected tab takes the [navigation row](#navigation-list)'s current-page recipe: `--color-nav-current` fill and `--shadow-nav-current`, with no underline. Its text is `--color-nav-current-text`: the first of `--color-accent`, `--color-text`, black, and white that reaches 4.5:1 over the tinted fill, both on the page and on a surface (composite a translucent fill over each first). Focus-visible is the focus ring, inset because the list scrolls.
-- **Motion.** Fill, colour, and shadow change as on a [navigation row](#navigation-list).
-- **Keyboard and screen reader.** Roving `tabindex`: arrow keys move between tabs, Home and End go to the ends, and focus selects the tab. Each tab has `aria-controls` and `aria-selected`; each panel has `role="tabpanel"`. Without JavaScript, show every panel under its own heading. Apply the tab roles and hide the headings and unselected panels only when the script enhances the markup.
-- **Forced colors.** The fill and shadow drop, so the selected tab takes a 2px `Highlight` border, and its padding shrinks by 2px to keep its size.
 
 ## Badge
 
@@ -223,21 +231,95 @@ Layer: Core. ui: `UiDialog`.
 Layer: Core. ui: `UiDrawer`.
 
 - **Anatomy.** A dialog fixed to the left edge, full height, `min(--sidebar + 48px, 100vw - 48px)` wide, with a header (title and close button) and a body that scrolls on its own. It is a floating layer with square corners: `--color-surface-raised`, a transparent 1px border, and `--shadow-dialog`. The close button is a [quiet action](#quiet-action).
+- **Navigation drawer.** A drawer that holds navigation opens on the current row, scrolled to the centre of the body. A keyboard open moves focus to that row; a tap moves focus to the body, so no ring shows and no on-screen keyboard opens. An open from a Find button moves focus to the [find field](#find-field), which stays pinned at the top of the body while the list scrolls under it.
 - **Keyboard and screen reader.** As for the dialog. Following an in-page link inside the drawer closes it and moves focus to the link's destination (given `tabindex="-1"` if it is not focusable), not back to the trigger. Modified clicks (a new tab or window) leave it open.
+- **Page behind.** While the drawer is open, until it has slid out, the page behind it does not scroll: the root takes `overflow: hidden`, which keeps the reader's position. The page reserves the scrollbar gutter all the time (`scrollbar-gutter: stable` on the root), so hiding a classic scrollbar does not reflow it.
 - **Motion.** It slides in over `--duration` and out over `--duration-fast`, with `--ease-out`, while the overlay fades. Reduced motion shows and hides it at once.
 
 ## Navigation list
 
 Layer: Core. The mono font on rail rows is identity. ui: the rows in `UiSiteNav` and the project menu.
 
-- **Anatomy.** A `<nav>` with a name, holding links in rows: at least `--row` tall (`--control-lg` at tablet width), `0 --space-3` padding, `--radius-field` corners, `--text-sm`, and `--color-muted`. Groups have a `--text-xs` semibold muted label and 2px gaps between rows.
-- **States.** Hover: `--color-row-hover` fill and `--color-text`. Current page (`aria-current="page"`): `--color-nav-current` fill, `--shadow-nav-current`, `--color-nav-current-text`, and medium weight; hover keeps that fill. `--color-nav-current` is an accent tint: `--color-accent` at 14% over `--color-surface-raised` in light, and `--color-accent` at 20% over transparent in dark. `--color-nav-current-text` is the first of `--color-accent`, `--color-text`, black, and white that reaches 4.5:1 over the tinted fill, both on the page and on a surface (composite a translucent fill over each first). Selected tabs and selected list rows use the same fill and rule. Current location in the page (`aria-current="location"`): `--color-text` in medium weight, with a 3×14 `--color-accent` pip at the leading edge, inset 4px, and no fill. Focus-visible: the focus ring, inset because the rail and the drawer scroll.
-- **Phone.** At tablet width a section rail becomes a drawer. Its trigger is a secondary button at `--control-lg` with a three-line menu glyph (14×10, 1.5px lines) before the label. Without JavaScript the list opens in place, so the trigger is a `<details>` summary with the secondary button classes and a chevron after the label. Only the chevron is local.
-- **Horizontal strip.** A section strip laid out in a row uses these rows and states unchanged, the location pip included.
+- **Anatomy.** A `<nav>` with a name, holding links in rows: at least `--row` tall (`--control-lg` at tablet width), `0 --space-3` padding, `--radius-inline` corners, `--text-sm`, and `--color-muted`. A row may hold a leading 16px icon and a trailing muted count. Groups have a `--text-xs` semibold muted label and 2px gaps between rows.
+- **Groups.** Name groups by purpose, with 2 to 8 rows each. Collapse groups only in a list of more than about 40 rows. A collapsible group's label is a `<button aria-expanded>` in the label type, with `--radius-inline` corners and a chevron that turns −90° when the group is closed. Never collapse the group that holds the current row.
+- **States.** Hover: `--color-row-hover` fill and `--color-text`. Current page (`aria-current="page"`): `--color-nav-current` fill, `--shadow-nav-current`, `--color-nav-current-text`, and medium weight; hover keeps that fill. `--color-nav-current` is an accent tint: `--color-accent` at 14% over `--color-surface-raised` in light, and `--color-accent` at 20% over transparent in dark. `--color-nav-current-text` is the first of `--color-accent`, `--color-text`, black, and white that reaches 4.5:1 over the tinted fill, both on the page and on a surface (composite a translucent fill over each first). Selected tabs and selected list rows use the same fill and rule. Current location in the page (`aria-current="location"`): `--color-text` in medium weight, with a 3×14 `--color-accent` pip at the leading edge, inset 4px, and no fill, in strips and contents lists. In a [section rail](#section-rail) the current section takes the current-page look instead and keeps `aria-current="location"`. A link carries one marker, and page outranks location; the [`aria-current` rules](DESIGN.md#navigation) say which applies, and the [tracking rule](DESIGN.md#navigation) says which section is current. Focus-visible: the focus ring, inset because the rail and the drawer scroll.
+- **Phone triggers.** Two triggers open a navigation drawer, and each has its place. The site shell uses the header's icon-only Menu button: at tablet width its [section rail](#section-rail) moves into that drawer. A page-level contents drawer, such as a docs page's "On this page", keeps a labelled trigger: a secondary button at `--control-lg` with a three-line menu glyph (14×10, 1.5px lines) before the label. A page with the site shell's Menu does not add a second, labelled trigger. Without JavaScript the list opens in place, so the trigger is a `<details>` summary with the secondary button classes and a chevron after the label. Only the chevron is local.
+- **Horizontal strip.** A row of 6 links or fewer; beyond that, use a drawer. It uses these rows and states unchanged: the current page takes the lifted fill, and a location keeps its pip. It scrolls sideways with 2px padding, so the current row's shadow stays whole, and a clipped edge fades over 24px, as [tabs](#tabs) do.
 - **Keyboard and screen reader.** Plain links in Tab order.
 - **Motion.** Fill, colour, and shadow change over `--duration-fast` with `--ease-out`.
-- **Forced colors.** Fills and shadows drop. Only the current page (`aria-current="page"`) takes a 2px `Highlight` border on its leading edge. The location pip keeps its shape with `forced-color-adjust: none` and a `Highlight` fill, so page and location still differ.
+- **Forced colors.** Fills and shadows drop. The current page (`aria-current="page"`), and a rail's current section, take a 2px `Highlight` border on the leading edge. The location pip keeps its shape with `forced-color-adjust: none` and a `Highlight` fill, so page and location still differ.
 - **List selection.** A selected row in a list or table (`aria-selected="true"`) takes the current-page recipe: `--color-nav-current` fill, `--shadow-nav-current`, medium weight, and its primary text in `--color-nav-current-text`, with no accent bar. Hover keeps that fill. Rows keep their own radius. Dividers between rows are straight 1px `--color-border-subtle` lines inset by the row's inline padding, drawn on the row, not as a shadow, and hidden next to a filled (hovered or selected) row. Forced colors: the fill and shadow drop, and the selected row takes a 2px `Highlight` border on its leading edge, as the current page does.
+
+## Section rail
+
+Layer: Core. ui: `UiSiteNav`.
+
+- **Use.** A long page or a small site whose readers jump between sections. Its rows follow the page order. Choose it by the [navigation levels](DESIGN.md#navigation).
+- **Anatomy.** A named `<aside>`, so the find field and the footer sit in a landmark, with `position: sticky; top: 0`, `height: 100dvh`, and a column flex layout with `--space-3` gaps. An optional [find field](#find-field) sits at the top. Below it, a named `<nav>` holds grouped [navigation list](#navigation-list) rows and scrolls on its own (`overflow-y: auto`, `overscroll-behavior: contain`). An optional footer for rail settings, such as the single-key shortcut switch, sits last, above a `--color-border-subtle` rule. The element that draws a divider never scrolls.
+- **States.** Rows take the navigation list states. The current section keeps `aria-current="location"` but takes the current-page look: `--color-nav-current` fill, `--shadow-nav-current`, and `--color-nav-current-text` in medium weight, with no pip. When the location changes, the rail scrolls its own list, never the page, to centre the current row if it is out of view. It leaves the list alone while the pointer is over the rail or focus is inside it.
+- **Tablet and phone.** At `max-width: 800px`, with JavaScript, the page header becomes one sticky row on `--color-bg`: the site name or a back link, then two icon-only secondary buttons at `--control-lg`, Find (a search icon) and Menu (a menu icon). Menu opens a [drawer](#drawer) titled "Menu" that holds, in order, the find field, the site's pages, the appearance control, and the rail's groups. Find opens the same drawer with the field focused. Both buttons set a negative `scroll-margin-top` equal to the page's scroll offset, so focusing one does not scroll the page. Without JavaScript nothing moves: the header keeps its links, and the rail stays in place above `main` with every row shown and the find field hidden.
+- **Keyboard and screen reader.** Both buttons have `aria-haspopup="dialog"` and an `aria-label` ("Find a component", "Menu"). Location changes are not announced. The current section follows the [location tracking rule](DESIGN.md#navigation).
+- **Motion.** The rail scrolls its list at once. Rows change as in the navigation list.
+- **Forced colors.** The current section's fill and shadow drop, and it takes a 2px `Highlight` border on its leading edge, as the current page does.
+
+## Find field
+
+Layer: Core. ui: none yet.
+
+- **Use.** Filter a long navigation list, such as a section rail, by name or purpose. It filters the list only, never the page, so deep links and the page order stay stable.
+- **Anatomy.** An `<input type="search">` in the [field](#text-input-and-textarea) recipe, with a leading 16px search icon in `--color-muted` (32px start padding) and a trailing [keyboard key](#keyboard-key) hint showing `/` (36px end padding). A visually hidden `role="status"` element, named in the field's `aria-describedby`, holds the match count.
+- **States.** Rest, focus-visible (field focus), and a query. The key hint hides while the field has focus or a value, when shortcuts are off, and under `(hover: none)`. With no matches, the list shows "No component matches <q>…</q>." in `--text-sm` `--color-muted`, and a text-button Clear.
+- **Matching.** Every word of the query must appear in a row's terms: its name, group, purpose, and aliases, held in `data-terms`. Rows that do not match hide, and so do groups with no visible rows. The count is announced after a 500ms pause ("3 matches", "No matches").
+- **Keyboard and screen reader.** `/` focuses the field and selects its text, under the [single-key shortcut](DESIGN.md#navigation) rules; the field carries `aria-keyshortcuts="/"` while shortcuts are on. Escape clears a value; the next Escape leaves the field, or closes the drawer. Enter goes to the first match and focuses the destination. ArrowDown moves focus to the first match.
+- **No JavaScript.** The field is `hidden` until the script runs.
+
+## Breadcrumbs
+
+Layer: Core. ui: none yet.
+
+- **Use.** Only at depth 3 or more, or for a page outside its site's shell. Do not repeat the page `h1` as the only crumb.
+- **Anatomy.** `<nav aria-label="Breadcrumb">` holding an `<ol>` in `--text-sm`. Separators are a `--color-muted` `/` drawn with `content: "/" / ""`, so they are not read. Ancestors are `--color-muted` links with no underline, at least `--control-sm` tall (`--control-lg` at tablet width), with `--radius-inline` corners. The current page is plain text with `aria-current="page"`, in `--color-text` and medium weight. On folio sites the trail is mono (identity).
+- **States.** Hover: `--color-text` and an underline. Focus-visible: the focus ring.
+- **Phone.** At `max-width: 640px` only the parent shows, as a back link: "‹ Parent".
+- **Forced colors.** No change: links and text take the system colours.
+
+## Pager
+
+Layer: Core. ui: none yet.
+
+- **Use.** Previous and next pages in a sequence, such as the design-language pages or skill pages within a group. It sits at the end of `main`. A page with a section rail has one pager, not one per section.
+- **Anatomy.** `<nav aria-label="…">` with two equal columns and a `--space-4` gap, below a `--color-border-subtle` rule with `--space-6` padding. Each link is a block row with `--space-3` `--space-4` padding, `--radius-field` corners, and a transparent 1px border: a `--text-xs` `--color-muted` direction with an arrow ("Previous", "Next"), then a medium `--color-text` title. Links take `rel="prev"` and `rel="next"`. Next sits in the end column, end-aligned, even when it is alone.
+- **States.** Hover: `--color-row-hover` fill. Focus-visible: the focus ring. There is no current state.
+- **Phone.** At `max-width: 640px`, one column in source order.
+- **Keyboard and screen reader.** The direction and the title are both inside the link, so it reads as one name, such as "Next Application example".
+- **Motion.** The fill changes over `--duration-fast` with `--ease-out`.
+
+## Tabs
+
+Layer: Core. ui: `UiTabs`.
+
+- **Use.** Panels about one object, when no URL changes. Never mix tabs that change the URL with tabs that switch panels in one set, and never give links `role="tab"`: a set of pages takes a [navigation strip](#navigation-list) instead.
+- **Anatomy.** A `role="tablist"` with no rule below it and a 12px gap below it. It scrolls sideways when needed, and a 24px mask fades each clipped edge. Scrolling clips on every side, so the list has 4px (`--space-1`) padding all round: it keeps the selected tab's shadow whole and its fill off the frame edge. Each tab is a borderless button at least `--control-md` tall (`--control-lg` on phones), with `--space-2` `--space-3` padding, `--radius-inline` corners, medium weight, and `--color-muted`. The selected tab's fill is a `::before` layer behind the label, inset 0, with the tab's corners; the list sets `isolation: isolate`, so the layer stays inside it.
+- **States.** Hover fills `--color-row-hover` and turns the text `--color-text`. The selected tab takes the [navigation row](#navigation-list)'s current-page recipe: `--color-nav-current` fill and `--shadow-nav-current`, with no underline. Its text is `--color-nav-current-text`: the first of `--color-accent`, `--color-text`, black, and white that reaches 4.5:1 over the tinted fill, both on the page and on a surface (composite a translucent fill over each first). Focus-visible is the focus ring, inset because the list scrolls.
+- **Motion.** Hover fades over `--duration-fast` with `--ease-out`. When the reader changes the tab, the fill glides from the old tab to the new one as the [segmented control](#segmented-control)'s thumb does: start the new fill's left and right edges where the old fill was, then animate each edge home with the `glide-left` and `glide-right` keyframes and CSS `ease`, the leading edge over 260ms and the trailing edge over 300ms. Labels cross-fade their colour over 260ms. An interrupted glide starts from the fill's current position. There is no glide on first render or under reduced motion, where the fill moves at once.
+- **Keyboard and screen reader.** Roving `tabindex`: arrow keys move between tabs, Home and End go to the ends, and focus selects the tab. Each tab has `aria-controls` and `aria-selected`; each panel has `role="tabpanel"`. Without JavaScript, show every panel under its own heading. Apply the tab roles and hide the headings and unselected panels only when the script enhances the markup.
+- **Forced colors.** The fill layer is removed (`content: none`), so the selected tab takes a 2px `Highlight` border, and its padding shrinks by 2px to keep its size.
+
+## Skip link
+
+Layer: Core. ui: the `fg-site-skip` class.
+
+- **Anatomy.** The first focusable element on the page, linking to `main` (`id="main"`) and named "Skip to content". It sits above the page until it takes focus, then shows at the top left as a floating layer: `--color-surface-raised`, a transparent 1px border, `--radius-field`, `--shadow-dialog`, `--space-2` `--space-3` padding, and the focus ring.
+- **Second link.** When a [section rail](#section-rail) comes before `main` and holds more than about 20 rows, a second link, "Skip to contents", follows the first and moves focus to the rail's list. It is hidden at tablet width, where the rail sits in the drawer.
+- **Keyboard and screen reader.** Activating a skip link moves focus to its target, which takes `tabindex="-1"` at that moment.
+
+## Keyboard key
+
+Layer: Core. ui: none yet.
+
+- **Use.** A key or shortcut in running text or shortcut docs, and the [find field](#find-field)'s hint. The hint is `aria-hidden`, because the field carries `aria-keyshortcuts`.
+- **Anatomy.** A `<kbd>`: `--font-mono` `--text-xs` medium in `--color-muted`, on a `--color-surface` fill with a 1px `--color-border` edge and `--radius-inline` corners, 20px tall, at least 20px wide, with 5px inline padding and no shadow.
+- **Forced colors.** The edge is `CanvasText`.
 
 ## Code block
 
@@ -283,8 +365,8 @@ Layer: Identity. ui: `UiCapture`.
 
 Layer: Identity. ui: `UiSiteHeader`, `UiSiteAppearancePicker`.
 
-- **Anatomy.** A static header at least 64px tall on `--color-bg` with a solid 1px `--color-text` rule below it. At the start is the project switcher: a `<details>` whose summary, a [quiet action](#quiet-action), shows the mono, semibold project name after a `~/` mark in `--color-project` (drawn by CSS, so it is not read), then a chevron. Its menu is a floating layer, with the dialog's tokens, listing the shared project registry in the order it defines, as navigation rows, with the current project marked `aria-current="page"`. At the end are the site links (`--color-muted`, at least 44px tall, `--color-text` on hover) and the appearance picker: an icon-only segmented control at `lg`.
-- **Phone.** With three or more links, the links take a second row.
+- **Anatomy.** A static header at least 64px tall on `--color-bg` with a solid 1px `--color-text` rule below it. At the start is the project switcher: a `<details>` whose summary, a [quiet action](#quiet-action), shows the mono, semibold project name after a `~/` mark in `--color-project` (drawn by CSS, so it is not read), then a chevron. Its menu is a floating layer, with the dialog's tokens, listing the shared project registry in the order it defines, as navigation rows, with the current project marked `aria-current="page"`. At the end are the site links and the appearance picker: an icon-only segmented control at `lg`. The site links are a [navigation strip](#navigation-list) of rows 44px tall (`--control-lg`). A link to a page inside the site takes `aria-current="page"` on that page, with the current-page recipe.
+- **Phone.** The first row holds the identity and the picker. With three or more links, the links take a second row. A long identity becomes a [breadcrumb](#breadcrumbs) back link.
 - **Keyboard and screen reader.** The summary is named "Project: <name>". Escape closes the menu and returns focus to the summary; moving focus out of it closes it. The chevron turns 180° while the menu is open, over `--duration-fast` with `--ease-out`.
 
 ## Page type and helpers
@@ -294,7 +376,6 @@ Layer: Identity. ui: `site.css` helpers.
 - **Headings.** Documentation, CLI tool, article, and product page titles (`--text-3xl`) use `--font-mono`; application titles use `--font-ui` at `--text-2xl` or smaller. On documentation, CLI tool, article, and product pages, a page-level section heading (h2) uses `--font-mono` at `--text-xl` (a product page may set it larger, up to `--text-3xl`), starts with a `## ` mark in `--color-accent`, drawn with `content: "## " / ""`, and has a `--color-border-subtle` rule above the section. Application and inline-visualization section headings use `--font-ui`, semibold, at `--text-xl` or smaller, with no mark and no rule; h3 and lower never take the mark. A product page or tool home may use a mono `--text-display` title (`--text-display-sm` on phones).
 - **Steps.** An ordered list in which each step hangs from a mono number in `--color-accent` on a ruled leading column, with an h3 title per step.
 - **Definitions.** A definition list of terms and short meanings: medium-weight terms and muted meanings in two columns, one column on phones. Flags such as `--all` do not break.
-- **Skip link.** The first focusable element, hidden above the page until it takes focus, then shown as a floating layer with the base focus ring.
 - **Facts.** A mono definition list of short labels and values, such as a repository path. Values wrap anywhere.
 - **Command list.** A table of commands (mono) and descriptions (muted), with a Copy [quiet action](#quiet-action) for each row. On phones each row becomes a two-column grid.
 - **Footer.** Mono, with an attribution link at the start and project links at the end.
