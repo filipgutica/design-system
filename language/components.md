@@ -148,7 +148,7 @@ Layer: Core. ui: `UiInput`. ui has no textarea; a textarea uses the same field r
 - **Anatomy.** A native `<input>` or `<textarea>`. Full width, line height 1.35. Input heights follow the control size, and horizontal padding is about 9px, 10px, or 11px.
 - **Tokens.** Fill `--color-field-bg` (`--color-surface-raised` in light, the sunk `--color-well` well in dark), text `--color-text`, placeholder `--color-muted` at full opacity, corners `--radius-field`, border 1px `--color-field-edge` (`--color-border-subtle`), shadow `--shadow-field` (none in light, `--shadow-sink` in dark).
 - **States.** Rest, focus-visible (the accent edge and inset line from [field focus](#rules-for-every-control)), disabled (the `--color-well` well, no shadow), invalid (`--color-error` border), and invalid while focused (`--color-error` border and a `--color-error` inset line). A textarea keeps the same padding at the top and bottom as at the sides, and resizes vertically only.
-- **Do.** Use a textarea for an answer that can run past one line, and `type="search"` for a field that filters or searches.
+- **Do.** A textarea for an answer longer than one line, and `type="search"` for a field that filters.
 - **Don't.** A label or an instruction that lives only in the placeholder. It disappears as the reader types.
 - **Keyboard and screen reader.** Each field has a visible `<label>`. A search field is the one exception: its leading magnifier and an accessible name that names the search (`aria-label`, or a visually hidden `<label>`) stand in for the visible label. A field inside a [field wrapper](#field-wrapper) gets its description and error ids from it.
 - **Motion.** None: the focus and invalid edges change at once, so a state shows as soon as it applies.
@@ -228,7 +228,7 @@ Layer: Core. ui: `UiBadge`.
 - **Don't.** A badge that repeats the title, or one on every row with the same value. Badge the exceptions.
 - **Keyboard and screen reader.** Static text; the label carries the meaning, never the colour alone.
 - **Motion.** None: a badge is static.
-- **Forced colors.** Fills drop and the transparent border draws as the system edge, so each badge reads as an outlined label. The tone dot is a fill and drops with it, so the label carries the status.
+- **Forced colors.** Fills drop and the transparent border draws as the system edge, so each badge reads as an outlined label. The tone dot drops with the fill, so the label carries the status; see [known gaps](decisions.md#known-gaps).
 
 ## Alert
 
@@ -241,7 +241,7 @@ Layer: Core. ui: `UiAlert`.
 - **Don't.** An alert for emphasis, a tip, or decoration. A status on one item is a badge.
 - **Keyboard and screen reader.** Static content. Use `role="status"` or `role="alert"` only for a message that appears while the reader works.
 - **Motion.** None: an alert shows at once, with no entrance animation.
-- **Forced colors.** Fills drop and the transparent border draws as the system edge. The icon keeps its status colour, as an SVG icon does in forced colors; the text carries the message.
+- **Forced colors.** Fills drop and the transparent border draws as the system edge. The icon keeps its status colour, and the text carries the message; see [known gaps](decisions.md#known-gaps).
 
 ## Surface and card
 
@@ -317,7 +317,7 @@ Layer: Core. ui: `UiSiteNav`.
 
 - **Anatomy.** A named `<aside>`, so the find field and the footer sit in a landmark, with `position: sticky; top: 0`, `height: 100dvh`, and a column flex layout with `--space-3` gaps. An optional [find field](#find-field) sits at the top. Below it, a named `<nav>` holds grouped [navigation list](#navigation-list) rows and scrolls on its own (`overflow-y: auto`, `overscroll-behavior: contain`). An optional footer for rail settings, such as the single-key shortcut switch, sits last, above a `--color-border-subtle` rule. The element that draws a divider never scrolls. The rail's rows follow the page order.
 - **States.** Rows take the navigation list states. The current section keeps `aria-current="location"` but takes the current-page look: `--color-nav-current` fill, `--shadow-nav-current`, and `--color-nav-current-text` in medium weight, with no pip. When the location changes, the rail scrolls its own list, never the page, to centre the current row if it is out of view. It leaves the list alone while the pointer is over the rail or focus is inside it.
-- **Do.** Use a rail on a long page, or a small site, whose readers jump between sections. Pick it by the navigation levels in DESIGN.md.
+- **Do.** Use a rail for a site of more than six pages, or a long page whose readers jump between sections. Six pages or fewer take a strip.
 - **Don't.** A rail beside a strip or a contents list that holds the same links. Each level has one list.
 - **Tablet and phone.** At `max-width: 800px`, with JavaScript, the page header becomes one sticky row on `--color-bg`: the site name or a back link, then two icon-only secondary buttons at `--control-lg`, Find (a search icon) and Menu (a menu icon). Menu opens a [drawer](#drawer) titled "Menu" that holds, in order, the find field, the site's pages, the appearance control, and the rail's groups. Find opens the same drawer with the field focused. Both buttons set a negative `scroll-margin-top` equal to the page's scroll offset, so focusing one does not scroll the page. Without JavaScript nothing moves: the header keeps its links, and the rail stays in place above `main` with every row shown and the find field hidden.
 - **Keyboard and screen reader.** Both buttons have `aria-haspopup="dialog"` and an `aria-label` ("Find a component", "Menu"). Location changes are not announced. The current section follows the [location tracking rule](DESIGN.md#navigation).
@@ -371,7 +371,7 @@ Layer: Core. ui: `UiTabs`.
 - **Anatomy.** A `role="tablist"` with no rule below it and a 12px gap below it. It scrolls sideways when needed, and a 24px mask fades each clipped edge. Scrolling clips on every side, so the list has 4px (`--space-1`) padding all round: it keeps the selected tab's shadow whole and its fill off the frame edge. Each tab is a borderless button at least `--control-md` tall (`--control-lg` on phones), with `--space-2` `--space-3` padding, `--radius-inline` corners, medium weight, and `--color-muted`. The selected tab's fill is a `::before` layer behind the label, inset 0, with the tab's corners; the list sets `isolation: isolate`, so the layer stays inside it.
 - **States.** Hover fills `--color-row-hover` and turns the text `--color-text`. The selected tab takes the [navigation row](#navigation-list)'s current-page recipe: `--color-nav-current` fill and `--shadow-nav-current`, with no underline. Its text is `--color-nav-current-text`: the first of `--color-accent`, `--color-text`, black, and white that reaches 4.5:1 over the tinted fill, both on the page and on a surface (composite a translucent fill over each first). Focus-visible is the focus ring, inset because the list scrolls.
 - **Do.** Use tabs for panels about one object, such as a monitor's Overview and History, when the URL does not change.
-- **Don't.** Links with `role="tab"`, or one set that mixes URL changes and panels. A set of pages is a navigation strip.
+- **Don't.** Links with `role="tab"`, or one set that mixes pages and panels. Pages take a navigation strip.
 - **Motion.** Hover fades over `--duration-fast` with `--ease-out`. When the reader changes the tab, the fill glides from the old tab to the new one as the [segmented control](#segmented-control)'s thumb does: start the new fill's left and right edges where the old fill was, then animate each edge home with the `glide-left` and `glide-right` keyframes and CSS `ease`, the leading edge over 260ms and the trailing edge over 300ms. Labels cross-fade their colour over 260ms. An interrupted glide starts from the fill's current position. There is no glide on first render or under reduced motion, where the fill moves at once.
 - **Keyboard and screen reader.** Roving `tabindex`: arrow keys move between tabs, Home and End go to the ends, and focus selects the tab. Each tab has `aria-controls` and `aria-selected`; each panel has `role="tabpanel"`. Without JavaScript, show every panel under its own heading. Apply the tab roles and hide the headings and unselected panels only when the script enhances the markup.
 - **Forced colors.** The fill layer is removed (`content: none`), so the selected tab takes a 2px `Highlight` border, and its padding shrinks by 2px to keep its size.
@@ -382,8 +382,8 @@ Layer: Core. ui: the `fg-site-skip` class.
 
 - **Anatomy.** The first focusable element on the page, linking to `main` (`id="main"`) and named "Skip to content". It sits above the page until it takes focus, then shows at the top left as a floating layer: `--color-surface-raised`, a transparent 1px border, `--radius-field`, `--shadow-dialog`, `--space-2` `--space-3` padding, and the focus ring.
 - **States.** Hidden above the page at rest, and shown at the top left while it has focus.
-- **Do.** Add "Skip to content" to every page whose header or rail comes before `main`, and check that the first Tab shows it.
-- **Don't.** A skip link hidden with `display: none` or `visibility: hidden`. It must show when it takes focus.
+- **Do.** A "Skip to content" link on every page with a header or rail before `main`; the first Tab shows it.
+- **Don't.** Hiding it with `display: none`, which also takes it out of the Tab order.
 - **Second link.** When a [section rail](#section-rail) comes before `main` and holds more than about 20 rows, a second link, "Skip to contents", follows the first and moves focus to the rail's list. It is hidden at tablet width, where the rail sits in the drawer.
 - **Keyboard and screen reader.** Activating a skip link moves focus to its target, which takes `tabindex="-1"` at that moment.
 - **Motion.** None: it appears at once when it takes focus.
@@ -395,8 +395,8 @@ Layer: Core. ui: none yet.
 
 - **Anatomy.** A `<kbd>`: `--font-mono` `--text-xs` medium in `--color-muted`, on a `--color-surface` fill with a 1px `--color-border` edge and `--radius-inline` corners, 20px tall, at least 20px wide, with 5px inline padding and no shadow.
 - **States.** None: a key is static text.
-- **Do.** Use it for a key or shortcut in running text, shortcut docs, and the find field's hint, with one key per `<kbd>`.
-- **Don't.** A key style for code, commands, or button names. Code takes `<code>`, and a button's name is plain text.
+- **Do.** A key or shortcut in running text or shortcut docs, one key per `<kbd>`.
+- **Don't.** A key style for code or button names. Code takes `<code>`; a button's name is plain text.
 - **Keyboard and screen reader.** A `<kbd>` reads as its text. The [find field](#find-field)'s hint is `aria-hidden`, because the field carries `aria-keyshortcuts`.
 - **Motion.** None: a key is static.
 - **Forced colors.** The edge is `CanvasText`.
@@ -437,7 +437,7 @@ Layer: Identity. ui: `UiCodeBlock` with a shell language or the compact variant.
 - **Anatomy.** A code block for a shell command, drawn as a dark plate in both themes: `--color-command-bg` with a `--color-command-border` edge (transparent in light). Text, syntax, and the caption all use `--color-terminal-text` or `--color-terminal-caption-text`. Each line starts with a `$ ` prompt in `--color-project-dark`, drawn with `content: "$ " / ""` and `user-select: none`, so copied and spoken text omit it. The plate sets `--color-focus: var(--color-project-dark)`, the dark-theme accent, so every ring on it, Copy's included, reads at 3:1 or more on the dark plate in both page themes.
 - **States.** As for the code block.
 - **Do.** Use it for a shell command the reader runs, one command per line.
-- **Don't.** A `$` typed into the command text. CSS draws the prompt, so a typed one ends up in the copied command.
+- **Don't.** A `$` typed into the command. CSS draws the prompt; a typed one is copied with the command.
 - **Keyboard and screen reader.** As for the code block.
 - **Motion.** None: as for the code block.
 - **Forced colors.** The dark plate drops to the system background, with system text and edge, and the prompt takes the system text colour.
@@ -482,7 +482,7 @@ Layer: Identity. ui: `site.css` helpers.
 - **Footer.** Mono, with an attribution link at the start and project links at the end.
 - **States.** None: the helpers are static type. The command list's Copy takes the quiet action states.
 - **Do.** Use steps for a sequence the reader follows in order, definitions for terms with short meanings, and facts for short labels and values.
-- **Don't.** The `##` mark on an application screen or on h3 and lower. It repeats down the page and competes with the data.
+- **Don't.** The `##` mark on an application screen, or on h3 and lower.
 - **Keyboard and screen reader.** Headings keep their outline levels, and the `## ` mark has empty alternative text, so it is not read. Steps are an ordered list; definitions and facts are definition lists.
 - **Motion.** None: the helpers are static.
 - **Forced colors.** No change: text, rules, and marks take the system colours.

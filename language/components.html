@@ -1046,7 +1046,7 @@
   <section class="component" id="text-input-and-textarea" data-layer="Core" data-states="focus disabled invalid" aria-labelledby="input-title">
     <header><h3 id="input-title">Text input and textarea</h3><span class="badge">Core</span><a href="components.md#text-input-and-textarea">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="text-input-and-textarea" aria-label="Copy link to Text input and textarea" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Type a short value or a longer note.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use a textarea for an answer that can run past one line, and <code>type="search"</code> for a field that filters or searches.</dd><dt>Don’t</dt><dd>A label or an instruction that lives only in the placeholder. It disappears as the reader types.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>A textarea for an answer longer than one line, and <code>type="search"</code> for a field that filters.</dd><dt>Don’t</dt><dd>A label or an instruction that lives only in the placeholder. It disappears as the reader types.</dd></dl>
     <div class="row"><h4>Input</h4><div class="states">
       <div class="state"><div class="field"><label class="field-label" for="in-rest">Service</label><input class="input" id="in-rest" placeholder="checkout-api"></div><span class="caption">Rest</span></div>
       <div class="state" inert><div class="field"><label class="field-label" for="in-focus">Service</label><input class="input is-focus" id="in-focus" value="checkout-api"></div><span class="caption">Focus visible</span></div>
@@ -1245,7 +1245,7 @@
   <section class="component" id="section-rail" data-layer="Core" aria-labelledby="section-rail-title">
     <header><h3 id="section-rail-title">Section rail</h3><span class="badge">Core</span><a href="components.md#section-rail">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="section-rail" aria-label="Copy link to Section rail" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A sticky list of sections that moves into a drawer on phones.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use a rail on a long page, or a small site, whose readers jump between sections. Pick it by the navigation levels in DESIGN.md.</dd><dt>Don’t</dt><dd>A rail beside a strip or a contents list that holds the same links. Each level has one list.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Use a rail for a site of more than six pages, or a long page whose readers jump between sections. Six pages or fewer take a strip.</dd><dt>Don’t</dt><dd>A rail beside a strip or a contents list that holds the same links. Each level has one list.</dd></dl>
     <div class="row"><h4>Desktop rail</h4><div class="states">
       <div class="state"><div class="rail-specimen"><div class="find"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="input" type="search" aria-label="Find a component, specimen" placeholder="Find a component"><kbd class="key" aria-hidden="true">/</kbd></div>
         <nav class="navlist" aria-label="Rail specimen"><span class="group-label">Inputs</span><a href="#section-rail">Select</a><a href="#section-rail" aria-current="location">Slider</a><a href="#section-rail">Field wrapper</a></nav></div><span class="caption">Live; Slider is the current section</span></div>
@@ -1292,7 +1292,7 @@
   <section class="component" id="tabs" data-layer="Core" data-states="hover selected focus" aria-labelledby="tabs-title">
     <header><h3 id="tabs-title">Tabs</h3><span class="badge">Core</span><a href="components.md#tabs">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="tabs" aria-label="Copy link to Tabs" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Switch panels about one object, without leaving the page.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use tabs for panels about one object, such as a monitor’s Overview and History, when the URL does not change.</dd><dt>Don’t</dt><dd>Links with <code>role="tab"</code>, or one set that mixes URL changes and panels. A set of pages is a navigation strip.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Use tabs for panels about one object, such as a monitor’s Overview and History, when the URL does not change.</dd><dt>Don’t</dt><dd>Links with <code>role="tab"</code>, or one set that mixes pages and panels. Pages take a navigation strip.</dd></dl>
     <div class="row"><h4>Live</h4><div class="states">
       <div class="state wide" data-tabs data-label="Monitor">
         <!-- Without JavaScript every panel shows under its heading; the script builds the tab list. -->
@@ -1311,7 +1311,7 @@
   <section class="component" id="skip-link" data-layer="Core" aria-labelledby="skip-link-title">
     <header><h3 id="skip-link-title">Skip link</h3><span class="badge">Core</span><a href="components.md#skip-link">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="skip-link" aria-label="Copy link to Skip link" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Jump past the header to the content.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Add “Skip to content” to every page whose header or rail comes before <code>main</code>, and check that the first Tab shows it.</dd><dt>Don’t</dt><dd>A skip link hidden with <code>display: none</code> or <code>visibility: hidden</code>. It must show when it takes focus.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>A “Skip to content” link on every page with a header or rail before <code>main</code>; the first Tab shows it.</dd><dt>Don’t</dt><dd>Hiding it with <code>display: none</code>, which also takes it out of the Tab order.</dd></dl>
     <div class="row"><h4>Focused</h4><div class="states">
       <div class="state" inert><a class="skip is-focus" href="#main">Skip to content</a><span class="caption">Focus visible; hidden above the page until focused</span></div>
     </div></div>
@@ -1320,7 +1320,7 @@
   <section class="component" id="keyboard-key" data-layer="Core" aria-labelledby="keyboard-key-title">
     <header><h3 id="keyboard-key-title">Keyboard key</h3><span class="badge">Core</span><a href="components.md#keyboard-key">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="keyboard-key" aria-label="Copy link to Keyboard key" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Show a key or shortcut in text.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use it for a key or shortcut in running text, shortcut docs, and the find field’s hint, with one key per <code>&lt;kbd&gt;</code>.</dd><dt>Don’t</dt><dd>A key style for code, commands, or button names. Code takes <code>&lt;code&gt;</code>, and a button’s name is plain text.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>A key or shortcut in running text or shortcut docs, one key per <code>&lt;kbd&gt;</code>.</dd><dt>Don’t</dt><dd>A key style for code or button names. Code takes <code>&lt;code&gt;</code>; a button’s name is plain text.</dd></dl>
     <div class="row"><h4>Keys</h4><div class="states">
       <div class="state"><p class="note">Press <kbd class="key">/</kbd> to find, <kbd class="key">Esc</kbd> to clear, and <kbd class="key">Enter</kbd> to go to the first match.</p><span class="caption">Rest, in running text</span></div>
     </div></div>
@@ -1353,7 +1353,7 @@
   <section class="component" id="command-plate" data-layer="Identity" aria-labelledby="cmd-title">
     <header><h3 id="cmd-title">Command plate</h3><span class="badge">Identity</span><a href="components.md#command-plate">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="command-plate" aria-label="Copy link to Command plate" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A shell command on a hue-tinted plate.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use it for a shell command the reader runs, one command per line.</dd><dt>Don’t</dt><dd>A <code>$</code> typed into the command text. CSS draws the prompt, so a typed one ends up in the copied command.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Use it for a shell command the reader runs, one command per line.</dd><dt>Don’t</dt><dd>A <code>$</code> typed into the command. CSS draws the prompt; a typed one is copied with the command.</dd></dl>
     <div class="row"><h4>Commands</h4><div class="states">
       <div class="state wide"><div class="code command compact"><pre tabindex="0" role="region" aria-label="Install command"><code id="cmd-install"><span class="line"><span>brew install filipgutica/tap/filip-stack</span></span></code></pre><button class="quiet-action copy" type="button" data-copy="cmd-install" aria-label="Copy install command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, live; the <code>$</code> is drawn by CSS</span></div>
       <div class="state wide"><div class="code command"><div class="code-head"><b>Set up</b><button class="quiet-action copy" type="button" data-copy="cmd-setup"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="Set up commands"><code id="cmd-setup"><span class="line"><span>pnpm install --frozen-lockfile</span></span><span class="line"><span>pnpm check</span></span></code></pre></div><span class="caption">With a header, two lines</span></div>
@@ -1394,7 +1394,7 @@
   <section class="component" id="page-type-and-helpers" data-layer="Identity" aria-labelledby="page-type-title">
     <header><h3 id="page-type-title">Page type and helpers</h3><span class="badge">Identity</span><a href="components.md#page-type-and-helpers">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="page-type-and-helpers" aria-label="Copy link to Page type and helpers" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Mono headings, steps, definitions, facts, and the footer.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use steps for a sequence the reader follows in order, definitions for terms with short meanings, and facts for short labels and values.</dd><dt>Don’t</dt><dd>The <code>##</code> mark on an application screen or on h3 and lower. It repeats down the page and competes with the data.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Use steps for a sequence the reader follows in order, definitions for terms with short meanings, and facts for short labels and values.</dd><dt>Don’t</dt><dd>The <code>##</code> mark on an application screen, or on h3 and lower.</dd></dl>
     <div class="row"><h4>Headings</h4><div class="states">
       <div class="state wide"><p class="folio-display">~/annoterm</p><span class="caption">Display title, mono</span></div>
       <div class="state wide"><p class="folio-h2">Install</p><span class="caption">Section heading with its <code>##</code> mark</span></div>
