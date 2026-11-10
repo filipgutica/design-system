@@ -1782,20 +1782,21 @@
     mark((jump?.target ?? current)?.a);
   };
   const schedule = () => { frame ??= requestAnimationFrame(update); };
+  // Where a jump to the target lands: its top at the inset, clamped to the page's scroll range.
+  const landingOf = (target) => Math.min(Math.max(scrollY + target.el.getBoundingClientRect().top - insetOf(), 0), Math.max(0, root.scrollHeight - innerHeight));
   const jumpTo = (id) => {
     jump = undefined;
     const target = tracked.find((t) => t.el.id === id);
     if (target) {
-      const range = Math.max(0, root.scrollHeight - innerHeight);
-      const landing = Math.min(Math.max(scrollY + target.el.getBoundingClientRect().top - insetOf(), 0), range);
+      const landing = landingOf(target);
       jump = { target, landing, closest: Math.abs(scrollY - landing) };
     }
     schedule();
   };
-  // A layout change can move the target. A pending jump whose target still sits at the inset measures its
-  // landing again; one whose target moved away ends, so tracking follows the page.
+  // A layout change can move the target. A pending jump still at its target's landing, including a landing
+  // the page bottom clamped, measures it again; one whose target moved away ends, so tracking follows the page.
   const rebase = () => {
-    if (jump && Math.abs(jump.target.el.getBoundingClientRect().top - insetOf()) <= 2) jumpTo(jump.target.el.id);
+    if (jump && Math.abs(scrollY - landingOf(jump.target)) <= 2) jumpTo(jump.target.el.id);
     else { jump = undefined; schedule(); }
   };
   addEventListener('scroll', schedule, { passive: true });

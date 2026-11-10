@@ -152,6 +152,16 @@ test.describe('desktop', () => {
     await expect.poll(where).toEqual(desktop)
     await expect(page.locator('#nav-drawer')).toBeHidden()
   })
+
+  test('a resize keeps a jump whose landing the page bottom clamped', async ({ page }) => {
+    // The page cannot scroll this target up to the inset, so the jump lands at the bottom and must still hold.
+    await page.setViewportSize({ width: 1280, height: 2100 })
+    await page.goto(`${url}#page-type-and-helpers`)
+    await expect(current(page)).toHaveText('Page type and helpers')
+    await page.setViewportSize({ width: 1250, height: 2100 })
+    await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))))
+    await expect(current(page)).toHaveText('Page type and helpers')
+  })
 })
 
 test.describe('reduced motion', () => {
