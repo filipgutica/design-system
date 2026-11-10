@@ -116,7 +116,9 @@ const engineShapes = {
 }
 const engineShapeDrift = (html) => {
   const corners = perSelector(cssRules(html)).flatMap(({ context, selector, body }) => {
-    const pseudo = Object.keys(engineShapes).find((name) => selector.includes(name))
+    // The rule's target is its last pseudo-element; a trailing state such as :hover still targets it.
+    const target = [...selector.matchAll(/::[\w-]+(?:\([^)]*\))?/g)].at(-1)?.[0]
+    const pseudo = Object.keys(engineShapes).find((name) => name === target)
     return pseudo ? body.split(';').map((declaration) => declaration.trim().match(/^(border(?:-[\w-]+)?-radius)\s*:\s*(.+)$/)).filter(Boolean)
       .map(([, property, value]) => ({ pseudo, ok: property === 'border-radius' && value.replace(/\s*!important$/, '') === engineShapes[pseudo], line: `${`${context} ${selector}`.trim()} { ${property}: ${value} }` })) : []
   })
@@ -127,7 +129,8 @@ test('the engine shape guard catches a slider track or picker off its role, in a
   const html = read('components.html')
   assert.deepEqual(engineShapeDrift(`${html}<style>@media (prefers-color-scheme: dark) { .range::-webkit-slider-runnable-track{border-radius:0} }
     .select::picker(select) { border-top-left-radius: var(--radius-panel) } .select::picker(select):popover-open { border-radius: var(--radius-field) }
-    .range::-webkit-slider-thumb:hover { border-radius: 0 } .range::-moz-range-track { border-radius: var(--radius-pill) !important }</style>`), [
+    .range::-webkit-slider-thumb:hover { border-radius: 0 } .range::-moz-range-track { border-radius: var(--radius-pill) !important }
+    .select::picker(select)::backdrop { border-radius: 0 } .select::picker(select)::-webkit-scrollbar-thumb { border-radius: var(--radius-pill) }</style>`), [
     '@media (prefers-color-scheme: dark) .range::-webkit-slider-runnable-track { border-radius: 0 }',
     '.select::picker(select) { border-top-left-radius: var(--radius-panel) }',
     '.select::picker(select):popover-open { border-radius: var(--radius-field) }',
@@ -521,10 +524,28 @@ const systemColours = `Canvas CanvasText LinkText VisitedText ActiveText ButtonF
 const word = (names) => new RegExp(`(?<![\\w-])(?:${names.join('|')})(?![\\w-])`, 'i')
 const rawColourPatterns = [/#[\da-f]{3,8}(?![\w-])/i, /(?<![\w-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i, word(namedColours)]
 // A rule is in forced colors when one of its @media queries needs forced-colors: active in every comma
-// branch. A query with or or not gets no exemption, since either can admit a branch without it.
-const forcedColorsActive = /\(\s*forced-colors\s*:\s*active\s*\)/
-const inForcedColors = (context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && !/\b(?:or|not)\b/.test(rule)
-  && selectors(rule.slice('@media'.length)).every((branch) => forcedColorsActive.test(branch)))
+// branch: the feature is a top-level and conjunct, with no top-level or or not. Groups nested inside
+// other conjuncts may use or and not.
+const forcedColorsActive = /^\(\s*forced-colors\s*:\s*active\s*\)$/
+const topLevelParts = (branch) => {
+  const parts = []
+  let depth = 0
+  let part = ''
+  for (const char of branch.trim()) {
+    if (char === '(') depth += 1
+    if (char === ')') depth -= 1
+    if (depth === 0 && /\s/.test(char)) {
+      if (part) parts.push(part)
+      part = ''
+    } else part += char
+  }
+  return part ? [...parts, part] : parts
+}
+const forcedBranch = (branch) => {
+  const parts = topLevelParts(branch)
+  return !parts.some((part) => /^(?:or|not)$/i.test(part)) && parts.some((part) => forcedColorsActive.test(part))
+}
+const inForcedColors = (context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && selectors(rule.slice('@media'.length)).every(forcedBranch))
 const isRawColour = (value, forced = false) => rawColourPatterns.some((pattern) => pattern.test(value)) || (!forced && word(systemColours).test(value))
 // SVG colour attributes in markup, outside scripts and style blocks; currentColor, none, and url() refs pass.
 const svgColourAttributes = (file, html) => [...html.replace(/<(script|style)\b[\s\S]*?<\/\1>|<!--[\s\S]*?-->/g, '')
@@ -544,7 +565,9 @@ test('the raw-colour guard catches hex, colour functions, named colours, SVG col
     @media (forced-colors: active) { .k { outline-color: Highlight } } @media (forced-colors: none) { .m { color: CanvasText } }
     @media not (forced-colors: active) { .n { color: CanvasText } } @media (forced-colors: active), (min-width: 801px) { .o { color: CanvasText } }
     @media (forced-colors: active) and (prefers-color-scheme: dark), (forced-colors: active) { .q { color: CanvasText } }
-    @media ((forced-colors: active) or (min-width: 801px)) { .r { color: CanvasText } }</style><p style="color: navy"></p>
+    @media ((forced-colors: active) or (min-width: 801px)) { .r { color: CanvasText } }
+    @media (forced-colors: active) and (not (prefers-color-scheme: dark)) { .s { color: CanvasText } }
+    @media (forced-colors: active) and ((min-width: 801px) or (prefers-color-scheme: dark)) { .t { color: CanvasText } }</style><p style="color: navy"></p>
     <svg><path stroke="#ff0000" fill="none"/><path fill='currentColor' stroke="url(#g)"/><stop stop-color="white"/><path fill = "#ff0000"/><path fill=red /></svg>`
   assert.deepEqual(rawColours('planted.html', planted).map((line) => line.split(' { ')[0]), [
     'planted.html: .a', 'planted.html: .b', 'planted.html: .c', 'planted.html: .d', 'planted.html: .e', 'planted.html: .f',
