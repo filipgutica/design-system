@@ -526,7 +526,8 @@
   .projects[open] .icon { transform: rotate(180deg); }
   .projects .navlist { position: absolute; z-index: 3; top: 100%; left: 0; min-width: 224px; margin-top: var(--space-1); padding: var(--space-1); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); box-shadow: var(--shadow-dialog); }
   .projects.is-open .navlist { position: static; }
-  .projects .navlist a { font-family: var(--font-mono); }
+  /* Rows sit --space-1 inside the menu, so they are concentric with it, as select picker rows are. */
+  .projects .navlist a { border-radius: calc(var(--radius-panel) - var(--space-1)); font-family: var(--font-mono); }
   .site-end { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-6); margin-left: auto; }
   /* The site links are a navigation strip at the header's 44px. */
   .site-links a { min-height: var(--control-lg); }

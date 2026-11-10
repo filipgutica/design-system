@@ -430,14 +430,14 @@ const below = (measured: { name: string; ratio: number; unmeasured?: string }[],
 const shapeRoles: Record<string, string[]> = {
   '--radius-control': ['.btn', '.quiet-action', '.segmented', '.segmented button', '.segmented button::before'],
   '--radius-pill': ['.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.progress', '.score .pips i', '.badge', '.navlist a[aria-current="location"]::before'],
-  '--radius-inline': ['.check input:not([type="radio"])', '.tab', '.navlist a', '.group-toggle', '.crumbs a', '.key', '.rows [role="option"]'],
+  '--radius-inline': ['.check input:not([type="radio"])', '.tab', '.navlist a:not(.projects .navlist a)', '.group-toggle', '.crumbs a', '.key', '.rows [role="option"]'],
   // The skip link is a floating layer, so the rule gives it --radius-panel. It keeps --radius-field
   // until the owner picks (decisions.md, Open questions).
   '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.skip'],
   '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist'],
 }
 // Rows that sit --space-1 inside a panel are concentric with it.
-const concentricRows = ['.select option', '.picker li']
+const concentricRows = ['.select option', '.picker li', '.projects .navlist a']
 const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
   const corners = (style: CSSStyleDeclaration) => [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].join(' ')
   const probe = document.body.appendChild(document.createElement('i'))
