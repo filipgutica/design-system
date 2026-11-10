@@ -63,7 +63,7 @@ export const tokenTerms = ({ name, group, values, formerly }) => [
   valueTerms(name, values.light[name]), valueTerms(name, values.dark[name]),
 ].join(' ').toLowerCase().replace(/\s+/g, ' ').trim()
 
-/** Formerly: the rename table (1.x name → 2.0 name) inverted, without leading dashes on the key. */
+/** Formerly: the rename table (name before the 2.0.0 rename → name after) inverted, without leading dashes on the key. */
 export const formerNames = (renames) => new Map([...renames].map(([from, to]) => [to.slice(2), from]))
 
 export const foundationsPage = ({ source, values, renames, version, packageName }) => {
@@ -96,7 +96,7 @@ export const foundationsPage = ({ source, values, renames, version, packageName 
 
   const main = `  <section class="intro" aria-labelledby="title">
     <h1 id="title">Foundations</h1>
-    <p>Every token in <a href="tokens.css"><code>tokens.css</code></a>: its light and dark value, its role, and its name before 2.0. The ${total} tokens come from <code>tokens.json</code> in <code>${esc(packageName)}</code> ${esc(version)}, so this page always matches the package.</p>
+    <p>Every token in <a href="tokens.css"><code>tokens.css</code></a>: its light and dark value, its role, and its name before the 2.0.0 token rename. The ${total} tokens come from <code>tokens.json</code> in <code>${esc(packageName)}</code> ${esc(version)}, so this page always matches the package.</p>
     <p>A project sets only the identity inputs. Every other token is core and stays as it is.</p>
   </section>
 

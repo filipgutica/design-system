@@ -24,7 +24,7 @@ export const deriveRenameTable = (tokensCss) => {
 
 export const renderRenameTable = (table) => [
   TABLE_START,
-  '| 1.x name | 2.0 name |',
+  '| Name before the 2.0.0 rename | Name after |',
   '| --- | --- |',
   ...[...table].map(([from, to]) => `| \`${from}\` | \`${to}\` |`),
   TABLE_END,

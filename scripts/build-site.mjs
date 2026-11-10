@@ -7,7 +7,7 @@
 // - index.json and llms.txt index the components for agents and tools.
 // - The language pages and files the site links to, and the fonts, are copied as they ship.
 //
-// The version is the latest v* release tag, since package.json keeps 0.0.0-development and
+// The version is the latest ds-v* release tag, since package.json keeps 0.0.0-development and
 // semantic-release tags each release.
 import { execFileSync } from 'node:child_process'
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -25,10 +25,13 @@ const readJson = (path) => JSON.parse(read(path))
 /** The language files and folders the site serves as they ship, beside the generated pages. */
 export const COPIED = ['tokens.css', 'reference.html', 'docs.html', 'product.html', 'DESIGN.md', 'components.md', 'decisions.md', 'visualizations.md', 'visualizations', 'implementations.json']
 
-/** The latest release, from the v* tags. A checkout without tags cannot know it, so the build stops. */
-export const releaseVersion = () => {
-  const tag = execFileSync('git', ['describe', '--tags', '--abbrev=0', '--match', 'v[0-9]*'], { cwd: root, encoding: 'utf8' }).trim()
-  return tag.slice(1)
+/**
+ * The latest release, from the ds-v* tags; the v* tags are the earlier version series. A checkout
+ * without tags cannot know it, so the build stops.
+ */
+export const releaseVersion = (cwd = root) => {
+  const tag = execFileSync('git', ['describe', '--tags', '--abbrev=0', '--match', 'ds-v[0-9]*'], { cwd, encoding: 'utf8' }).trim()
+  return tag.slice('ds-v'.length)
 }
 
 /** Every generated site file, as [path under site/, content]. */
