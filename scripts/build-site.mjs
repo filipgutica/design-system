@@ -22,8 +22,8 @@ const root = fileURLToPath(new URL('..', import.meta.url))
 const read = (path) => readFileSync(`${root}${path}`, 'utf8')
 const readJson = (path) => JSON.parse(read(path))
 
-/** The language files the site serves as they ship, beside the generated pages. */
-export const COPIED = ['tokens.css', 'reference.html', 'docs.html', 'product.html', 'DESIGN.md', 'components.md', 'decisions.md', 'implementations.json']
+/** The language files and folders the site serves as they ship, beside the generated pages. */
+export const COPIED = ['tokens.css', 'reference.html', 'docs.html', 'product.html', 'DESIGN.md', 'components.md', 'decisions.md', 'visualizations.md', 'visualizations', 'implementations.json']
 
 /** The latest release, from the v* tags. A checkout without tags cannot know it, so the build stops. */
 export const releaseVersion = () => {
@@ -64,10 +64,10 @@ const run = () => {
   const files = siteFiles({ version: releaseVersion() })
   rmSync(out, { recursive: true, force: true })
   mkdirSync(out, { recursive: true })
-  for (const name of COPIED) cpSync(`${root}language/${name}`, `${out}${name}`)
+  for (const name of COPIED) cpSync(`${root}language/${name}`, `${out}${name}`, { recursive: true })
   cpSync(`${root}fonts`, `${out}fonts`, { recursive: true })
   for (const [path, content] of files) writeFileSync(`${out}${path}`, content)
-  console.log(`site/: ${files.map(([path]) => path).join(', ')}, and ${COPIED.length} language files and fonts/`)
+  console.log(`site/: ${files.map(([path]) => path).join(', ')}, ${COPIED.join(', ')}, and fonts/`)
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) run()

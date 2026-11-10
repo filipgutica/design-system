@@ -24,6 +24,8 @@ jobs:
   build:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    outputs:
+      current: ${{ steps.current.outputs.current }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -41,10 +43,23 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
+      # A re-run of an older Release must not deploy its commit over a newer site, so a Release run
+      # deploys only while its commit is still the head of main. A manual run deploys what it built.
+      - id: current
+        env:
+          EVENT: ${{ github.event_name }}
+          BUILT: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$EVENT" != workflow_run ] || [ "$(git ls-remote origin refs/heads/main | cut -f1)" = "$BUILT" ]; then
+            echo current=true >> "$GITHUB_OUTPUT"
+          else
+            echo "Skipping the deploy: $BUILT is no longer the head of main."
+            echo current=false >> "$GITHUB_OUTPUT"
+          fi
 
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && needs.build.outputs.current == 'true'
     runs-on: ubuntu-latest
     permissions:
       pages: write

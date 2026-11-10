@@ -16,11 +16,11 @@ export const SITE_URL = 'https://filipgutica.github.io/design-system/'
 export const esc = (text) => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
 /**
- * Page CSS for a table.stack: at phone width each row becomes a record. Each cell holds one wrapper
- * element, so its label and its content are the cell's only two grid items.
+ * Page CSS for a table.stack: at `maxWidth` and below each row becomes a record. Each cell holds one
+ * wrapper element, so its label and its content are the cell's only two grid items.
  */
-export const STACKED_TABLES_CSS = `
-  @media (max-width: 640px) {
+export const stackedTablesCss = (maxWidth) => `
+  @media (max-width: ${maxWidth}) {
     table.stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
     table.stack, table.stack tbody, table.stack tr, table.stack th, table.stack td { display: block; white-space: normal; }
     table.stack tr { padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border-subtle); }
@@ -38,6 +38,21 @@ export const swap = (html, from, to) => {
   const count = html.split(from).length - 1
   if (count !== 1) throw new Error(`components.html: expected one ${JSON.stringify(from.slice(0, 60))}, found ${count}`)
   return html.replace(from, () => to)
+}
+
+/**
+ * The offsets of the text from `start` to the end of `end`, where each occurs exactly once and `end`
+ * comes after `start`, so a changed template fails the build instead of splicing in the wrong place.
+ */
+export const spanOnce = (html, start, end) => {
+  for (const marker of [start, end]) {
+    const count = html.split(marker).length - 1
+    if (count !== 1) throw new Error(`components.html: expected one ${JSON.stringify(marker)}, found ${count}`)
+  }
+  const from = html.indexOf(start)
+  const to = html.indexOf(end) + end.length
+  if (to - end.length < from + start.length) throw new Error(`components.html: ${JSON.stringify(end)} comes before ${JSON.stringify(start)}`)
+  return [from, to]
 }
 
 /** The text from the first `start` to the end of the first `end` after it. */
@@ -112,10 +127,10 @@ export const sitePage = ({ template, current, title, rail, main, css = '', js = 
     html = swap(html, '<p>No component matches <q></q>.</p>', `<p>No ${esc(rail.noun.replace(/^an? /, ''))} matches <q></q>.</p>`)
   }
   if (main) {
-    const pagerEnd = html.indexOf('</nav>', html.indexOf('<nav class="pager" aria-label="Design system pages">')) + '</nav>'.length
-    const mainStart = html.indexOf('<main id="main">') + '<main id="main">'.length
-    // The shared script announces copies in #copy-status, which the catalogue keeps in its code block section.
-    html = `${html.slice(0, mainStart)}\n${main}\n  <p class="sr-only" role="status" id="copy-status"></p>\n\n  ${pager(current)}${html.slice(pagerEnd)}`
+    // The whole of <main>, which ends with the pager. The shared script announces copies in #copy-status,
+    // which the catalogue keeps in its code block section.
+    const [from, to] = spanOnce(html, '<main id="main">', '</nav>\n</main>')
+    html = `${html.slice(0, from)}<main id="main">\n${main}\n  <p class="sr-only" role="status" id="copy-status"></p>\n\n  ${pager(current)}\n</main>${html.slice(to)}`
     // The catalogue's live dialog and drawer specimens belong to its own <main>.
     html = swap(html, between(html, '<dialog class="dialog" id="live-dialog"', '</dialog>\n<dialog class="drawer" id="nav-drawer"'), '<dialog class="drawer" id="nav-drawer"')
   }

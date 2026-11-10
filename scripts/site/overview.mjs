@@ -1,6 +1,6 @@
 // Overview: what the design system is, and the install path for each stack. The version and the
 // exports table come from the build (the release tag and package.json), not from page text.
-import { STACKED_TABLES_CSS, esc } from './shell.mjs'
+import { esc, stackedTablesCss } from './shell.mjs'
 
 // A command plate (one shell line) and a source block with a header and Copy, in the catalogue's markup.
 const command = ({ id, label, line }) => `<div class="code command compact"><pre tabindex="0" role="region" aria-label="${esc(label)}"><code id="${id}"><span class="line"><span>${esc(line)}</span></span></code></pre><button class="quiet-action copy" type="button" data-copy="${id}" aria-label="Copy ${esc(label.toLowerCase())}"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div>`
@@ -158,4 +158,4 @@ const OVERVIEW_CSS = `
     .defs { grid-template-columns: minmax(0, 1fr); gap: 0; }
     .defs dd { margin-bottom: var(--space-3); }
   }
-${STACKED_TABLES_CSS}`
+${stackedTablesCss('640px')}`

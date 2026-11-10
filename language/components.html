@@ -1674,22 +1674,28 @@
 
   // Find filters the rail only, never the page, so deep links and the page order stay stable. Every word
   // must appear in a row's terms. The count is announced after a pause.
+  // A page that also filters its own content, such as a table of tokens, sets window.findScope before
+  // the reader types: { filter(words) → { count, one, many }, keeps(link) → boolean }. Find then calls
+  // filter on each change, keeps the rail links keeps() names, and announces the page's count and noun.
   let announce;
   const filter = () => {
     const query = find.value.trim().toLowerCase();
     const words = query.split(/\s+/).filter(Boolean);
+    const scope = window.findScope;
+    const result = scope?.filter(words);
     let shown = 0;
     links.forEach((a) => {
-      const match = words.every((w) => a.dataset.terms.includes(w));
+      const match = scope ? scope.keeps(a) : words.every((w) => a.dataset.terms.includes(w));
       a.hidden = !match;
       if (match) shown += 1;
     });
     railGroups.forEach((g) => { g.hidden = !g.querySelector('a:not([hidden])'); });
     empty.hidden = shown > 0;
     empty.querySelector('q').textContent = find.value.trim();
+    const { count, one, many } = result ?? { count: shown, one: 'match', many: 'matches' };
     clearTimeout(announce);
     announce = setTimeout(() => {
-      findCount.textContent = query ? (shown ? `${shown} ${shown === 1 ? 'match' : 'matches'}` : 'No matches') : '';
+      findCount.textContent = query ? (count ? `${count} ${count === 1 ? one : many}` : `No ${many}`) : '';
     }, 500);
   };
   // Goes to a row's destination and focuses it. In the drawer the click closes it, and the drawer moves focus.

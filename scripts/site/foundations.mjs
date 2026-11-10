@@ -1,7 +1,7 @@
 // Foundations: every token with its light and dark value, role, and former name. Values come from
 // dist/tokens.json; group titles, notes, and roles from the token source; former names from the
 // rename table in decisions.md. Find filters the token rows as well as the rail.
-import { STACKED_TABLES_CSS, esc, inlineCode } from './shell.mjs'
+import { esc, inlineCode, stackedTablesCss } from './shell.mjs'
 
 // Page order, and the rail group each token group sits under, by the source group's id.
 const RAIL = [
@@ -44,6 +44,14 @@ const specimen = ({ name, value, plate }) => {
   return ''
 }
 
+// A font stack lists one family per span, so lines break between families and never inside one.
+const valueText = (name, value) => (name.startsWith('font-')
+  ? value.split(',').map((family, i, all) => `<span class="family">${esc(family.trim())}${i < all.length - 1 ? ',' : ''}</span>`).join(' ')
+  : esc(value))
+
+// A name breaks only after a hyphen, so a long name wraps inside its column.
+const breakableName = (name) => `--${name.replace(/-/g, '-<wbr>')}`
+
 // A font stack's Find terms are its family names only, so "link" does not match BlinkMacSystemFont.
 const valueTerms = (name, value) => (name.startsWith('font-')
   ? value.split(',').map((family) => family.trim().replace(/"/g, '')).filter((family) => /\s|^[A-Z]/.test(family)).join(' ')
@@ -64,11 +72,11 @@ export const foundationsPage = ({ source, values, renames, version, packageName 
   const total = groups.reduce((n, { tokens }) => n + Object.keys(tokens).length, 0)
   const plate = { light: values.light['color-surface-raised'], dark: values.dark['color-surface-raised'] }
 
-  const cell = (name, mode) => `<span class="value">${specimen({ name, value: values[mode][name], plate: plate[mode] })}<code>${esc(values[mode][name])}</code></span>`
+  const cell = (name, mode) => `<span class="value">${specimen({ name, value: values[mode][name], plate: plate[mode] })}<code>${valueText(name, values[mode][name])}</code></span>`
   const row = (name, group) => {
     const was = formerly.get(name)
     return `<tr data-terms="${esc(tokenTerms({ name, group, values, formerly }))}">
-        <th scope="row"><span class="token"><code>--${name}</code><button class="quiet-action copy" type="button" data-copy-token="var(--${name})" aria-label="Copy var(--${name})" hidden><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg><span class="copy-result" hidden></span></button></span>${was ? `<span class="was">Formerly <code>${was}</code></span>` : ''}</th>
+        <th scope="row"><div class="token"><code class="name">${breakableName(name)}</code><button class="quiet-action copy" type="button" data-copy-token="var(--${name})" aria-label="Copy var(--${name})" hidden><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg><span class="copy-result" hidden></span></button>${was ? `<span class="was">Formerly <code>${was}</code></span>` : ''}</div></th>
         <td data-label="Light"><div>${cell(name, 'light')}</div></td>
         <td data-label="Dark"><div>${values.light[name] === values.dark[name] ? '<span class="same">Same as light</span>' : cell(name, 'dark')}</div></td>
         <td data-label="Role"><div>${inlineCode(group.roles[name])}</div></td>
@@ -113,6 +121,9 @@ ${sections}`
   return { title: 'Foundations · Design system', rail, main, css: FOUNDATIONS_CSS, js: FOUNDATIONS_JS, total }
 }
 
+// Below this width the four columns cannot hold a font family or a long name, so each row becomes a record.
+const STACK_BELOW = '1100px'
+
 const FOUNDATIONS_CSS = `
   .token-group { display: grid; gap: var(--space-2); }
   .token-group .layer-head { grid-auto-flow: column; justify-content: start; align-items: center; gap: var(--space-3); }
@@ -125,15 +136,20 @@ const FOUNDATIONS_CSS = `
   .tokens thead th { color: var(--color-muted); font-size: var(--text-xs); font-weight: var(--weight-medium); white-space: nowrap; }
   .tokens tbody th { font-weight: var(--weight-regular); }
   .tokens code { font-size: var(--text-xs); }
-  .token { display: inline-flex; align-items: center; gap: var(--space-1); white-space: nowrap; }
-  .token code { color: var(--color-text); }
-  .token .copy { opacity: 0; }
-  .tokens tr:is(:hover, :focus-within) .token .copy, .token .copy:has(.copy-result:not([hidden])) { opacity: 1; }
+  /* The name and its former name stack on the cell's first lines, level with the values. Copy sits right
+     after the name, centred on its line; negative margins take back the 44px target's extra height, so it
+     never pushes the former name down. */
+  .token { display: grid; grid-template-columns: minmax(0, max-content) auto; justify-content: start; column-gap: var(--space-1); align-items: start; }
+  .token .name { min-width: 0; overflow-wrap: anywhere; color: var(--color-text); }
+  .token .copy { grid-row: 1; grid-column: 2; align-self: center; margin-block: -0.875rem; }
   .copy-result { font-size: var(--text-xs); }
-  .was { display: block; margin-top: 0.125rem; color: var(--color-muted); font-size: var(--text-xs); }
+  .was { grid-column: 1 / -1; color: var(--color-muted); font-size: var(--text-xs); }
   .was code { color: var(--color-muted); }
   .value { display: inline-flex; align-items: flex-start; gap: var(--space-2); min-width: 0; }
-  .value code { min-width: 0; overflow-wrap: break-word; color: var(--color-muted); }
+  .value code { min-width: 0; overflow-wrap: anywhere; color: var(--color-muted); }
+  /* A font stack breaks between families; a family wraps inside itself only when it is wider than the column. */
+  .family { display: inline-block; max-width: 100%; }
+  .value:has(.family) { flex-direction: column; }
   .same { color: var(--color-muted); }
   .chip { flex: none; width: 1.25rem; height: 1.25rem; border-radius: var(--radius-inline); box-shadow: inset 0 0 0 1px var(--color-border-subtle); }
   .tile { flex: none; width: 2rem; height: 1.5rem; border-radius: var(--radius-inline); background: var(--plate); }
@@ -145,21 +161,16 @@ const FOUNDATIONS_CSS = `
   /* The phone bar's Clear names the query on one line, cut short with an ellipsis; the bar's icon buttons keep their size. */
   .section-bar > .bar-clear { display: block; width: auto; max-width: 7.5rem; padding-inline: var(--space-2); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   .page-head > .crumbs a { white-space: nowrap; }
-  @media (max-width: 800px) {
-    /* Tablets: long names wrap inside their column. Phones stack each row into a record. */
-    .token { flex-wrap: wrap; white-space: normal; }
-    .token code { overflow-wrap: anywhere; }
-    .token .copy { opacity: 1; }
-  }
-  @media (hover: none) { .token .copy { opacity: 1; } }
   @media (forced-colors: active) { .chip { forced-color-adjust: none; } }
-${STACKED_TABLES_CSS}`
+${stackedTablesCss(STACK_BELOW)}`
 
-// Find also filters the token rows, so a query shows the matching tokens in place. The page script
-// reaches the shell only through the DOM: the field's input and keydown, and the Clear button.
+// Find also filters the token rows, so a query shows the matching tokens in place. The page hands the
+// shell its scope (see the Find comment in components.html): the rows a query keeps, the rail links
+// whose group still has a row, and the count to announce.
 const FOUNDATIONS_JS = `
   const find = document.getElementById('find');
   const rows = [...document.querySelectorAll('.tokens tbody tr')];
+  const groups = [...document.querySelectorAll('[data-group]')];
   const summary = document.getElementById('find-summary');
   const status = document.getElementById('copy-status');
   // Phones: the drawer closes over a filtered page, so the sticky bar says so and can clear it.
@@ -168,22 +179,22 @@ const FOUNDATIONS_JS = `
   barClear.className = 'btn text bar-clear';
   barClear.hidden = true;
   document.getElementById('section-bar').prepend(barClear);
-  const filterRows = () => {
-    const query = find.value.trim();
-    const words = query.toLowerCase().split(/\\s+/).filter(Boolean);
-    let shown = 0;
-    rows.forEach((row) => { row.hidden = !words.every((w) => row.dataset.terms.includes(w)); if (!row.hidden) shown += 1; });
-    document.querySelectorAll('[data-group]').forEach((group) => { group.hidden = !group.querySelector('tbody tr:not([hidden])'); });
-    summary.hidden = !words.length;
-    summary.querySelector('p').textContent = shown ? \`Showing \${shown} of \${rows.length} tokens for “\${query}”.\` : \`No token matches “\${query}”.\`;
-    barClear.hidden = !words.length;
-    barClear.textContent = \`Clear “\${query}”\`;
+  window.findScope = {
+    filter: (words) => {
+      const query = find.value.trim();
+      let shown = 0;
+      rows.forEach((row) => { row.hidden = !words.every((w) => row.dataset.terms.includes(w)); if (!row.hidden) shown += 1; });
+      groups.forEach((group) => { group.hidden = !group.querySelector('tbody tr:not([hidden])'); });
+      summary.hidden = !words.length;
+      summary.querySelector('p').textContent = shown ? \`Showing \${shown} of \${rows.length} tokens for “\${query}”.\` : \`No token matches “\${query}”.\`;
+      barClear.hidden = !words.length;
+      barClear.textContent = \`Clear “\${query}”\`;
+      return { count: shown, one: 'token', many: 'tokens' };
+    },
+    keeps: (link) => !document.getElementById(link.hash.slice(1)).hidden,
   };
-  // Clearing sets the field and fires input, so the shell's rail filter runs too.
+  // Clearing sets the field and fires input, so the shell runs the filter.
   const clear = () => { find.value = ''; find.dispatchEvent(new Event('input')); };
-  find.addEventListener('input', filterRows);
-  find.addEventListener('keydown', (e) => { if (e.key === 'Escape') queueMicrotask(filterRows); });
-  document.getElementById('find-clear').addEventListener('click', filterRows);
   document.getElementById('find-summary-clear').addEventListener('click', () => { clear(); find.focus(); });
   barClear.addEventListener('click', clear);
 

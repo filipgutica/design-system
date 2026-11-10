@@ -135,6 +135,69 @@ test.describe('Foundations Find', () => {
     await expect(page.locator('#find')).toHaveValue('')
     await expect(page.locator('.tokens tbody tr[hidden]')).toHaveCount(0)
   })
+
+  // Each word matches some token in the group, but no single token has them all.
+  for (const query of ['body 600', 'surface-raised shadow']) {
+    test(`keeps a rail link only while its group has a matching row: "${query}"`, async ({ page }) => {
+      await page.goto('foundations.html')
+      await page.locator('#find').fill(query)
+      await expect(shownTokens(page)).toHaveCount(0)
+      await expect(page.locator('section[data-group]:not([hidden])')).toHaveCount(0)
+      await expect(page.locator('#rail .rail-list a:not([hidden])')).toHaveCount(0)
+      await expect(page.locator('#find-empty')).toBeVisible()
+    })
+  }
+
+  test('announces the number of tokens it shows', async ({ page }) => {
+    await page.goto('foundations.html')
+    await page.locator('#find').fill('focus ring')
+    const shown = await shownTokens(page).count()
+    expect(shown).toBeGreaterThan(1)
+    await expect(page.locator('#find-count')).toHaveText(`${shown} tokens`)
+    await page.locator('#find').fill('--color-bg')
+    await expect(page.locator('#find-count')).toHaveText('1 token')
+    await page.locator('#find').fill('no-such-token')
+    await expect(page.locator('#find-count')).toHaveText('No tokens')
+  })
+})
+
+test.describe('Foundations table', () => {
+  // Below 1101px each row is a record; from 1101px it is four columns.
+  for (const width of [390, 801, 900, 1000, 1100, 1101, 1200, 1280, 1440]) {
+    test(`every name, value, and Copy stays inside its own cell at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('foundations.html')
+      const escapes = await page.locator('.tokens tbody :is(th, td)').evaluateAll((cells) => cells.flatMap((cell) => {
+        const box = cell.getBoundingClientRect()
+        return [...cell.querySelectorAll('code, .family, .copy, i, .sample, .was')]
+          .filter((el) => { const r = el.getBoundingClientRect(); return r.width > 0 && (r.left < box.left - 0.5 || r.right > box.right + 0.5) })
+          .map((el) => `${cell.closest('tr')!.querySelector('.name')!.textContent}: ${el.className || el.tagName}`)
+      }))
+      expect(escapes).toEqual([])
+      // A font family never breaks inside itself.
+      const broken = await page.locator('.family').evaluateAll((families) => families.filter((f) => f.getClientRects().length > 1).map((f) => f.textContent))
+      expect(broken).toEqual([])
+    })
+  }
+
+  test('a token name sits level with its values, with its former name right under it, and Copy shows beside it', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.goto('foundations.html')
+    const row = page.locator('.tokens tbody tr', { has: page.locator('.name', { hasText: /^--color-bg$/ }) })
+    const name = (await row.locator('.name').boundingBox())!
+    const value = (await row.locator('td[data-label="Light"] code').boundingBox())!
+    const was = (await row.locator('.was').boundingBox())!
+    expect(Math.abs(name.y - value.y)).toBeLessThanOrEqual(2)
+    expect(was.y - (name.y + name.height)).toBeLessThanOrEqual(4)
+    // Copy shows without a hover, so every reader can find it, and it is in the tab order.
+    const copy = row.getByRole('button', { name: 'Copy var(--color-bg)' })
+    expect(await copy.evaluate((b) => getComputedStyle(b).opacity)).toBe('1')
+    const copyBox = (await copy.boundingBox())!
+    expect(copyBox.x - (name.x + name.width)).toBeLessThanOrEqual(12)
+    await page.locator('.tokens tbody tr').first().locator('.copy').focus()
+    await page.keyboard.press('Tab')
+    await expect(page.locator('.tokens tbody tr').nth(1).locator('.copy')).toBeFocused()
+  })
 })
 
 test('on phones, the sticky bar offers Clear on one line while a filter is on', async ({ page }) => {
