@@ -113,7 +113,7 @@ Read DESIGN.md first: it holds the selection rules and acceptance checks. Copy c
 
 - [DESIGN.md](${SITE_URL}DESIGN.md): the design language, selection rules, and acceptance checks
 - [components.md](${SITE_URL}components.md): one spec per component: anatomy, states, Do and Don't, keyboard, motion, and forced colors
-- [decisions.md](${SITE_URL}decisions.md): why each decision was made, and the 1.x to 2.0 token renames
+- [decisions.md](${SITE_URL}decisions.md): why each decision was made, and the 2.0.0 token rename table
 - [index.json](${SITE_URL}index.json): every component with its layer, purpose, Do and Don't lines, page, spec, and implementations
 
 ## Pages

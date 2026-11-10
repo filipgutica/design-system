@@ -97,7 +97,7 @@ export const Panel = ({ children }: { children: React.ReactNode }) => (
     {children}
   </section>
 )` })}
-    <p><code>cssVar()</code> only accepts names that exist, so a 1.x name such as <code>text</code> fails the type check. Apps that switch dark mode with a <code>.dark</code> class import <code>class/base.css</code> instead of <code>tokens.css</code>.</p>
+    <p><code>cssVar()</code> only accepts names that exist, so a name from before the 2.0.0 token rename, such as <code>text</code>, fails the type check. Apps that switch dark mode with a <code>.dark</code> class import <code>class/base.css</code> instead of <code>tokens.css</code>.</p>
   </section>
 
   <section class="doc-section" id="agents" aria-labelledby="agents-title">

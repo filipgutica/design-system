@@ -20,7 +20,7 @@ Filip's design language for any framework: the spec, the tokens, the component c
 
 To change a value, edit the JSON and run `pnpm tokens:build`. `pnpm tokens:check` fails when a generated file is stale or a token has no role.
 
-`pnpm site:build` writes the site to `site/`. It reads the version from the latest `v*` tag, so it needs the tags in the checkout.
+`pnpm site:build` writes the site to `site/`. It reads the version from the latest `ds-v*` tag, so it needs the tags in the checkout.
 
 ## Install
 
@@ -52,11 +52,11 @@ pnpm verify
 
 ## Release
 
-semantic-release publishes from `main` with npm provenance, as in ui:
+semantic-release publishes from `main` with npm provenance. Releases stay 1.0.x while the design system has no outside users ([decisions.md](language/decisions.md), Versioning):
 
-- `fix` releases a patch.
-- `feat` releases a minor.
-- A breaking change releases a major.
+- Any commit that releases, such as `fix`, `feat`, or a breaking change, releases a patch. The release notes still name breaking changes.
+- `build`, `chore`, `docs`, `test`, and similar types release nothing.
+- Release tags are `ds-v*`. The `v1.0.0`–`v2.4.0` tags and npm versions are the earlier series.
 
 Commits follow Conventional Commits, and CI checks them with commitlint. Do not edit the version by hand.
 
