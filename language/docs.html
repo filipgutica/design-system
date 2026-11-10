@@ -19,6 +19,7 @@
 .navlist a[aria-current="page"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); font-weight: var(--weight-medium); }
 .navlist a[aria-current="location"] { color: var(--color-text); font-weight: var(--weight-medium); }
 .navlist a[aria-current="location"]::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--color-accent); }
+@supports (text-box: trim-both cap alphabetic) { .navlist a:not(:has(> *)) { display: block; align-content: center; text-box: trim-both cap alphabetic; } .navlist a:not(:has(> *))[aria-current="location"]::before { inset-block: 0; margin-block: auto; } }
 /* The sidebar is a section rail: components.html#section-rail, unchanged. Its current section takes the current-page look, with no pip. */
 :is(.rail, .rail-specimen) a[aria-current="location"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); }
 :is(.rail, .rail-specimen) a[aria-current="location"]::before { content: none; }

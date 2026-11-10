@@ -260,3 +260,63 @@ test('index.json and llms.txt list every component, and their site links resolve
     expect((await request.get(href.slice(SITE_URL.length) || './')).status(), href).toBe(200)
   }
 })
+
+// The space above and below a label's ink, in CSS pixels. The page renders at deviceScaleFactor 4; the
+// screenshot is decoded in a canvas, and a pixel inside the label's text columns counts as ink when it
+// is nearer the text colour than the fill beside the text.
+const inkGaps = async (page: Page, selector: string) => {
+  const control = page.locator(selector).first()
+  await control.scrollIntoViewIfNeeded()
+  const box = (await control.boundingBox())!
+  const label = await control.evaluate((el) => {
+    const text = [...el.childNodes].find((node) => node.nodeType === Node.TEXT_NODE && node.textContent!.trim())!
+    const range = document.createRange()
+    range.selectNodeContents(text)
+    const r = el.getBoundingClientRect()
+    const t = range.getBoundingClientRect()
+    return { left: t.left - r.left, right: t.right - r.left, ink: getComputedStyle(el).color.match(/[\d.]+/g)!.slice(0, 3).map(Number) }
+  })
+  const png = await page.screenshot({ clip: box, scale: 'device' })
+  return page.evaluate(async ({ data, label }) => {
+    const image = new Image()
+    image.src = `data:image/png;base64,${data}`
+    await image.decode()
+    const canvas = document.createElement('canvas')
+    canvas.width = image.width
+    canvas.height = image.height
+    const context = canvas.getContext('2d')!
+    context.drawImage(image, 0, 0)
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data
+    // One device pixel is 1/4 CSS px. The clip's edges round to whole device pixels, so dividing the
+    // canvas size by a fractional box size would skew every gap.
+    const scale = 4
+    const at = (x: number, y: number) => [0, 1, 2].map((i) => pixels[(y * canvas.width + x) * 4 + i])
+    const distance = (a: number[], b: number[]) => a.reduce((sum, value, i) => sum + Math.abs(value - b[i]), 0)
+    const fill = at(Math.max(0, Math.round((label.left - 3) * scale)), Math.round(canvas.height / 2))
+    let top = -1
+    let bottom = -1
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = Math.round(label.left * scale); x < Math.round(label.right * scale); x++) {
+        const pixel = at(x, y)
+        if (distance(pixel, fill) > 60 && distance(pixel, label.ink) < distance(pixel, fill)) { if (top < 0) top = y; bottom = y }
+      }
+    }
+    return { above: top / scale, below: (canvas.height - 1 - bottom) / scale }
+  }, { data: png.toString('base64'), label })
+}
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test(`the header pill and a selected tab centre their label's ink in ${colorScheme}`, async ({ browser }) => {
+    const context = await browser.newContext({ colorScheme, viewport: { width: 1280, height: 900 }, deviceScaleFactor: 4, baseURL: test.info().project.use.baseURL })
+    const page = await context.newPage()
+    // Both labels have no descenders, so a line box that keeps descender room shows as a larger gap below.
+    for (const [path, selector, text] of [['', '.page-head .strip a[aria-current="page"]', 'Overview'], ['components.html', 'main [role="tab"][aria-selected="true"]', 'Overview']]) {
+      await page.goto(path)
+      await expect(page.locator(selector).first()).toHaveText(text)
+      const { above, below } = await inkGaps(page, selector)
+      expect(above, `${selector}: no ink found`).toBeGreaterThan(0)
+      expect(Math.abs(above - below), `${selector}: ${above}px above the ink, ${below}px below`).toBeLessThanOrEqual(0.5)
+    }
+    await context.close()
+  })
+}
