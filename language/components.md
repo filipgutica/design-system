@@ -238,7 +238,7 @@ Layer: Core. ui: `UiAlert`.
 - **Tokens.** Neutral: `--color-surface`. Status tones use their `--color-*-surface` tint with `--color-text`; the icon takes the status colour.
 - **States.** None: an alert is static content. Its tone is a variant, not a state.
 - **Do.** Use an alert for a caveat or status message the reader needs before acting. When action is needed, name it, such as "Reconnect the source to resume sync".
-- **Don't.** Use an alert for decoration or routine emphasis. Use a badge for a short status label; keep explanations and recovery instructions in an alert.
+- **Don't.** An alert for decoration or routine emphasis. A short status label is a badge; explanations and recovery instructions stay in an alert.
 - **Keyboard and screen reader.** Static content. Use `role="status"` or `role="alert"` only for a message that appears while the reader works.
 - **Motion.** None: an alert shows at once, with no entrance animation.
 - **Forced colors.** Fills drop and the transparent border draws as the system edge. The icon keeps its status colour, and the text carries the message; see [known gaps](decisions.md#known-gaps).
