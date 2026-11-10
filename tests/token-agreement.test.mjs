@@ -51,10 +51,10 @@ const compare = ({ css, data }) => {
 }
 
 test('the agreement check catches a tokens.css value that drifts from its JSON token', () => {
-  const drifted = tokensCss.replace('--bg: #f4f5f6;', '--bg: #ffffff;')
+  const drifted = tokensCss.replace('--color-bg: #f4f5f6;', '--color-bg: #ffffff;')
 
-  // Lines that reference --bg, such as --accent-text, drift with it.
-  assert.ok(compare({ css: drifted, data: tokenData }).disagreements.includes('--bg (--color-bg, light): tokens.css #ffffff, JSON #f4f5f6'))
+  // Lines that reference --color-bg, such as --color-accent-text, drift with it.
+  assert.ok(compare({ css: drifted, data: tokenData }).disagreements.includes('--color-bg (--color-bg, light): tokens.css #ffffff, JSON #f4f5f6'))
 })
 
 test('the agreement check counts a tokens.css line without a ui: comment as uncovered', () => {

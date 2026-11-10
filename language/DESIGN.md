@@ -19,7 +19,7 @@ The language has a reusable core and a replaceable identity layer.
 | Core | Tokens, depth, controls and their states, focus, motion, accessibility, and forced colors | Adopts it as is |
 | Identity | The terminal folio look of the personal sites: the `~/name` header, the project registry, mono display headings, `##` section marks, and terminal plates | Replaces it with its own |
 
-A new project keeps `tokens.css` unchanged and sets the identity inputs (`--project`, `--project-dark`, `--font-sans`, `--font-mono`, and `--accent-text` when the hue needs it) on `:root` in its own stylesheet. [Component specs](components.md) mark each component Core or Identity, and [decisions](decisions.md) record why each choice was made and which options were rejected. Read both before you build or change a component.
+A new project keeps `tokens.css` unchanged and sets the identity inputs (`--color-project`, `--color-project-dark`, `--font-ui`, `--font-mono`, and `--color-accent-text` when the hue needs it) on `:root` in its own stylesheet. [Component specs](components.md) mark each component Core or Identity, and [decisions](decisions.md) record why each choice was made and which options were rejected. Read both before you build or change a component.
 
 ## Apply the right format
 
@@ -39,7 +39,7 @@ Center the **container**, not every sentence. Align header, content, images, and
 
 ## Files and examples
 
-- `tokens.css`: a standalone snapshot of the values (the Graphite Indigo theme) owned by `@filipgutica/ui`. The identity inputs sit in one block at the top. Each line's `ui:` comment names the library variable for that token. Update it when the package values change.
+- `tokens.css`: a standalone snapshot of the values (the Graphite Indigo theme) owned by `@filipgutica/ui`. The identity inputs sit in one block at the top. Each line's `ui:` comment lists the library variables that carry that value, the line's own name first. Update it when the package values change.
 - `components.md`: one spec for each component, with anatomy, tokens, states, keyboard and screen-reader behavior, motion, and forced colors. Read it for any component work.
 - `components.html`: every component in each of its states, in plain HTML and CSS on `tokens.css`. Copy component markup and styles from there.
 - `decisions.md`: the choices behind the components, and the options they replaced.
@@ -50,12 +50,12 @@ Center the **container**, not every sentence. Align header, content, images, and
 
 Personal sites import `@filipgutica/ui/themes/graphite-indigo.css` and the shared site helpers. The UI package owns the values and generation procedure.
 
-Token names depend on where the page runs. This file uses the `tokens.css` names.
+Token names depend on where the page runs. This file uses the `tokens.css` names, which `@filipgutica/ui` shares.
 
 | Context | Variable names to write |
 | --- | --- |
 | Standalone HTML | The `tokens.css` names. Import or inline `tokens.css`, and copy component styles from `components.html`. |
-| Site on `@filipgutica/ui` | The library variable in the `ui:` comment beside each `tokens.css` line, such as `--color-muted` for `--text-muted`. Some names are unchanged, such as `--text-sm`. When a comment names several, use the first. A `tokens.css` name that its comment does not list is undefined on a library site, and `var()` falls back without an error. The library draws the base focus ring only inside `.fg-site-docs`; elsewhere, write it yourself, exactly `outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset)`. |
+| Site on `@filipgutica/ui` | The `tokens.css` names, which the library declares. The exceptions are `--color-nav-current-text` and `--color-segmented-current-text`: the library does not declare them, so write them with the fallback their `ui:` comment shows. Without it, `var()` falls back without an error. The library draws the base focus ring only inside `.fg-site-docs`; elsewhere, write it yourself, exactly `outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset)`. |
 | Other repository | That repository's own tokens and components, matched to these roles by meaning. |
 | Inline visual | The host's supplied CSS variables and font, with no separate page shell. |
 
@@ -73,22 +73,22 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
 ### Typography
 
-- Use `--font-sans` for prose, h3 and below, labels, and controls, and `--font-mono` for code, identifiers, and keys. The identity layer decides where else mono appears.
+- Use `--font-ui` for prose, h3 and below, labels, and controls, and `--font-mono` for code, identifiers, and keys. The identity layer decides where else mono appears.
 - Controls and dense application content use `--text-md`; secondary text uses `--text-sm`. Paragraphs and substantial article text use `--text-reading` with `--leading`. Bound reading text with `--measure` and introductory copy to a slightly shorter line.
-- Documentation titles use `--text-3xl`; section headings use `--text-xl` and sit above their content. Application titles use `--text-2xl` or smaller, and application section headings use `--font-sans` at `--text-xl` or smaller.
+- Documentation titles use `--text-3xl`; section headings use `--text-xl` and sit above their content. Application titles use `--text-2xl` or smaller, and application section headings use `--font-ui` at `--text-xl` or smaller.
 - Use `--weight-regular`, `--weight-medium`, and `--weight-semibold`. Keep the source text's case; never transform it. Sentence case and restrained tracking make hierarchy easier to scan.
-- Use `--text-muted` for secondary information and metadata, and `--text` for essential labels and instructions.
+- Use `--color-muted` for secondary information and metadata, and `--color-text` for essential labels and instructions.
 
 ### Theme and color
 
 - Inline visuals inherit the host theme. They do **not** need an independent theme switch.
 - Standalone pages follow the OS by default. A visible theme control is optional: include it when the user requests one, the product already has one, or choosing/comparing themes serves the task. Token inspection and UI-library documentation are valid uses; a simple chart or explainer usually is not.
 - Existing products retain their theme preferences and persistence contracts. Where a standalone choice is needed, System removes the override and explicit Light/Dark choices set it. Wrap storage access in try/catch.
-- Use neutral `--bg`, `--surface`, and `--surface-raised` (paper in light, graphite in dark) to separate regions. Use `--text` and `--text-muted` for the main hierarchy.
-- Each project sets one hue, and `--accent` follows it. The hue fills the one primary action in each decision group, and marks identity and selection: current items, the selected tab's text, and checked or selected controls. It is never a fill for secondary buttons, cards, or wells. Check it at 3:1 for marks and bars, and at 4.5:1 wherever it colours text, on every surface it sits on. `--accent-text` on an `--accent` fill must reach 4.5:1 for each hue; a hue that misses does not colour text or carry a label there.
-- `--link` identifies links; underline prose links. `--focus` is the accent (`--accent`) and outlines keyboard focus on every role but fields, which turn their edge the accent instead (see [focus](components.md#rules-for-every-control)). Where color marks a checked or selected state, use `--accent` as a fill, tint, or mark; `--link` never marks one, and a focus ring marks only focus, never selection.
+- Use neutral `--color-bg`, `--color-surface`, and `--color-surface-raised` (paper in light, graphite in dark) to separate regions. Use `--color-text` and `--color-muted` for the main hierarchy.
+- Each project sets one hue, and `--color-accent` follows it. The hue fills the one primary action in each decision group, and marks identity and selection: current items, the selected tab's text, and checked or selected controls. It is never a fill for secondary buttons, cards, or wells. Check it at 3:1 for marks and bars, and at 4.5:1 wherever it colours text, on every surface it sits on. `--color-accent-text` on an `--color-accent` fill must reach 4.5:1 for each hue; a hue that misses does not colour text or carry a label there.
+- `--color-link` identifies links; underline prose links. `--color-focus` is the accent (`--color-accent`) and outlines keyboard focus on every role but fields, which turn their edge the accent instead (see [focus](components.md#rules-for-every-control)). Where color marks a checked or selected state, use `--color-accent` as a fill, tint, or mark; `--color-link` never marks one, and a focus ring marks only focus, never selection.
 - Navigation and selection: the current page, the selected tab, and a selected list row take the same quiet lifted fill, tinted with the accent, with accent text where it reaches 4.5:1 on that fill (another readable colour otherwise), and no underline or bar; an in-page location takes a short accent pip without a fill. Keep raised-control hover and keyboard focus separate from these states. [Component specs](components.md#navigation-list) give the values.
-- Status colors mean state and have a text or icon label. Status surfaces are soft tints of their status color (the `--*-soft` tokens). Outside badges, the danger button label, and field error text, status foreground colors go on icons; numbers and labels beside them stay in `--text` or `--text-muted`. Keep restrained syntax colors separate from the action palette.
+- Status colors mean state and have a text or icon label. Status surfaces are soft tints of their status color (the `--color-*-surface` tokens). Outside badges, the danger button label, and field error text, status foreground colors go on icons; numbers and labels beside them stay in `--color-text` or `--color-muted`. Keep restrained syntax colors separate from the action palette.
 - Verify light and dark appearance where supported, regardless of whether a switch is visible. Check text contrast rather than assuming a muted token is accessible at every size.
 
 ### Layout and spacing
@@ -110,34 +110,34 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
 ### Surfaces
 
-- Start with headings, content, and whitespace. Use a `--border-subtle` divider where it clarifies a boundary.
+- Start with headings, content, and whitespace. Use a `--color-border-subtle` divider where it clarifies a boundary.
 - Each surface role has one recipe:
 
   | Role | Use for | Fill | Border | Radius | Shadow |
   | --- | --- | --- | --- | --- | --- |
-  | Page | The canvas and example stages | `--bg` | None | None | None |
-  | Well | Source code, screenshots, figures, and inset previews other than example stages | `--surface` | Source code: transparent 1px; figures: `--border-subtle` | `--radius-lg` | Source code: `--shadow-surface`; figures: none |
-  | Panel | Cards, forms, charts, and detail views | `--surface-raised` | Transparent 1px | `--radius-lg` | `--shadow-surface` |
-  | Field | Inputs, selects, textareas, and search fields | `--field-bg`; disabled: `--field` | `--field-edge` | `--radius-field` | `--field-shadow`; disabled: none |
-  | Track | Segmented and switch tracks, and selected radio cards | `--field` | Transparent 1px | Tracks: `--radius-md`; radio cards: `--radius-lg` | `--shadow-sink` |
-  | Floating layer | Menus, popovers, pickers, and dialogs | `--surface-raised` | Transparent 1px; the shadow's ring draws the edge | `--radius-lg` | `--shadow-popover` |
+  | Page | The canvas and example stages | `--color-bg` | None | None | None |
+  | Well | Source code, screenshots, figures, and inset previews other than example stages | `--color-surface` | Source code: transparent 1px; figures: `--color-border-subtle` | `--radius-panel` | Source code: `--shadow-surface`; figures: none |
+  | Panel | Cards, forms, charts, and detail views | `--color-surface-raised` | Transparent 1px | `--radius-panel` | `--shadow-surface` |
+  | Field | Inputs, selects, textareas, and search fields | `--color-field-bg`; disabled: `--color-well` | `--color-field-edge` | `--radius-field` | `--shadow-field`; disabled: none |
+  | Track | Segmented and switch tracks, and selected radio cards | `--color-well` | Transparent 1px | Tracks: `--radius-control`; radio cards: `--radius-panel` | `--shadow-sink` |
+  | Floating layer | Menus, popovers, pickers, and dialogs | `--color-surface-raised` | Transparent 1px; the shadow's ring draws the edge | `--radius-panel` | `--shadow-dialog` |
 
-- Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--field-edge`. `--border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--border-subtle` edge and no rest raise. Invalid fields show a `--danger` edge, except in forced colors, where the system edge wins. Figures, example frames, and dividers use `--border-subtle`.
-- Radii: `--radius-sm` for inline elements and checkboxes; `--radius-field` for fields, navigation rows, tabs, and toggle cards; `--radius-md` (a pill) for buttons and segmented controls; `--radius-lg` for wells, example frames, plates, panels, radio cards, alerts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
+- Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--color-field-edge`. `--color-border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--color-border-subtle` edge and no rest raise. Invalid fields show a `--color-error` edge, except in forced colors, where the system edge wins. Figures, example frames, and dividers use `--color-border-subtle`.
+- Radii: `--radius-inline` for inline elements and checkboxes; `--radius-field` for fields, navigation rows, tabs, and toggle cards; `--radius-control` (a pill) for buttons and segmented controls; `--radius-panel` for wells, example frames, plates, panels, radio cards, alerts, and floating layers; `--radius-pill` for badges and switch tracks. Inner menu rows take the panel radius minus `--space-1`.
 - Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
 - [Depth](#depth) gives each role its shadow. Stable hover states keep normal content quiet.
 
 ### Depth
 
-Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow value, including the dark ones. Pages and components use the tokens and write no shadow of their own. Only zero-blur lines in a token colour are exempt: focus rings and dividers. A focused field's inset line is a token too (`--field-shadow-focus`, `--field-shadow-focus-invalid`).
+Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow value, including the dark ones. Pages and components use the tokens and write no shadow of their own. Only zero-blur lines in a token colour are exempt: focus rings and dividers. A focused field's inset line is a token too (`--shadow-field-focus`, `--shadow-field-focus-invalid`).
 
 | Tier | Token | Use for |
 | --- | --- | --- |
 | Control | `--shadow-raise` | Idle buttons, unselected radio cards, switch knobs, and segmented thumbs |
 | Container | `--shadow-surface` | Panels, cards, source code (not inside an example frame), command plates, and terminal captures |
-| Pressed or well | `--shadow-sink` | Tracks, pressed buttons, selected radio cards, and fields in dark (through `--field-shadow`; light fields take none) |
+| Pressed or well | `--shadow-sink` | Tracks, pressed buttons, selected radio cards, and fields in dark (through `--shadow-field`; light fields take none) |
 | Selected row | `--shadow-nav-current` | The current navigation row, the selected tab, and a selected list row |
-| Floating | `--shadow-popover` | Menus, popovers, pickers, and dialogs |
+| Floating | `--shadow-dialog` | Menus, popovers, pickers, and dialogs |
 
 - Idle controls and containers take no outer light highlight and no blur wider than 2px. In dark mode, controls take a faint inset top edge and containers a faint 1px ring, so no halo shows.
 - A pressed button sinks and moves 1px down; see [Button](components.md#button).
@@ -159,7 +159,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 ### Interaction and motion
 
 - Show visible focus and accessible names. A visual simplification must preserve useful controls, caveats, and keyboard paths.
-- Every focusable element but a field draws one ring, `outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset)`, with no glow, over its own raise or sink shadow. The `tokens.css` base sets it. `--focus` is the accent, which reaches 3:1 on `--bg`, `--surface`, and `--surface-raised` in both themes; a dark plate sets `--focus: var(--project-dark)`. Do not give a role its own ring colour. Fields (input, select, textarea, search) draw no ring: focus turns the edge `--accent` with a 2px inset line (`--field-shadow-focus`), and the fill stays. [Component specs](components.md#rules-for-every-control) give the values. Use an inset offset (`calc(var(--focus-width) * -1)`) only where a scrolling or clipping parent would cut the ring, or inside a segmented control; add a comment that names the reason. Keep the focus default in `@layer base`, so a component's own focus rule can refine it. Pointer hover never draws the outline.
+- Every focusable element but a field draws one ring, `outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset)`, with no glow, over its own raise or sink shadow. The `tokens.css` base sets it. `--color-focus` is the accent, which reaches 3:1 on `--color-bg`, `--color-surface`, and `--color-surface-raised` in both themes; a dark plate sets `--color-focus: var(--color-project-dark)`. Do not give a role its own ring colour. Fields (input, select, textarea, search) draw no ring: focus turns the edge `--color-accent` with a 2px inset line (`--shadow-field-focus`), and the fill stays. [Component specs](components.md#rules-for-every-control) give the values. Use an inset offset (`calc(var(--focus-width) * -1)`) only where a scrolling or clipping parent would cut the ring, or inside a segmented control; add a comment that names the reason. Keep the focus default in `@layer base`, so a component's own focus rule can refine it. Pointer hover never draws the outline.
 - Keep product navigation distinct from in-page section links. Current-page and current-section indicators serve different purposes. Open sibling project links in the same tab; indicate a new tab only when the link opens one.
 - Use `--duration-fast` for hover/press and `--duration` for menus/panels. Animate opacity or transform only where it explains a state change. A component spec may set its own timing, as the segmented control's glide does.
 - Keep content visible without reveal effects, entrance sequences, or continuous decorative animation. Honor reduced motion, including anchor scrolling.
@@ -179,12 +179,12 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 The personal sites are terminal tools that read Markdown and paths, so their identity comes from that world. A new project replaces this section with its own identity and keeps the core.
 
 - **Mono identity.** `--font-mono` (IBM Plex Mono) sets identity, the page titles and section headings of documentation, CLI tool, article, and product pages, navigation rails, metadata, captions, and the footer. `@filipgutica/ui` self-hosts IBM Plex; elsewhere the tokens fall back to the system stack.
-- **Headings.** Documentation, CLI tool, article, and product page titles are mono; application titles are `--font-sans`. Page-level section headings (h2) on documentation, CLI tool, article, and product pages are mono, start with a `##` mark in `--accent` (decorative, so screen readers skip it), and have a `--border-subtle` rule above the section. Application and inline-visualization section headings, and every h3 or lower, are plain `--font-sans` with no mark. Product pages and tool homes may use a mono `--text-display` title, stepping down to `--text-display-sm` on phones; keep a short heading measure, place supporting copy and the primary action nearby, and let the first product image enter the initial desktop viewport.
+- **Headings.** Documentation, CLI tool, article, and product page titles are mono; application titles are `--font-ui`. Page-level section headings (h2) on documentation, CLI tool, article, and product pages are mono, start with a `##` mark in `--color-accent` (decorative, so screen readers skip it), and have a `--color-border-subtle` rule above the section. Application and inline-visualization section headings, and every h3 or lower, are plain `--font-ui` with no mark. Product pages and tool homes may use a mono `--text-display` title, stepping down to `--text-display-sm` on phones; keep a short heading measure, place supporting copy and the primary action nearby, and let the first product image enter the initial desktop viewport.
 - **Hue marks.** The hue also draws the `~/` header mark, the `##` mark on documentation, CLI tool, article, and product section headings, step numbers, and the `$` prompt.
-- **Header.** Personal product sites share a compact static header: a mono `~/name` identity with the `~/` in `--accent`, a project switcher, useful page links, appearance controls, and a solid `--text` rule below. Use the shared project registry for names, order, and destinations. Keep a gallery's existing application navigation structure.
+- **Header.** Personal product sites share a compact static header: a mono `~/name` identity with the `~/` in `--color-accent`, a project switcher, useful page links, appearance controls, and a solid `--color-text` rule below. Use the shared project registry for names, order, and destinations. Keep a gallery's existing application navigation structure.
 - **Appearance.** Personal pages share the built-in System/Light/Dark choice, through the header's picker. An explicitly selected custom gallery theme overrides that choice until the reader selects a built-in appearance. Preserve installed themes.
-- **Terminal plates.** Commands sit on a dark plate tinted with the project hue (`--command-bg`), in both themes. A shell command gets a `$` prompt in `--project-dark`, drawn by CSS so it never enters copied or accessible text. Short commands use a headerless compact row with an accessible Copy control. Terminal captures keep the neutral `--terminal` plate, with a mono status-line caption below the screen; tabs on a capture switch to mono.
-- **Steps.** A real sequence is an ordered list with mono numbers in `--accent` on a ruled leading column, an h3 title per step, and an optional result note on the last step.
+- **Terminal plates.** Commands sit on a dark plate tinted with the project hue (`--color-command-bg`), in both themes. A shell command gets a `$` prompt in `--color-project-dark`, drawn by CSS so it never enters copied or accessible text. Short commands use a headerless compact row with an accessible Copy control. Terminal captures keep the neutral `--color-terminal` plate, with a mono status-line caption below the screen; tabs on a capture switch to mono.
+- **Steps.** A real sequence is an ordered list with mono numbers in `--color-accent` on a ruled leading column, an h3 title per step, and an optional result note on the last step.
 
 ## Avoid recurring clutter
 

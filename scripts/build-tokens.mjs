@@ -3,10 +3,10 @@
 //   node scripts/build-tokens.mjs           write every output
 //   node scripts/build-tokens.mjs --check   fail when an output is stale
 //
-// Two CSS flavours come from the same values:
-// - Standalone (language/tokens.css, dist/themes/*.css): the design-language names (--bg, --text, ...).
+// Two CSS flavours come from the same values and share @filipgutica/ui's names (--color-bg, ...):
+// - Standalone (language/tokens.css, dist/themes/*.css): one variable per token.
 //   Dark mode follows prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it.
-// - Class (dist/class/base.css, dist/class/themes/*.css): @filipgutica/ui's names (--color-*, ...).
+// - Class (dist/class/base.css, dist/class/themes/*.css): adds ui's component roles (--color-input-bg, ...).
 //   Dark mode is a .dark class on <html>.
 // dist/tokens.json and dist/tokens.js carry the standalone values, resolved, for code.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -151,7 +151,7 @@ const libraryNamesFor = (data) => {
   return (name) => {
     if (fallbacks[name] !== undefined) return `var(${fallbacks[name]}, ${resolve(name, LIGHT)})`
     const names = Object.entries({ ...roles, ...baseRoles }).filter(([, token]) => token === name).map(([role]) => role)
-      .sort((a, b) => Number(b === `--color-${name}`) - Number(a === `--color-${name}`))
+      .sort((a, b) => Number(b === `--${name}`) - Number(a === `--${name}`))
     if (aliases[name] !== undefined) names.push(aliases[name])
     if (sameNameTokens.has(name)) names.push(`--${name}`)
     return names.join(', ')
@@ -166,15 +166,16 @@ const standaloneHeader = `/*
  * Two layers. The identity block at the top of :root is the project's own: its hue
  * pair and fonts. A new project keeps this file unchanged and sets those lines on
  * :root in its own stylesheet, loaded after this one. The dark blocks switch
- * --project to --project-dark, so the override needs no dark rule. Check
- * --accent-text at 4.5:1 on the new hue and override it too when it falls short.
+ * --color-project to --color-project-dark, so the override needs no dark rule. Check
+ * --color-accent-text at 4.5:1 on the new hue and override it too when it falls short.
  * The terminal plate tokens also belong to the identity layer; every other line is core.
  *
  * Standalone HTML: import or inline this file.
  * Inline visuals: inherit the host font and theme variables; see DESIGN.md.
  * Repos: map these names onto the repository's own token system.
- * Sites on @filipgutica/ui: use the variable named in each line's "ui:" comment.
- * When a line names several, use the first; the others are component roles with the same value.
+ * Sites on @filipgutica/ui: the names are the same. Each line's "ui:" comment lists the ui
+ * variables that carry its value, its own name first; the others are component roles with the same
+ * value. A var(…) comment is a fallback ui writes where it reads the role. ui's build reads these comments.
  *
  * Theme states: bare :root is light. prefers-color-scheme picks dark unless
  * data-theme="light" is set. data-theme="dark" forces dark.
@@ -187,23 +188,23 @@ const standaloneBase = `/* Minimal base. Component styles live in components.htm
 /* The page's own background and text colour stay outside the layer. A host that wraps the page in
    its own unlayered reset, such as an artifact viewer, would otherwise keep its body colours while
    the tokens switch to dark, leaving token-coloured text on the wrong background. */
-body { background: var(--bg); color: var(--text); }
+body { background: var(--color-bg); color: var(--color-text); }
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
   body {
     margin: 0;
-    font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-sans);
+    font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-ui);
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4, p { margin: 0; }
   h1, h2, h3, h4 { font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); text-wrap: balance; }
   code, kbd, pre { font-family: var(--font-mono); }
   table, .num { font-variant-numeric: tabular-nums; }
-  a { color: var(--link); text-decoration: none; }
+  a { color: var(--color-link); text-decoration: none; }
   a:hover { text-decoration: underline; }
   p a, dd a { text-decoration: underline; text-underline-offset: 0.18em; }
-  :focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
+  :focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; scroll-behavior: auto !important; }
     /* A busy spinner slows instead of stopping, so the busy state stays visible. */
@@ -257,7 +258,7 @@ export const renderStandaloneTokens = (data) => {
 }
 
 // The identity inputs only, to load after tokens.css. Its dark blocks already switch
-// --project to --project-dark, so a theme needs no dark rule.
+// --color-project to --color-project-dark, so a theme needs no dark rule.
 export const renderStandaloneTheme = (data) => {
   const resolve = standaloneResolver(data)
   const identity = data.groups.filter(({ identity: isIdentity }) => isIdentity).flatMap(({ tokens }) => Object.keys(tokens))
@@ -282,7 +283,7 @@ export const resolvedTokens = (data) => {
 }
 
 const generatedNote = `Generated from tokens/${THEME}.json by scripts/build-tokens.mjs. Do not edit.`
-const cssVarDoc = "/** The var() reference for a token, such as cssVar('text') for 'var(--text)'. */"
+const cssVarDoc = "/** The var() reference for a token, such as cssVar('color-text') for 'var(--color-text)'. */"
 
 export const renderTokensJs = (data) => [
   `// ${generatedNote}`,

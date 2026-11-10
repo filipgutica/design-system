@@ -35,7 +35,7 @@ npm install @filipgutica/design-system
 | `@filipgutica/design-system/tokens.json` | The resolved values as JSON. |
 | `@filipgutica/design-system/language/*` | The spec, catalogue, and example pages. |
 
-In a React app, import `tokens.css` and `fonts.css` once in the entry and write `var(--text)` in styles, or `cssVar('text')` in TypeScript. `tests/react-smoke/` is a working example.
+In a React app, import `tokens.css` and `fonts.css` once in the entry and write `var(--color-text)` in styles, or `cssVar('color-text')` in TypeScript. `tests/react-smoke/` is a working example.
 
 ## Develop
 
@@ -63,4 +63,4 @@ Commits follow Conventional Commits, and CI checks them with commitlint. Do not 
 
 ## License
 
-MIT. The IBM Plex fonts in `fonts/` are under the SIL Open Font License; see the `OFL-*.txt` files beside them. The editor theme in `language/themes/graphite-indigo/` derives from Visual Studio Code's default themes; see its `LICENSE` and `THIRD_PARTY_NOTICES.md`.
+MIT. The IBM Plex fonts in `fonts/` are under the SIL Open Font License; see the `OFL-*.txt` files beside them. The editor theme in `language/editor-themes/graphite-indigo/` derives from Visual Studio Code's default themes; see its `LICENSE` and `THIRD_PARTY_NOTICES.md`.

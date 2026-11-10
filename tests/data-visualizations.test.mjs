@@ -57,8 +57,8 @@ test('the generated initial state has reconciled counts, provenance and safe emb
 
 test('standalone mode requires tokens; missing aggregate evidence and empty results stay visible', async () => {
   await assert.rejects(renderReport(sample(), { mode: 'standalone' }), /tokens/)
-  const html = await renderReport(sample(), { mode: 'standalone', tokens: ':root{--text:currentColor}' })
-  assert.match(html, /--foreground:var\(--text\)/)
+  const html = await renderReport(sample(), { mode: 'standalone', tokens: ':root{--color-text:currentColor}' })
+  assert.match(html, /--foreground:var\(--color-text\)/)
   const value = sample()
   delete value.windows[0].referenceCounts
   value.windows[0].rows = []
@@ -93,11 +93,11 @@ test('a long unbroken item name wraps in the phone layout', async () => {
 })
 
 test('standalone pickers take the field recipe; inline pickers keep the host look', async () => {
-  const field = /\.ov-controls select\{background:var\(--field-bg\);border-color:var\(--field-edge\);border-radius:var\(--radius-field\);box-shadow:var\(--field-shadow\)\}\.ov-controls select:focus-visible\{outline:none;border-color:var\(--accent\);box-shadow:var\(--field-shadow-focus\)\}@media \(forced-colors:active\)\{\.ov-controls select:focus-visible\{outline:var\(--focus-width\) solid Highlight;outline-offset:-1px\}\}/
-  const standalone = await renderReport(sample(), { mode: 'standalone', tokens: ':root{--text:currentColor}' })
+  const field = /\.ov-controls select\{background:var\(--color-field-bg\);border-color:var\(--color-field-edge\);border-radius:var\(--radius-field\);box-shadow:var\(--shadow-field\)\}\.ov-controls select:focus-visible\{outline:none;border-color:var\(--color-accent\);box-shadow:var\(--shadow-field-focus\)\}@media \(forced-colors:active\)\{\.ov-controls select:focus-visible\{outline:var\(--focus-width\) solid Highlight;outline-offset:-1px\}\}/
+  const standalone = await renderReport(sample(), { mode: 'standalone', tokens: ':root{--color-text:currentColor}' })
   assert.match(standalone, field)
   // Equal specificity, so the field recipe must come after report.css's own picker and focus rules to win.
   assert.ok(standalone.search(field) > standalone.indexOf('.ov-controls select{font:inherit'))
   assert.ok(standalone.search(field) > standalone.indexOf('.ov-controls select:focus-visible{outline:var(--focus-width,2px)'))
-  assert.doesNotMatch(await renderReport(sample()), /--field|--shadow-sink/)
+  assert.doesNotMatch(await renderReport(sample()), /--color-field|--shadow-field|--color-well|--shadow-sink/)
 })
