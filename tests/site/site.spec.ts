@@ -174,8 +174,13 @@ test.describe('Foundations table', () => {
           .map((el) => `${cell.closest('tr')!.querySelector('.name')!.textContent}: ${el.className || el.tagName}`)
       }))
       expect(escapes).toEqual([])
-      // A font family never breaks inside itself.
-      const broken = await page.locator('.family').evaluateAll((families) => families.filter((f) => f.getClientRects().length > 1).map((f) => f.textContent))
+      // A font family never breaks inside itself: its text's line boxes all share one top. The element
+      // is an inline-block, which has one box however its text wraps, so the check measures the text.
+      const broken = await page.locator('.family').evaluateAll((families) => families.filter((family) => {
+        const range = document.createRange()
+        range.selectNodeContents(family)
+        return new Set([...range.getClientRects()].filter((r) => r.width > 0).map((r) => Math.round(r.top))).size > 1
+      }).map((family) => family.textContent))
       expect(broken).toEqual([])
     })
   }

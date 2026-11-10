@@ -2,6 +2,8 @@ name: Pages
 
 # The site shows the released version, which semantic-release tags in the Release workflow, so the
 # deploy waits for Release to finish on main. Pull requests build the site without deploying it.
+# Each successful Release run deploys the commit it built. A manual re-run of an older Release would
+# deploy that older commit; the next Release or a manual run of this workflow restores main.
 on:
   workflow_run:
     workflows:
@@ -24,8 +26,6 @@ jobs:
   build:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    outputs:
-      current: ${{ steps.current.outputs.current }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -43,23 +43,10 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
-      # A re-run of an older Release must not deploy its commit over a newer site, so a Release run
-      # deploys only while its commit is still the head of main. A manual run deploys what it built.
-      - id: current
-        env:
-          EVENT: ${{ github.event_name }}
-          BUILT: ${{ github.event.workflow_run.head_sha }}
-        run: |
-          if [ "$EVENT" != workflow_run ] || [ "$(git ls-remote origin refs/heads/main | cut -f1)" = "$BUILT" ]; then
-            echo current=true >> "$GITHUB_OUTPUT"
-          else
-            echo "Skipping the deploy: $BUILT is no longer the head of main."
-            echo current=false >> "$GITHUB_OUTPUT"
-          fi
 
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main' && needs.build.outputs.current == 'true'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write
