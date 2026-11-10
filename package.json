@@ -35,7 +35,9 @@
     "test": "node --test tests/*.test.mjs",
     "test:react": "tsc -p tests/react-smoke && playwright test -c tests/react-smoke",
     "test:catalogue": "tsc -p tests/catalogue && playwright test -c tests/catalogue",
-    "verify": "pnpm tokens:check && pnpm test && pnpm test:react && pnpm test:catalogue && pnpm pack --dry-run && publint"
+    "site:build": "node scripts/build-site.mjs",
+    "test:site": "pnpm site:build && tsc -p tests/site && playwright test -c tests/site",
+    "verify": "pnpm tokens:check && pnpm test && pnpm test:react && pnpm test:catalogue && pnpm test:site && pnpm pack --dry-run && publint"
   },
   "engines": {
     "node": ">=22.12"

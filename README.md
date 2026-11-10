@@ -4,20 +4,23 @@ Filip's design language for any framework: the spec, the tokens, the component c
 
 - **Agents** get `language/` at `~/design-language` through filip-stack host config.
 - **Vue apps** use [`@filipgutica/ui`](https://github.com/filipgutica/ui), which implements this design language.
-- **Pages:** the catalogue and example pages are at <https://filipgutica.github.io/design-system/components.html>.
+- **Site:** <https://filipgutica.github.io/design-system/> has the Overview, Foundations, and Components pages, with `index.json` and `llms.txt` for agents.
 
 ## Contents
 
 | Path | What it holds |
 | --- | --- |
-| `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
-| `tokens/graphite-indigo.json` | The Graphite Indigo token values: the only place a value lives |
+| `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the catalogue (`components.html`), `implementations.json` (each component's Vue and React version), example pages, visualization helpers, and the Graphite Indigo editor theme |
+| `tokens/graphite-indigo.json` | The Graphite Indigo token values, the only place a value lives, and each token's role |
 | `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css` and `dist/` |
+| `scripts/build-site.mjs` | The site build: writes `site/` for GitHub Pages from `components.html`, the tokens, and `package.json` |
 | `dist/` | Generated token files for the class flavour, theme overrides, JSON, and JavaScript |
 | `fonts/` | IBM Plex latin `woff2` files, `fonts.css`, and their OFL licences |
-| `tests/` | Guard tests for the payload and the tokens, the React smoke test, and the catalogue's behaviour tests |
+| `tests/` | Guard tests for the payload, the tokens, and the site build, the React smoke test, and behaviour tests for the catalogue and the built site |
 
-To change a value, edit the JSON and run `pnpm tokens:build`. `pnpm tokens:check` fails when a generated file is stale.
+To change a value, edit the JSON and run `pnpm tokens:build`. `pnpm tokens:check` fails when a generated file is stale or a token has no role.
+
+`pnpm site:build` writes the site to `site/`. It reads the version from the latest `v*` tag, so it needs the tags in the checkout.
 
 ## Install
 

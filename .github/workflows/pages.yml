@@ -1,7 +1,13 @@
 name: Pages
 
+# The site shows the released version, which semantic-release tags in the Release workflow, so the
+# deploy waits for Release to finish on main. Pull requests build the site without deploying it.
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Release
+    types:
+      - completed
     branches:
       - main
   pull_request:
@@ -16,14 +22,25 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          # The commit Release built, with its tags: the site build reads the version from the latest v* tag.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
       - uses: actions/configure-pages@v5
-      # language/ is served as it ships: the catalogue and pages link to tokens.css and to each other relatively.
+      - run: pnpm site:build
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: language
+          path: site
 
   deploy:
     needs: build
