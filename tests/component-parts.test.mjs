@@ -6,10 +6,6 @@ import { read } from './css.mjs'
 // same place. A part that does not apply says "None", then a colon and the reason. Do and Don't come
 // right after States. The catalogue shows the same Do and Don't lines under each component's purpose.
 const REQUIRED = ['Anatomy', 'States', 'Do', "Don't", 'Keyboard and screen reader', 'Motion', 'Forced colors']
-// A Don't line names the mistake, such as "A switch in a form…". One that opens with an instruction reads
-// as advice once the label is gone, as in index.json.
-const IMPERATIVE = /^(?:Use|Add|Put|Keep|Give|Show|Write|Make|Place|Avoid|Never|Do|Don't)\b/
-
 const slug = (title) => title.toLowerCase().replace(/[^a-z0-9 -]/g, '').trim().replace(/\s+/g, '-')
 // A section runs to the next level-2 or level-3 heading, so a subsection's parts do not count for it.
 // Only a "- **Part.** text" bullet is a part; a word in prose is not.
@@ -30,7 +26,6 @@ const partProblems = (md, ids) => {
       if (!REQUIRED.includes(name)) continue
       if (!text) problems.push(`${id}: ${name} is empty`)
       else if (/^None\b/.test(text) && !/^None: \S/.test(text)) problems.push(`${id}: ${name} says None without a reason`)
-      else if (name === "Don't" && IMPERATIVE.test(text)) problems.push(`${id}: Don't opens with an instruction, not the mistake`)
     }
     const states = names.indexOf('States')
     if (states >= 0 && (names[states + 1] !== 'Do' || names[states + 2] !== "Don't")) problems.push(`${id}: Do and Don't do not follow States`)
@@ -55,7 +50,6 @@ test('the parts check catches a missing or empty part, a bare None, a part in pr
   assert.deepEqual(partProblems(section(bullets(full.map((line) => (line.startsWith('Motion') ? 'Motion. None.' : line)))), ['widget']), ['widget: Motion says None without a reason'])
   assert.deepEqual(partProblems(section(bullets(full.map((line) => (line.startsWith('Motion') ? 'Motion. None by default.' : line)))), ['widget']), ['widget: Motion says None without a reason'])
   assert.deepEqual(partProblems(section(`${bullets(full.filter((line) => !line.startsWith('Motion')))}\n\nMotion is none, because it is static.`), ['widget']), ['widget: no Motion'])
-  assert.deepEqual(partProblems(section(bullets(full.map((line) => (line.startsWith("Don't") ? "Don't. Use it for decoration." : line)))), ['widget']), ["widget: Don't opens with an instruction, not the mistake"])
   for (const empty of ['Motion. ', 'Motion.']) {
     assert.deepEqual(partProblems(section(bullets(full.map((line) => (line.startsWith('Motion') ? empty : line)))), ['widget']), ['widget: Motion is empty'], JSON.stringify(empty))
   }

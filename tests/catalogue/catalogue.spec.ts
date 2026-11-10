@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 
 // Behaviour of the catalogue shell in language/components.html: Find, the / shortcut, location
 // tracking, the tablet drawer, the tab glide, the live slider's value, the page without JavaScript,
-// overflow, and axe.
+// overflow, forced colors, and axe.
 const url = new URL('../../language/components.html', import.meta.url).href
 const railLink = (page: Page, name: string) => page.locator('#rail .rail-list a', { hasText: new RegExp(`^${name}$`) })
 const current = (page: Page) => page.locator('#rail [aria-current="location"]')
@@ -352,6 +352,226 @@ for (const width of [390, 720, 1280]) {
     // Overflow is content wider than the page's box. The page reserves a scrollbar gutter, which a browser
     // with hidden scrollbars (headless Linux) leaves empty, so the difference can be negative there.
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0)
+  })
+}
+
+// Rendered recipes. Contrast and corners are read from computed styles, so overrides, whitespace, and
+// corner longhands settle as Chromium renders them. Every specimen is measured in each state class it
+// shows (.is-hover, .is-active, .is-focus, aria-pressed).
+const docText = async (page: Page, file: string) => {
+  await page.goto(new URL(`../../language/${file}`, import.meta.url).href)
+  return page.locator('body').innerText()
+}
+
+type Pair = { selector: string; min: number; textPseudo?: string; fillPseudo?: string; edge?: boolean }
+const contrastPairs: Record<string, Pair> = {
+  'every enabled primary button label': { selector: '.btn:not(.secondary, .ghost, .danger, .text):not(:disabled)', min: 4.5 },
+  'every enabled danger button label': { selector: '.btn.danger:not(:disabled)', min: 4.5 },
+  'every status badge label': { selector: '.badge:is(.success, .warning, .danger, .info)', min: 4.5 },
+  'every enabled toggle card label and description': { selector: '.toggle:not(:disabled) :is(.toggle-text, .toggle-text small)', min: 4.5 },
+  'every selected segmented label on its thumb': { selector: '.segmented button[aria-pressed="true"]:not(:disabled)', fillPseudo: '::before', min: 4.5 },
+  'the command plate text': { selector: '.code.command .line', min: 4.5 },
+  'the command plate prompt': { selector: '.code.command .line', textPseudo: '::before', min: 3 },
+  'every focused field edge, on its fill and on the surface around it': { selector: ':is(.input, .select, .textarea, .search).is-focus', edge: true, min: 3 },
+}
+// Each specimen's text (or edge) colour over the background colours stacked under it. Chromium computes
+// colours as rgb() or color(srgb …); anything else throws, so a pair cannot pass unread. The helper does not
+// model paint order: a background image in the stack, or a host background over a pseudo-element fill,
+// makes the specimen fail as unmeasured.
+const ratios = (page: Page, pair: Pair) => page.locator(pair.selector).evaluateAll((nodes, { textPseudo, fillPseudo, edge }) => {
+  const parse = (value: string) => {
+    const rgb = value.match(/^rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)$/)
+    if (rgb) return [Number(rgb[1]) / 255, Number(rgb[2]) / 255, Number(rgb[3]) / 255, rgb[4] === undefined ? 1 : Number(rgb[4])]
+    const srgb = value.match(/^color\(srgb ([-\d.e]+) ([-\d.e]+) ([-\d.e]+)(?: \/ ([\d.]+))?\)$/)
+    if (srgb) return [Number(srgb[1]), Number(srgb[2]), Number(srgb[3]), srgb[4] === undefined ? 1 : Number(srgb[4])]
+    throw new Error(`unsupported colour: ${value}`)
+  }
+  const over = (top: number[], bottom: number[]) => [0, 1, 2].map((i) => top[i] * top[3] + bottom[i] * (1 - top[3])).concat(1)
+  // The layers down to the first opaque one, innermost first; anything under that is hidden.
+  const ground = (node: Element, pseudo?: string) => {
+    const styles = pseudo ? [getComputedStyle(node, pseudo)] : []
+    for (let el: Element | null = node; el; el = el.parentElement) styles.push(getComputedStyle(el))
+    if (pseudo && (parse(styles[1].backgroundColor)[3] > 0 || styles[1].backgroundImage !== 'none')) {
+      throw new Error(`a host background over the ${pseudo} fill: ${styles[1].backgroundColor} ${styles[1].backgroundImage}`)
+    }
+    const layers: number[][] = []
+    for (const style of styles) {
+      if (style.backgroundImage !== 'none') throw new Error(`a background image: ${style.backgroundImage}`)
+      const colour = parse(style.backgroundColor)
+      layers.push(colour)
+      if (colour[3] === 1) break
+    }
+    return layers.reverse().reduce((below, layer) => over(layer, below), [1, 1, 1, 1])
+  }
+  const luminance = (c: number[]) => c.slice(0, 3).map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0)
+  const ratio = (ink: number[], below: number[]) => {
+    const [hi, lo] = [luminance(over(ink, below)), luminance(below)].sort((a, b) => b - a)
+    return (hi + 0.05) / (lo + 0.05)
+  }
+  return nodes.flatMap((node, index) => {
+    const name = `${node.className} #${index} "${node.textContent?.trim().slice(0, 24)}"`
+    try {
+      if (edge) {
+        const ink = parse(getComputedStyle(node).borderTopColor)
+        return [{ name: `${name} on its fill`, ratio: ratio(ink, ground(node)) }, { name: `${name} on its surface`, ratio: ratio(ink, ground(node.parentElement!)) }]
+      }
+      return [{ name, ratio: ratio(parse(getComputedStyle(node, textPseudo).color), ground(node, fillPseudo)) }]
+    } catch (error) {
+      return [{ name, ratio: Number.NaN, unmeasured: (error as Error).message }]
+    }
+  })
+}, pair)
+const below = (measured: { name: string; ratio: number; unmeasured?: string }[], min: number) => measured.filter(({ ratio }) => !(ratio >= min))
+  .map(({ name, ratio, unmeasured }) => `${name}: ${unmeasured ? `unmeasured, ${unmeasured}` : `${ratio.toFixed(2)}:1`}`)
+
+// Shape follows role (DESIGN.md, Surfaces): the rendered corners of each role's parts equal its token.
+// The slider track and the select picker are engine pseudo-elements that computed styles cannot reach;
+// the node literal-radius guard covers them.
+const shapeRoles: Record<string, string[]> = {
+  '--radius-control': ['.btn', '.quiet-action', '.segmented', '.segmented button', '.segmented button::before'],
+  '--radius-pill': ['.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.progress', '.score .pips i', '.badge', '.navlist a[aria-current="location"]::before'],
+  '--radius-inline': ['.check input:not([type="radio"])', '.tab', '.navlist a', '.group-toggle', '.crumbs a', '.key', '.rows [role="option"]'],
+  // The skip link is a floating layer, so the rule gives it --radius-panel. It keeps --radius-field
+  // until the owner picks (decisions.md, Open questions).
+  '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.skip'],
+  '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist'],
+}
+// Rows that sit --space-1 inside a panel are concentric with it.
+const concentricRows = ['.select option', '.picker li']
+const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
+  const corners = (style: CSSStyleDeclaration) => [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].join(' ')
+  const probe = document.body.appendChild(document.createElement('i'))
+  probe.style.borderRadius = 'calc(var(--radius-panel) - var(--space-1))'
+  const expected = [
+    ...Object.entries(roles).flatMap(([token, list]) => list.map((selector) => [selector, getComputedStyle(document.documentElement).getPropertyValue(token).trim()])),
+    ...concentric.map((selector) => [selector, getComputedStyle(probe).borderTopLeftRadius]),
+  ].map(([selector, value]) => ({ base: selector.replace(/::[\w-]+$/, ''), pseudo: selector.match(/::[\w-]+$/)?.[0] ?? null, selector, value }))
+  probe.remove()
+  const problems = new Set<string>()
+  for (const { base, pseudo, selector, value } of expected) {
+    const nodes = [...document.querySelectorAll(base)]
+    if (nodes.length === 0) problems.add(`${selector}: no specimen`)
+    for (const node of nodes) {
+      const got = corners(getComputedStyle(node, pseudo))
+      if (got !== `${value} ${value} ${value} ${value}`) problems.add(`${selector}: ${got}, not ${value}`)
+    }
+  }
+  // Any other corner is none, round, or the corners of the shape it fills.
+  for (const node of document.querySelectorAll('body *')) {
+    for (const pseudo of [null, '::before', '::after']) {
+      const got = corners(getComputedStyle(node, pseudo))
+      const host = pseudo ? node : node.parentElement
+      if (got === '0px 0px 0px 0px' || got === '50% 50% 50% 50%' || (host && got === corners(getComputedStyle(host)))) continue
+      if (expected.some((rule) => rule.pseudo === pseudo && node.matches(rule.base))) continue
+      problems.add(`${node.tagName.toLowerCase()}${[...node.classList].map((name) => `.${name}`).join('')}${pseudo ?? ''}: ${got}, with no role`)
+    }
+  }
+  return [...problems]
+}, { roles: shapeRoles, concentric: concentricRows })
+
+test.describe('rendered recipes', () => {
+  test.use({ viewport: { width: 1280, height: 900 } })
+
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test.describe(colorScheme, () => {
+      test.use({ colorScheme })
+
+      for (const [name, pair] of Object.entries(contrastPairs)) {
+        test(`contrast: ${name} reaches ${pair.min}:1`, async ({ page }) => {
+          await page.goto(url)
+          const measured = await ratios(page, pair)
+          expect(measured.length).toBeGreaterThan(0)
+          expect(below(measured, pair.min)).toEqual([])
+        })
+      }
+
+      test('each component renders the corner radius of its role, and no other part has one', async ({ page }) => {
+        await page.goto(url)
+        expect(await shapeProblems(page)).toEqual([])
+      })
+
+      test('contrast: the toggle card ratios in decisions.md match the render', async ({ page }) => {
+        const row = (await docText(page, 'decisions.md')).split('\n').find((line) => line.startsWith('| Toggle card |'))
+        await page.goto(url)
+        // The one card with a description is the live one: press it, with no transition to sample midway.
+        await page.addStyleTag({ content: '.toggle { transition: none; }' })
+        await page.locator('.toggle:has(small)').evaluate((node) => node.setAttribute('aria-pressed', 'true'))
+        const measured = await ratios(page, { selector: '.toggle:has(small) :is(.toggle-text, .toggle-text small)', min: 0 })
+        expect(measured).toHaveLength(2)
+        expect(below(measured, 0)).toEqual([])
+        for (const { ratio } of measured) expect(row).toContain(`${ratio.toFixed(2)}:1`)
+      })
+    })
+  }
+
+  test('the contrast check fails a hover rule that hides the primary label', async ({ page }) => {
+    await page.goto(url)
+    await page.addStyleTag({ content: '.btn:is(:hover, .is-hover):not(:disabled) { color: var(--color-button-hover); }' })
+    expect(below(await ratios(page, contrastPairs['every enabled primary button label']), 4.5)).toEqual([expect.stringMatching(/^btn is-hover #\d+ ".*": 1\.00:1$/)])
+  })
+
+  test('the contrast check fails a fill it cannot measure: a background image, or a host background over a pseudo-element fill', async ({ page }) => {
+    await page.goto(url)
+    await page.addStyleTag({ content: `.btn:is(:hover, .is-hover):not(:disabled) { background-image: linear-gradient(var(--color-accent-text), var(--color-accent-text)); }
+      .segmented button[aria-pressed="true"] { background: var(--color-segmented-current-text); }` })
+    expect(below(await ratios(page, contrastPairs['every enabled primary button label']), 4.5)).toEqual([expect.stringMatching(/^btn is-hover #\d+ ".*": unmeasured, a background image: linear-gradient/)])
+    const segmented = below(await ratios(page, contrastPairs['every selected segmented label on its thumb']), 4.5)
+    expect(segmented.length).toBeGreaterThan(0)
+    for (const line of segmented) expect(line).toMatch(/unmeasured, a host background over the ::before fill/)
+    await page.addStyleTag({ content: `.segmented button[aria-pressed="true"] { background: linear-gradient(var(--color-segmented-current-text), var(--color-segmented-current-text)); }` })
+    const imaged = below(await ratios(page, contrastPairs['every selected segmented label on its thumb']), 4.5)
+    expect(imaged).toHaveLength(segmented.length)
+    for (const line of imaged) expect(line).toMatch(/unmeasured, a host background over the ::before fill: rgba\(0, 0, 0, 0\) linear-gradient/)
+  })
+
+  test('the DESIGN.md shape table names each role token with its value', async ({ page }) => {
+    const table = [...(await docText(page, 'DESIGN.md')).matchAll(/^\s*\| [^|]+ \| (Pill|\d+px) \| `(--radius-[\w-]+)` \|/gm)].map(([, shape, token]) => [token, shape])
+    expect(table.map(([token]) => token).sort()).toEqual(Object.keys(shapeRoles).sort())
+    await page.goto(url)
+    const values = await page.evaluate((tokens) => tokens.map((token) => getComputedStyle(document.documentElement).getPropertyValue(token).trim()), table.map(([token]) => token))
+    expect(values).toEqual(table.map(([, shape]) => (shape === 'Pill' ? '999px' : shape)))
+  })
+
+
+  test('the shape check catches a role override, a corner longhand, and a radius with no role', async ({ page }) => {
+    await page.goto(url)
+    await page.addStyleTag({ content: '.tab{border-radius:var(--radius-field)} .key { border-top-left-radius: var(--radius-pill) } .purpose { border-radius: var(--radius-control) }' })
+    const problems = await shapeProblems(page)
+    expect(problems).toContain('.tab: 10px 10px 10px 10px, not 6px')
+    expect(problems).toContain('.key: 999px 6px 6px 6px, not 6px')
+    expect(problems).toContain('p.purpose: 999px 999px 999px 999px, with no role')
+  })
+})
+
+// In forced colors a fill takes the system background, and an SVG keeps the colour it sets. The badge's tone
+// dot and the alert's status icon must still draw, in the system text colour of their label.
+for (const colorScheme of ['light', 'dark'] as const) {
+  test.describe(`forced colors, ${colorScheme}`, () => {
+    test.use({ forcedColors: 'active', colorScheme, viewport: { width: 1280, height: 900 } })
+
+    test('each status badge keeps its tone dot in the label colour', async ({ page }) => {
+      await page.goto(url)
+      const badges = await page.locator('#badge .badge:is(.success, .warning, .danger, .info)').evaluateAll((items) => items.map((item) => ({
+        text: getComputedStyle(item).color,
+        dot: getComputedStyle(item, '::before').backgroundColor,
+        canvas: getComputedStyle(document.body).backgroundColor,
+      })))
+      expect(badges).toHaveLength(4)
+      for (const { text, dot, canvas } of badges) {
+        expect(dot).toBe(text)
+        expect(dot).not.toBe(canvas)
+      }
+    })
+
+    test('each alert icon takes the alert text colour', async ({ page }) => {
+      await page.goto(url)
+      const alerts = await page.locator('#alert .alert').evaluateAll((items) => items.map((item) => ({
+        text: getComputedStyle(item).color,
+        icon: getComputedStyle(item.querySelector('.icon')!).color,
+      })))
+      expect(alerts).toHaveLength(5)
+      for (const { text, icon } of alerts) expect(icon).toBe(text)
+    })
   })
 }
 

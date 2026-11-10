@@ -185,7 +185,7 @@ Layer: Core. ui: `UiField`.
 
 Layer: Core. ui: `UiSlider`.
 
-- **Anatomy.** A 6px track with `--radius-inline` and `--color-surface-muted`, an `--color-accent` range, and a round thumb (16px, 18px, or 20px) with a 2px `--color-accent` edge and a `--color-surface-raised` fill. The current value follows the track as `--text-sm` text in tabular numbers, in an `<output>` whose `for` names the slider.
+- **Anatomy.** A 6px track with `--radius-pill` and `--color-surface-muted`, an `--color-accent` range, and a round thumb (16px, 18px, or 20px) with a 2px `--color-accent` edge and a `--color-surface-raised` fill. The current value follows the track as `--text-sm` text in tabular numbers, in an `<output>` whose `for` names the slider.
 - **States.** Rest, dragging (`cursor: grabbing`), focus-visible on the thumb, and disabled.
 - **Do.** Use a slider for an approximate value in a range, such as volume or opacity, and show the current value as text beside it.
 - **Don't.** A slider for a value the reader must set exactly, such as a port or a price. Use a text input.
@@ -197,7 +197,7 @@ Layer: Core. ui: `UiSlider`.
 
 Layer: Core. ui: `UiProgress`.
 
-- **Anatomy.** A track about 9px tall with a 1px `--color-border-subtle` edge, `--radius-inline`, and `--color-surface-muted`, holding an `--color-accent` indicator moved with `translateX`.
+- **Anatomy.** A track about 9px tall with a 1px `--color-border-subtle` edge, `--radius-pill`, and `--color-surface-muted`, holding an `--color-accent` indicator moved with `translateX`.
 - **States.** None: a progress bar takes no input, so it has no interaction states. Its value follows `aria-valuenow`.
 - **Do.** Use it for a task with a known end, such as an import, and name it for the task.
 - **Don't.** A progress bar for a measured value, such as disk usage or a rating. It shows a task moving to its end; use text or a score.
@@ -209,7 +209,7 @@ Layer: Core. ui: `UiProgress`.
 
 Layer: Core. ui: `UiScore`.
 
-- **Anatomy.** A row of 8px pips with 3px gaps, then the value in medium weight and `/max` in muted regular weight, in tabular numbers. Empty pips have a 1px `--color-border` edge; filled pips are `--color-accent`.
+- **Anatomy.** A row of 8px round pips (`--radius-pill`) with 3px gaps, then the value in medium weight and `/max` in muted regular weight, in tabular numbers. Empty pips have a 1px `--color-border` edge; filled pips are `--color-accent`.
 - **States.** None: a score is static, so it has no interaction states.
 - **Do.** Use it for a value out of a fixed maximum, such as 4/5, and keep one maximum across a list so the rows compare.
 - **Don't.** A score for a percentage or an open-ended count. Write the number as text.
@@ -228,7 +228,7 @@ Layer: Core. ui: `UiBadge`.
 - **Don't.** A badge that repeats the title, or one on every row with the same value. Badge the exceptions.
 - **Keyboard and screen reader.** Static text; the label carries the meaning, never the colour alone.
 - **Motion.** None: a badge is static.
-- **Forced colors.** Fills drop and the transparent border draws as the system edge, so each badge reads as an outlined label. The tone dot drops with the fill, so the label carries the status; see [known gaps](decisions.md#known-gaps).
+- **Forced colors.** Fills drop and the transparent border draws as the system edge, so each badge reads as an outlined label. The tone dot opts out of adjustment (`forced-color-adjust: none`) and draws in `CanvasText`, the label's colour; the label still carries the status.
 
 ## Alert
 
@@ -241,7 +241,7 @@ Layer: Core. ui: `UiAlert`.
 - **Don't.** An alert for decoration or routine emphasis. A short status label is a badge; explanations and recovery instructions stay in an alert.
 - **Keyboard and screen reader.** Static content. Use `role="status"` or `role="alert"` only for a message that appears while the reader works.
 - **Motion.** None: an alert shows at once, with no entrance animation.
-- **Forced colors.** Fills drop and the transparent border draws as the system edge. The icon keeps its status colour, and the text carries the message; see [known gaps](decisions.md#known-gaps).
+- **Forced colors.** Fills drop and the transparent border draws as the system edge. The icon takes `CanvasText`, the text colour, because an SVG keeps the status colour it sets; the text carries the message.
 
 ## Surface and card
 

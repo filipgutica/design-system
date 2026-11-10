@@ -381,11 +381,11 @@
       "note": "One radius per role, from inline code to floating panels.",
       "comment": "Shape",
       "roles": {
-        "radius-inline": "Inline elements, checkboxes, navigation rows, list-selection rows, and tabs",
-        "radius-control": "Buttons, quiet actions, segmented controls, and their thumbs",
-        "radius-panel": "Wells, plates, panels, radio cards, alerts, and floating layers",
-        "radius-field": "Inputs, selects, textareas, toggle cards, and pager links",
-        "radius-pill": "Status badges and switch tracks"
+        "radius-inline": "Places and picked rows: navigation rows, tabs, list rows, breadcrumb links, checkboxes, and keyboard keys",
+        "radius-control": "Pills that act or set a value: buttons, quiet actions, segmented controls, and their thumbs",
+        "radius-panel": "Containers: wells, plates, panels, radio cards, alerts, and floating layers",
+        "radius-field": "Typed fields and controls whose label wraps: inputs, selects, textareas, toggle cards, and pager links",
+        "radius-pill": "Small state marks: status badges, switch tracks, slider and progress tracks, and score pips"
       },
       "tokens": {
         "radius-inline": "6px",
