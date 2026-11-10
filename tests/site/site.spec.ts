@@ -137,6 +137,23 @@ test.describe('Foundations Find', () => {
   })
 })
 
+test('on phones, the sticky bar offers Clear on one line while a filter is on', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('foundations.html')
+  await page.locator('#section-find').click()
+  await page.locator('#find').fill('surface-raised shadow')
+  await page.locator('#nav-drawer .close').click()
+  const clear = page.locator('#section-bar .bar-clear')
+  await expect(clear).toHaveText('Clear “surface-raised shadow”')
+  const lineHeight = await page.locator('.page-head .crumbs a').first().evaluate((a) => a.getBoundingClientRect().height)
+  expect((await clear.boundingBox())!.height).toBeLessThanOrEqual(48)
+  expect(lineHeight).toBeLessThanOrEqual(48)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0)
+  await clear.click()
+  await expect(clear).toBeHidden()
+  await expect(page.locator('.tokens tbody tr[hidden]')).toHaveCount(0)
+})
+
 test('Copy writes var(--name) and says so', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (text: string) => { (window as unknown as { copied: string }).copied = text } } })

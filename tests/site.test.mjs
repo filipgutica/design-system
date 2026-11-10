@@ -61,12 +61,21 @@ test('the link check catches a missing page and a missing fragment', () => {
   assert.deepEqual(deadLinks({ files: planted, ...inLanguage }), ['components.html: index.html', 'components.html: #nowhere'])
 })
 
+// site/ holds the generated files, the copied language files, and fonts/, and nothing else from the repository.
+const copied = new Map(COPIED.map((name) => [name, read(`language/${name}`)]))
+const inSite = {
+  exists: (name) => files.has(name) || copied.has(name) || (name.startsWith('fonts/') && existsSync(name)),
+  read: (name) => files.get(name) ?? copied.get(name),
+}
+
 test('every link in the built site resolves inside site/', () => {
-  const copied = new Map(COPIED.map((name) => [name, read(`language/${name}`)]))
-  const onSite = (name) => files.has(name) || copied.has(name) || existsSync(name.replace(/^fonts\//, 'fonts/'))
-  const readSite = (name) => files.get(name) ?? copied.get(name)
   const sitePages = new Map([...files, ...copied].filter(([name]) => name.endsWith('.html')))
-  assert.deepEqual(deadLinks({ files: sitePages, exists: onSite, read: readSite }), [])
+  assert.deepEqual(deadLinks({ files: sitePages, ...inSite }), [])
+})
+
+test('the site link check catches a file the repository has but site/ does not', () => {
+  const planted = new Map([['docs.html', '<a href="README.md">Read me</a><a href="fonts/fonts.css">Fonts</a><a href="tokens.css">Tokens</a>']])
+  assert.deepEqual(deadLinks({ files: planted, ...inSite }), ['docs.html: README.md'])
 })
 
 test('implementations.json names real components with a component and an https URL', () => {

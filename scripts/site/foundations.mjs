@@ -142,6 +142,9 @@ const FOUNDATIONS_CSS = `
   .height { flex: none; width: 0.5rem; border-radius: 2px; background: var(--color-accent); }
   .sample { flex: none; min-width: 1.5rem; line-height: 1; color: var(--color-text); }
   .find-summary { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+  /* The phone bar's Clear names the query on one line, cut short with an ellipsis; the bar's icon buttons keep their size. */
+  .section-bar > .bar-clear { display: block; width: auto; max-width: 7.5rem; padding-inline: var(--space-2); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .page-head > .crumbs a { white-space: nowrap; }
   @media (max-width: 800px) {
     /* Tablets: long names wrap inside their column. Phones stack each row into a record. */
     .token { flex-wrap: wrap; white-space: normal; }
