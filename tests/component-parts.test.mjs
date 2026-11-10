@@ -11,11 +11,11 @@ const slug = (title) => title.toLowerCase().replace(/[^a-z0-9 -]/g, '').trim().r
 // A section runs to the next level-2 or level-3 heading, so a subsection's parts do not count for it.
 // Only a "- **Part.** text" bullet is a part; a word in prose is not.
 const specSections = (md) => new Map(md.split(/^(?=#{2,3} )/m).filter((block) => block.startsWith('## '))
-  .map((block) => [slug(block.match(/^## (.+)/)[1]), [...block.matchAll(/^- \*\*([^*]+?)\.\*\* (.*)$/gm)].map(([, name, text]) => ({ name, text }))]))
+  .map((block) => [slug(block.match(/^## (.+)/)[1]), [...block.matchAll(/^- \*\*([^*]+?)\.\*\*(.*)$/gm)].map(([, name, text]) => ({ name, text: text.trim() }))]))
 
 const catalogueIds = (html) => [...html.matchAll(/<section class="component" id="([\w-]+)"/g)].map(([, id]) => id)
 
-// Lists each missing part, each "None" without a reason, and Do or Don't out of place, as "id: problem".
+// Lists each missing or empty part, each "None" without a reason, and Do or Don't out of place, as "id: problem".
 const partProblems = (md, ids) => {
   const sections = specSections(md)
   return ids.flatMap((id) => {
@@ -24,7 +24,9 @@ const partProblems = (md, ids) => {
     const names = parts.map(({ name }) => name)
     const problems = REQUIRED.filter((part) => !names.includes(part)).map((part) => `${id}: no ${part}`)
     for (const { name, text } of parts) {
-      if (REQUIRED.includes(name) && /^None\b/.test(text) && !/^None: \S/.test(text)) problems.push(`${id}: ${name} says None without a reason`)
+      if (!REQUIRED.includes(name)) continue
+      if (!text) problems.push(`${id}: ${name} is empty`)
+      else if (/^None\b/.test(text) && !/^None: \S/.test(text)) problems.push(`${id}: ${name} says None without a reason`)
     }
     const states = names.indexOf('States')
     if (states >= 0 && (names[states + 1] !== 'Do' || names[states + 2] !== "Don't")) problems.push(`${id}: Do and Don't do not follow States`)
@@ -40,7 +42,7 @@ test('every component section has every part, or says None with a reason', () =>
   assert.deepEqual(partProblems(md, catalogueIds(html)), [])
 })
 
-test('the parts check catches a missing part, a bare None, a part in prose only, and Do out of place', () => {
+test('the parts check catches a missing or empty part, a bare None, a part in prose only, and Do out of place', () => {
   const section = (body) => `## Widget\n\nLayer: Core.\n\n${body}\n`
   const full = ['Anatomy. A box.', 'States. Rest.', 'Do. Use it.', "Don't. Misuse it.", 'Keyboard and screen reader. A button.', 'Motion. None: it is static.', 'Forced colors. The edge draws.']
   const bullets = (lines) => lines.map((line) => line.replace(/^([^.]+)\./, '- **$1.**')).join('\n')
@@ -49,6 +51,9 @@ test('the parts check catches a missing part, a bare None, a part in prose only,
   assert.deepEqual(partProblems(section(bullets(full.map((line) => (line.startsWith('Motion') ? 'Motion. None.' : line)))), ['widget']), ['widget: Motion says None without a reason'])
   assert.deepEqual(partProblems(section(bullets(full.map((line) => (line.startsWith('Motion') ? 'Motion. None by default.' : line)))), ['widget']), ['widget: Motion says None without a reason'])
   assert.deepEqual(partProblems(section(`${bullets(full.filter((line) => !line.startsWith('Motion')))}\n\nMotion is none, because it is static.`), ['widget']), ['widget: no Motion'])
+  for (const empty of ['Motion. ', 'Motion.']) {
+    assert.deepEqual(partProblems(section(bullets(full.map((line) => (line.startsWith('Motion') ? empty : line)))), ['widget']), ['widget: Motion is empty'], JSON.stringify(empty))
+  }
   assert.deepEqual(partProblems(section(bullets(full.filter((line) => !line.startsWith("Don't")))), ['widget']), ["widget: no Don't", "widget: Do and Don't do not follow States"])
   const [anatomy, states, ...rest] = full
   assert.deepEqual(partProblems(section(bullets([anatomy, ...rest, states])), ['widget']), ["widget: Do and Don't do not follow States"])
@@ -68,11 +73,18 @@ const escape = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').repla
 const asHtml = (line) => line.split(/(`[^`]+`)/).map((part) => (part.startsWith('`')
   ? `<code>${escape(part.slice(1, -1))}</code>`
   : escape(part).replace(/'/g, '’').replace(/"([^"]*)"/g, '“$1”'))).join('')
-const catalogueGuidance = (page) => new Map([...page.matchAll(/<section class="component" id="([\w-]+)"[^>]*>\n {4}<header>.*\n {4}<p class="purpose">[^<]*<\/p>\n {4}<dl class="guidance"><dt>Do<\/dt><dd>(.*?)<\/dd><dt>Don’t<\/dt><dd>(.*?)<\/dd><\/dl>\n/g)]
-  .map(([, id, doLine, dontLine]) => [id, { do: doLine, dont: dontLine }]))
+// Each section's guidance list, which must follow its purpose line. Whitespace between and inside the
+// tags does not matter.
+const squash = (text) => text?.replace(/\s+/g, ' ').trim()
+const catalogueGuidance = (page) => new Map(page.split(/(?=<section class="component" id=)/).slice(1).flatMap((section) => {
+  const id = section.match(/^<section class="component" id="([\w-]+)"/)[1]
+  const list = section.match(/<p class="purpose">[^<]*<\/p>\s*<dl class="guidance">([\s\S]*?)<\/dl>/)?.[1]
+  const item = (term) => squash(list?.match(new RegExp(`<dt>\\s*${term}\\s*</dt>\\s*<dd>([\\s\\S]*?)</dd>`))?.[1])
+  return list ? [[id, { do: item('Do'), dont: item('Don’t') }]] : []
+}))
 const specGuidanceHtml = (spec) => new Map([...specSections(spec)].map(([id, parts]) => [id, {
-  do: asHtml(parts.find(({ name }) => name === 'Do')?.text ?? ''),
-  dont: asHtml(parts.find(({ name }) => name === "Don't")?.text ?? ''),
+  do: squash(asHtml(parts.find(({ name }) => name === 'Do')?.text ?? '')),
+  dont: squash(asHtml(parts.find(({ name }) => name === "Don't")?.text ?? '')),
 }]))
 
 test('the catalogue shows each component’s Do and Don’t lines from components.md, under its purpose', () => {
@@ -84,4 +96,10 @@ test('the catalogue shows each component’s Do and Don’t lines from component
   const edited = specGuidanceHtml(md.replace('- **Do.** Use a select for one choice from more than five options', '- **Do.** Use a select for one choice from more than six options'))
   assert.notDeepEqual(shown.get('select'), edited.get('select'))
   assert.equal(asHtml("Links with `role=\"tab\"`, or a \"set\" that isn't"), 'Links with <code>role="tab"</code>, or a “set” that isn’t')
+  // The same lists spread over several lines read the same; a section without its list is caught.
+  const multiline = html.replace(/<dl class="guidance">.*?<\/dl>/g, (list) => list.replaceAll('><', '>\n      <').replace(/<dd>/g, '<dd>\n        '))
+  assert.notEqual(multiline, html)
+  assert.deepEqual(catalogueGuidance(multiline), shown)
+  const missing = html.replace(/(id="select"[\s\S]*?)<dl class="guidance">.*?<\/dl>\n/, '$1')
+  assert.deepEqual([...catalogueGuidance(missing).keys()], catalogueIds(html).filter((id) => id !== 'select'))
 })

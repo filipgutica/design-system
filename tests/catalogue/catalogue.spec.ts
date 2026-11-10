@@ -2,7 +2,8 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 
 // Behaviour of the catalogue shell in language/components.html: Find, the / shortcut, location
-// tracking, the tablet drawer, the tab glide, the page without JavaScript, overflow, and axe.
+// tracking, the tablet drawer, the tab glide, the live slider's value, the page without JavaScript,
+// overflow, and axe.
 const url = new URL('../../language/components.html', import.meta.url).href
 const railLink = (page: Page, name: string) => page.locator('#rail .rail-list a', { hasText: new RegExp(`^${name}$`) })
 const current = (page: Page) => page.locator('#rail [aria-current="location"]')
@@ -88,6 +89,21 @@ test.describe('desktop', () => {
     expect(glide).toEqual({ slide: 'right', names: ['glide-left', 'glide-right'] })
     await expect(list).not.toHaveAttribute('data-slide')
     await expect(list.getByRole('tab', { name: 'Settings' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  test('the live slider’s visible value follows the keyboard and the pointer', async ({ page }) => {
+    await page.goto(`${url}#slider`)
+    const slider = page.locator('#sl-rest')
+    const value = page.locator('output[for="sl-rest"]')
+    await expect(value).toHaveText('40%')
+    await slider.focus()
+    await page.keyboard.press('ArrowRight')
+    await expect(value).toHaveText('41%')
+    const box = (await slider.boundingBox())!
+    await page.mouse.click(box.x + box.width * 0.9, box.y + box.height / 2)
+    const pointed = Number(await slider.inputValue())
+    expect(pointed).toBeGreaterThan(80)
+    await expect(value).toHaveText(`${pointed}%`)
   })
 
   test('a keyboard tab change glides too', async ({ page }) => {

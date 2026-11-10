@@ -206,6 +206,11 @@
   .range[data-size="sm"] { height: var(--control-sm); }
   .range[data-size="lg"] { height: var(--control-lg); }
   .range:disabled { opacity: 0.58; cursor: not-allowed; }
+  /* The current value follows the track, so the reader sees the number the thumb sets. */
+  .slider { display: flex; align-items: center; gap: var(--space-3); width: 220px; max-width: 100%; }
+  .slider > .range { flex: 1; width: auto; min-width: 0; }
+  .slider-value { min-width: 4ch; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+  .range:disabled + .slider-value { opacity: 0.58; }
   /* The ring goes on the thumb, not the full-width input. */
   .range:is(:focus-visible, .is-focus) { outline: none; }
   .range:is(:focus-visible, .is-focus)::-webkit-slider-thumb { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
@@ -1106,14 +1111,14 @@
     <p class="purpose">Set a value in a range.</p>
     <dl class="guidance"><dt>Do</dt><dd>Use a slider for an approximate value in a range, such as volume or opacity, and show the current value as text beside it.</dd><dt>Don’t</dt><dd>A slider for a value the reader must set exactly, such as a port or a price. Use a text input.</dd></dl>
     <div class="row"><h4>States</h4><div class="states">
-      <div class="state"><div class="field"><label class="field-label" for="sl-rest">Sample rate</label><input class="range" id="sl-rest" type="range" min="0" max="100" value="40" style="--value:40%" data-live-range></div><span class="caption">Rest, live</span></div>
-      <div class="state" inert><input class="range is-focus" type="range" aria-label="Sample rate, focused" min="0" max="100" value="60" style="--value:60%"><span class="caption">Focus visible</span></div>
-      <div class="state" inert><input class="range" type="range" aria-label="Sample rate, disabled" min="0" max="100" value="60" style="--value:60%" disabled><span class="caption">Disabled</span></div>
+      <div class="state"><div class="field"><label class="field-label" for="sl-rest">Sample rate</label><div class="slider"><input class="range" id="sl-rest" type="range" min="0" max="100" value="40" style="--value:40%" data-live-range><output class="slider-value" for="sl-rest" aria-live="off">40%</output></div></div><span class="caption">Rest, live</span></div>
+      <div class="state" inert><div class="slider"><input class="range is-focus" id="sl-focus" type="range" aria-label="Sample rate, focused" min="0" max="100" value="60" style="--value:60%"><output class="slider-value" for="sl-focus" aria-live="off">60%</output></div><span class="caption">Focus visible</span></div>
+      <div class="state" inert><div class="slider"><input class="range" id="sl-disabled" type="range" aria-label="Sample rate, disabled" min="0" max="100" value="60" style="--value:60%" disabled><output class="slider-value" for="sl-disabled" aria-live="off">60%</output></div><span class="caption">Disabled</span></div>
     </div></div>
     <div class="row"><h4>Sizes</h4><div class="states">
-      <div class="state" inert><input class="range" data-size="sm" type="range" aria-label="Small slider" min="0" max="100" value="50"><span class="caption">sm</span></div>
-      <div class="state" inert><input class="range" type="range" aria-label="Medium slider" min="0" max="100" value="50"><span class="caption">md</span></div>
-      <div class="state" inert><input class="range" data-size="lg" type="range" aria-label="Large slider" min="0" max="100" value="50"><span class="caption">lg</span></div>
+      <div class="state" inert><div class="slider"><input class="range" id="sl-sm" data-size="sm" type="range" aria-label="Small slider" min="0" max="100" value="50"><output class="slider-value" for="sl-sm" aria-live="off">50%</output></div><span class="caption">sm</span></div>
+      <div class="state" inert><div class="slider"><input class="range" id="sl-md" type="range" aria-label="Medium slider" min="0" max="100" value="50"><output class="slider-value" for="sl-md" aria-live="off">50%</output></div><span class="caption">md</span></div>
+      <div class="state" inert><div class="slider"><input class="range" id="sl-lg" data-size="lg" type="range" aria-label="Large slider" min="0" max="100" value="50"><output class="slider-value" for="sl-lg" aria-live="off">50%</output></div><span class="caption">lg</span></div>
     </div></div>
   </section>
 
@@ -1159,7 +1164,7 @@
   <section class="component" id="alert" data-layer="Core" aria-labelledby="alert-title">
     <header><h3 id="alert-title">Alert</h3><span class="badge">Core</span><a href="components.md#alert">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="alert" aria-label="Copy link to Alert" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A real caveat or status message in the page.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use an alert for a caveat or status the reader needs before acting, and say what to do, such as “Reconnect the source to resume sync”.</dd><dt>Don’t</dt><dd>An alert for emphasis, a tip, or decoration. A status on one item is a badge.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Use an alert for a caveat or status message the reader needs before acting. When action is needed, name it, such as “Reconnect the source to resume sync”.</dd><dt>Don’t</dt><dd>Use an alert for decoration or routine emphasis. Use a badge for a short status label; keep explanations and recovery instructions in an alert.</dd></dl>
     <div class="row"><h4>Tones</h4><div class="states">
       <div class="state wide"><div class="alert"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg><p>Values are sampled every 5 minutes.</p></div><span class="caption">Neutral</span></div>
       <div class="state wide"><div class="alert success"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><p>The monitor recovered at 14:20.</p></div><span class="caption">Success</span></div>
@@ -1226,7 +1231,7 @@
   <section class="component" id="navigation-list" data-layer="Core" data-states="hover selected focus" aria-labelledby="nav-title">
     <header><h3 id="nav-title">Navigation list</h3><span class="badge">Core</span><a href="components.md#navigation-list">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="navigation-list" aria-label="Copy link to Navigation list" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Rows of links with current page and current location.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Label each row with its page’s title as the page’s h1 reads, so the reader can match row and page.</dd><dt>Don’t</dt><dd>Actions such as Delete or Sign out in a navigation list. Every row is a link to a place; an action is a button.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Label a page link with the destination page’s title, and an in-page link with its destination section’s heading.</dd><dt>Don’t</dt><dd>Actions such as Delete or Sign out in a navigation list. Every row is a link to a place; an action is a button.</dd></dl>
     <div class="row"><h4>Rows</h4><div class="states">
       <div class="state"><nav class="navlist" aria-label="Sample routes"><span class="group-label">Guides</span><a href="components.html" aria-current="page">Install</a><a href="#navigation-list">Configure</a><a href="#navigation-list">Release</a></nav><span class="caption">Live; Install is the current page</span></div>
       <div class="state" inert><nav class="navlist" aria-label="Sample routes, pinned"><a href="#navigation-list" class="is-hover">Hover</a><a href="components.html" aria-current="page" class="is-hover">Current page, hover</a><a href="#navigation-list" aria-current="location">Current location</a><a href="#navigation-list" class="is-focus">Focus visible</a></nav><span class="caption">Hover, current page with hover, current location, and focus visible</span></div>
@@ -1245,7 +1250,7 @@
   <section class="component" id="section-rail" data-layer="Core" aria-labelledby="section-rail-title">
     <header><h3 id="section-rail-title">Section rail</h3><span class="badge">Core</span><a href="components.md#section-rail">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="section-rail" aria-label="Copy link to Section rail" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A sticky list of sections that moves into a drawer on phones.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use a rail for a site of more than six pages, or a long page whose readers jump between sections. Six pages or fewer take a strip.</dd><dt>Don’t</dt><dd>A rail beside a strip or a contents list that holds the same links. Each level has one list.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Use a rail for the sections of a long page, or for a site’s pages. A site’s pages may take a navigation strip of 6 links or fewer instead.</dd><dt>Don’t</dt><dd>A rail beside a strip or a contents list that holds the same links. Each level has one list.</dd></dl>
     <div class="row"><h4>Desktop rail</h4><div class="states">
       <div class="state"><div class="rail-specimen"><div class="find"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="input" type="search" aria-label="Find a component, specimen" placeholder="Find a component"><kbd class="key" aria-hidden="true">/</kbd></div>
         <nav class="navlist" aria-label="Rail specimen"><span class="group-label">Inputs</span><a href="#section-rail">Select</a><a href="#section-rail" aria-current="location">Slider</a><a href="#section-rail">Field wrapper</a></nav></div><span class="caption">Live; Slider is the current section</span></div>
@@ -1526,7 +1531,12 @@
   document.querySelectorAll('[data-live-toggle]').forEach((t) => t.addEventListener('click', () => t.setAttribute('aria-pressed', String(t.getAttribute('aria-pressed') !== 'true'))));
 
   // Slider fill follows the value.
-  document.querySelectorAll('[data-live-range]').forEach((r) => r.addEventListener('input', () => r.style.setProperty('--value', `${r.value}%`)));
+  // A live slider moves its range fill and its visible value together, from the keyboard or the pointer.
+  document.querySelectorAll('[data-live-range]').forEach((r) => r.addEventListener('input', () => {
+    r.style.setProperty('--value', `${r.value}%`);
+    const value = document.querySelector(`output[for="${r.id}"]`);
+    if (value) value.value = `${r.value}%`;
+  }));
 
   // A list that scrolls sideways names its clipped ends in data-clip, so CSS fades only those edges.
   const trackClip = (list) => {
