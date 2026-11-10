@@ -40,7 +40,7 @@ Center the **container**, not every sentence. Align header, content, images, and
 ## Files and examples
 
 - `tokens.css`: a standalone snapshot of the values (the Graphite Indigo theme) owned by `@filipgutica/ui`. The identity inputs sit in one block at the top. Each line's `ui:` comment lists the library variables that carry that value, the line's own name first. Update it when the package values change.
-- `components.md`: one spec for each component, with anatomy, tokens, states, keyboard and screen-reader behavior, motion, and forced colors. Read it for any component work.
+- `components.md`: one spec for each component, with anatomy, states, Do and Don't lines, keyboard and screen-reader behavior, motion, and forced colors. Read it for any component work.
 - `components.html`: every component in each of its states, in plain HTML and CSS on `tokens.css`. Copy component markup and styles from there.
 - `decisions.md`: the choices behind the components, and the options they replaced.
 - `reference.html`: an application example, and a Foundations catalogue (`#foundations`) of every token: type, color with contrast, spacing, shape, borders, elevation, focus, and motion.
