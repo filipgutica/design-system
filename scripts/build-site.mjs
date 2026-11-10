@@ -13,7 +13,7 @@ import { execFileSync } from 'node:child_process'
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { readRenameTable } from './rename-tokens.mjs'
-import { COMPONENTS_CSS, catalogueComponents, componentIndex, implementationProblems, llmsTxt, withImplementationLinks } from './site/components.mjs'
+import { COMPONENTS_CSS, catalogueComponents, componentIndex, implementationProblems, llmsTxt, specGuidance, withImplementationLinks } from './site/components.mjs'
 import { foundationsPage } from './site/foundations.mjs'
 import { overviewPage } from './site/overview.mjs'
 import { sitePage } from './site/shell.mjs'
@@ -37,6 +37,7 @@ export const siteFiles = ({ version }) => {
   const pkg = readJson('package.json')
   const implementations = readJson('language/implementations.json')
   const components = catalogueComponents(template)
+  const guidance = specGuidance({ markdown: read('language/components.md'), components })
   const problems = implementationProblems({ implementations, components })
   if (problems.length) throw new Error(`language/implementations.json:\n  ${problems.join('\n  ')}`)
 
@@ -54,7 +55,7 @@ export const siteFiles = ({ version }) => {
     ['index.html', sitePage({ template, current: 'overview', ...overview })],
     ['foundations.html', sitePage({ template, current: 'foundations', ...foundations })],
     ['components.html', withImplementationLinks({ html: catalogue, implementations })],
-    ['index.json', `${JSON.stringify(componentIndex({ components, implementations, pkg, version }), null, 2)}\n`],
+    ['index.json', `${JSON.stringify(componentIndex({ components, guidance, implementations, pkg, version }), null, 2)}\n`],
     ['llms.txt', llmsTxt({ components, pkg, version })],
   ]
 }

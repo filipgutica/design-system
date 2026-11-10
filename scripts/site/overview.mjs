@@ -106,9 +106,9 @@ export const Panel = ({ children }: { children: React.ReactNode }) => (
     ${command({ id: 'cmd-agents', label: 'Apply command', line: 'filip-stack apply' })}
     <dl class="defs">
       <dt><a href="DESIGN.md"><code>DESIGN.md</code></a></dt><dd>Selection rules and acceptance checks. Agents read it first.</dd>
-      <dt><a href="components.md"><code>components.md</code></a></dt><dd>One spec per component: anatomy, tokens, states, and keyboard.</dd>
+      <dt><a href="components.md"><code>components.md</code></a></dt><dd>One spec per component: anatomy, states, Do and Don’t, keyboard, motion, and forced colors.</dd>
       <dt><a href="components.html"><code>components.html</code></a></dt><dd>Markup and styles to copy, in every state.</dd>
-      <dt><a href="llms.txt"><code>llms.txt</code></a> and <a href="index.json"><code>index.json</code></a></dt><dd>A generated index of every component: its layer, purpose, spec, and implementations.</dd>
+      <dt><a href="llms.txt"><code>llms.txt</code></a> and <a href="index.json"><code>index.json</code></a></dt><dd>A generated index of every component: its layer, purpose, Do and Don’t lines, spec, and implementations.</dd>
     </dl>
   </section>
 

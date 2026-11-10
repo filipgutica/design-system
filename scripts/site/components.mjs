@@ -18,6 +18,25 @@ export const catalogueComponents = (template) => {
   return components
 }
 
+/**
+ * Each component's Do and Don't lines from language/components.md, by section id. The lines carry no
+ * links, so index.json holds them as written. Throws when a catalogue component has no line.
+ */
+export const specGuidance = ({ markdown, components }) => {
+  const slug = (title) => title.toLowerCase().replace(/[^a-z0-9 -]/g, '').trim().replace(/\s+/g, '-')
+  const sections = new Map(markdown.split(/^(?=#{2,3} )/m).filter((block) => block.startsWith('## '))
+    .map((block) => [slug(block.match(/^## (.+)/)[1]), block]))
+  const problems = []
+  const guidance = new Map(components.map(({ id }) => {
+    const section = sections.get(id) ?? ''
+    const lines = { do: section.match(/^- \*\*Do\.\*\* (.+)$/m)?.[1], dont: section.match(/^- \*\*Don't\.\*\* (.+)$/m)?.[1] }
+    for (const [key, line] of Object.entries(lines)) if (!line || line.includes('](')) problems.push(`${id}: ${key}`)
+    return [id, lines]
+  }))
+  if (problems.length) throw new Error(`components.md: a Do or Don't line is missing or holds a link: ${problems.join(', ')}`)
+  return guidance
+}
+
 /** The implementation of a component in each framework, from language/implementations.json, or null. */
 export const implementationsOf = ({ implementations, id }) => Object.fromEntries(
   Object.entries(implementations).map(([framework, byId]) => [framework, byId[id] ?? null]),
@@ -63,7 +82,7 @@ export const implementationProblems = ({ implementations, components }) => {
 }
 
 /** site/index.json: one entry per component, for agents and tools. */
-export const componentIndex = ({ components, implementations, pkg, version }) => ({
+export const componentIndex = ({ components, guidance, implementations, pkg, version }) => ({
   name: pkg.name,
   version,
   site: SITE_URL,
@@ -73,6 +92,8 @@ export const componentIndex = ({ components, implementations, pkg, version }) =>
     layer,
     group,
     purpose,
+    do: guidance.get(id).do,
+    dont: guidance.get(id).dont,
     url: `${SITE_URL}components.html#${id}`,
     spec: `${SITE_URL}components.md#${id}`,
     implementations: implementationsOf({ implementations, id }),
@@ -91,9 +112,9 @@ Read DESIGN.md first: it holds the selection rules and acceptance checks. Copy c
 ## Docs
 
 - [DESIGN.md](${SITE_URL}DESIGN.md): the design language, selection rules, and acceptance checks
-- [components.md](${SITE_URL}components.md): one spec per component: anatomy, tokens, states, and keyboard
+- [components.md](${SITE_URL}components.md): one spec per component: anatomy, states, Do and Don't, keyboard, motion, and forced colors
 - [decisions.md](${SITE_URL}decisions.md): why each decision was made, and the 1.x to 2.0 token renames
-- [index.json](${SITE_URL}index.json): every component with its layer, purpose, page, spec, and implementations
+- [index.json](${SITE_URL}index.json): every component with its layer, purpose, Do and Don't lines, page, spec, and implementations
 
 ## Pages
 

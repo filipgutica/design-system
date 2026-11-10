@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { posix } from 'node:path'
 import { COPIED, siteFiles } from '../scripts/build-site.mjs'
-import { catalogueComponents, implementationProblems } from '../scripts/site/components.mjs'
+import { catalogueComponents, implementationProblems, specGuidance } from '../scripts/site/components.mjs'
 import { foundationsPage } from '../scripts/site/foundations.mjs'
 import { overviewPage } from '../scripts/site/overview.mjs'
 import { shellDrift, sitePage, spanOnce } from '../scripts/site/shell.mjs'
@@ -113,6 +113,26 @@ test('implementations.json names real components with a component and an https U
   assert.deepEqual(implementationProblems({ implementations: { vue: { buton: { component: 'UiButton', url: 'http://x' } } }, components }), [
     'no react map', 'vue: no component buton', 'vue.buton: needs a component and an https url',
   ])
+})
+
+// index.json carries each component's Do and Don't lines as components.md writes them. The test finds
+// each section by its heading on its own, not through the build's parser.
+test('every index.json entry has Do and Don’t lines that match its components.md section', () => {
+  const index = JSON.parse(files.get('index.json'))
+  const spec = read('language/components.md')
+  const lineOf = (name, part) => spec.split(/^(?=#{2,3} )/m).find((block) => block.startsWith(`## ${name}\n`))
+    ?.match(new RegExp(`^- \\*\\*${part}\\.\\*\\* (.+)$`, 'm'))?.[1]
+  assert.equal(index.components.length, 32)
+  for (const entry of index.components) {
+    assert.ok(entry.do && entry.dont, entry.id)
+    assert.equal(entry.do, lineOf(entry.name, 'Do'), entry.id)
+    assert.equal(entry.dont, lineOf(entry.name, "Don't"), entry.id)
+  }
+  assert.match(files.get('llms.txt'), /index\.json\): every component with its layer, purpose, Do and Don't lines/)
+  // A missing line, or a line with a link that would break in JSON, stops the build.
+  const components = catalogueComponents(template)
+  assert.throws(() => specGuidance({ markdown: spec.replace(/^- \*\*Do\.\*\* One primary button.*\n/m, ''), components }), /: button: do$/)
+  assert.throws(() => specGuidance({ markdown: spec.replace('Use a figure.', 'Use a [figure](#figure).'), components }), /: terminal-capture: dont$/)
 })
 
 test('Overview takes its version and exports from the build and package.json', () => {

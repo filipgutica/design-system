@@ -642,6 +642,10 @@
   .component > header a { font-size: var(--text-sm); }
   /* Each component has a one-line purpose, which Find also matches, and a Copy link quiet action. */
   .purpose { max-width: var(--measure); margin-top: calc(-1 * var(--space-2)); color: var(--color-muted); font-size: var(--text-sm); }
+  /* The spec's Do and Don't lines, as a two-column definition list under the purpose. components.md owns the text. */
+  .guidance { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-1) var(--space-3); max-width: var(--measure); margin: 0; font-size: var(--text-sm); }
+  .guidance dt { font-weight: var(--weight-medium); }
+  .guidance dd { margin: 0; color: var(--color-muted); }
   .copy-link { width: var(--control-sm); height: var(--control-sm); align-self: center; color: var(--color-muted); }
   .note { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-sm); }
   .row { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: var(--space-2) var(--space-6); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border-subtle); }
@@ -871,6 +875,7 @@
   <section class="component" id="button" data-layer="Core" data-states="hover pressed focus disabled busy" aria-labelledby="button-title">
     <header><h3 id="button-title">Button</h3><span class="badge">Core</span><a href="components.md#button">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="button" aria-label="Copy link to Button" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">The main action control: primary, secondary, ghost, danger, and text.</p>
+    <dl class="guidance"><dt>Do</dt><dd>One primary button in each decision group, labelled with a verb for its result, such as “Save changes”. Every other action in the group is secondary, ghost, or text.</dd><dt>Don’t</dt><dd>The danger variant on an action the reader can undo. Danger marks an action that destroys something.</dd></dl>
     <div class="row"><h4>Primary</h4><div class="states">
       <div class="state"><button class="btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>New monitor</button><span class="caption">Rest</span></div>
       <div class="state" inert><button class="btn is-hover" type="button">New monitor</button><span class="caption">Hover</span></div>
@@ -921,6 +926,7 @@
   <section class="component" id="quiet-action" data-layer="Core" data-states="hover pressed focus disabled" aria-labelledby="quiet-action-title">
     <header><h3 id="quiet-action-title">Quiet action</h3><span class="badge">Core</span><a href="components.md#quiet-action">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="quiet-action" aria-label="Copy link to Quiet action" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A small transparent action inside a component, such as Copy or Close.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use it for an action inside a component: Copy in a code block or command list, close in a dialog or drawer, Full size on a capture, and the project trigger.</dd><dt>Don’t</dt><dd>An action that stands on its own in the page, such as Save or Next. That is a button.</dd></dl>
     <p class="note">One recipe for Copy, Full size, dialog and drawer close, and the project trigger. Each component sets only its size and place.</p>
     <div class="row"><h4>Icon</h4><div class="states">
       <div class="state"><button class="quiet-action close" type="button" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button><span class="caption">Rest</span></div>
@@ -945,6 +951,7 @@
   <section class="component" id="checkbox-and-radio" data-layer="Core" data-states="selected focus disabled" aria-labelledby="check-title">
     <header><h3 id="check-title">Checkbox and radio</h3><span class="badge">Core</span><a href="components.md#checkbox-and-radio">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="checkbox-and-radio" aria-label="Copy link to Checkbox and radio" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Pick several options, or one from a short list.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Checkboxes for options the reader can pick in any combination. Radios for one choice from a short list that stays in view.</dd><dt>Don’t</dt><dd>A label written as a question, such as “Send updates?”, or as a negative, such as “Don’t email me”. Name the option: “Email me updates”.</dd></dl>
     <div class="row"><h4>Checkbox</h4><div class="states">
       <div class="state"><label class="check"><input type="checkbox">Notify on recovery</label><span class="caption">Rest</span></div>
       <div class="state" inert><label class="check"><input type="checkbox" checked>Notify on recovery</label><span class="caption">Checked</span></div>
@@ -967,6 +974,7 @@
   <section class="component" id="radio-card-group" data-layer="Core" data-states="hover selected focus disabled" aria-labelledby="rc-title">
     <header><h3 id="rc-title">Radio card group</h3><span class="badge">Core</span><a href="components.md#radio-card-group">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="radio-card-group" aria-label="Copy link to Radio card group" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Pick one option that needs a description.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use radio cards when the reader chooses by a description, such as plans or deploy modes. Give each card a title and one line on what differs.</dd><dt>Don’t</dt><dd>Radio cards for options that a title alone explains. Use radios.</dd></dl>
     <div class="row"><h4>Live</h4><div class="states">
       <div class="state wide"><fieldset class="radio-cards"><legend class="sr-only">Delivery</legend><label class="radio-card"><input type="radio" name="delivery" checked><strong>Immediate</strong><span class="muted">Send each alert.</span></label><label class="radio-card"><input type="radio" name="delivery"><strong>Digest</strong><span class="muted">Group the alerts.</span></label></fieldset><span class="caption">Rest; Immediate is selected</span></div>
     </div></div>
@@ -979,6 +987,7 @@
   <section class="component" id="switch" data-layer="Core" data-states="selected focus disabled" aria-labelledby="switch-title">
     <header><h3 id="switch-title">Switch</h3><span class="badge">Core</span><a href="components.md#switch">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="switch" aria-label="Copy link to Switch" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Turn a setting on or off at once.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a switch for a setting that applies the moment it changes. Its label names the setting, such as “Dark mode”, and stays the same when on or off.</dd><dt>Don’t</dt><dd>A switch in a form that applies on submit. Use a checkbox there.</dd></dl>
     <div class="row"><h4>States</h4><div class="states">
       <div class="state"><div class="switch-row"><button class="switch" id="sw-rest" type="button" role="switch" aria-checked="false" aria-labelledby="sw-rest-label"><span class="switch-track" aria-hidden="true"></span></button><label id="sw-rest-label" for="sw-rest">Alerts</label></div><span class="caption">Off, live</span></div>
       <div class="state" inert><div class="switch-row"><button class="switch" id="sw-on" type="button" role="switch" aria-checked="true" aria-labelledby="sw-on-label"><span class="switch-track" aria-hidden="true"></span></button><label id="sw-on-label" for="sw-on">Alerts</label></div><span class="caption">On</span></div>
@@ -996,6 +1005,7 @@
   <section class="component" id="toggle-button" data-layer="Core" data-states="hover pressed focus disabled" aria-labelledby="toggle-title">
     <header><h3 id="toggle-title">Toggle button</h3><span class="badge">Core</span><a href="components.md#toggle-button">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="toggle-button" aria-label="Copy link to Toggle button" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A labelled card that latches on, with a switch inside.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use it for an on or off option whose label sits inside the control, such as “Wrap lines” in a viewer’s toolbar.</dd><dt>Don’t</dt><dd>A toggle button for an action that runs once, such as Refresh. It stays on until pressed again; an action is a button.</dd></dl>
     <div class="row"><h4>States</h4><div class="states">
       <div class="state"><button class="toggle" type="button" aria-pressed="false" data-live-toggle><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Wrap lines<small>Long lines fold</small></span></button><span class="caption">Rest, live</span></div>
       <div class="state" inert><button class="toggle is-hover" type="button" aria-pressed="false"><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Wrap lines</span></button><span class="caption">Hover</span></div>
@@ -1013,6 +1023,7 @@
   <section class="component" id="segmented-control" data-layer="Core" data-states="hover pressed focus disabled" aria-labelledby="seg-title">
     <header><h3 id="seg-title">Segmented control</h3><span class="badge">Core</span><a href="components.md#segmented-control">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="segmented-control" aria-label="Copy link to Segmented control" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Two to five short options that apply at once.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use it for two to five short options that apply at once and change how the same content shows, such as a view mode or the System, Light, and Dark choice.</dd><dt>Don’t</dt><dd>A segmented control that switches between panels of content. Use tabs.</dd></dl>
     <p class="note">The live control glides its thumb between options: 260ms for the leading edge, 300ms for the trailing edge. The theme picker at the top uses the same script, and it does not glide when the page loads a saved choice.</p>
     <div class="row"><h4>Text</h4><div class="states">
       <div class="state"><div class="segmented" role="group" aria-label="View" data-live><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false">Board</button><button type="button" aria-pressed="false">Timeline</button></div><span class="caption">Rest, live</span></div>
@@ -1035,6 +1046,7 @@
   <section class="component" id="text-input-and-textarea" data-layer="Core" data-states="focus disabled invalid" aria-labelledby="input-title">
     <header><h3 id="input-title">Text input and textarea</h3><span class="badge">Core</span><a href="components.md#text-input-and-textarea">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="text-input-and-textarea" aria-label="Copy link to Text input and textarea" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Type a short value or a longer note.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a textarea for an answer that can run past one line, and <code>type="search"</code> for a field that filters or searches.</dd><dt>Don’t</dt><dd>A label or an instruction that lives only in the placeholder. It disappears as the reader types.</dd></dl>
     <div class="row"><h4>Input</h4><div class="states">
       <div class="state"><div class="field"><label class="field-label" for="in-rest">Service</label><input class="input" id="in-rest" placeholder="checkout-api"></div><span class="caption">Rest</span></div>
       <div class="state" inert><div class="field"><label class="field-label" for="in-focus">Service</label><input class="input is-focus" id="in-focus" value="checkout-api"></div><span class="caption">Focus visible</span></div>
@@ -1062,6 +1074,7 @@
   <section class="component" id="select" data-layer="Core" data-states="focus disabled invalid" aria-labelledby="select-title">
     <header><h3 id="select-title">Select</h3><span class="badge">Core</span><a href="components.md#select">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="select" aria-label="Copy link to Select" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Choose from a longer list.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a select for one choice from more than five options, in a predictable order: alphabetical, numeric, or by frequency of use.</dd><dt>Don’t</dt><dd>A first option that acts as the label, such as “Choose a region”. The label goes above the field.</dd></dl>
     <div class="row"><h4>Closed</h4><div class="states">
       <div class="state"><div class="field"><label class="field-label" for="se-rest">Window</label><select class="select" id="se-rest"><option>Last hour</option><option>Last 24 hours</option><option>Last 7 days</option></select></div><span class="caption">Rest</span></div>
       <div class="state" inert><div class="field"><label class="field-label" for="se-focus">Window</label><select class="select is-focus" id="se-focus"><option>Last hour</option></select></div><span class="caption">Focus visible</span></div>
@@ -1081,6 +1094,7 @@
   <section class="component" id="field-wrapper" data-layer="Core" data-states="invalid" aria-labelledby="fieldw-title">
     <header><h3 id="fieldw-title">Field wrapper</h3><span class="badge">Core</span><a href="components.md#field-wrapper">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="field-wrapper" aria-label="Copy link to Field wrapper" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Label, description, and error text around a field.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Write the error as the fix, such as “Enter a date after today”, and the description as a format or limit, such as “Up to 64 characters”.</dd><dt>Don’t</dt><dd>A description that repeats the label, or an error that only says “Invalid”.</dd></dl>
     <div class="row"><h4>Description and error</h4><div class="states">
       <div class="state"><div class="field"><label class="field-label" for="fw-desc">Threshold</label><input class="input" id="fw-desc" inputmode="numeric" value="300" aria-describedby="fw-desc-text"><p class="field-description" id="fw-desc-text">Milliseconds at p95.</p></div><span class="caption">With description</span></div>
       <div class="state" inert><div class="field"><label class="field-label" for="fw-error">Threshold</label><input class="input" id="fw-error" value="-1" aria-invalid="true" aria-errormessage="fw-error-text"><p class="field-error" id="fw-error-text">Enter a positive number.</p></div><span class="caption">Error replaces the description</span></div>
@@ -1090,6 +1104,7 @@
   <section class="component" id="slider" data-layer="Core" data-states="focus disabled" aria-labelledby="slider-title">
     <header><h3 id="slider-title">Slider</h3><span class="badge">Core</span><a href="components.md#slider">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="slider" aria-label="Copy link to Slider" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Set a value in a range.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a slider for an approximate value in a range, such as volume or opacity, and show the current value as text beside it.</dd><dt>Don’t</dt><dd>A slider for a value the reader must set exactly, such as a port or a price. Use a text input.</dd></dl>
     <div class="row"><h4>States</h4><div class="states">
       <div class="state"><div class="field"><label class="field-label" for="sl-rest">Sample rate</label><input class="range" id="sl-rest" type="range" min="0" max="100" value="40" style="--value:40%" data-live-range></div><span class="caption">Rest, live</span></div>
       <div class="state" inert><input class="range is-focus" type="range" aria-label="Sample rate, focused" min="0" max="100" value="60" style="--value:60%"><span class="caption">Focus visible</span></div>
@@ -1110,6 +1125,7 @@
   <section class="component" id="progress" data-layer="Core" aria-labelledby="progress-title">
     <header><h3 id="progress-title">Progress</h3><span class="badge">Core</span><a href="components.md#progress">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="progress" aria-label="Copy link to Progress" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Show how far a task has got.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use it for a task with a known end, such as an import, and name it for the task.</dd><dt>Don’t</dt><dd>A progress bar for a measured value, such as disk usage or a rating. It shows a task moving to its end; use text or a score.</dd></dl>
     <div class="row"><h4>Values</h4><div class="states">
       <div class="state"><div class="progress" role="progressbar" aria-label="Import, empty" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span style="transform:translateX(-100%)"></span></div><span class="caption">0%</span></div>
       <div class="state"><div class="progress" role="progressbar" aria-label="Import" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40"><span style="transform:translateX(-60%)"></span></div><span class="caption">40%</span></div>
@@ -1120,6 +1136,7 @@
   <section class="component" id="score" data-layer="Core" aria-labelledby="score-title">
     <header><h3 id="score-title">Score</h3><span class="badge">Core</span><a href="components.md#score">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="score" aria-label="Copy link to Score" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Show a value out of a maximum.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use it for a value out of a fixed maximum, such as 4/5, and keep one maximum across a list so the rows compare.</dd><dt>Don’t</dt><dd>A score for a percentage or an open-ended count. Write the number as text.</dd></dl>
     <div class="row"><h4>Values</h4><div class="states">
       <div class="state"><span class="score"><span class="pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span><b>3<span>/5</span></b></span><span class="caption">3 of 5</span></div>
       <div class="state"><span class="score"><span class="pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><b>5<span>/5</span></b></span><span class="caption">5 of 5</span></div>
@@ -1129,6 +1146,7 @@
   <section class="component" id="badge" data-layer="Core" aria-labelledby="badge-title">
     <header><h3 id="badge-title">Badge</h3><span class="badge">Core</span><a href="components.md#badge">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="badge" aria-label="Copy link to Badge" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A short status label.</p>
+    <dl class="guidance"><dt>Do</dt><dd>A one- or two-word status or category on an item, such as “Healthy” or “Beta”, with a status tone only when it is a status.</dd><dt>Don’t</dt><dd>A badge that repeats the title, or one on every row with the same value. Badge the exceptions.</dd></dl>
     <div class="row"><h4>Tones</h4><div class="states">
       <div class="state"><span class="badge">No data</span><span class="caption">Neutral</span></div>
       <div class="state"><span class="badge success">Healthy</span><span class="caption">Success</span></div>
@@ -1141,6 +1159,7 @@
   <section class="component" id="alert" data-layer="Core" aria-labelledby="alert-title">
     <header><h3 id="alert-title">Alert</h3><span class="badge">Core</span><a href="components.md#alert">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="alert" aria-label="Copy link to Alert" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A real caveat or status message in the page.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use an alert for a caveat or status the reader needs before acting, and say what to do, such as “Reconnect the source to resume sync”.</dd><dt>Don’t</dt><dd>An alert for emphasis, a tip, or decoration. A status on one item is a badge.</dd></dl>
     <div class="row"><h4>Tones</h4><div class="states">
       <div class="state wide"><div class="alert"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg><p>Values are sampled every 5 minutes.</p></div><span class="caption">Neutral</span></div>
       <div class="state wide"><div class="alert success"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><p>The monitor recovered at 14:20.</p></div><span class="caption">Success</span></div>
@@ -1158,6 +1177,7 @@
   <section class="component" id="surface-and-card" data-layer="Core" aria-labelledby="card-title">
     <header><h3 id="card-title">Surface and card</h3><span class="badge">Core</span><a href="components.md#surface-and-card">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="surface-and-card" aria-label="Copy link to Surface and card" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Panels and cards for parallel, comparable content.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use cards for a few parallel, self-contained items that a reader compares, such as plans or projects.</dd><dt>Don’t</dt><dd>A panel inside a panel, or cards around ordinary prose.</dd></dl>
     <div class="row"><h4>Card</h4><div class="states">
       <div class="state wide"><article class="card" aria-labelledby="card-sample-title"><div class="card-head"><h4 id="card-sample-title">API p95 latency</h4><span class="badge danger">Alerting</span></div><div class="card-body">412 ms against a 300 ms threshold for 10 minutes.</div><div class="card-foot"><span>checkout-api</span><span>Updated 2 minutes ago</span></div></article><span class="caption">Header, body, and footer</span></div>
     </div></div>
@@ -1170,12 +1190,14 @@
   <section class="component" id="figure" data-layer="Core" aria-labelledby="figure-title">
     <header><h3 id="figure-title">Figure</h3><span class="badge">Core</span><a href="components.md#figure">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="figure" aria-label="Copy link to Figure" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">An image or diagram with a caption.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Caption every figure with what it shows. When the prose refers to one figure by number, number them all.</dd><dt>Don’t</dt><dd>A screenshot of code or of a component. Show code as text, so the reader can copy it, and a component live.</dd></dl>
     <figure class="figure"><div class="figure-plate"><div class="cluster" style="display:flex;gap:var(--space-2);flex-wrap:wrap"><span class="badge success">Healthy</span><span class="badge warning">Warning</span><span class="badge danger">Alerting</span></div></div><figcaption><b>Figure 1.</b> A well with its caption below.</figcaption></figure>
   </section>
 
   <section class="component" id="dialog" data-layer="Core" aria-labelledby="dialog-title">
     <header><h3 id="dialog-title">Dialog</h3><span class="badge">Core</span><a href="components.md#dialog">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="dialog" aria-label="Copy link to Dialog" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A modal task that needs an answer before the page continues.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a dialog for a short task the reader must finish or cancel before the page continues, such as confirming a deletion. Title it with that task.</dd><dt>Don’t</dt><dd>A dialog that opens without the reader asking, such as on page load, or one that holds a long form. A long form gets its own page.</dd></dl>
     <div class="row"><h4>Live</h4><div class="states">
       <div class="state"><button class="btn secondary" type="button" data-open="live-dialog">Open dialog</button><span class="caption">Opens a native modal dialog</span></div>
     </div></div>
@@ -1187,6 +1209,7 @@
   <section class="component" id="drawer" data-layer="Core" aria-labelledby="drawer-title">
     <header><h3 id="drawer-title">Drawer</h3><span class="badge">Core</span><a href="components.md#drawer">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="drawer" aria-label="Copy link to Drawer" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A side panel, such as phone navigation.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a drawer for navigation or supporting detail that slides in from the side, such as the phone menu, and open it from a named button.</dd><dt>Don’t</dt><dd>The page’s main task inside a drawer. The drawer holds navigation or detail; the task stays on the page.</dd></dl>
     <div class="row"><h4>Live</h4><div class="states">
       <div class="state"><button class="btn secondary menu-glyph" type="button" data-size="lg" data-open="live-drawer">Contents</button><span class="caption">Rest, live: a page’s contents trigger opens a side drawer</span></div>
     </div></div>
@@ -1203,6 +1226,7 @@
   <section class="component" id="navigation-list" data-layer="Core" data-states="hover selected focus" aria-labelledby="nav-title">
     <header><h3 id="nav-title">Navigation list</h3><span class="badge">Core</span><a href="components.md#navigation-list">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="navigation-list" aria-label="Copy link to Navigation list" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Rows of links with current page and current location.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Label each row with its page’s title as the page’s h1 reads, so the reader can match row and page.</dd><dt>Don’t</dt><dd>Actions such as Delete or Sign out in a navigation list. Every row is a link to a place; an action is a button.</dd></dl>
     <div class="row"><h4>Rows</h4><div class="states">
       <div class="state"><nav class="navlist" aria-label="Sample routes"><span class="group-label">Guides</span><a href="components.html" aria-current="page">Install</a><a href="#navigation-list">Configure</a><a href="#navigation-list">Release</a></nav><span class="caption">Live; Install is the current page</span></div>
       <div class="state" inert><nav class="navlist" aria-label="Sample routes, pinned"><a href="#navigation-list" class="is-hover">Hover</a><a href="components.html" aria-current="page" class="is-hover">Current page, hover</a><a href="#navigation-list" aria-current="location">Current location</a><a href="#navigation-list" class="is-focus">Focus visible</a></nav><span class="caption">Hover, current page with hover, current location, and focus visible</span></div>
@@ -1221,6 +1245,7 @@
   <section class="component" id="section-rail" data-layer="Core" aria-labelledby="section-rail-title">
     <header><h3 id="section-rail-title">Section rail</h3><span class="badge">Core</span><a href="components.md#section-rail">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="section-rail" aria-label="Copy link to Section rail" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A sticky list of sections that moves into a drawer on phones.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a rail on a long page, or a small site, whose readers jump between sections. Pick it by the navigation levels in DESIGN.md.</dd><dt>Don’t</dt><dd>A rail beside a strip or a contents list that holds the same links. Each level has one list.</dd></dl>
     <div class="row"><h4>Desktop rail</h4><div class="states">
       <div class="state"><div class="rail-specimen"><div class="find"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="input" type="search" aria-label="Find a component, specimen" placeholder="Find a component"><kbd class="key" aria-hidden="true">/</kbd></div>
         <nav class="navlist" aria-label="Rail specimen"><span class="group-label">Inputs</span><a href="#section-rail">Select</a><a href="#section-rail" aria-current="location">Slider</a><a href="#section-rail">Field wrapper</a></nav></div><span class="caption">Live; Slider is the current section</span></div>
@@ -1234,6 +1259,7 @@
   <section class="component" id="find-field" data-layer="Core" aria-labelledby="find-field-title">
     <header><h3 id="find-field-title">Find field</h3><span class="badge">Core</span><a href="components.md#find-field">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="find-field" aria-label="Copy link to Find field" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Filter a navigation list as you type.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use it at the top of a long navigation list, such as a section rail, to filter its rows by name or purpose.</dd><dt>Don’t</dt><dd>A find field used as a site-wide search. It matches only the rows of the list it filters.</dd></dl>
     <div class="row"><h4>States</h4><div class="states">
       <div class="state"><div class="find"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="input" type="search" aria-label="Find a component, rest specimen" placeholder="Find a component"><kbd class="key" aria-hidden="true">/</kbd></div><span class="caption">Rest, live; the key hint shows the shortcut</span></div>
       <div class="state" inert><div class="find"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="input is-focus" type="search" aria-label="Find a component, focus specimen" value="tog"></div><span class="find-count">3 matches</span><span class="caption">Focus visible with a query; the hint hides</span></div>
@@ -1245,6 +1271,7 @@
   <section class="component" id="breadcrumbs" data-layer="Core" aria-labelledby="breadcrumbs-title">
     <header><h3 id="breadcrumbs-title">Breadcrumbs</h3><span class="badge">Core</span><a href="components.md#breadcrumbs">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="breadcrumbs" aria-label="Copy link to Breadcrumbs" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">The path from the site to this page.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use breadcrumbs only at depth 3 or more, or on a page outside its site’s shell.</dd><dt>Don’t</dt><dd>A trail whose only crumb repeats the page’s h1.</dd></dl>
     <div class="row"><h4>Trail</h4><div class="states">
       <div class="state"><nav class="crumbs" aria-label="Breadcrumb, specimen"><ol><li><a href="#breadcrumbs">Design system</a></li><li><a href="#breadcrumbs">Components</a></li><li><span aria-current="page">Navigation</span></li></ol></nav><span class="caption">Rest, live; the current page is text</span></div>
       <div class="state" inert><nav class="crumbs" aria-label="Breadcrumb, pinned"><ol><li><a href="#breadcrumbs" class="is-hover">Design system</a></li><li><a href="#breadcrumbs" class="is-focus">Components</a></li><li><span aria-current="page">Navigation</span></li></ol></nav><span class="caption">Hover on Design system, focus visible on Components</span></div>
@@ -1255,6 +1282,7 @@
   <section class="component" id="pager" data-layer="Core" aria-labelledby="pager-title">
     <header><h3 id="pager-title">Pager</h3><span class="badge">Core</span><a href="components.md#pager">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="pager" aria-label="Copy link to Pager" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Previous and next pages in a sequence.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a pager for pages a reader goes through in order, such as a guide’s chapters or the skills in one group.</dd><dt>Don’t</dt><dd>A pager on pages with no reading order, or one per section on a page with a section rail.</dd></dl>
     <div class="row"><h4>Sequence</h4><div class="states">
       <div class="state wide"><nav class="pager" aria-label="Pages, specimen"><a href="#pager" rel="prev"><span class="pager-dir"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>Previous</span><span class="pager-title">Foundations</span></a><a href="#pager" rel="next"><span class="pager-dir">Next<svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></span><span class="pager-title">Application example</span></a></nav><span class="caption">Rest, live; previous and next</span></div>
       <div class="state wide" inert><nav class="pager" aria-label="Pages, pinned"><a href="#pager" rel="next" class="is-hover"><span class="pager-dir">Next<svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></span><span class="pager-title">Components</span></a></nav><span class="caption">First page: next only, still at the end; hover</span></div>
@@ -1264,6 +1292,7 @@
   <section class="component" id="tabs" data-layer="Core" data-states="hover selected focus" aria-labelledby="tabs-title">
     <header><h3 id="tabs-title">Tabs</h3><span class="badge">Core</span><a href="components.md#tabs">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="tabs" aria-label="Copy link to Tabs" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Switch panels about one object, without leaving the page.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use tabs for panels about one object, such as a monitor’s Overview and History, when the URL does not change.</dd><dt>Don’t</dt><dd>Links with <code>role="tab"</code>, or one set that mixes URL changes and panels. A set of pages is a navigation strip.</dd></dl>
     <div class="row"><h4>Live</h4><div class="states">
       <div class="state wide" data-tabs data-label="Monitor">
         <!-- Without JavaScript every panel shows under its heading; the script builds the tab list. -->
@@ -1282,6 +1311,7 @@
   <section class="component" id="skip-link" data-layer="Core" aria-labelledby="skip-link-title">
     <header><h3 id="skip-link-title">Skip link</h3><span class="badge">Core</span><a href="components.md#skip-link">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="skip-link" aria-label="Copy link to Skip link" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Jump past the header to the content.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Add “Skip to content” to every page whose header or rail comes before <code>main</code>, and check that the first Tab shows it.</dd><dt>Don’t</dt><dd>A skip link hidden with <code>display: none</code> or <code>visibility: hidden</code>. It must show when it takes focus.</dd></dl>
     <div class="row"><h4>Focused</h4><div class="states">
       <div class="state" inert><a class="skip is-focus" href="#main">Skip to content</a><span class="caption">Focus visible; hidden above the page until focused</span></div>
     </div></div>
@@ -1290,6 +1320,7 @@
   <section class="component" id="keyboard-key" data-layer="Core" aria-labelledby="keyboard-key-title">
     <header><h3 id="keyboard-key-title">Keyboard key</h3><span class="badge">Core</span><a href="components.md#keyboard-key">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="keyboard-key" aria-label="Copy link to Keyboard key" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Show a key or shortcut in text.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use it for a key or shortcut in running text, shortcut docs, and the find field’s hint, with one key per <code>&lt;kbd&gt;</code>.</dd><dt>Don’t</dt><dd>A key style for code, commands, or button names. Code takes <code>&lt;code&gt;</code>, and a button’s name is plain text.</dd></dl>
     <div class="row"><h4>Keys</h4><div class="states">
       <div class="state"><p class="note">Press <kbd class="key">/</kbd> to find, <kbd class="key">Esc</kbd> to clear, and <kbd class="key">Enter</kbd> to go to the first match.</p><span class="caption">Rest, in running text</span></div>
     </div></div>
@@ -1303,6 +1334,7 @@
   <section class="component" id="code-block" data-layer="Core" aria-labelledby="code-title">
     <header><h3 id="code-title">Code block</h3><span class="badge">Core</span><a href="components.md#code-block">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="code-block" aria-label="Copy link to Code block" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Source code with an optional header and Copy, and a live example above it.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a code block for source with no live result. When the reader should see the result too, use the variant with a live example.</dd><dt>Don’t</dt><dd>The same language label on every block of a page. Put useful setup context above the block instead.</dd></dl>
     <div class="row"><h4>Source well</h4><div class="states">
       <div class="state wide"><div class="code"><div class="code-head"><b>monitor.ts</b><span class="lang">TypeScript</span><button class="quiet-action copy" type="button" data-copy="code-src"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="monitor.ts"><code id="code-src"><span class="line"><span class="ln">1</span><span><span class="k">const</span> threshold = <span class="n">300</span> <span class="c">// ms at p95</span></span></span><span class="line"><span class="ln">2</span><span><span class="k">export const</span> name = <span class="s">'API p95 latency'</span></span></span></code></pre></div><span class="caption">Header, line numbers, and Copy, live</span></div>
       <div class="state wide" inert><div class="code compact"><pre><code><span class="line"><span>import { threshold } from './monitor'</span></span></code></pre><button class="quiet-action copy is-focus" type="button" aria-label="Copy import"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, with focus visible on Copy</span></div>
@@ -1321,6 +1353,7 @@
   <section class="component" id="command-plate" data-layer="Identity" aria-labelledby="cmd-title">
     <header><h3 id="cmd-title">Command plate</h3><span class="badge">Identity</span><a href="components.md#command-plate">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="command-plate" aria-label="Copy link to Command plate" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A shell command on a hue-tinted plate.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use it for a shell command the reader runs, one command per line.</dd><dt>Don’t</dt><dd>A <code>$</code> typed into the command text. CSS draws the prompt, so a typed one ends up in the copied command.</dd></dl>
     <div class="row"><h4>Commands</h4><div class="states">
       <div class="state wide"><div class="code command compact"><pre tabindex="0" role="region" aria-label="Install command"><code id="cmd-install"><span class="line"><span>brew install filipgutica/tap/filip-stack</span></span></code></pre><button class="quiet-action copy" type="button" data-copy="cmd-install" aria-label="Copy install command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, live; the <code>$</code> is drawn by CSS</span></div>
       <div class="state wide"><div class="code command"><div class="code-head"><b>Set up</b><button class="quiet-action copy" type="button" data-copy="cmd-setup"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="Set up commands"><code id="cmd-setup"><span class="line"><span>pnpm install --frozen-lockfile</span></span><span class="line"><span>pnpm check</span></span></code></pre></div><span class="caption">With a header, two lines</span></div>
@@ -1331,6 +1364,7 @@
   <section class="component" id="terminal-capture" data-layer="Identity" aria-labelledby="capture-title">
     <header><h3 id="capture-title">Terminal capture</h3><span class="badge">Identity</span><a href="components.md#terminal-capture">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="terminal-capture" aria-label="Copy link to Terminal capture" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A recorded terminal screen with a status line.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use it to show what a command prints, one tab per capture, with the path and branch in the status line.</dd><dt>Don’t</dt><dd>A capture for a screenshot of a graphical app. Use a figure.</dd></dl>
     <div class="capture" data-tabs data-label="Captures">
       <!-- The script adds the tab list and the Full size button; without it every capture is listed. -->
       <div class="capture-head" hidden><button class="quiet-action full" type="button" data-full-size><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>Full size</button></div>
@@ -1343,6 +1377,7 @@
   <section class="component" id="site-header" data-layer="Identity" aria-labelledby="header-title">
     <header><h3 id="header-title">Site header</h3><span class="badge">Identity</span><a href="components.md#site-header">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="site-header" aria-label="Copy link to Site header" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">The ~/name header with project switcher and appearance.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Keep the same header and site links, six at most and in one order, on every page of a personal product site.</dd><dt>Don’t</dt><dd>The site header on an application screen. An application keeps its own navigation.</dd></dl>
     <div class="row"><h4>Closed</h4><div class="states">
       <div class="state wide"><div class="site-header">
         <details class="projects"><summary class="quiet-action" aria-label="Project: filip-stack"><span>filip-stack</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects"><a href="#site-header">annoterm</a><a href="components.html" aria-current="page">filip-stack</a><a href="#site-header">ui</a></nav></details>
@@ -1359,6 +1394,7 @@
   <section class="component" id="page-type-and-helpers" data-layer="Identity" aria-labelledby="page-type-title">
     <header><h3 id="page-type-title">Page type and helpers</h3><span class="badge">Identity</span><a href="components.md#page-type-and-helpers">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="page-type-and-helpers" aria-label="Copy link to Page type and helpers" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Mono headings, steps, definitions, facts, and the footer.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use steps for a sequence the reader follows in order, definitions for terms with short meanings, and facts for short labels and values.</dd><dt>Don’t</dt><dd>The <code>##</code> mark on an application screen or on h3 and lower. It repeats down the page and competes with the data.</dd></dl>
     <div class="row"><h4>Headings</h4><div class="states">
       <div class="state wide"><p class="folio-display">~/annoterm</p><span class="caption">Display title, mono</span></div>
       <div class="state wide"><p class="folio-h2">Install</p><span class="caption">Section heading with its <code>##</code> mark</span></div>
