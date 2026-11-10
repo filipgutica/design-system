@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 
 // Behaviour of the catalogue shell in language/components.html: Find, the / shortcut, location
 // tracking, the tablet drawer, the tab glide, the live slider's value, the page without JavaScript,
-// overflow, and axe.
+// overflow, forced colors, and axe.
 const url = new URL('../../language/components.html', import.meta.url).href
 const railLink = (page: Page, name: string) => page.locator('#rail .rail-list a', { hasText: new RegExp(`^${name}$`) })
 const current = (page: Page) => page.locator('#rail [aria-current="location"]')
@@ -352,6 +352,38 @@ for (const width of [390, 720, 1280]) {
     // Overflow is content wider than the page's box. The page reserves a scrollbar gutter, which a browser
     // with hidden scrollbars (headless Linux) leaves empty, so the difference can be negative there.
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0)
+  })
+}
+
+// In forced colors a fill takes the system background, and an SVG keeps the colour it sets. The badge's tone
+// dot and the alert's status icon must still draw, in the system text colour of their label.
+for (const colorScheme of ['light', 'dark'] as const) {
+  test.describe(`forced colors, ${colorScheme}`, () => {
+    test.use({ forcedColors: 'active', colorScheme, viewport: { width: 1280, height: 900 } })
+
+    test('each status badge keeps its tone dot in the label colour', async ({ page }) => {
+      await page.goto(url)
+      const badges = await page.locator('#badge .badge:is(.success, .warning, .danger, .info)').evaluateAll((items) => items.map((item) => ({
+        text: getComputedStyle(item).color,
+        dot: getComputedStyle(item, '::before').backgroundColor,
+        canvas: getComputedStyle(document.body).backgroundColor,
+      })))
+      expect(badges).toHaveLength(4)
+      for (const { text, dot, canvas } of badges) {
+        expect(dot).toBe(text)
+        expect(dot).not.toBe(canvas)
+      }
+    })
+
+    test('each alert icon takes the alert text colour', async ({ page }) => {
+      await page.goto(url)
+      const alerts = await page.locator('#alert .alert').evaluateAll((items) => items.map((item) => ({
+        text: getComputedStyle(item).color,
+        icon: getComputedStyle(item.querySelector('.icon')!).color,
+      })))
+      expect(alerts).toHaveLength(5)
+      for (const { text, icon } of alerts) expect(icon).toBe(text)
+    })
   })
 }
 

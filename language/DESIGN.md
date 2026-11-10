@@ -39,7 +39,7 @@ Center the **container**, not every sentence. Align header, content, images, and
 
 ## Files and examples
 
-- `tokens.css`: a standalone snapshot of the values (the Graphite Indigo theme) owned by `@filipgutica/ui`. The identity inputs sit in one block at the top. Each line's `ui:` comment lists the library variables that carry that value, the line's own name first. Update it when the package values change.
+- `tokens.css`: the values of the Graphite Indigo theme, generated from the token source (`tokens/graphite-indigo.json`) in `@filipgutica/design-system`. To change a value, edit the JSON there and run `pnpm tokens:build`; do not edit `tokens.css` by hand. The identity inputs sit in one block at the top. Each line's `ui:` comment lists the library variables that carry that value, the line's own name first.
 - `components.md`: one spec for each component, with anatomy, states, Do and Don't lines, keyboard and screen-reader behavior, motion, and forced colors. Read it for any component work.
 - `components.html`: every component in each of its states, in plain HTML and CSS on `tokens.css`. Copy component markup and styles from there.
 - `decisions.md`: the choices behind the components, and the options they replaced.
@@ -105,6 +105,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | Phone | `@media (max-width: 640px)` | Side gutters drop from `--space-6` to `--space-4`, and section gaps take their phone step. |
 
   Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. One documented exception: the tool-home hero (`.fg-site-hero` in `@filipgutica/ui`) splits at `@media (min-width: 1024px)`, with the title across the top, the lede on the left, and the install block and facts on the right. Below 1024px it stacks in source order. `@filipgutica/ui` also ships 680px rules for its own site header, prose title and definitions (`max-width: 680px`, with `min-width: 681px` for frame padding); they belong to the library, so pages add no viewport breakpoint beyond the table and the hero split. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.
+- Density: an application screen has one size for each place, not a range. Toolbar controls (buttons, segmented filters, and search fields) are `sm`, `--control-sm` tall. Table and list rows, and rail and navigation rows, are `--row` tall. Other controls keep the default `md` (`--control-md`). At tablet width every touch target grows to `--control-lg`. The console in `reference.html` uses these sizes.
 - [Navigation](#navigation) is a strip of 6 links or fewer, or a section rail that moves into a drawer at tablet width. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line; `UiSiteNav` does this. Keep wide code, tables, and charts scrolling inside their containers.
 - Keep main headings, actions, and product evidence visible on load. Scrolling should reveal more content without being required to make existing content appear.
 
@@ -119,11 +120,23 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | Well | Source code, screenshots, figures, and inset previews other than example stages | `--color-surface` | Source code: transparent 1px; figures: `--color-border-subtle` | `--radius-panel` | Source code: `--shadow-surface`; figures: none |
   | Panel | Cards, forms, charts, and detail views | `--color-surface-raised` | Transparent 1px | `--radius-panel` | `--shadow-surface` |
   | Field | Inputs, selects, textareas, and search fields | `--color-field-bg`; disabled: `--color-well` | `--color-field-edge` | `--radius-field` | `--shadow-field`; disabled: none |
-  | Track | Segmented and switch tracks, and selected radio cards | `--color-well` | Transparent 1px | Tracks: `--radius-control`; radio cards: `--radius-panel` | `--shadow-sink` |
+  | Track | Segmented and switch tracks, and selected radio cards | `--color-well` | Transparent 1px | Segmented tracks: `--radius-control`; switch tracks: `--radius-pill`; radio cards: `--radius-panel` | `--shadow-sink` |
   | Floating layer | Menus, popovers, pickers, and dialogs | `--color-surface-raised` | Transparent 1px; the shadow's ring draws the edge | `--radius-panel` | `--shadow-dialog` |
 
 - Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--color-field-edge`. `--color-border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--color-border-subtle` edge and no rest raise. Invalid fields show a `--color-error` edge, except in forced colors, where the system edge wins. Figures, example frames, and dividers use `--color-border-subtle`.
-- Radii: `--radius-inline` for inline elements, checkboxes, navigation rows, list-selection rows, and tabs; `--radius-field` for fields, toggle cards, and pager links; `--radius-control` (a pill) for buttons and segmented controls; `--radius-panel` for wells, example frames, plates, panels, radio cards, alerts, and floating layers; `--radius-pill` for badges and switch tracks. Navigation rows inside a floating menu, such as the project menu, keep `--radius-inline`; option rows in a select picker take the panel radius minus `--space-1`.
+- Shape follows role. A pill acts, or sets a value in place; a rectangle is a place, or holds content. Pick a new component's radius from its role in this table, not from the component it looks like.
+
+  | Role | Shape | Token | Members |
+  | --- | --- | --- | --- |
+  | Acts, or sets a value on one line | Pill | `--radius-control` | Buttons, quiet actions, and segmented controls with their thumbs |
+  | Small state mark | Pill | `--radius-pill` | Status badges, switch tracks and knobs, slider and progress tracks, score pips, and the in-page location pip |
+  | A place, or a row you pick | 6px | `--radius-inline` | Navigation rows, group labels, breadcrumb links, tabs, list rows, checkboxes, and keyboard keys |
+  | Something you type in, or a control whose label wraps | 10px | `--radius-field` | Inputs, selects, textareas, search fields, toggle cards, and pager links |
+  | Holds other things | 16px | `--radius-panel` | Wells, plates, panels, cards, radio cards, alerts, code blocks, example frames, and floating layers |
+
+  - A pill never holds text that can wrap. A control whose label can wrap, such as a toggle card or a radio card, is a rectangle.
+  - Nested rectangles are concentric: a rectangle inside a rounded container takes the container's radius minus the gap between them. Option rows in a select picker take `calc(var(--radius-panel) - var(--space-1))`. Two exceptions wait on the owner (see [open questions](decisions.md#open-questions)): rows in the project menu keep `--radius-inline`, and the skip link, a floating layer, keeps `--radius-field`.
+  - Round marks (radios, slider thumbs, badge dots, and the busy spinner) take `50%`, a fill inside a shape inherits its corners, and an edge that meets another shape takes `0`. A page writes no other literal radius.
 - Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
 - [Depth](#depth) gives each role its shadow. Stable hover states keep normal content quiet.
 

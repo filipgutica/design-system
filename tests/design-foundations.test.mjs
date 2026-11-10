@@ -94,6 +94,74 @@ test('the Foundations current-row swatch and radius list follow the navigation r
   assert.doesNotMatch(radiusUse(reference, '--radius-field'), /navigation rows|tabs/)
 })
 
+// Shape follows role (DESIGN.md, Surfaces). Each catalogue selector that sets a corner radius is listed
+// under the token of its role. Any other corner is shape-free: round (50%), inherited from the shape it
+// fills, square where it meets another shape (0, and the bottom sheet's lower corners), or concentric
+// with the panel around it.
+const shapeRoles = {
+  '--radius-control': ['.btn', ':where(.quiet-action)', '.segmented', '.segmented button', '.segmented button::before'],
+  '--radius-pill': [
+    '.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.range::-webkit-slider-runnable-track',
+    '.range::-moz-range-track', '.range::-moz-range-progress', '.progress', '.score .pips i', '.badge',
+    '.navlist a[aria-current="location"]::before',
+  ],
+  '--radius-inline': ['.check input', '.tab', '.navlist a', '.group-toggle', '.crumbs a', '.key', '.rows [role="option"]'],
+  // The skip link is a floating layer, so the rule gives it --radius-panel. It keeps --radius-field
+  // until the owner picks (decisions.md, Open questions).
+  '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.skip'],
+  '--radius-panel': [
+    '.select::picker(select)', '.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code',
+    '.example', '.capture', '.projects .navlist',
+  ],
+}
+const shapeFree = new Set(['50%', 'inherit', '0', 'calc(var(--radius-panel) - var(--space-1))', 'var(--radius-panel) var(--radius-panel) 0 0'])
+const shapeDrift = (html) => {
+  const roleOf = new Map(Object.entries(shapeRoles).flatMap(([token, list]) => list.map((selector) => [selector, `var(${token})`])))
+  const corners = perSelector(cssRules(html)).flatMap(({ context, selector, body }) =>
+    [...body.matchAll(/(?:^|; )border-radius: ([^;]+)/g)].map(([, value]) => ({ context, selector, value })))
+  const wrong = corners.filter(({ selector, value }) => (roleOf.has(selector) ? value !== roleOf.get(selector) : !shapeFree.has(value)))
+    .map(({ context, selector, value }) => `${`${context} ${selector}`.trim()} { border-radius: ${value} }`)
+  const missing = [...roleOf.keys()].filter((selector) => !corners.some((corner) => corner.selector === selector)).map((selector) => `${selector}: no radius`)
+  return [...wrong, ...missing]
+}
+
+test('the shape guard catches a component on another role’s radius, a radius with no role, and a listed component that lost its radius', () => {
+  const html = read('components.html')
+  assert.deepEqual(shapeDrift(html.replace('.tab { ', '.tab { border-radius: var(--radius-field); ').replace(/(\.tab \{[^}]*?)border-radius: var\(--radius-inline\); /, '$1')), ['.tab { border-radius: var(--radius-field) }'])
+  assert.deepEqual(shapeDrift(`${html}<style>.chip { border-radius: var(--radius-control) }</style>`), ['.chip { border-radius: var(--radius-control) }'])
+  assert.deepEqual(shapeDrift(html.replace('.key { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 0.3125rem; border: 1px solid var(--color-border); border-radius: var(--radius-inline); ', '.key { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 0.3125rem; border: 1px solid var(--color-border); ')), ['.key: no radius'])
+})
+
+test('each catalogue component takes the radius of its role in the DESIGN.md shape table', () => {
+  const table = [...read('DESIGN.md').matchAll(/^\s*\| [^|]+ \| (Pill|\d+px) \| `(--radius-[\w-]+)` \|/gm)].map(([, shape, token]) => [token, shape])
+  assert.deepEqual(table.map(([token]) => token).sort(), Object.keys(shapeRoles).sort())
+  const root = themeBlock(read('tokens.css'), ':root {')
+  for (const [token, shape] of table) assert.equal(tokenValue(root, token), shape === 'Pill' ? '999px' : shape, token)
+  assert.deepEqual(shapeDrift(read('components.html')), [])
+})
+
+// A page writes a corner from tokens: 0, 50%, inherit, var() references, or a calc() of them.
+const isRadiusAllowed = (value) => value.replace(/var\(--[\w-]+\)/g, ' ').replace(/calc\(|\)|[-+*/]/g, ' ').trim().split(/\s+/)
+  .every((part) => ['', '0', '50%', 'inherit'].includes(part))
+const radiusLiterals = (file, html) => flaggedDeclarations({
+  file,
+  html,
+  isViolation: (property, value) => /^border(?:-[\w-]+)?-radius$/.test(property) && !isRadiusAllowed(value.replace(/\s*!important$/, '')),
+})
+
+test('the radius guard catches a literal corner in a rule, an inline style, a longhand, and a calc()', () => {
+  const planted = `<style>.a { border-radius: 12px } .b { border-top-left-radius: 4px } .c { border-radius: calc(var(--radius-panel) - 4px) }
+    .d { border-radius: var(--radius-panel) var(--radius-panel) 0 0 } .e { border-radius: calc(var(--radius-panel) - var(--space-1)) }</style>
+    <i style="border-radius: 3px"></i><i style="border-radius: 50%"></i>`
+  assert.deepEqual(radiusLiterals('planted.html', planted).map((line) => line.split(' { ')[0]), ['planted.html: .a', 'planted.html: .b', 'planted.html: .c', 'planted.html: [style]'])
+})
+
+test('no page or the report stylesheet writes a literal corner radius', () => {
+  const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
+  const sources = [...pages.map((page) => [page, read(page)]), ['visualizations/report.css', `<style>${read('visualizations/report.css')}</style>`]]
+  assert.deepEqual(sources.flatMap(([file, html]) => radiusLiterals(file, html)), [])
+})
+
 // Flattens a page's <style> into rules, each with its @media or @supports context.
 const cssRules = (html) => {
   const css = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)].map(([, block]) => block).join('\n').replace(/\/\*[\s\S]*?\*\//g, '')
@@ -204,7 +272,7 @@ const stateNeeds = [
   {
     classes: ['tab'],
     states: [
-      '.tab:is(:hover, .is-hover)',
+      '.tab:is(:hover, .is-hover):where(:not(:disabled))',
       '.tab[aria-selected="true"]',
       '.tab[aria-selected="true"]::before',
       '@media (forced-colors: active) .tab[aria-selected="true"]',
@@ -440,6 +508,81 @@ test('no page marks a selected row with an inset accent bar', () => {
   assert.deepEqual(pages.flatMap((page) => selectionBars(page, read(page))), [])
 })
 
+// Colour comes from tokens.css. A page or the report stylesheet writes no hex, colour function, or named
+// colour; transparent and currentColor are allowed, and system colours only inside a forced-colors block.
+// A mask uses only the alpha of its image, so the black in a mask's gradient or SVG is never drawn and is
+// skipped.
+const namedColours = `aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue blueviolet brown
+  burlywood cadetblue chartreuse chocolate coral cornflowerblue cornsilk crimson cyan darkblue darkcyan darkgoldenrod darkgray
+  darkgreen darkgrey darkkhaki darkmagenta darkolivegreen darkorange darkorchid darkred darksalmon darkseagreen darkslateblue
+  darkslategray darkslategrey darkturquoise darkviolet deeppink deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite
+  forestgreen fuchsia gainsboro ghostwhite gold goldenrod gray green greenyellow grey honeydew hotpink indianred indigo ivory
+  khaki lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan lightgoldenrodyellow lightgray lightgreen
+  lightgrey lightpink lightsalmon lightseagreen lightskyblue lightslategray lightslategrey lightsteelblue lightyellow lime
+  limegreen linen magenta maroon mediumaquamarine mediumblue mediumorchid mediumpurple mediumseagreen mediumslateblue
+  mediumspringgreen mediumturquoise mediumvioletred midnightblue mintcream mistyrose moccasin navajowhite navy oldlace olive
+  olivedrab orange orangered orchid palegoldenrod palegreen paleturquoise palevioletred papayawhip peachpuff peru pink plum
+  powderblue purple rebeccapurple red rosybrown royalblue saddlebrown salmon sandybrown seagreen seashell sienna silver skyblue
+  slateblue slategray slategrey snow springgreen steelblue tan teal thistle tomato turquoise violet wheat white whitesmoke
+  yellow yellowgreen`.split(/\s+/)
+const systemColours = `Canvas CanvasText LinkText VisitedText ActiveText ButtonFace ButtonText ButtonBorder Field FieldText
+  Highlight HighlightText SelectedItem SelectedItemText Mark MarkText GrayText AccentColor AccentColorText`.split(/\s+/)
+const word = (names) => new RegExp(`(?<![\\w-])(?:${names.join('|')})(?![\\w-])`, 'i')
+const rawColourPatterns = [/#[\da-f]{3,8}(?![\w-])/i, /(?<![\w-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i, word(namedColours)]
+const rawColours = (file, html) => flaggedDeclarations({
+  file,
+  html,
+  isViolation: (property, value, context) => !/^(?:-webkit-)?mask(?:-image)?$/.test(property)
+    && (rawColourPatterns.some((pattern) => pattern.test(value)) || (!context.includes('forced-colors') && word(systemColours).test(value))),
+})
+
+test('the raw-colour guard catches hex, colour functions, named colours, and a system colour outside forced colors', () => {
+  const planted = `<style>.a { color: #fff } .b { background: rgb(0 0 0 / 40%) } .c { border-color: oklch(70% 0.1 250) }
+    .d { color: White } .e { outline-color: Highlight } .f { background-image: url("data:image/svg+xml,<svg fill='red'/>") }
+    .g { color: var(--color-text); background: transparent; border-color: currentColor } .h { animation-name: glide-left }
+    .i { mask: url("data:image/svg+xml,<svg stroke='black'/>") } .l { mask-image: linear-gradient(#000, transparent) } .j { color: color-mix(in srgb, var(--color-text) 8%, transparent) }
+    @media (forced-colors: active) { .k { outline-color: Highlight } }</style><p style="color: navy"></p>`
+  assert.deepEqual(rawColours('planted.html', planted).map((line) => line.split(' { ')[0]), ['planted.html: .a', 'planted.html: .b', 'planted.html: .c', 'planted.html: .d', 'planted.html: .e', 'planted.html: .f', 'planted.html: [style]'])
+})
+
+test('no page or the report stylesheet writes a raw colour outside tokens.css', () => {
+  const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
+  const sources = [...pages.map((page) => [page, read(page)]), ['visualizations/report.css', `<style>${read('visualizations/report.css')}</style>`]]
+  assert.deepEqual(sources.flatMap(([file, html]) => rawColours(file, html)), [])
+})
+
+// Hover is feedback that a control will act, so no hover rule reaches a disabled control. A hover rule
+// whose subject is a native control (button, input, select, option, textarea), or a class the page puts
+// on one, excludes :disabled in that compound: :where(:not(:disabled)) adds no specificity, so the rule
+// still loses to the selected state it lost to before.
+const disableable = /^(?:button|input|select|option|textarea)$/
+// State classes such as .is-hover only show a state in a specimen, so they do not mark a control.
+const controlClasses = (html) => new Set([...html.matchAll(/<(button|input|select|textarea)\b[^>]*\bclass="([^"]*)"/g)]
+  .flatMap(([, , list]) => list.split(/\s+/)).filter((name) => !name.startsWith('is-')))
+const hoverOnDisabled = (file, html) => {
+  const classes = controlClasses(html)
+  return perSelector(cssRules(html)).filter(({ selector }) => {
+    const compound = selector.split(/\s+(?![^(]*\))|\s*[>+~]\s*(?![^(]*\))/).find((part) => /:hover\b/.test(part))
+    if (!compound) return false
+    const element = compound.match(/^[a-z]+/)?.[0]
+    const targets = disableable.test(element ?? '') || [...compound.matchAll(/\.([\w-]+)/g)].some(([, name]) => classes.has(name))
+    return targets && !/:enabled\b|:not\(.*:disabled/.test(compound)
+  }).map(({ context, selector }) => `${file}: ${`${context} ${selector}`.trim()}`)
+}
+
+test('the hover guard catches a hover rule that reaches a disabled button, input, or option', () => {
+  const planted = `<style>.chip:hover { color: red } .copy:is(:hover, .is-hover) { color: red } .select option:hover { color: red }
+    .tab:is(:hover, .is-hover):where(:not(:disabled)) { color: red } .btn:hover:not(:disabled, [aria-pressed="true"]) { color: red }
+    .radio-card:hover:not(:has(input:disabled)) { color: red } .navlist a:hover { color: red }</style>
+    <button class="copy quiet-action"></button><button class="tab"></button><button class="btn"></button>`
+  assert.deepEqual(hoverOnDisabled('planted.html', planted), ['planted.html: .copy:is(:hover, .is-hover)', 'planted.html: .select option:hover'])
+})
+
+test('no hover rule on any page reaches a disabled control', () => {
+  const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
+  assert.deepEqual(pages.flatMap((page) => hoverOnDisabled(page, read(page))), [])
+})
+
 // The selected fill must keep accent text readable. This reads the default hue pair, the surfaces, and
 // the --color-nav-current mix from each tokens.css theme block, composites the fill over every surface it can
 // sit on, and checks accent text at 4.5:1.
@@ -541,6 +684,128 @@ test('the accent focus ring reaches 3:1 on --color-bg, --color-surface, and --co
   const results = focusRingContrast(read('tokens.css'))
   assert.equal(results.length, 9)
   assert.deepEqual(belowContrast(results, 3), [])
+})
+
+// Every pair the docs claim reads, measured from the catalogue rule that draws it. A recipe colour is read
+// from components.html and resolved against each tokens.css theme block, so a change to the rule or to a
+// token is measured. The resolver reads hex, black, white, transparent, var(), light-dark(), and
+// color-mix(in srgb) with premultiplied alpha; anything else throws, so a pair cannot pass unread.
+const resolveColour = (value, theme, locals = {}) => {
+  const fixed = { transparent: [0, 0, 0, 0], black: [0, 0, 0, 1], white: [255, 255, 255, 1] }[value]
+  if (fixed) return fixed
+  if (value.startsWith('#')) return [...rgb(value), 1]
+  const [, name, args = ''] = value.match(/^([\w-]+)\((.*)\)$/) ?? []
+  const parts = selectors(args)
+  if (name === 'var') {
+    const next = locals[args] ?? tokenValue(theme.block, args) ?? tokenValue(theme.light, args)
+    if (!next) throw new Error(`unknown token: ${args}`)
+    return resolveColour(next, theme, locals)
+  }
+  if (name === 'light-dark' && parts.length === 2) return resolveColour(parts[theme.dark ? 1 : 0], theme, locals)
+  if (name === 'color-mix' && parts[0] === 'in srgb' && parts.length === 3) {
+    const [a, b] = parts.slice(1).map((part) => {
+      const [, colour, share] = part.match(/^(.+?)(?:\s+([\d.]+)%)?$/)
+      return { colour: resolveColour(colour, theme, locals), share: share === undefined ? undefined : Number(share) / 100 }
+    })
+    a.share ??= b.share === undefined ? 0.5 : 1 - b.share
+    b.share ??= 1 - a.share
+    const alpha = a.colour[3] * a.share + b.colour[3] * b.share
+    return [0, 1, 2].map((i) => (alpha ? (a.colour[i] * a.colour[3] * a.share + b.colour[i] * b.colour[3] * b.share) / alpha : 0)).concat(alpha)
+  }
+  throw new Error(`unsupported colour: ${value}`)
+}
+const over = (top, bottom) => [0, 1, 2].map((i) => top[i] * top[3] + bottom[i] * (1 - top[3])).concat(1)
+const recipeValue = (rules, selector, property) => {
+  const body = rules.find((rule) => !rule.context && rule.selector === selector)?.body
+  const value = body?.match(new RegExp(`(?:^|; )${property}: ([^;]+)`))?.[1]
+  assert.ok(value, `components.html sets ${property} on ${selector}`)
+  return value
+}
+// Text over each fill, each fill over every surface it can sit on, in every theme block.
+const recipeContrast = ({ css, html, text, fills, locals = [] }) => {
+  const rules = cssRules(html)
+  const local = Object.fromEntries(locals.map(([selector, property]) => [property, recipeValue(rules, selector, property)]))
+  return accentThemes(css).flatMap((theme) => {
+    const scope = { ...theme, dark: theme.name !== 'light' }
+    const ink = resolveColour(recipeValue(rules, ...text), scope, local)
+    return fills.flatMap((fill) => surfaces.map((surface) => {
+      const ground = over(resolveColour(recipeValue(rules, ...fill), scope, local), resolveColour(`var(${surface})`, scope, local))
+      return { theme: theme.name, fill: fill[0], surface, ratio: contrast(over(ink, ground).slice(0, 3), ground.slice(0, 3)) }
+    }))
+  })
+}
+const contrastPairs = {
+  'the primary label (--color-accent-text) on the accent at rest, hover, and press': {
+    text: ['.btn', 'color'],
+    fills: [['.btn', 'background'], ['.btn:is(:hover, .is-hover):not(:disabled)', 'background'],
+      ['.btn:not(.secondary, .ghost, .danger, .text):is(:active, [aria-pressed="true"], .is-active):not(:disabled)', 'background']],
+  },
+  'the danger label on its rest, hover, and press fills': {
+    text: ['.btn.danger', 'color'],
+    fills: [['.btn.danger', 'background'], ['.btn.danger:is(:hover, .is-hover):not(:disabled)', 'background'],
+      ['.btn.danger:is(:active, [aria-pressed="true"], .is-active):not(:disabled)', 'background']],
+  },
+  ...Object.fromEntries(['success', 'warning', 'danger', 'info'].map((tone) => [`the ${tone} badge label on its tint`, {
+    text: ['.badge:is(.success, .warning, .danger, .info)', 'color'],
+    fills: [['.badge:is(.success, .warning, .danger, .info)', 'background']],
+    locals: [[`.badge.${tone}`, '--tone']],
+  }])),
+  'the pressed toggle card label on its tint': { text: ['.toggle', 'color'], fills: [['.toggle[aria-pressed="true"]', 'background']] },
+  'the pressed toggle card description on its tint': { text: ['.toggle-text small', 'color'], fills: [['.toggle[aria-pressed="true"]', 'background']] },
+  'the selected segmented label on its thumb': {
+    text: ['.segmented button[aria-pressed="true"]', 'color'],
+    fills: [['.segmented button[aria-pressed="true"]::before', 'background']],
+  },
+  'command plate text on the plate': { text: ['.code.command', 'color'], fills: [['.code.command', 'background']] },
+}
+
+test('the recipe contrast guard fails a pale hue under the primary label and reads a recipe from the catalogue', () => {
+  const css = read('tokens.css')
+  const html = read('components.html')
+  const pale = belowContrast(recipeContrast({ css: css.replace('--color-project: #4b45d1;', '--color-project: #c9c7f5;'), html, ...contrastPairs['the primary label (--color-accent-text) on the accent at rest, hover, and press'] }))
+  assert.deepEqual([...new Set(pale.map(({ theme }) => theme))], ['light'])
+  const faded = html.replace('.badge.warning { --tone: var(--color-warning); }', '.badge.warning { --tone: color-mix(in srgb, var(--color-warning) 40%, white); }')
+  assert.ok(belowContrast(recipeContrast({ css, html: faded, ...contrastPairs['the warning badge label on its tint'] })).length > 0)
+  assert.throws(() => recipeContrast({ css, html: html.replace('.toggle-text small { color: var(--color-muted);', '.toggle-text small { color: oklch(50% 0 0);'), ...contrastPairs['the pressed toggle card description on its tint'] }), /unsupported colour/)
+})
+
+for (const [name, pair] of Object.entries(contrastPairs)) {
+  test(`${name} reaches 4.5:1 in light and both dark blocks`, () => {
+    const results = recipeContrast({ css: read('tokens.css'), html: read('components.html'), ...pair })
+    assert.equal(results.length, 3 * pair.fills.length * surfaces.length)
+    assert.deepEqual(belowContrast(results), [])
+  })
+}
+
+// The prompt is a graphic mark, so it needs 3:1 (WCAG 1.4.11), for the default hue pair.
+test('the command plate prompt reaches 3:1 on the plate in light and both dark blocks', () => {
+  const results = recipeContrast({ css: read('tokens.css'), html: read('components.html'), text: ['.code.command .line::before', 'color'], fills: [['.code.command', 'background']] })
+  assert.deepEqual(belowContrast(results, 3), [])
+})
+
+// A field has no focus ring, so its accent edge is the indicator: 3:1 (WCAG 1.4.11) against the field
+// fill and every surface around the field (decisions.md, Known gaps).
+test('the focused field edge reaches 3:1 against the field fill and every surface in light and both dark blocks', () => {
+  const rules = cssRules(read('components.html'))
+  const edge = recipeValue(rules, ':is(.input, .select, .textarea):is(:focus-visible, .is-focus)', 'border-color')
+  const grounds = [recipeValue(rules, '.input, .select, .textarea', 'background'), ...surfaces.map((surface) => `var(${surface})`)]
+  const results = accentThemes(read('tokens.css')).flatMap((theme) => {
+    const scope = { ...theme, dark: theme.name !== 'light' }
+    return grounds.map((ground) => {
+      const colour = over(resolveColour(ground, scope), [255, 255, 255, 1])
+      return { theme: theme.name, ground, ratio: contrast(over(resolveColour(edge, scope), colour).slice(0, 3), colour.slice(0, 3)) }
+    })
+  })
+  assert.equal(results.length, 12)
+  assert.deepEqual(belowContrast(results, 3), [])
+})
+
+// The toggle card ratios that decisions.md quotes.
+test('the toggle card ratios in decisions.md match the measured ones', () => {
+  const ratios = (text) => recipeContrast({ css: read('tokens.css'), html: read('components.html'), text, fills: [['.toggle[aria-pressed="true"]', 'background']] })
+    .filter(({ surface, theme }) => surface === '--color-surface-raised' && theme !== 'dark (data-theme)').map(({ ratio }) => `${ratio.toFixed(2)}:1`)
+  const row = read('decisions.md').split('\n').find((line) => line.startsWith('| Toggle card |'))
+  for (const ratio of [...ratios(['.toggle', 'color']), ...ratios(['.toggle-text small', 'color'])]) assert.ok(row.includes(ratio), ratio)
 })
 
 // The native clear cross sits at the input's trailing edge. A fixed-width search input inside a wider

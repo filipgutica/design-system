@@ -94,17 +94,17 @@
   .search input::placeholder { color: var(--color-muted); }
   /* The native clear button, quieted to a thin muted cross drawn with a mask. */
   .search input::-webkit-search-cancel-button { width: 0.75rem; height: 0.75rem; margin-inline-start: var(--space-2); background: var(--color-muted); cursor: pointer; -webkit-appearance: none; appearance: none; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 2.5l7 7m0-7l-7 7' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
-  .search input::-webkit-search-cancel-button:hover { background: var(--color-text); }
+  .search input:where(:not(:disabled))::-webkit-search-cancel-button:hover { background: var(--color-text); }
   /* Forced colors would drop the masked fill, so the cross opts out and takes the system text colour. */
   /* Forced colors drop the inset line, so the focused field draws the system ring just inside its edge. */
   @media (forced-colors: active) { .search:is(:has(input:focus-visible), .is-focus) { outline: var(--focus-width) solid Highlight; outline-offset: -1px; } }
-  @media (forced-colors: active) { .search input::-webkit-search-cancel-button, .search input::-webkit-search-cancel-button:hover { forced-color-adjust: none; background: CanvasText; } }
+  @media (forced-colors: active) { .search input::-webkit-search-cancel-button, .search input:where(:not(:disabled))::-webkit-search-cancel-button:hover { forced-color-adjust: none; background: CanvasText; } }
   kbd { font-size: var(--text-xs); color: var(--color-muted); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-inline); padding: 0 var(--space-1); line-height: 1.125rem; background: var(--color-surface-raised); }
 
   /* Tabs, for the Foundations specimens: components.html#tabs, unchanged. */
   .tablist { --glide-lead: 260ms; --glide-trail: 300ms; display: flex; width: max-content; max-width: 100%; overflow-x: auto; padding: var(--space-1); isolation: isolate; }
   .tab { position: relative; flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-inline); background: transparent; color: var(--color-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-ui); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
-  .tab:is(:hover, .is-hover) { background: var(--color-row-hover); color: var(--color-text); }
+  .tab:is(:hover, .is-hover):where(:not(:disabled)) { background: var(--color-row-hover); color: var(--color-text); }
   /* The selected tab takes the navigation row's lifted fill: one selected state for both. The fill is a
      ::before layer behind the label; in the catalogue it glides between tabs. */
   .tab[aria-selected="true"] { background: transparent; color: var(--color-nav-current-text); }
@@ -171,9 +171,9 @@
   /* List selection: components.html#navigation-list. Dividers are straight lines inset by the row
      padding; a filled row (hovered or selected) hides the divider above it and the one below it. */
   .row + .row::before { content: ""; position: absolute; inset: 0 var(--space-3) auto; border-top: 1px solid var(--color-border-subtle); }
-  .row:is(:hover, [aria-selected="true"])::before,
-  .row:is(:hover, [aria-selected="true"]) + .row::before { display: none; }
-  .row:hover { background: var(--color-row-hover); }
+  .row:is(:hover:where(:not(:disabled)), [aria-selected="true"])::before,
+  .row:is(:hover:where(:not(:disabled)), [aria-selected="true"]) + .row::before { display: none; }
+  .row:hover:where(:not(:disabled)) { background: var(--color-row-hover); }
   /* The selected row takes the navigation row's current recipe; it comes after hover, so hover keeps the fill. */
   .row[aria-selected="true"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); font-weight: var(--weight-medium); }
   .row[aria-selected="true"] .title { color: var(--color-nav-current-text); }
@@ -247,6 +247,12 @@
   .alert.warning { background: var(--color-warning-surface); } .alert.warning .icon { color: var(--color-warning); }
   .alert.danger { background: var(--color-error-surface); } .alert.danger .icon { color: var(--color-error); }
   .alert.info { background: var(--color-info-surface); } .alert.info .icon { color: var(--color-info); }
+  @media (forced-colors: active) {
+    /* The tone dot is a fill, so it opts out of adjustment and takes the label's system colour. */
+    .badge:is(.success, .warning, .danger, .info)::before { forced-color-adjust: none; background: CanvasText; }
+    /* An SVG keeps the colour it sets, so the status icon takes the system text colour. */
+    .alert .icon, .alert:is(.success, .warning, .danger, .info) .icon { color: CanvasText; }
+  }
 
   /* Code block: components.html#code-block, unchanged. */
   .code { width: 100%; max-width: var(--measure); min-width: 0; overflow: hidden; border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-code); color: var(--color-code-text); box-shadow: var(--shadow-surface); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
@@ -256,7 +262,7 @@
   /* Copy is a quiet action; this sets its size and place. */
   .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-lg); min-height: var(--control-lg); margin-left: auto; padding: var(--space-1) 0.375rem; color: inherit; }
   /* The code block has its own palette, so its Copy keeps the plate's text colour on hover. */
-  .code .copy:is(:hover, .is-hover) { color: inherit; }
+  .code .copy:is(:hover, .is-hover):where(:not(:disabled)) { color: inherit; }
   /* Inset: the code block clips its content. */
   .code pre:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   .code .copy.quiet-action:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
@@ -662,11 +668,11 @@
           <h3 id="shape-title">Shape</h3>
           <p class="note">Pill buttons, rounded fields and toggle cards, large-radius panels, and inline corners. Cards never take a pill.</p>
           <ul class="specs">
-            <li class="spec" data-token="--radius-inline"><div class="spec-meta"><code>--radius-inline</code><span class="value"></span><span class="use">Inline elements, checkboxes, navigation rows, list-selection rows, and tabs</span></div><i class="shape-box" style="border-radius:var(--radius-inline)"></i></li>
-            <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Inputs, selects, textareas, toggle cards, and pager links</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
-            <li class="spec" data-token="--radius-control"><div class="spec-meta"><code>--radius-control</code><span class="value"></span><span class="use">Buttons, quiet actions, segmented controls, and their thumbs</span></div><i class="shape-box" style="border-radius:var(--radius-control)"></i></li>
-            <li class="spec" data-token="--radius-panel"><div class="spec-meta"><code>--radius-panel</code><span class="value"></span><span class="use">Wells, plates, panels, radio cards, alerts, and floating layers</span></div><i class="shape-box" style="border-radius:var(--radius-panel)"></i></li>
-            <li class="spec" data-token="--radius-pill"><div class="spec-meta"><code>--radius-pill</code><span class="value"></span><span class="use">Status badges and switch tracks</span></div><i class="shape-box" style="border-radius:var(--radius-pill)"></i></li>
+            <li class="spec" data-token="--radius-inline"><div class="spec-meta"><code>--radius-inline</code><span class="value"></span><span class="use">Places and picked rows: navigation rows, tabs, list rows, breadcrumb links, checkboxes, and keyboard keys</span></div><i class="shape-box" style="border-radius:var(--radius-inline)"></i></li>
+            <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Typed fields and controls whose label wraps: inputs, selects, textareas, toggle cards, and pager links</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
+            <li class="spec" data-token="--radius-control"><div class="spec-meta"><code>--radius-control</code><span class="value"></span><span class="use">Pills that act or set a value: buttons, quiet actions, segmented controls, and their thumbs</span></div><i class="shape-box" style="border-radius:var(--radius-control)"></i></li>
+            <li class="spec" data-token="--radius-panel"><div class="spec-meta"><code>--radius-panel</code><span class="value"></span><span class="use">Containers: wells, plates, panels, radio cards, alerts, and floating layers</span></div><i class="shape-box" style="border-radius:var(--radius-panel)"></i></li>
+            <li class="spec" data-token="--radius-pill"><div class="spec-meta"><code>--radius-pill</code><span class="value"></span><span class="use">Small state marks: status badges, switch tracks, slider and progress tracks, and score pips</span></div><i class="shape-box" style="border-radius:var(--radius-pill)"></i></li>
           </ul>
         </section>
 
