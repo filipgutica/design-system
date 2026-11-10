@@ -588,7 +588,8 @@ test('no page or the report stylesheet writes a raw colour outside tokens.css', 
 // whose subject is a native control (button, input, select, option, textarea), or a class the page puts
 // on one, excludes :disabled in that compound: :where(:not(:disabled)) adds no specificity, so the rule
 // still loses to the selected state it lost to before. A label owns the control inside it, as a radio
-// card does, so a hover rule on a label's class excludes a disabled descendant with :not(:has(…:disabled)).
+// card does, so a hover rule on a label's class excludes a disabled descendant with :not(:has(…:disabled)),
+// or requires an enabled one with :has(…:enabled).
 // Composite owners in this language are labels; a new kind of owner needs a line here.
 const disableable = /^(?:button|input|select|option|textarea)$/
 // State classes such as .is-hover only show a state in a specimen, so they do not mark a control.
@@ -602,7 +603,7 @@ const hoverOnDisabled = (file, html) => {
     if (!compound) return false
     const names = [...compound.matchAll(/\.([\w-]+)/g)].map(([, name]) => name)
     if (disableable.test(compound.match(/^[a-z]+/)?.[0] ?? '') || names.some((name) => controls.has(name))) return !/:enabled\b|:not\(.*:disabled/.test(compound)
-    return names.some((name) => owners.has(name)) && !/:not\(:has\([^)]*:disabled/.test(compound)
+    return names.some((name) => owners.has(name)) && !/:not\(:has\([^)]*:disabled|:has\([^)]*:enabled/.test(compound)
   }).map(({ context, selector }) => `${file}: ${`${context} ${selector}`.trim()}`)
 }
 
@@ -610,7 +611,7 @@ test('the hover guard catches a hover rule that reaches a disabled button, input
   const planted = `<style>.chip:hover { color: red } .copy:is(:hover, .is-hover) { color: red } .select option:hover { color: red }
     .tab:is(:hover, .is-hover):where(:not(:disabled)) { color: red } .btn:hover:not(:disabled, [aria-pressed="true"]) { color: red }
     .radio-card:hover:not(:has(input:disabled)) { color: red } .navlist a:hover { color: red }
-    .check:hover:not(:has(input:checked)) { color: red }</style>
+    .check:hover:not(:has(input:checked)) { color: red } .radio-card:has(input:enabled):hover { color: red } .check:has(:enabled):hover { color: red }</style>
     <button class="copy quiet-action"></button><button class="tab"></button><button class="btn"></button>
     <label class="radio-card"><input type="radio"></label><label class="check"><input type="checkbox"></label>`
   assert.deepEqual(hoverOnDisabled('planted.html', planted), ['planted.html: .copy:is(:hover, .is-hover)', 'planted.html: .select option:hover', 'planted.html: .check:hover:not(:has(input:checked))'])
