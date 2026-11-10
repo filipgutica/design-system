@@ -71,8 +71,9 @@ const detectRelease = async (pluginConfig, context) => {
 }
 
 // Releases stay 1.0.x while the design system has no outside users (decisions.md, Versioning), so every
-// release is a patch. Breaking changes are still detected and logged, and the release notes still list
-// them. Leaving 1.0.x is a deliberate change: npm already holds 1.1.0 to 2.4.0, so the next series starts
+// release is a patch. Breaking changes are still detected and logged. The release notes list a breaking
+// change only when its commit message carries `!` or a `BREAKING CHANGE:` footer; a marker only in the PR
+// body, or in the `[BREAKING CHANGE]` form, still releases but does not reach the notes. Leaving 1.0.x is a deliberate change: npm already holds 1.1.0 to 2.4.0, so the next series starts
 // at 2.5.0 or 3.0.0, from a new seed tag, not only from removing this cap.
 export const analyzeCommits = async (pluginConfig, context) => {
   const release = await detectRelease(pluginConfig, context)

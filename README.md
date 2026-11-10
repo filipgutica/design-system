@@ -54,8 +54,9 @@ pnpm verify
 
 semantic-release publishes from `main` with npm provenance. Releases stay 1.0.x while the design system has no outside users ([decisions.md](language/decisions.md), Versioning):
 
-- Any commit that releases, such as `fix`, `feat`, or a breaking change, releases a patch. The release notes still name breaking changes.
-- `build`, `chore`, `docs`, `test`, and similar types release nothing.
+- Any commit that releases, such as `fix`, `feat`, or a breaking change, releases a patch.
+- The release notes name a breaking change only when its commit message has `!` after the type or a `BREAKING CHANGE:` footer. Put it there; a marker only in the PR body releases a patch but does not reach the notes.
+- `build`, `chore`, `docs`, `test`, and similar types release nothing, unless the commit or its PR marks a breaking change.
 - Release tags are `ds-v*`. The `v1.0.0`–`v2.4.0` tags and npm versions are the earlier series.
 
 Commits follow Conventional Commits, and CI checks them with commitlint. Do not edit the version by hand.
