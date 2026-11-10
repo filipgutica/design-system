@@ -1,8 +1,17 @@
 {
   "groups": [
     {
+      "id": "identity-inputs",
+      "title": "Identity inputs",
+      "note": "The four lines a project sets on `:root`: the hue for light and dark, and the two font stacks. Every other token follows from them.",
       "comment": "Identity layer: a project swaps these four lines. --color-project is the light-theme hue;\n--color-project-dark is the dark-theme hue, also used on dark plates in both themes.",
       "identity": true,
+      "roles": {
+        "color-project": "The project hue; `--color-accent` follows it",
+        "color-project-dark": "The `$` prompt on the command plate",
+        "font-ui": "Prose, h3 and below, application section headings, labels, and controls",
+        "font-mono": "Identity, documentation and product page titles and section headings, navigation rails, metadata, captions, code, identifiers, and keys"
+      },
       "tokens": {
         "color-project": [
           "#4b45d1",
@@ -14,6 +23,9 @@
       }
     },
     {
+      "id": "surfaces",
+      "title": "Surfaces, text, and lines",
+      "note": "Neutral paper in light and graphite in dark. Contrast, not colour, separates regions.",
       "comment": "Core roles: only the identity lines above feed them. Neutral paper and graphite surfaces.",
       "notes": {
         "color-well": "The well: segmented and switch tracks, pressed buttons, selected radio cards, and disabled fields.",
@@ -21,6 +33,27 @@
         "color-nav-current": "Selected rows lift and take a faint accent tint, so the selection reads on near-white panels too.",
         "color-nav-current-text": "Text on the current nav row, selected tab, and selected list row: the first of --color-accent, --color-text, black, and white\nthat reaches 4.5:1 over --color-nav-current, on the page and on a surface.",
         "color-segmented-current-text": "The selected segmented label: the first of --color-accent, --color-text, black, and white that reaches\n4.5:1 on the thumb. An icon-only option needs 3:1."
+      },
+      "roles": {
+        "color-bg": "Page canvas",
+        "color-surface": "Wells: code, screenshots, figures",
+        "color-surface-raised": "Panels and floating layers",
+        "color-surface-muted": "Neutral badges, slider and progress tracks, and radio card hover",
+        "color-well": "The well: segmented and switch tracks, pressed buttons, selected radio cards, and disabled fields",
+        "color-field-bg": "Field fill: `--color-surface-raised` in light, the sunk `--color-well` well in dark. It stays the same on focus",
+        "color-field-edge": "Field border at rest: `--color-border-subtle` in both themes. Focus turns it `--color-accent`",
+        "shadow-field": "Fields at rest: none in light, where the white fill and edge carry the shape; `--shadow-sink` in dark. Disabled fields drop it",
+        "color-control-thumb": "Secondary buttons and segmented thumbs",
+        "color-nav-current": "Current navigation row and selected tab, with `--shadow-nav-current`",
+        "color-nav-current-text": "Text on the current row and selected tab: the first of `--color-accent`, `--color-text`, black, and white that reaches 4.5:1 on the tinted fill",
+        "color-segmented-current-text": "The selected segmented label: the first of `--color-accent`, `--color-text`, black, and white that reaches 4.5:1 on the thumb (3:1 for an icon)",
+        "color-row-hover": "Hover on navigation rows, tabs, ghost buttons, and listbox options",
+        "color-row-selected": "Checked option in a select picker",
+        "color-border-subtle": "Figures and dividers",
+        "color-border": "Unchecked checkbox and radio edges; the off switch track mixes it into `--color-well`",
+        "color-text": "Essential labels and instructions",
+        "color-muted": "Secondary information and metadata",
+        "color-overlay": "Backdrop behind dialogs and drawers"
       },
       "tokens": {
         "color-bg": [
@@ -90,9 +123,22 @@
       }
     },
     {
+      "id": "accent",
+      "title": "Accent and links",
+      "note": "The hue fills the one primary action and marks selection and focus. Links keep their own colour.",
       "comment": "The hue fills primary actions and marks selection; links keep --color-link.",
       "notes": {
         "color-focus": "One focus ring for every role: the accent, at 3:1 or more on --color-bg, --color-surface, and --color-surface-raised\nin both themes. Fields mark focus with their own accent edge instead; see components.md."
+      },
+      "roles": {
+        "color-accent": "Primary action fill, marks, current items, checked controls; 4.5:1 where it colors text",
+        "color-accent-text": "Primary button label",
+        "color-accent-hover": "No core component reads it; it mirrors `--color-accent-hover` in `@filipgutica/ui`",
+        "color-button-hover": "Primary button hover",
+        "color-link": "Links",
+        "color-focus": "The one focus ring on every role but fields: the accent",
+        "focus-width": "One ring for every role but fields: buttons, quiet actions, links, tabs, and navigation rows. `--color-focus` is the accent, at 3:1 or more on every surface. It has no glow and sits over the control's own raise or sink shadow. Pointer hover never draws focus.",
+        "focus-offset": "The gap between a control and its ring"
       },
       "tokens": {
         "color-accent": "{color-project}",
@@ -109,7 +155,20 @@
       }
     },
     {
+      "id": "status",
+      "title": "Status",
+      "note": "Only for state, always with a text or icon label. Each has a soft surface for alerts and badges.",
       "comment": "Status: only for state, never for decoration.",
+      "roles": {
+        "color-success": "Success state: icons, and the success alert and badge. Always with a text label",
+        "color-warning": "Warning state: icons, and the warning alert and badge. Always with a text label",
+        "color-error": "Errors and destructive actions: invalid field edges, field error text, the danger button label, and error icons",
+        "color-info": "Information state: icons, and the info alert and badge",
+        "color-success-surface": "Alert text on its tint",
+        "color-warning-surface": "Alert text on its tint",
+        "color-error-surface": "Alert text on its tint",
+        "color-info-surface": "Alert text on its tint"
+      },
       "tokens": {
         "color-success": [
           "#157249",
@@ -146,9 +205,22 @@
       }
     },
     {
+      "id": "terminal-plates",
+      "title": "Terminal plates",
+      "note": "Derived from the hue: the tinted command plate and the neutral terminal capture of the terminal folio identity. A project without plates leaves them unused.",
       "comment": "Identity layer, derived: terminal folio plates. Commands take the hue; captures stay neutral.\nA project without terminal plates leaves these unused.",
       "notes": {
         "shadow-nav-current-dark": "The terminal capture's header stays dark in both appearances, so its selected tab keeps the dark lift."
+      },
+      "roles": {
+        "color-command-bg": "Command plate, tinted with the hue, in both themes",
+        "color-command-border": "Command plate edge; transparent in light",
+        "color-terminal": "Terminal capture plate, in both themes",
+        "color-terminal-text": "Command text",
+        "color-terminal-border": "Terminal plate edge",
+        "color-terminal-caption": "Status-line caption under a terminal capture",
+        "color-terminal-caption-text": "The status-line caption under a terminal capture",
+        "shadow-nav-current-dark": "The selected tab's lift in a terminal capture header, which stays dark in both appearances"
       },
       "tokens": {
         "color-command-bg": [
@@ -168,7 +240,18 @@
       }
     },
     {
+      "id": "code",
+      "title": "Code",
+      "note": "Source code wells and their restrained syntax colours.",
       "comment": "Source code wells",
+      "roles": {
+        "color-code": "Source code well",
+        "color-code-text": "Plain text in source code wells",
+        "color-syntax-keyword": "Keywords in source code",
+        "color-syntax-string": "Strings in source code",
+        "color-syntax-number": "Numbers in source code",
+        "color-syntax-comment": "Comments in source code"
+      },
       "tokens": {
         "color-code": "{color-surface}",
         "color-code-text": "{color-text}",
@@ -191,7 +274,29 @@
       }
     },
     {
+      "id": "type",
+      "title": "Type",
+      "note": "Sizes in rem, so text follows the reader’s font size. The identity inputs name the families.",
       "comment": "Type scale. The identity block names the families.",
+      "roles": {
+        "text-xs": "Badges, navigation group labels, and code block headers",
+        "text-sm": "Secondary text and figure captions",
+        "text-md": "Controls and dense application content",
+        "text-lg": "Subheadings (h3 and below) and large controls",
+        "text-xl": "Documentation section heading, in mono",
+        "text-2xl": "Largest application title",
+        "text-3xl": "Documentation title, in mono",
+        "text-reading": "Paragraphs and article text, with `--leading` and `--measure`",
+        "text-display": "Product page and tool home title, in mono",
+        "text-display-sm": "The display title on phones",
+        "leading-tight": "Headings, from the `tokens.css` base",
+        "leading": "Body and reading text",
+        "weight-regular": "Body text, labels, and rows that are not current",
+        "weight-medium": "The current destination",
+        "weight-semibold": "Headings, from the `tokens.css` base",
+        "tracking-tight": "Headings, from the `tokens.css` base",
+        "text-code": "Inline code, source code, and command plates"
+      },
       "tokens": {
         "text-xs": "0.75rem",
         "text-sm": "0.8125rem",
@@ -213,7 +318,23 @@
       }
     },
     {
+      "id": "space",
+      "title": "Space",
+      "note": "A 4px rhythm: small gaps inside a group, larger gaps between groups.",
       "comment": "Space: a 4px rhythm (0.25rem at the default 16px root).",
+      "roles": {
+        "space-1": "The smallest rhythm step: an icon and its label, and inner insets",
+        "space-2": "Gaps inside a group, such as between controls",
+        "space-3": "Gaps between related rows and fields",
+        "space-4": "Side gutter on phones",
+        "space-5": "A rhythm step between group and section gaps",
+        "space-6": "Side gutter",
+        "space-8": "Documentation section gap on phones",
+        "space-12": "Documentation section gap",
+        "space-16": "Product section separation at tablet width",
+        "space-20": "A large rhythm step for page regions",
+        "space-24": "Product section separation"
+      },
       "tokens": {
         "space-1": "0.25rem",
         "space-2": "0.5rem",
@@ -229,7 +350,20 @@
       }
     },
     {
+      "id": "size",
+      "title": "Size",
+      "note": "Control heights, the reading measure, and page widths.",
       "comment": "Size",
+      "roles": {
+        "control-sm": "Small control height: compact buttons and inline actions",
+        "control-md": "Default control height on fine pointers",
+        "control-lg": "Touch controls",
+        "row": "Navigation and list rows",
+        "measure": "Bounds reading text",
+        "page-max": "Documentation frame",
+        "page-wide": "Product page frame",
+        "sidebar": "This page's sidebar"
+      },
       "tokens": {
         "control-sm": "2rem",
         "control-md": "2.25rem",
@@ -242,7 +376,17 @@
       }
     },
     {
+      "id": "shape",
+      "title": "Shape",
+      "note": "One radius per role, from inline code to floating panels.",
       "comment": "Shape",
+      "roles": {
+        "radius-inline": "Inline elements, checkboxes, navigation rows, list-selection rows, and tabs",
+        "radius-control": "Buttons, quiet actions, segmented controls, and their thumbs",
+        "radius-panel": "Wells, plates, panels, radio cards, alerts, and floating layers",
+        "radius-field": "Inputs, selects, textareas, toggle cards, and pager links",
+        "radius-pill": "Status badges and switch tracks"
+      },
       "tokens": {
         "radius-inline": "6px",
         "radius-control": "999px",
@@ -252,9 +396,21 @@
       }
     },
     {
+      "id": "elevation",
+      "title": "Elevation",
+      "note": "One shadow per depth tier. Pages write no shadow of their own.",
       "comment": "Elevation: DESIGN.md#depth assigns each tier. Idle controls and surfaces take no outer light\nhighlight and no blur wider than 2px.",
       "notes": {
         "shadow-field-focus": "A focused field's inset line inside its accent or danger edge. It takes each theme's accent and danger."
+      },
+      "roles": {
+        "shadow-raise": "Idle controls: buttons, unselected radio cards, switch knobs, and segmented thumbs",
+        "shadow-surface": "Containers: panels, cards, source code, command plates, and terminal captures",
+        "shadow-sink": "Wells: tracks, pressed buttons, selected radio cards, and dark fields",
+        "shadow-dialog": "Menus, popovers, pickers, and dialogs",
+        "shadow-nav-current": "The lift under the current navigation row and the selected tab",
+        "shadow-field-focus": "A focused field's 2px inset line: the accent at 18%, inside its `--color-accent` edge",
+        "shadow-field-focus-invalid": "A focused invalid field's inset line: `--color-error` at 18%, inside its `--color-error` edge"
       },
       "tokens": {
         "shadow-raise": [
@@ -282,7 +438,15 @@
       }
     },
     {
+      "id": "motion",
+      "title": "Motion",
+      "note": "Short durations for hover and press, a longer one for menus and panels.",
       "comment": "Motion",
+      "roles": {
+        "duration-fast": "Hover and press",
+        "duration": "Menus, panels, and the switch knob",
+        "ease-out": "Animate opacity or transform only where it explains a state change"
+      },
       "tokens": {
         "duration-fast": "120ms",
         "duration": "180ms",
@@ -290,8 +454,15 @@
       }
     },
     {
+      "id": "library",
+      "title": "Library only",
+      "note": "@filipgutica/ui variables with no design-language token. `tokens.css` leaves them out.",
       "comment": "Library only: @filipgutica/ui variables with no design-language token. tokens.css leaves them out.",
       "standalone": false,
+      "roles": {
+        "color-shadow": "Shadow colour for @filipgutica/ui components that draw their own shadow",
+        "shadow-control": "Outer shadow on @filipgutica/ui controls: none, as idle controls take no lift"
+      },
       "tokens": {
         "color-shadow": [
           "rgb(16 24 40 / 10%)",

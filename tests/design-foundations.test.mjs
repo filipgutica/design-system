@@ -211,7 +211,14 @@ const stateNeeds = [
       '@media (forced-colors: active) .tab[aria-selected="true"]::before',
     ],
   },
-  { classes: ['navlist'], states: ['.navlist a:is(:hover, .is-hover)', '.navlist a[aria-current="page"]', '@media (forced-colors: active) .navlist a[aria-current="page"]'] },
+  {
+    classes: ['navlist'],
+    states: [
+      '.navlist a:is(:hover, .is-hover)', '.navlist a[aria-current="page"]', '@media (forced-colors: active) .navlist a[aria-current="page"]',
+      '@supports (text-box: trim-both cap alphabetic) .navlist a:not(:has(> *))',
+      '@supports (text-box: trim-both cap alphabetic) .navlist a:not(:has(> *))[aria-current="location"]::before',
+    ],
+  },
   {
     classes: ['rail'],
     states: [

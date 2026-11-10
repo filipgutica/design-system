@@ -323,6 +323,15 @@
   .navlist a[aria-current="page"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); font-weight: var(--weight-medium); }
   .navlist a[aria-current="location"] { color: var(--color-text); font-weight: var(--weight-medium); }
   .navlist a[aria-current="location"]::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--color-accent); }
+  /* Optical centring: a line box keeps room for descenders, so a label in a flex row sits about 1px above
+     centre. Where text-box is supported, a text-only row becomes a block that trims its line to the cap
+     height and centres it, and the pip centres itself. Block padding gives a wrapped label room above its
+     first cap and below its last descenders; a single line still centres in the min-height. Rows with an
+     icon or a count keep flex layout, and browsers without text-box keep today's rendering. */
+  @supports (text-box: trim-both cap alphabetic) {
+    .navlist a:not(:has(> *)) { display: block; align-content: center; padding-block: var(--space-2); text-box: trim-both cap alphabetic; }
+    .navlist a:not(:has(> *))[aria-current="location"]::before { inset-block: 0; margin-block: auto; }
+  }
   /* Inset: the rail and the drawer scroll. */
   .navlist a:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   /* Phone trigger: a secondary button with a three-line menu glyph, because it opens a side drawer. */
@@ -381,6 +390,11 @@
   .crumbs a { display: inline-flex; align-items: center; min-height: var(--control-sm); border-radius: var(--radius-inline); color: var(--color-muted); text-decoration: none; }
   .crumbs a:is(:hover, .is-hover) { color: var(--color-text); text-decoration: underline; text-underline-offset: 0.2em; }
   .crumbs [aria-current="page"] { color: var(--color-text); font-weight: var(--weight-medium); overflow-wrap: anywhere; }
+  /* Crumbs share the header row with the strip, so they centre on the cap height too. */
+  @supports (text-box: trim-both cap alphabetic) {
+    .crumbs a:not(:has(> *)) { display: block; align-content: center; padding-block: var(--space-2); text-box: trim-both cap alphabetic; }
+    .crumbs [aria-current="page"], .crumbs li + li::before { text-box: trim-both cap alphabetic; }
+  }
   /* Phones show only the parent, as a back link; .is-back pins that for the specimen. */
   .crumbs.is-back li:not(:nth-last-child(2)) { display: none; }
   .crumbs.is-back li::before { content: none; }
@@ -1674,22 +1688,28 @@
 
   // Find filters the rail only, never the page, so deep links and the page order stay stable. Every word
   // must appear in a row's terms. The count is announced after a pause.
+  // A page that also filters its own content, such as a table of tokens, sets window.findScope before
+  // the reader types: { filter(words) → { count, one, many }, keeps(link) → boolean }. Find then calls
+  // filter on each change, keeps the rail links keeps() names, and announces the page's count and noun.
   let announce;
   const filter = () => {
     const query = find.value.trim().toLowerCase();
     const words = query.split(/\s+/).filter(Boolean);
+    const scope = window.findScope;
+    const result = scope?.filter(words);
     let shown = 0;
     links.forEach((a) => {
-      const match = words.every((w) => a.dataset.terms.includes(w));
+      const match = scope ? scope.keeps(a) : words.every((w) => a.dataset.terms.includes(w));
       a.hidden = !match;
       if (match) shown += 1;
     });
     railGroups.forEach((g) => { g.hidden = !g.querySelector('a:not([hidden])'); });
     empty.hidden = shown > 0;
     empty.querySelector('q').textContent = find.value.trim();
+    const { count, one, many } = result ?? { count: shown, one: 'match', many: 'matches' };
     clearTimeout(announce);
     announce = setTimeout(() => {
-      findCount.textContent = query ? (shown ? `${shown} ${shown === 1 ? 'match' : 'matches'}` : 'No matches') : '';
+      findCount.textContent = query ? (count ? `${count} ${count === 1 ? one : many}` : `No ${many}`) : '';
     }, 500);
   };
   // Goes to a row's destination and focuses it. In the drawer the click closes it, and the drawer moves focus.
