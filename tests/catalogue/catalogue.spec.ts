@@ -155,11 +155,33 @@ test.describe('desktop', () => {
 
   test('a resize keeps a jump whose landing the page bottom clamped', async ({ page }) => {
     // The page cannot scroll this target up to the inset, so the jump lands at the bottom and must still hold.
-    await page.setViewportSize({ width: 1280, height: 2100 })
+    // Widening the page shortens it, so the clamped landing moves and the page sits at the new one.
+    await page.setViewportSize({ width: 1000, height: 2100 })
     await page.goto(`${url}#page-type-and-helpers`)
     await expect(current(page)).toHaveText('Page type and helpers')
-    await page.setViewportSize({ width: 1250, height: 2100 })
+    const before = await page.evaluate(() => scrollY)
+    await page.setViewportSize({ width: 1280, height: 2100 })
     await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))))
+    expect(before - await page.evaluate(() => scrollY)).toBeGreaterThan(100)
+    await expect(current(page)).toHaveText('Page type and helpers')
+  })
+
+  test('a resize keeps a jump whose smooth scroll is still on its way', async ({ page }) => {
+    // The page scrolls smoothly under normal motion only where a site opts in, so the test opts in. The resize
+    // fires after the hash change, which measures the jump again, and before the scroll arrives.
+    await page.setViewportSize({ width: 1280, height: 2100 })
+    await page.goto(url)
+    const startY = await page.evaluate(async () => {
+      document.documentElement.style.scrollBehavior = 'smooth'
+      const hashed = new Promise((done) => addEventListener('hashchange', done, { once: true }))
+      document.querySelector<HTMLAnchorElement>('#rail a[href="#page-type-and-helpers"]')!.click()
+      await hashed
+      dispatchEvent(new Event('resize'))
+      return scrollY
+    })
+    const bottom = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)
+    expect(startY).toBeLessThan(bottom - 1000)
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThanOrEqual(bottom - 2)
     await expect(current(page)).toHaveText('Page type and helpers')
   })
 })
