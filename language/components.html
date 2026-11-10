@@ -325,10 +325,11 @@
   .navlist a[aria-current="location"]::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--color-accent); }
   /* Optical centring: a line box keeps room for descenders, so a label in a flex row sits about 1px above
      centre. Where text-box is supported, a text-only row becomes a block that trims its line to the cap
-     height and centres it, and the pip centres itself. Rows with an icon or a count keep flex layout, and
-     browsers without text-box keep today's rendering. */
+     height and centres it, and the pip centres itself. Block padding gives a wrapped label room above its
+     first cap and below its last descenders; a single line still centres in the min-height. Rows with an
+     icon or a count keep flex layout, and browsers without text-box keep today's rendering. */
   @supports (text-box: trim-both cap alphabetic) {
-    .navlist a:not(:has(> *)) { display: block; align-content: center; text-box: trim-both cap alphabetic; }
+    .navlist a:not(:has(> *)) { display: block; align-content: center; padding-block: var(--space-2); text-box: trim-both cap alphabetic; }
     .navlist a:not(:has(> *))[aria-current="location"]::before { inset-block: 0; margin-block: auto; }
   }
   /* Inset: the rail and the drawer scroll. */
@@ -391,7 +392,7 @@
   .crumbs [aria-current="page"] { color: var(--color-text); font-weight: var(--weight-medium); overflow-wrap: anywhere; }
   /* Crumbs share the header row with the strip, so they centre on the cap height too. */
   @supports (text-box: trim-both cap alphabetic) {
-    .crumbs a:not(:has(> *)) { display: block; align-content: center; text-box: trim-both cap alphabetic; }
+    .crumbs a:not(:has(> *)) { display: block; align-content: center; padding-block: var(--space-2); text-box: trim-both cap alphabetic; }
     .crumbs [aria-current="page"], .crumbs li + li::before { text-box: trim-both cap alphabetic; }
   }
   /* Phones show only the parent, as a back link; .is-back pins that for the specimen. */

@@ -307,17 +307,43 @@ const labelInk = async (page: Page, selector: string) => {
 }
 
 for (const colorScheme of ['light', 'dark'] as const) {
-  test(`the header pill and a selected tab centre their label's ink in ${colorScheme}`, async ({ browser }) => {
+  test(`the header pill centres its label's ink in ${colorScheme}`, async ({ browser }) => {
     const context = await browser.newContext({ colorScheme, viewport: { width: 1280, height: 900 }, deviceScaleFactor: 4, baseURL: test.info().project.use.baseURL })
     const page = await context.newPage()
-    // Both labels have no descenders, so a line box that keeps descender room shows as a larger gap below.
-    for (const [path, selector, text] of [['', '.page-head .strip a[aria-current="page"]', 'Overview'], ['components.html', 'main [role="tab"][aria-selected="true"]', 'Overview']]) {
-      await page.goto(path)
-      await expect(page.locator(selector).first()).toHaveText(text)
+    await page.goto('')
+    // "Overview" has no descenders, so a line box that keeps descender room shows as a larger gap below.
+    const selector = '.page-head .strip a[aria-current="page"]'
+    await expect(page.locator(selector)).toHaveText('Overview')
+    const { box, top, bottom } = await labelInk(page, selector)
+    const above = top - box.top
+    const below = box.bottom - bottom
+    expect(Math.abs(above - below), `${above}px above the ink, ${below}px below`).toBeLessThanOrEqual(0.5)
+    await context.close()
+  })
+
+  test(`a wrapped navigation row or crumb keeps its label inside the fill and focus ring in ${colorScheme}`, async ({ browser }) => {
+    const context = await browser.newContext({ colorScheme, viewport: { width: 1280, height: 900 }, deviceScaleFactor: 4, baseURL: test.info().project.use.baseURL })
+    const page = await context.newPage()
+    await page.goto('components.html')
+    // Rows wrap rather than truncate. Trimming the line to the cap height must keep the room a wrapped
+    // label had above its first line and below its last.
+    await page.locator('main').evaluate((main) => main.insertAdjacentHTML('afterbegin', [
+      '<nav class="navlist" style="width: 240px"><a class="is-hover" href="#wrapped-row">A very long navigation label that wraps onto more than one line ending in typography</a></nav>',
+      '<nav class="crumbs" style="width: 120px"><ol><li><a href="#wrapped-crumb">A long parent page title that wraps</a></li></ol></nav>',
+    ].join('')))
+    const ring = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--focus-width')))
+    for (const selector of ['a[href="#wrapped-row"]', 'a[href="#wrapped-crumb"]']) {
+      const { lines, lineHeight } = await page.locator(selector).evaluate((el) => {
+        const range = document.createRange()
+        range.selectNodeContents(el)
+        return { lines: new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size, lineHeight: parseFloat(getComputedStyle(el).lineHeight) }
+      })
+      expect(lines, `${selector} wraps`).toBeGreaterThan(1)
       const { box, top, bottom } = await labelInk(page, selector)
-      const above = top - box.top
-      const below = box.bottom - bottom
-      expect(Math.abs(above - below), `${selector}: ${above}px above the ink, ${below}px below`).toBeLessThanOrEqual(0.5)
+      // Without text-box the row is its line boxes tall, so it must be at least that tall with it.
+      expect(box.bottom - box.top, `${selector}: height`).toBeGreaterThanOrEqual(Math.floor(lines * lineHeight))
+      expect(top - box.top, `${selector}: ink starts ${top - box.top}px below the top edge`).toBeGreaterThanOrEqual(ring)
+      expect(box.bottom - bottom, `${selector}: ink ends ${box.bottom - bottom}px above the bottom edge`).toBeGreaterThanOrEqual(ring)
     }
     await context.close()
   })
