@@ -391,7 +391,9 @@ const ratios = (page: Page, pair: Pair) => page.locator(pair.selector).evaluateA
   const ground = (node: Element, pseudo?: string) => {
     const styles = pseudo ? [getComputedStyle(node, pseudo)] : []
     for (let el: Element | null = node; el; el = el.parentElement) styles.push(getComputedStyle(el))
-    if (pseudo && parse(styles[1].backgroundColor)[3] > 0) throw new Error(`a host background over the ${pseudo} fill: ${styles[1].backgroundColor}`)
+    if (pseudo && (parse(styles[1].backgroundColor)[3] > 0 || styles[1].backgroundImage !== 'none')) {
+      throw new Error(`a host background over the ${pseudo} fill: ${styles[1].backgroundColor} ${styles[1].backgroundImage}`)
+    }
     const layers: number[][] = []
     for (const style of styles) {
       if (style.backgroundImage !== 'none') throw new Error(`a background image: ${style.backgroundImage}`)
@@ -516,6 +518,10 @@ test.describe('rendered recipes', () => {
     const segmented = below(await ratios(page, contrastPairs['every selected segmented label on its thumb']), 4.5)
     expect(segmented.length).toBeGreaterThan(0)
     for (const line of segmented) expect(line).toMatch(/unmeasured, a host background over the ::before fill/)
+    await page.addStyleTag({ content: `.segmented button[aria-pressed="true"] { background: linear-gradient(var(--color-segmented-current-text), var(--color-segmented-current-text)); }` })
+    const imaged = below(await ratios(page, contrastPairs['every selected segmented label on its thumb']), 4.5)
+    expect(imaged).toHaveLength(segmented.length)
+    for (const line of imaged) expect(line).toMatch(/unmeasured, a host background over the ::before fill: rgba\(0, 0, 0, 0\) linear-gradient/)
   })
 
   test('the DESIGN.md shape table names each role token with its value', async ({ page }) => {
