@@ -9,6 +9,10 @@
 // - Class (dist/class/base.css, dist/class/themes/*.css): adds ui's component roles (--color-input-bg, ...).
 //   Dark mode is a .dark class on <html>.
 // dist/tokens.json and dist/tokens.js carry the standalone values, resolved, for code.
+//
+// Each group also carries reader-facing text for the site's Foundations page, which no output
+// above includes: an id, a title, a note, and roles (what each token is for, one entry per token,
+// with `backticks` for code). These roles are not library.roles, which maps ui's component variables.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -22,6 +26,25 @@ const flatTokens = (data) => Object.fromEntries(data.groups.flatMap(({ tokens })
 
 // The groups tokens.css declares: every group but the library-only one.
 const standaloneGroups = (data) => data.groups.filter(({ standalone }) => standalone !== false)
+
+// Problems with the reader-facing text: a group without an id, title, or note, a token without a
+// role, a role for a token the group does not have, or markup in a role (roles are plain text).
+export const docProblems = (data) => {
+  const problems = []
+  const ids = new Set()
+  data.groups.forEach(({ id, title, note, roles = {}, tokens }, index) => {
+    const where = id ?? `group ${index}`
+    for (const [field, value] of Object.entries({ id, title, note })) if (!value) problems.push(`${where}: no ${field}`)
+    if (id && ids.has(id)) problems.push(`${where}: duplicate id`)
+    ids.add(id)
+    for (const name of Object.keys(tokens)) if (!roles[name]) problems.push(`--${name}: no role`)
+    for (const [name, role] of Object.entries(roles)) {
+      if (!(name in tokens)) problems.push(`${where}: role for --${name}, which the group does not have`)
+      else if (/[<>]/.test(role)) problems.push(`--${name}: markup in its role`)
+    }
+  })
+  return problems
+}
 
 const valueFor = (tokens, name, mode) => {
   const value = tokens[name]
@@ -325,6 +348,13 @@ const run = () => {
   const root = fileURLToPath(new URL('..', import.meta.url))
   const check = process.argv.slice(2).includes('--check')
   const data = JSON.parse(readFileSync(`${root}tokens/${THEME}.json`, 'utf8'))
+
+  const problems = docProblems(data)
+  if (problems.length > 0) {
+    console.error(`tokens/${THEME}.json needs reader-facing text:\n${problems.map((problem) => `  ${problem}`).join('\n')}`)
+    process.exitCode = 1
+    return
+  }
 
   const stale = []
   for (const [path, content] of outputs(data)) {
