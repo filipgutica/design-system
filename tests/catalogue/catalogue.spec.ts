@@ -184,6 +184,32 @@ test.describe('desktop', () => {
     await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThanOrEqual(bottom - 2)
     await expect(current(page)).toHaveText('Page type and helpers')
   })
+
+  test('many small resizes during a jump do not move its landing', async ({ page }) => {
+    // Each 1px resize is within the tolerance alone. Measuring the landing again on each one would let it drift
+    // 40px, and the jump would then hold the row after the reader scrolls away.
+    await page.setViewportSize({ width: 1280, height: 2100 })
+    await page.goto(url)
+    await page.evaluate(async () => {
+      document.documentElement.style.scrollBehavior = 'smooth'
+      const hashed = new Promise((done) => addEventListener('hashchange', done, { once: true }))
+      document.querySelector<HTMLAnchorElement>('#rail a[href="#page-type-and-helpers"]')!.click()
+      await hashed
+    })
+    // A frame between resizes delivers each one as its own resize event; without it they coalesce into one.
+    for (let shrink = 1; shrink <= 40; shrink++) {
+      await page.setViewportSize({ width: 1280, height: 2100 - shrink })
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(done)))
+    }
+    const settled = () => page.evaluate(async () => {
+      const y = scrollY
+      await new Promise((done) => setTimeout(done, 150))
+      return scrollY === y
+    })
+    await expect.poll(settled).toBe(true)
+    await page.evaluate(() => scrollBy({ top: 10, behavior: 'instant' }))
+    await expect(current(page)).not.toHaveText('Page type and helpers')
+  })
 })
 
 test.describe('reduced motion', () => {

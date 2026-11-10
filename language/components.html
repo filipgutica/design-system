@@ -1793,13 +1793,15 @@
     }
     schedule();
   };
-  // A layout change can move the target. A pending jump holds, and measures its landing again, while the
-  // landing has not moved (the scroll may still be on its way) or the page already sits at the new landing (a
-  // landing the page bottom clamped). Otherwise the target moved away, and the jump ends so tracking follows the page.
+  // A layout change can move the target. While the landing stays within 2px of the stored one, the jump holds
+  // unchanged, so small changes cannot add up (the scroll may still be on its way). When the landing moved and the
+  // page already sits at the new one, as when the page bottom clamps it, the jump measures again. Otherwise the
+  // target moved away, and the jump ends so tracking follows the page.
   const rebase = () => {
     if (jump) {
       const landing = landingOf(jump.target);
-      if (Math.abs(landing - jump.landing) <= 2 || Math.abs(scrollY - landing) <= 2) return jumpTo(jump.target.el.id);
+      if (Math.abs(landing - jump.landing) <= 2) return schedule();
+      if (Math.abs(scrollY - landing) <= 2) return jumpTo(jump.target.el.id);
     }
     jump = undefined;
     schedule();
