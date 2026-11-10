@@ -6,12 +6,12 @@ import { cssVar, tokens } from '@filipgutica/design-system'
 import { createRoot } from 'react-dom/client'
 
 // cssVar returns the literal var() type, and a name outside tokens.css does not type-check.
-const text: 'var(--text)' = cssVar('text')
-// @ts-expect-error --color-text is a @filipgutica/ui name, not a tokens.css name.
-cssVar('color-text')
+const text: 'var(--color-text)' = cssVar('color-text')
+// @ts-expect-error --text is a 1.x name, renamed to --color-text in 2.0.0.
+cssVar('text')
 
 const App = () => (
-  <main style={{ color: text, background: cssVar('surface'), padding: cssVar('space-4') }}>
+  <main style={{ color: text, background: cssVar('color-surface'), padding: cssVar('space-4') }}>
     <h1 data-testid="heading">Design system</h1>
     <p>{Object.keys(tokens.themes['graphite-indigo'].light).length} tokens</p>
   </main>

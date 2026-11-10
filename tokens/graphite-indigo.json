@@ -1,109 +1,109 @@
 {
   "groups": [
     {
-      "comment": "Identity layer: a project swaps these four lines. --project is the light-theme hue;\n--project-dark is the dark-theme hue, also used on dark plates in both themes.",
+      "comment": "Identity layer: a project swaps these four lines. --color-project is the light-theme hue;\n--color-project-dark is the dark-theme hue, also used on dark plates in both themes.",
       "identity": true,
       "tokens": {
-        "project": [
+        "color-project": [
           "#4b45d1",
-          "{project-dark}"
+          "{color-project-dark}"
         ],
-        "project-dark": "#a5a1ff",
-        "font-sans": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
+        "color-project-dark": "#a5a1ff",
+        "font-ui": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
         "font-mono": "\"IBM Plex Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace"
       }
     },
     {
       "comment": "Core roles: only the identity lines above feed them. Neutral paper and graphite surfaces.",
       "notes": {
-        "field": "The well: segmented and switch tracks, pressed buttons, selected radio cards, and disabled fields.",
-        "field-bg": "Fields (input, select, textarea, search): a white fill with a faint edge in light, the sunk well in dark.\nDark fields stay sunk in the well. It sits within about 1.01:1 of the canvas, so the edge carries the shape.",
-        "nav-current": "Selected rows lift and take a faint accent tint, so the selection reads on near-white panels too.",
-        "nav-current-text": "Text on the current nav row, selected tab, and selected list row: the first of --accent, --text, black, and white\nthat reaches 4.5:1 over --nav-current, on the page and on a surface.",
-        "segmented-current-text": "The selected segmented label: the first of --accent, --text, black, and white that reaches\n4.5:1 on the thumb. An icon-only option needs 3:1."
+        "color-well": "The well: segmented and switch tracks, pressed buttons, selected radio cards, and disabled fields.",
+        "color-field-bg": "Fields (input, select, textarea, search): a white fill with a faint edge in light, the sunk well in dark.\nDark fields stay sunk in the well. It sits within about 1.01:1 of the canvas, so the edge carries the shape.",
+        "color-nav-current": "Selected rows lift and take a faint accent tint, so the selection reads on near-white panels too.",
+        "color-nav-current-text": "Text on the current nav row, selected tab, and selected list row: the first of --color-accent, --color-text, black, and white\nthat reaches 4.5:1 over --color-nav-current, on the page and on a surface.",
+        "color-segmented-current-text": "The selected segmented label: the first of --color-accent, --color-text, black, and white that reaches\n4.5:1 on the thumb. An icon-only option needs 3:1."
       },
       "tokens": {
-        "bg": [
+        "color-bg": [
           "#f4f5f6",
           "#0d1012"
         ],
-        "surface": [
+        "color-surface": [
           "#e9ebed",
           "#13171a"
         ],
-        "surface-raised": [
+        "color-surface-raised": [
           "#fbfbfc",
           "#181d21"
         ],
-        "surface-hover": [
+        "color-surface-muted": [
           "#e2e5e8",
           "#20262b"
         ],
-        "field": [
-          "{surface-hover}",
-          "color-mix(in srgb, {bg} 87.5%, black)"
+        "color-well": [
+          "{color-surface-muted}",
+          "color-mix(in srgb, {color-bg} 87.5%, black)"
         ],
-        "field-bg": [
-          "{surface-raised}",
-          "{field}"
+        "color-field-bg": [
+          "{color-surface-raised}",
+          "{color-well}"
         ],
-        "field-edge": "{border-subtle}",
-        "field-shadow": [
+        "color-field-edge": "{color-border-subtle}",
+        "shadow-field": [
           "none",
           "{shadow-sink}"
         ],
-        "control-thumb": [
-          "{surface-raised}",
-          "color-mix(in srgb, {surface-raised} 88%, white)"
+        "color-control-thumb": [
+          "{color-surface-raised}",
+          "color-mix(in srgb, {color-surface-raised} 88%, white)"
         ],
-        "nav-current": [
-          "color-mix(in srgb, {accent} 14%, {surface-raised})",
-          "color-mix(in srgb, {accent} 20%, transparent)"
+        "color-nav-current": [
+          "color-mix(in srgb, {color-accent} 14%, {color-surface-raised})",
+          "color-mix(in srgb, {color-accent} 20%, transparent)"
         ],
-        "nav-current-text": "{accent}",
-        "segmented-current-text": "{accent}",
-        "row-hover": [
+        "color-nav-current-text": "{color-accent}",
+        "color-segmented-current-text": "{color-accent}",
+        "color-row-hover": [
           "#e2e5e8",
           "#20262b"
         ],
-        "row-selected": "{surface-raised}",
-        "border-subtle": [
+        "color-row-selected": "{color-surface-raised}",
+        "color-border-subtle": [
           "#d3d8dd",
           "#262d33"
         ],
-        "border": [
+        "color-border": [
           "#6d747b",
           "#78818a"
         ],
-        "text": [
+        "color-text": [
           "#101315",
           "#e6e9eb"
         ],
-        "text-muted": [
+        "color-muted": [
           "#50575e",
           "#9aa3ab"
         ],
-        "overlay": [
+        "color-overlay": [
           "rgb(0 0 0 / 42%)",
           "rgb(0 0 0 / 62%)"
         ]
       }
     },
     {
-      "comment": "The hue fills primary actions and marks selection; links keep --link.",
+      "comment": "The hue fills primary actions and marks selection; links keep --color-link.",
       "notes": {
-        "focus": "One focus ring for every role: the accent, at 3:1 or more on --bg, --surface, and --surface-raised\nin both themes. Fields mark focus with their own accent edge instead; see components.md."
+        "color-focus": "One focus ring for every role: the accent, at 3:1 or more on --color-bg, --color-surface, and --color-surface-raised\nin both themes. Fields mark focus with their own accent edge instead; see components.md."
       },
       "tokens": {
-        "accent": "{project}",
-        "accent-text": "{bg}",
-        "accent-hover": "{text}",
-        "button-hover": "color-mix(in srgb, {accent} 85%, {text})",
-        "link": [
+        "color-accent": "{color-project}",
+        "color-accent-text": "{color-bg}",
+        "color-accent-hover": "{color-text}",
+        "color-button-hover": "color-mix(in srgb, {color-accent} 85%, {color-text})",
+        "color-link": [
           "#0b5f7c",
           "#67c1df"
         ],
-        "focus": "{accent}",
+        "color-focus": "{color-accent}",
         "focus-width": "2px",
         "focus-offset": "3px"
       }
@@ -111,35 +111,35 @@
     {
       "comment": "Status: only for state, never for decoration.",
       "tokens": {
-        "success": [
+        "color-success": [
           "#157249",
           "#4cc38a"
         ],
-        "warning": [
+        "color-warning": [
           "#86532e",
           "#e2a54b"
         ],
-        "danger": [
+        "color-error": [
           "#bd342b",
           "#f0776c"
         ],
-        "info": [
+        "color-info": [
           "#175cd3",
           "#84adff"
         ],
-        "success-soft": [
+        "color-success-surface": [
           "#d9e5e1",
           "#172d25"
         ],
-        "warning-soft": [
+        "color-warning-surface": [
           "#e7e2de",
           "#2f281b"
         ],
-        "danger-soft": [
+        "color-error-surface": [
           "#efe4e4",
           "#312020"
         ],
-        "info-soft": [
+        "color-info-surface": [
           "#d9e3f2",
           "#202938"
         ]
@@ -148,43 +148,43 @@
     {
       "comment": "Identity layer, derived: terminal folio plates. Commands take the hue; captures stay neutral.\nA project without terminal plates leaves these unused.",
       "notes": {
-        "terminal-shadow-nav-current": "The terminal capture's header stays dark in both appearances, so its selected tab keeps the dark lift."
+        "shadow-nav-current-dark": "The terminal capture's header stays dark in both appearances, so its selected tab keeps the dark lift."
       },
       "tokens": {
-        "command-bg": [
-          "color-mix(in srgb, {project} 25%, #101010)",
-          "color-mix(in srgb, {project} 16%, black)"
+        "color-command-bg": [
+          "color-mix(in srgb, {color-project} 25%, #101010)",
+          "color-mix(in srgb, {color-project} 16%, black)"
         ],
-        "command-border": [
+        "color-command-border": [
           "transparent",
-          "color-mix(in srgb, {project} 28%, black)"
+          "color-mix(in srgb, {color-project} 28%, black)"
         ],
-        "terminal": "#0a0c0e",
-        "terminal-text": "#e6e9eb",
-        "terminal-border": "#2a3036",
-        "terminal-caption": "#13171a",
-        "terminal-caption-text": "#c9d0d6",
-        "terminal-shadow-nav-current": "0 1px 2px rgb(0 0 0 / 25%)"
+        "color-terminal": "#0a0c0e",
+        "color-terminal-text": "#e6e9eb",
+        "color-terminal-border": "#2a3036",
+        "color-terminal-caption": "#13171a",
+        "color-terminal-caption-text": "#c9d0d6",
+        "shadow-nav-current-dark": "0 1px 2px rgb(0 0 0 / 25%)"
       }
     },
     {
       "comment": "Source code wells",
       "tokens": {
-        "code-bg": "{surface}",
-        "code-text": "{text}",
-        "code-key": [
+        "color-code": "{color-surface}",
+        "color-code-text": "{color-text}",
+        "color-syntax-keyword": [
           "#715b42",
           "#d8c2a5"
         ],
-        "code-string": [
+        "color-syntax-string": [
           "#346347",
           "#a8bd9c"
         ],
-        "code-number": [
+        "color-syntax-number": [
           "#86532e",
           "#d5b98c"
         ],
-        "code-comment": [
+        "color-syntax-comment": [
           "#626772",
           "#a0a6b1"
         ]
@@ -244,9 +244,9 @@
     {
       "comment": "Shape",
       "tokens": {
-        "radius-sm": "6px",
-        "radius-md": "999px",
-        "radius-lg": "16px",
+        "radius-inline": "6px",
+        "radius-control": "999px",
+        "radius-panel": "16px",
         "radius-field": "10px",
         "radius-pill": "999px"
       }
@@ -254,7 +254,7 @@
     {
       "comment": "Elevation: DESIGN.md#depth assigns each tier. Idle controls and surfaces take no outer light\nhighlight and no blur wider than 2px.",
       "notes": {
-        "field-shadow-focus": "A focused field's inset line inside its accent or danger edge. It takes each theme's accent and danger."
+        "shadow-field-focus": "A focused field's inset line inside its accent or danger edge. It takes each theme's accent and danger."
       },
       "tokens": {
         "shadow-raise": [
@@ -269,16 +269,16 @@
           "inset 1.2px 1.2px 3.6px rgb(130 142 158 / 35%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 80%)",
           "inset 1.2px 1.2px 3.6px rgb(0 0 0 / 55%), inset -1.2px -1.2px 3.6px rgb(255 255 255 / 5%)"
         ],
-        "shadow-popover": [
-          "0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px {border-subtle}",
-          "0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px {border-subtle}"
+        "shadow-dialog": [
+          "0 8px 24px rgb(16 16 24 / 12%), 0 0 0 1px {color-border-subtle}",
+          "0 8px 24px rgb(0 0 0 / 45%), 0 0 0 1px {color-border-subtle}"
         ],
         "shadow-nav-current": [
           "0 1px 3px rgb(130 142 158 / 40%)",
-          "{terminal-shadow-nav-current}"
+          "{shadow-nav-current-dark}"
         ],
-        "field-shadow-focus": "inset 0 0 0 2px color-mix(in srgb, {accent} 18%, transparent)",
-        "field-shadow-focus-invalid": "inset 0 0 0 2px color-mix(in srgb, {danger} 18%, transparent)"
+        "shadow-field-focus": "inset 0 0 0 2px color-mix(in srgb, {color-accent} 18%, transparent)",
+        "shadow-field-focus-invalid": "inset 0 0 0 2px color-mix(in srgb, {color-error} 18%, transparent)"
       }
     },
     {
@@ -303,85 +303,85 @@
   ],
   "library": {
     "roles": {
-      "--color-project": "project",
-      "--color-project-dark": "project-dark",
-      "--color-bg": "bg",
-      "--color-surface": "surface",
-      "--color-surface-raised": "surface-raised",
-      "--color-surface-muted": "surface-hover",
-      "--color-text": "text",
-      "--color-muted": "text-muted",
-      "--color-link": "link",
-      "--color-accent": "accent",
-      "--color-accent-text": "accent-text",
-      "--color-focus": "focus",
-      "--color-border": "border",
-      "--color-border-subtle": "border-subtle",
-      "--color-button-bg": "accent",
-      "--color-button-text": "accent-text",
-      "--color-button-hover": "button-hover",
-      "--color-input-bg": "surface-raised",
-      "--color-input-text": "text",
-      "--color-input-border": "border",
-      "--color-input-placeholder": "text-muted",
-      "--color-row-hover": "row-hover",
-      "--color-row-selected": "row-selected",
-      "--color-row-selected-text": "text",
-      "--color-code": "code-bg",
-      "--color-code-text": "code-text",
-      "--color-syntax-comment": "code-comment",
-      "--color-syntax-keyword": "code-key",
-      "--color-syntax-string": "code-string",
-      "--color-syntax-number": "code-number",
-      "--color-syntax-function": "code-key",
-      "--color-syntax-type": "code-number",
-      "--color-syntax-variable": "code-text",
-      "--color-syntax-operator": "text-muted",
-      "--color-syntax-punctuation": "text-muted",
-      "--color-syntax-tag": "code-key",
-      "--color-syntax-attribute": "code-number",
-      "--color-error": "danger",
-      "--color-warning": "warning",
-      "--color-success": "success",
-      "--color-info": "info",
-      "--color-progress": "accent",
-      "--color-error-surface": "danger-soft",
-      "--color-warning-surface": "warning-soft",
-      "--color-success-surface": "success-soft",
-      "--color-info-surface": "info-soft",
-      "--shadow-dialog": "shadow-popover",
-      "--color-status-text": "text",
-      "--color-terminal": "terminal",
-      "--color-terminal-text": "terminal-text",
-      "--color-terminal-border": "terminal-border",
-      "--color-terminal-caption": "terminal-caption",
-      "--color-terminal-caption-text": "terminal-caption-text",
-      "--color-accent-hover": "accent-hover",
-      "--color-command-bg": "command-bg",
-      "--color-command-border": "command-border"
+      "--color-project": "color-project",
+      "--color-project-dark": "color-project-dark",
+      "--color-bg": "color-bg",
+      "--color-surface": "color-surface",
+      "--color-surface-raised": "color-surface-raised",
+      "--color-surface-muted": "color-surface-muted",
+      "--color-text": "color-text",
+      "--color-muted": "color-muted",
+      "--color-link": "color-link",
+      "--color-accent": "color-accent",
+      "--color-accent-text": "color-accent-text",
+      "--color-focus": "color-focus",
+      "--color-border": "color-border",
+      "--color-border-subtle": "color-border-subtle",
+      "--color-button-bg": "color-accent",
+      "--color-button-text": "color-accent-text",
+      "--color-button-hover": "color-button-hover",
+      "--color-input-bg": "color-surface-raised",
+      "--color-input-text": "color-text",
+      "--color-input-border": "color-border",
+      "--color-input-placeholder": "color-muted",
+      "--color-row-hover": "color-row-hover",
+      "--color-row-selected": "color-row-selected",
+      "--color-row-selected-text": "color-text",
+      "--color-code": "color-code",
+      "--color-code-text": "color-code-text",
+      "--color-syntax-comment": "color-syntax-comment",
+      "--color-syntax-keyword": "color-syntax-keyword",
+      "--color-syntax-string": "color-syntax-string",
+      "--color-syntax-number": "color-syntax-number",
+      "--color-syntax-function": "color-syntax-keyword",
+      "--color-syntax-type": "color-syntax-number",
+      "--color-syntax-variable": "color-code-text",
+      "--color-syntax-operator": "color-muted",
+      "--color-syntax-punctuation": "color-muted",
+      "--color-syntax-tag": "color-syntax-keyword",
+      "--color-syntax-attribute": "color-syntax-number",
+      "--color-error": "color-error",
+      "--color-warning": "color-warning",
+      "--color-success": "color-success",
+      "--color-info": "color-info",
+      "--color-progress": "color-accent",
+      "--color-error-surface": "color-error-surface",
+      "--color-warning-surface": "color-warning-surface",
+      "--color-success-surface": "color-success-surface",
+      "--color-info-surface": "color-info-surface",
+      "--shadow-dialog": "shadow-dialog",
+      "--color-status-text": "color-text",
+      "--color-terminal": "color-terminal",
+      "--color-terminal-text": "color-terminal-text",
+      "--color-terminal-border": "color-terminal-border",
+      "--color-terminal-caption": "color-terminal-caption",
+      "--color-terminal-caption-text": "color-terminal-caption-text",
+      "--color-accent-hover": "color-accent-hover",
+      "--color-command-bg": "color-command-bg",
+      "--color-command-border": "color-command-border"
     },
     "baseRoles": {
-      "--color-well": "field",
-      "--color-field-bg": "field-bg",
-      "--color-field-edge": "field-edge",
-      "--shadow-field": "field-shadow",
-      "--color-control-thumb": "control-thumb",
-      "--color-nav-current": "nav-current",
-      "--color-overlay": "overlay",
-      "--shadow-field-focus": "field-shadow-focus",
-      "--shadow-field-focus-invalid": "field-shadow-focus-invalid"
+      "--color-well": "color-well",
+      "--color-field-bg": "color-field-bg",
+      "--color-field-edge": "color-field-edge",
+      "--shadow-field": "shadow-field",
+      "--color-control-thumb": "color-control-thumb",
+      "--color-nav-current": "color-nav-current",
+      "--color-overlay": "color-overlay",
+      "--shadow-field-focus": "shadow-field-focus",
+      "--shadow-field-focus-invalid": "shadow-field-focus-invalid"
     },
     "aliases": {
-      "font-sans": "--font-ui",
-      "radius-sm": "--radius-inline",
-      "radius-md": "--radius-control",
+      "font-ui": "--font-ui",
+      "radius-inline": "--radius-inline",
+      "radius-control": "--radius-control",
       "radius-field": "--radius-field",
-      "radius-lg": "--radius-panel",
-      "terminal-shadow-nav-current": "--shadow-nav-current-dark"
+      "radius-panel": "--radius-panel",
+      "shadow-nav-current-dark": "--shadow-nav-current-dark"
     },
     "fallbacks": {
-      "nav-current-text": "--color-nav-current-text",
-      "segmented-current-text": "--color-segmented-current-text"
+      "color-nav-current-text": "--color-nav-current-text",
+      "color-segmented-current-text": "--color-segmented-current-text"
     },
     "lightOnly": [
       "--color-focus",

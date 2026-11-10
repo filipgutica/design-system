@@ -7,18 +7,18 @@
 <link rel="stylesheet" href="tokens.css">
 <style>
 .frame { width: min(calc(var(--page-max) + var(--sidebar)), calc(100% - var(--space-12))); margin-inline: auto; }
-.header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); min-height: var(--space-16); border-bottom: 1px solid var(--border-subtle); }
-.brand { color: var(--text); font-weight: var(--weight-semibold); }
+.header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); min-height: var(--space-16); border-bottom: 1px solid var(--color-border-subtle); }
+.brand { color: var(--color-text); font-weight: var(--weight-semibold); }
 .header nav { display: flex; gap: var(--space-6); }
 .header a { display: inline-flex; align-items: center; min-height: var(--control-lg); font-size: var(--text-sm); }
 .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
 .sidebar { position: sticky; top: var(--space-6); align-self: start; display: grid; gap: var(--space-1); padding-block: var(--space-6); }
 /* Navigation rows: components.html#navigation-list, unchanged. Only the rail's placement and spacing are local. */
-.navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-field); color: var(--text-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
-.navlist a:is(:hover, .is-hover) { background: var(--row-hover); color: var(--text); text-decoration: none; }
-.navlist a[aria-current="page"] { background: var(--nav-current); box-shadow: var(--shadow-nav-current); color: var(--nav-current-text); font-weight: var(--weight-medium); }
-.navlist a[aria-current="location"] { color: var(--text); font-weight: var(--weight-medium); }
-.navlist a[aria-current="location"]::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--accent); }
+.navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-field); color: var(--color-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+.navlist a:is(:hover, .is-hover) { background: var(--color-row-hover); color: var(--color-text); text-decoration: none; }
+.navlist a[aria-current="page"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); font-weight: var(--weight-medium); }
+.navlist a[aria-current="location"] { color: var(--color-text); font-weight: var(--weight-medium); }
+.navlist a[aria-current="location"]::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--color-accent); }
 /* Fills and shadows drop. The current page takes a system border; the in-page location keeps
    its pip, redrawn in the system highlight, so the two still differ. */
 @media (forced-colors: active) { .navlist a[aria-current="page"] { border-inline-start: 2px solid Highlight; } .navlist a[aria-current="location"]::before { forced-color-adjust: none; background: Highlight; } }
@@ -28,27 +28,27 @@ h1, h2 { font-family: var(--font-mono); }
 h1 { font-size: var(--text-3xl); max-width: 24ch; }
 h2 { font-size: var(--text-xl); }
 /* The ## mark goes on page-level section headings only. It is decorative; the empty alternative text keeps it out of the accessible name. */
-main > section > h2::before { content: "## " / ""; color: var(--accent); }
+main > section > h2::before { content: "## " / ""; color: var(--color-accent); }
 /* The main gap alone separates sections. The rule above each heading belongs to the heading, as in @filipgutica/ui. */
-main > section > h2 { padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
-p { max-width: var(--measure); color: var(--text-muted); font-size: var(--text-reading); }
+main > section > h2 { padding-top: var(--space-4); border-top: 1px solid var(--color-border-subtle); }
+p { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-reading); }
 /* Command plate: dark in both themes and tinted with the hue. Text takes the terminal colour and the focus ring the dark-theme accent, so both read on the dark plate. */
-.command { box-shadow: var(--shadow-surface); --focus: var(--project-dark); --text: var(--terminal-text); display: flex; align-items: center; gap: var(--space-3); max-width: var(--measure); padding: var(--space-1) var(--space-3); border: 1px solid var(--command-border); border-radius: var(--radius-lg); background: var(--command-bg); color: var(--terminal-text); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+.command { box-shadow: var(--shadow-surface); --color-focus: var(--color-project-dark); --color-text: var(--color-terminal-text); display: flex; align-items: center; gap: var(--space-3); max-width: var(--measure); padding: var(--space-1) var(--space-3); border: 1px solid var(--color-command-border); border-radius: var(--radius-panel); background: var(--color-command-bg); color: var(--color-terminal-text); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 /* The prompt is drawn by CSS, so it is not copied and screen readers skip it. */
-.command code::before { content: "$ " / ""; color: var(--project-dark); }
+.command code::before { content: "$ " / ""; color: var(--color-project-dark); }
 .command pre { min-width: 0; flex: 1; margin: 0; overflow-x: auto; font-size: var(--text-sm); }
 /* Copy is a quiet action: components.html#quiet-action, unchanged. The page adds its size and colour only. */
-:where(.quiet-action) { display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
-.quiet-action:is(:hover, .is-hover):where(:not(:disabled)) { color: var(--text); background: color-mix(in srgb, currentColor 12%, transparent); }
+:where(.quiet-action) { display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+.quiet-action:is(:hover, .is-hover):where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 12%, transparent); }
 .quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 18%, transparent); }
 .quiet-action:disabled { opacity: 0.58; cursor: not-allowed; }
-.command button { flex: none; min-width: var(--control-lg); min-height: var(--control-lg); color: var(--terminal-caption-text); }
-.meta, #copy-status { color: var(--text-muted); font-size: var(--text-sm); }
-.definitions { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-3) var(--space-6); margin: 0; padding-top: var(--space-4); border-top: 1px solid var(--border-subtle); }
+.command button { flex: none; min-width: var(--control-lg); min-height: var(--control-lg); color: var(--color-terminal-caption-text); }
+.meta, #copy-status { color: var(--color-muted); font-size: var(--text-sm); }
+.definitions { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-3) var(--space-6); margin: 0; padding-top: var(--space-4); border-top: 1px solid var(--color-border-subtle); }
 .definitions dt { font-family: var(--font-mono); font-size: var(--text-sm); }
-.definitions dd { margin: 0; color: var(--text-muted); }
-footer { padding-block: var(--space-6); border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: var(--text-sm); }
-@media (max-width: 800px) { .navlist a { min-height: var(--control-lg); } .layout { grid-template-columns: minmax(0, 1fr); gap: 0; } .sidebar { position: static; display: flex; flex-wrap: wrap; gap: var(--space-2); padding-block: var(--space-3); border-bottom: 1px solid var(--border-subtle); } .sidebar a { padding-inline: var(--space-2); } main { padding-top: var(--space-6); } .definitions { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); } .definitions dd { margin-bottom: var(--space-3); } }
+.definitions dd { margin: 0; color: var(--color-muted); }
+footer { padding-block: var(--space-6); border-top: 1px solid var(--color-border-subtle); color: var(--color-muted); font-size: var(--text-sm); }
+@media (max-width: 800px) { .navlist a { min-height: var(--control-lg); } .layout { grid-template-columns: minmax(0, 1fr); gap: 0; } .sidebar { position: static; display: flex; flex-wrap: wrap; gap: var(--space-2); padding-block: var(--space-3); border-bottom: 1px solid var(--color-border-subtle); } .sidebar a { padding-inline: var(--space-2); } main { padding-top: var(--space-6); } .definitions { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); } .definitions dd { margin-bottom: var(--space-3); } }
 @media (max-width: 640px) { .frame { width: calc(100% - var(--space-8)); } main { gap: var(--space-8); } }
 </style>
 </head>

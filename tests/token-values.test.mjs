@@ -1,9 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readRenameTable, renameTokens } from '../scripts/rename-tokens.mjs'
 import { declarations, read, resolveAll, ruleBody } from './css.mjs'
 
 // The generator must reproduce the values that existed before it took over:
-// - language/tokens.css against the DS-1 hand copy (tests/fixtures/ds-1-tokens.css).
+// - language/tokens.css against the DS-1 hand copy (tests/fixtures/ds-1-tokens.css), with its 1.x
+//   names renamed through the 2.0.0 rename table in decisions.md.
 // - dist/class/*.css against @filipgutica/ui at f18b7274 (tests/fixtures/ui-f18b7274/): src/theme.css
 //   and src/themes/graphite-indigo.css.
 // Each file must declare the same variables in each rule, so the cascade with a page's own overrides
@@ -35,7 +37,7 @@ const classModes = (...files) => {
   }
 }
 
-const handTokens = read('tests/fixtures/ds-1-tokens.css')
+const handTokens = renameTokens({ text: read('tests/fixtures/ds-1-tokens.css'), table: readRenameTable(read('language/decisions.md')) })
 const generatedTokens = read('language/tokens.css')
 const uiTheme = read('tests/fixtures/ui-f18b7274/theme.css')
 const uiGraphiteIndigo = read('tests/fixtures/ui-f18b7274/graphite-indigo.css')
@@ -60,8 +62,8 @@ test('tokens.css keeps the DS-1 declaration text except where a value became a r
 
   assert.deepEqual(changed, [
     // The dark lift is the always-dark lift, so it names that token instead of repeating its value.
-    ':root:not([data-theme="light"]) --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%) -> var(--terminal-shadow-nav-current)',
-    ':root[data-theme="dark"] --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%) -> var(--terminal-shadow-nav-current)',
+    ':root:not([data-theme="light"]) --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%) -> var(--shadow-nav-current-dark)',
+    ':root[data-theme="dark"] --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%) -> var(--shadow-nav-current-dark)',
   ])
 })
 
