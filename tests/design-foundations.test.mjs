@@ -103,6 +103,40 @@ const radiusLiterals = (file, html) => flaggedDeclarations({
   isViolation: (property, value) => /^border(?:-[\w-]+)?-radius$/.test(property) && !isRadiusAllowed(value.replace(/\s*!important$/, '')),
 })
 
+// Engine pseudo-elements that computed styles cannot reach keep their role here: the slider track and
+// fill are state marks, the thumb is round, and the select picker is a floating layer. Every rule that
+// sets a corner on one, in any context, sets border-radius to this value.
+const engineShapes = {
+  '::-webkit-slider-runnable-track': 'var(--radius-pill)',
+  '::-moz-range-track': 'var(--radius-pill)',
+  '::-moz-range-progress': 'var(--radius-pill)',
+  '::-webkit-slider-thumb': '50%',
+  '::-moz-range-thumb': '50%',
+  '::picker(select)': 'var(--radius-panel)',
+}
+const engineShapeDrift = (html) => {
+  const corners = perSelector(cssRules(html)).flatMap(({ context, selector, body }) => {
+    const pseudo = Object.keys(engineShapes).find((name) => selector.endsWith(name))
+    return pseudo ? body.split(';').map((declaration) => declaration.trim().match(/^(border(?:-[\w-]+)?-radius)\s*:\s*(.+)$/)).filter(Boolean)
+      .map(([, property, value]) => ({ pseudo, ok: property === 'border-radius' && value === engineShapes[pseudo], line: `${`${context} ${selector}`.trim()} { ${property}: ${value} }` })) : []
+  })
+  return [...corners.filter(({ ok }) => !ok).map(({ line }) => line), ...Object.keys(engineShapes).filter((name) => !corners.some(({ pseudo }) => pseudo === name)).map((name) => `${name}: no radius`)]
+}
+
+test('the engine shape guard catches a slider track or picker off its role, in any context or longhand', () => {
+  const html = read('components.html')
+  assert.deepEqual(engineShapeDrift(`${html}<style>@media (prefers-color-scheme: dark) { .range::-webkit-slider-runnable-track{border-radius:0} }
+    .select::picker(select) { border-top-left-radius: var(--radius-panel) }</style>`), [
+    '@media (prefers-color-scheme: dark) .range::-webkit-slider-runnable-track { border-radius: 0 }',
+    '.select::picker(select) { border-top-left-radius: var(--radius-panel) }',
+  ])
+  assert.deepEqual(engineShapeDrift(html.replace('.range::-moz-range-thumb { width: 14px; height: 14px; border: 2px solid var(--color-accent); border-radius: 50%;', '.range::-moz-range-thumb { width: 14px; height: 14px; border: 2px solid var(--color-accent);')), ['::-moz-range-thumb: no radius'])
+})
+
+test('the slider track, slider thumb, and select picker take their role’s corners', () => {
+  assert.deepEqual(engineShapeDrift(read('components.html')), [])
+})
+
 test('the radius guard catches a literal corner in a rule, an inline style, a longhand, and a calc()', () => {
   const planted = `<style>.a{border-radius:12px} .b { border-top-left-radius: 4px } .c { border-radius: calc(var(--radius-panel) - 4px) }
     .d { border-radius: var(--radius-panel) var(--radius-panel) 0 0 } .e { border-radius: calc(var(--radius-panel) - var(--space-1)) }</style>
@@ -483,16 +517,19 @@ const systemColours = `Canvas CanvasText LinkText VisitedText ActiveText ButtonF
   Highlight HighlightText SelectedItem SelectedItemText Mark MarkText GrayText AccentColor AccentColorText`.split(/\s+/)
 const word = (names) => new RegExp(`(?<![\\w-])(?:${names.join('|')})(?![\\w-])`, 'i')
 const rawColourPatterns = [/#[\da-f]{3,8}(?![\w-])/i, /(?<![\w-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i, word(namedColours)]
+// A rule is in forced colors when one of its @media queries needs forced-colors: active in every branch.
 const forcedColorsActive = /(?<!not\s*)\(\s*forced-colors\s*:\s*active\s*\)/
+const inForcedColors = (context) => context.split(/(?=@)/)
+  .some((rule) => rule.startsWith('@media') && selectors(rule.slice('@media'.length)).every((branch) => forcedColorsActive.test(branch)))
 const isRawColour = (value, forced = false) => rawColourPatterns.some((pattern) => pattern.test(value)) || (!forced && word(systemColours).test(value))
 // SVG colour attributes in markup, outside scripts and style blocks; currentColor, none, and url() refs pass.
 const svgColourAttributes = (file, html) => [...html.replace(/<(script|style)\b[\s\S]*?<\/\1>|<!--[\s\S]*?-->/g, '')
-  .matchAll(/\s(fill|stroke|stop-color|flood-color|lighting-color|color)=(["'])(.*?)\2/g)]
-  .filter(([, , , value]) => isRawColour(value)).map(([, name, , value]) => `${file}: ${name}="${value}"`)
+  .matchAll(/\s(fill|stroke|stop-color|flood-color|lighting-color|color)\s*=\s*(?:(["'])(.*?)\2|([^\s"'>]+))/g)]
+  .map(([, name, , quoted, bare]) => [name, quoted ?? bare]).filter(([, value]) => isRawColour(value)).map(([name, value]) => `${file}: ${name}="${value}"`)
 const rawColours = (file, html) => [...flaggedDeclarations({
   file,
   html,
-  isViolation: (property, value, context) => !/^(?:-webkit-)?mask(?:-image)?$/.test(property) && isRawColour(value, forcedColorsActive.test(context)),
+  isViolation: (property, value, context) => !/^(?:-webkit-)?mask(?:-image)?$/.test(property) && isRawColour(value, inForcedColors(context)),
 }), ...svgColourAttributes(file, html)]
 
 test('the raw-colour guard catches hex, colour functions, named colours, SVG colour attributes, and a system colour outside forced colors', () => {
@@ -501,12 +538,14 @@ test('the raw-colour guard catches hex, colour functions, named colours, SVG col
     .g { color: var(--color-text); background: transparent; border-color: currentColor } .h { animation-name: glide-left }
     .i { mask: url("data:image/svg+xml,<svg stroke='black'/>") } .l { mask-image: linear-gradient(#000, transparent) } .j { color: color-mix(in srgb, var(--color-text) 8%, transparent) }
     @media (forced-colors: active) { .k { outline-color: Highlight } } @media (forced-colors: none) { .m { color: CanvasText } }
-    @media not (forced-colors: active) { .n { color: CanvasText } }</style><p style="color: navy"></p>
-    <svg><path stroke="#ff0000" fill="none"/><path fill='currentColor' stroke="url(#g)"/><stop stop-color="white"/></svg>`
+    @media not (forced-colors: active) { .n { color: CanvasText } } @media (forced-colors: active), (min-width: 801px) { .o { color: CanvasText } }
+    @media (forced-colors: active) and (prefers-color-scheme: dark), (forced-colors: active) { .q { color: CanvasText } }</style><p style="color: navy"></p>
+    <svg><path stroke="#ff0000" fill="none"/><path fill='currentColor' stroke="url(#g)"/><stop stop-color="white"/><path fill = "#ff0000"/><path fill=red /></svg>`
   assert.deepEqual(rawColours('planted.html', planted).map((line) => line.split(' { ')[0]), [
     'planted.html: .a', 'planted.html: .b', 'planted.html: .c', 'planted.html: .d', 'planted.html: .e', 'planted.html: .f',
-    'planted.html: @media (forced-colors: none) .m', 'planted.html: @media not (forced-colors: active) .n', 'planted.html: [style]',
-    'planted.html: stroke="#ff0000"', 'planted.html: stop-color="white"',
+    'planted.html: @media (forced-colors: none) .m', 'planted.html: @media not (forced-colors: active) .n',
+    'planted.html: @media (forced-colors: active), (min-width: 801px) .o', 'planted.html: [style]',
+    'planted.html: stroke="#ff0000"', 'planted.html: stop-color="white"', 'planted.html: fill="#ff0000"', 'planted.html: fill="red"',
   ])
 })
 

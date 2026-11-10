@@ -372,10 +372,12 @@ const contrastPairs: Record<string, Pair> = {
   'every selected segmented label on its thumb': { selector: '.segmented button[aria-pressed="true"]:not(:disabled)', fillPseudo: '::before', min: 4.5 },
   'the command plate text': { selector: '.code.command .line', min: 4.5 },
   'the command plate prompt': { selector: '.code.command .line', textPseudo: '::before', min: 3 },
-  'every focused field edge, on its fill and on the surface around it': { selector: ':is(.input, .select, .textarea).is-focus', edge: true, min: 3 },
+  'every focused field edge, on its fill and on the surface around it': { selector: ':is(.input, .select, .textarea, .search).is-focus', edge: true, min: 3 },
 }
-// Each specimen's text (or edge) colour over the backgrounds stacked under it. Chromium computes colours
-// as rgb() or color(srgb …); anything else throws, so a pair cannot pass unread.
+// Each specimen's text (or edge) colour over the background colours stacked under it. Chromium computes
+// colours as rgb() or color(srgb …); anything else throws, so a pair cannot pass unread. The helper does not
+// model paint order: a background image in the stack, or a host background over a pseudo-element fill,
+// makes the specimen fail as unmeasured.
 const ratios = (page: Page, pair: Pair) => page.locator(pair.selector).evaluateAll((nodes, { textPseudo, fillPseudo, edge }) => {
   const parse = (value: string) => {
     const rgb = value.match(/^rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)$/)
@@ -385,10 +387,19 @@ const ratios = (page: Page, pair: Pair) => page.locator(pair.selector).evaluateA
     throw new Error(`unsupported colour: ${value}`)
   }
   const over = (top: number[], bottom: number[]) => [0, 1, 2].map((i) => top[i] * top[3] + bottom[i] * (1 - top[3])).concat(1)
+  // The layers down to the first opaque one, innermost first; anything under that is hidden.
   const ground = (node: Element, pseudo?: string) => {
-    const layers = pseudo ? [getComputedStyle(node, pseudo).backgroundColor] : []
-    for (let el: Element | null = node; el; el = el.parentElement) layers.push(getComputedStyle(el).backgroundColor)
-    return layers.reverse().reduce((below, layer) => over(parse(layer), below), [1, 1, 1, 1])
+    const styles = pseudo ? [getComputedStyle(node, pseudo)] : []
+    for (let el: Element | null = node; el; el = el.parentElement) styles.push(getComputedStyle(el))
+    if (pseudo && parse(styles[1].backgroundColor)[3] > 0) throw new Error(`a host background over the ${pseudo} fill: ${styles[1].backgroundColor}`)
+    const layers: number[][] = []
+    for (const style of styles) {
+      if (style.backgroundImage !== 'none') throw new Error(`a background image: ${style.backgroundImage}`)
+      const colour = parse(style.backgroundColor)
+      layers.push(colour)
+      if (colour[3] === 1) break
+    }
+    return layers.reverse().reduce((below, layer) => over(layer, below), [1, 1, 1, 1])
   }
   const luminance = (c: number[]) => c.slice(0, 3).map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0)
   const ratio = (ink: number[], below: number[]) => {
@@ -397,14 +408,19 @@ const ratios = (page: Page, pair: Pair) => page.locator(pair.selector).evaluateA
   }
   return nodes.flatMap((node, index) => {
     const name = `${node.className} #${index} "${node.textContent?.trim().slice(0, 24)}"`
-    if (edge) {
-      const ink = parse(getComputedStyle(node).borderTopColor)
-      return [{ name: `${name} on its fill`, ratio: ratio(ink, ground(node)) }, { name: `${name} on its surface`, ratio: ratio(ink, ground(node.parentElement!)) }]
+    try {
+      if (edge) {
+        const ink = parse(getComputedStyle(node).borderTopColor)
+        return [{ name: `${name} on its fill`, ratio: ratio(ink, ground(node)) }, { name: `${name} on its surface`, ratio: ratio(ink, ground(node.parentElement!)) }]
+      }
+      return [{ name, ratio: ratio(parse(getComputedStyle(node, textPseudo).color), ground(node, fillPseudo)) }]
+    } catch (error) {
+      return [{ name, ratio: Number.NaN, unmeasured: (error as Error).message }]
     }
-    return [{ name, ratio: ratio(parse(getComputedStyle(node, textPseudo).color), ground(node, fillPseudo)) }]
   })
 }, pair)
-const below = (measured: { name: string; ratio: number }[], min: number) => measured.filter(({ ratio }) => !(ratio >= min)).map(({ name, ratio }) => `${name}: ${ratio.toFixed(2)}:1`)
+const below = (measured: { name: string; ratio: number; unmeasured?: string }[], min: number) => measured.filter(({ ratio }) => !(ratio >= min))
+  .map(({ name, ratio, unmeasured }) => `${name}: ${unmeasured ? `unmeasured, ${unmeasured}` : `${ratio.toFixed(2)}:1`}`)
 
 // Shape follows role (DESIGN.md, Surfaces): the rendered corners of each role's parts equal its token.
 // The slider track and the select picker are engine pseudo-elements that computed styles cannot reach;
@@ -467,6 +483,11 @@ test.describe('rendered recipes', () => {
         })
       }
 
+      test('each component renders the corner radius of its role, and no other part has one', async ({ page }) => {
+        await page.goto(url)
+        expect(await shapeProblems(page)).toEqual([])
+      })
+
       test('contrast: the toggle card ratios in decisions.md match the render', async ({ page }) => {
         const row = (await docText(page, 'decisions.md')).split('\n').find((line) => line.startsWith('| Toggle card |'))
         await page.goto(url)
@@ -475,6 +496,7 @@ test.describe('rendered recipes', () => {
         await page.locator('.toggle:has(small)').evaluate((node) => node.setAttribute('aria-pressed', 'true'))
         const measured = await ratios(page, { selector: '.toggle:has(small) :is(.toggle-text, .toggle-text small)', min: 0 })
         expect(measured).toHaveLength(2)
+        expect(below(measured, 0)).toEqual([])
         for (const { ratio } of measured) expect(row).toContain(`${ratio.toFixed(2)}:1`)
       })
     })
@@ -486,6 +508,16 @@ test.describe('rendered recipes', () => {
     expect(below(await ratios(page, contrastPairs['every enabled primary button label']), 4.5)).toEqual([expect.stringMatching(/^btn is-hover #\d+ ".*": 1\.00:1$/)])
   })
 
+  test('the contrast check fails a fill it cannot measure: a background image, or a host background over a pseudo-element fill', async ({ page }) => {
+    await page.goto(url)
+    await page.addStyleTag({ content: `.btn:is(:hover, .is-hover):not(:disabled) { background-image: linear-gradient(var(--color-accent-text), var(--color-accent-text)); }
+      .segmented button[aria-pressed="true"] { background: var(--color-segmented-current-text); }` })
+    expect(below(await ratios(page, contrastPairs['every enabled primary button label']), 4.5)).toEqual([expect.stringMatching(/^btn is-hover #\d+ ".*": unmeasured, a background image: linear-gradient/)])
+    const segmented = below(await ratios(page, contrastPairs['every selected segmented label on its thumb']), 4.5)
+    expect(segmented.length).toBeGreaterThan(0)
+    for (const line of segmented) expect(line).toMatch(/unmeasured, a host background over the ::before fill/)
+  })
+
   test('the DESIGN.md shape table names each role token with its value', async ({ page }) => {
     const table = [...(await docText(page, 'DESIGN.md')).matchAll(/^\s*\| [^|]+ \| (Pill|\d+px) \| `(--radius-[\w-]+)` \|/gm)].map(([, shape, token]) => [token, shape])
     expect(table.map(([token]) => token).sort()).toEqual(Object.keys(shapeRoles).sort())
@@ -494,10 +526,6 @@ test.describe('rendered recipes', () => {
     expect(values).toEqual(table.map(([, shape]) => (shape === 'Pill' ? '999px' : shape)))
   })
 
-  test('each component renders the corner radius of its role, and no other part has one', async ({ page }) => {
-    await page.goto(url)
-    expect(await shapeProblems(page)).toEqual([])
-  })
 
   test('the shape check catches a role override, a corner longhand, and a radius with no role', async ({ page }) => {
     await page.goto(url)
