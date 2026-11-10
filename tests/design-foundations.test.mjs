@@ -24,6 +24,48 @@ test('the component catalogue has one section per component spec, in the same la
   assert.deepEqual(sections, specs)
 })
 
+// Each control section declares the interactive states its spec defines in data-states, and the
+// Control states table shows the same marks. A declared state must appear in the spec's States line.
+const stateWords = {
+  hover: /\bhover/i,
+  pressed: /\bpress/i,
+  selected: /\b(?:selected|checked|on|current)\b/i,
+  focus: /\bfocus/i,
+  disabled: /\bdisabled\b/i,
+  busy: /\bbusy\b/i,
+  invalid: /\binvalid\b/i,
+}
+const declaredStates = (html) => [...html.matchAll(/<section class="component" id="([\w-]+)" data-layer="\w+" data-states="([^"]*)"/g)]
+  .map(([, id, states]) => ({ id, states: states.split(' ') }))
+const tableStates = (html) => {
+  const columns = [...html.match(/<table class="coverage">[\s\S]*?<\/thead>/)[0].matchAll(/<th scope="col">([^<]+)<\/th>/g)].slice(1).map(([, name]) => name.toLowerCase())
+  return [...html.matchAll(/<tr data-for="([\w-]+)">([\s\S]*?)<\/tr>/g)].map(([, id, row]) => ({
+    id,
+    states: [...row.matchAll(/<td>([\s\S]*?)<\/td>/g)].flatMap(([, cell], i) => (cell.includes('class="none"') ? [] : [columns[i]])),
+  }))
+}
+const specStates = (md, id) => {
+  const slug = (title) => title.toLowerCase().replace(/[^a-z0-9 -]/g, '').trim().replace(/\s+/g, '-')
+  const section = md.split(/^(?=## )/m).find((block) => slug(block.match(/^## (.+)/)?.[1] ?? '') === id)
+  return section?.match(/^- \*\*States\.\*\* (.+)$/m)?.[1] ?? ''
+}
+const undeclaredStates = (html, md) => declaredStates(html).flatMap(({ id, states }) =>
+  states.filter((state) => !stateWords[state]?.test(specStates(md, id))).map((state) => `${id}: ${state}`))
+
+test('the state-coverage guard catches a state the spec does not define, and a table that drifts', () => {
+  const html = read('components.html')
+  const planted = html.replace(/(id="slider" data-layer="Core" data-states=")([^"]*)"/, '$1$2 busy"')
+  assert.deepEqual(undeclaredStates(planted, read('components.md')), ['slider: busy'])
+  assert.notDeepEqual(tableStates(planted), declaredStates(planted))
+})
+
+test('the Control states table matches each section’s data-states, and each state is in its spec', () => {
+  const html = read('components.html')
+  assert.ok(declaredStates(html).length >= 13)
+  assert.deepEqual(tableStates(html), declaredStates(html))
+  assert.deepEqual(undeclaredStates(html, read('components.md')), [])
+})
+
 // Flattens a page's <style> into rules, each with its @media or @supports context.
 const cssRules = (html) => {
   const css = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)].map(([, block]) => block).join('\n').replace(/\/\*[\s\S]*?\*\//g, '')
@@ -130,7 +172,16 @@ const stateNeeds = [
       '@media (forced-colors: active) .segmented button[aria-pressed="true"]::before',
     ],
   },
-  { classes: ['tab'], states: ['.tab:is(:hover, .is-hover)', '.tab[aria-selected="true"]', '@media (forced-colors: active) .tab[aria-selected="true"]'] },
+  {
+    classes: ['tab'],
+    states: [
+      '.tab:is(:hover, .is-hover)',
+      '.tab[aria-selected="true"]',
+      '.tab[aria-selected="true"]::before',
+      '@media (forced-colors: active) .tab[aria-selected="true"]',
+      '@media (forced-colors: active) .tab[aria-selected="true"]::before',
+    ],
+  },
   { classes: ['navlist'], states: ['.navlist a:is(:hover, .is-hover)', '.navlist a[aria-current="page"]', '@media (forced-colors: active) .navlist a[aria-current="page"]'] },
 ]
 const missingStates = (page, html) => {

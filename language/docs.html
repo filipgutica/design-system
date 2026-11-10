@@ -14,7 +14,7 @@
 .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
 .sidebar { position: sticky; top: var(--space-6); align-self: start; display: grid; gap: var(--space-1); padding-block: var(--space-6); }
 /* Navigation rows: components.html#navigation-list, unchanged. Only the rail's placement and spacing are local. */
-.navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-field); color: var(--color-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+.navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-inline); color: var(--color-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
 .navlist a:is(:hover, .is-hover) { background: var(--color-row-hover); color: var(--color-text); text-decoration: none; }
 .navlist a[aria-current="page"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); font-weight: var(--weight-medium); }
 .navlist a[aria-current="location"] { color: var(--color-text); font-weight: var(--weight-medium); }
@@ -66,7 +66,7 @@ footer { padding-block: var(--space-6); border-top: 1px solid var(--color-border
 <footer>Design language reference. Content and package name are illustrative.</footer>
 </div>
 <script>
-// Marks the section the reader is in: the last section whose top has reached the top of the
+// Location tracking (DESIGN.md#navigation). Marks the section the reader is in: the last section whose top has reached the top of the
 // viewport, or the last section once the page is scrolled to the end. After a jump (a link or a
 // deep link) the target stays current until the reader scrolls, because a short page cannot
 // scroll the target to the top. Without JavaScript the links still work; only the marker is missing.
