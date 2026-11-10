@@ -297,8 +297,9 @@
   dialog.drawer { position: fixed; inset: 0 auto 0 0; height: 100dvh; max-height: none; margin: 0; }
   dialog.drawer::backdrop { background: var(--color-overlay); }
   /* The page behind an open drawer does not scroll, through the slide out too. Hiding the root's overflow keeps the
-     reader's position, and the stable gutter keeps the page from shifting when a classic scrollbar hides. */
-  :root:has(dialog.drawer[open]) { overflow: hidden; scrollbar-gutter: stable; }
+     reader's position. The gutter is reserved all the time, so a classic scrollbar that hides does not reflow the page. */
+  :root { scrollbar-gutter: stable; }
+  :root:has(dialog.drawer[open]) { overflow: hidden; }
   @media (prefers-reduced-motion: no-preference) {
     dialog.drawer[open] { animation: drawer-in var(--duration) var(--ease-out); }
     dialog.drawer[open]::backdrop { animation: fade-in var(--duration) var(--ease-out); }
@@ -1833,8 +1834,12 @@
   };
   tablet.addEventListener('change', () => { place(); rebase(); });
   place();
-  // A deep link's landing is measured once the rail has its place, because moving it shifts the page.
-  if (location.hash) jumpTo(location.hash.slice(1));
+  // Moving the rail shifts the page under a deep link, so the target is scrolled back into place and its
+  // landing measured after the move.
+  if (location.hash) {
+    document.getElementById(location.hash.slice(1))?.scrollIntoView();
+    jumpTo(location.hash.slice(1));
+  }
   update();
   // detail is 0 for a click made with Enter or Space, and 1 or more for a tap or a mouse click.
   document.getElementById('section-menu').addEventListener('click', (e) => openDrawer({ byPointer: e.detail > 0 }));

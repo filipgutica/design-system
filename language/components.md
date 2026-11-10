@@ -233,7 +233,7 @@ Layer: Core. ui: `UiDrawer`.
 - **Anatomy.** A dialog fixed to the left edge, full height, `min(--sidebar + 48px, 100vw - 48px)` wide, with a header (title and close button) and a body that scrolls on its own. It is a floating layer with square corners: `--color-surface-raised`, a transparent 1px border, and `--shadow-dialog`. The close button is a [quiet action](#quiet-action).
 - **Navigation drawer.** A drawer that holds navigation opens on the current row, scrolled to the centre of the body. A keyboard open moves focus to that row; a tap moves focus to the body, so no ring shows and no on-screen keyboard opens. An open from a Find button moves focus to the [find field](#find-field), which stays pinned at the top of the body while the list scrolls under it.
 - **Keyboard and screen reader.** As for the dialog. Following an in-page link inside the drawer closes it and moves focus to the link's destination (given `tabindex="-1"` if it is not focusable), not back to the trigger. Modified clicks (a new tab or window) leave it open.
-- **Page behind.** While the drawer is open, until it has slid out, the page behind it does not scroll: the root takes `overflow: hidden` with `scrollbar-gutter: stable`, which keeps the reader's position.
+- **Page behind.** While the drawer is open, until it has slid out, the page behind it does not scroll: the root takes `overflow: hidden`, which keeps the reader's position. The page reserves the scrollbar gutter all the time (`scrollbar-gutter: stable` on the root), so hiding a classic scrollbar does not reflow it.
 - **Motion.** It slides in over `--duration` and out over `--duration-fast`, with `--ease-out`, while the overlay fades. Reduced motion shows and hides it at once.
 
 ## Navigation list

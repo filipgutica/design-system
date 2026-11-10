@@ -275,7 +275,9 @@ for (const width of [390, 720, 1280]) {
   test(`no horizontal overflow at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 })
     await page.goto(url)
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0)
+    // Overflow is content wider than the page's box. The page reserves a scrollbar gutter, which a browser
+    // with hidden scrollbars (headless Linux) leaves empty, so the difference can be negative there.
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0)
   })
 }
 
