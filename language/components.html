@@ -296,6 +296,9 @@
   .drawer { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(calc(var(--sidebar) + var(--space-12)), 100%); height: 260px; overflow: hidden; padding: 0; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
   dialog.drawer { position: fixed; inset: 0 auto 0 0; height: 100dvh; max-height: none; margin: 0; }
   dialog.drawer::backdrop { background: var(--color-overlay); }
+  /* The page behind an open drawer does not scroll, through the slide out too. Hiding the root's overflow keeps the
+     reader's position, and the stable gutter keeps the page from shifting when a classic scrollbar hides. */
+  :root:has(dialog.drawer[open]) { overflow: hidden; scrollbar-gutter: stable; }
   @media (prefers-reduced-motion: no-preference) {
     dialog.drawer[open] { animation: drawer-in var(--duration) var(--ease-out); }
     dialog.drawer[open]::backdrop { animation: fade-in var(--duration) var(--ease-out); }
@@ -352,8 +355,8 @@
   .rail-foot { padding-top: var(--space-3); border-top: 1px solid var(--color-border-subtle); color: var(--color-muted); font-size: var(--text-sm); }
   .rail-foot .switch-row label { color: var(--color-muted); }
   /* In a rail the current section takes the current-page look, with no pip. Strips and contents lists keep the pip. */
-  :is(.rail, .rail-specimen) .navlist a[aria-current="location"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); }
-  :is(.rail, .rail-specimen) .navlist a[aria-current="location"]::before { content: none; }
+  :is(.rail, .rail-specimen) a[aria-current="location"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); }
+  :is(.rail, .rail-specimen) a[aria-current="location"]::before { content: none; }
   /* Tablet and phone: Find and Menu, icon-only and square, in the header row. */
   .section-bar { display: flex; gap: var(--space-2); }
   .section-bar .btn { width: var(--control-lg); padding: 0; }
@@ -585,7 +588,7 @@
     .navlist a[aria-current="page"] { border-inline-start: 2px solid Highlight; }
     .navlist a[aria-current="location"]::before { forced-color-adjust: none; background: Highlight; }
     /* A rail's current section has no pip, so it takes the current page's system border. */
-    :is(.rail, .rail-specimen) .navlist a[aria-current="location"] { border-inline-start: 2px solid Highlight; }
+    :is(.rail, .rail-specimen) a[aria-current="location"] { border-inline-start: 2px solid Highlight; }
     .key { border-color: CanvasText; }
     .coverage td { color: CanvasText; }
     /* Value marks: only the mark opts out of adjustment and redraws in the system highlight. */
@@ -694,6 +697,8 @@
     .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
     .layout > .rail { position: static; height: auto; padding-block: var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
     .layout > .rail .rail-list { overflow: visible; }
+    /* The rail sits in the drawer or, without the script, right after the header, so it needs no skip link. */
+    .skip[href="#contents"] { display: none; }
     .index-grid { columns: 1; }
     .row { grid-template-columns: minmax(0, 1fr); }
     /* Touch: unsized controls grow to --control-lg. Size specimens keep their sizes. */
@@ -750,6 +755,7 @@
 </svg>
 
 <a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#contents">Skip to contents</a>
 <div class="frame">
 <header class="page-head">
   <p class="site-name">Design system</p>
@@ -773,7 +779,7 @@
     <div class="find"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="input" type="search" id="find" placeholder="Find a component" aria-label="Find a component" aria-describedby="find-count" autocomplete="off" spellcheck="false" aria-keyshortcuts="/"><kbd class="key" aria-hidden="true">/</kbd></div>
     <p class="sr-only" role="status" id="find-count"></p>
   </div>
-  <nav class="rail-list" aria-label="Components">
+  <nav class="rail-list" id="contents" aria-label="Components">
     <div class="navlist" role="group" aria-labelledby="rail-overview">
       <span class="group-label" id="rail-overview">Overview</span>
       <a href="#index" data-terms="by purpose overview index overview all components">By purpose</a>
@@ -1167,7 +1173,7 @@
     <header><h3 id="drawer-title">Drawer</h3><span class="badge">Core</span><a href="components.md#drawer">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="drawer" aria-label="Copy link to Drawer" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A side panel, such as phone navigation.</p>
     <div class="row"><h4>Live</h4><div class="states">
-      <div class="state"><button class="btn secondary menu-glyph" type="button" data-size="lg" data-open="live-drawer">Contents</button><span class="caption">Phone trigger: opens a side drawer</span></div>
+      <div class="state"><button class="btn secondary menu-glyph" type="button" data-size="lg" data-open="live-drawer">Contents</button><span class="caption">Rest, live: a page’s contents trigger opens a side drawer</span></div>
     </div></div>
     <div class="row"><h4>In place</h4><div class="states">
       <div class="state wide" inert><div class="drawer" role="dialog" aria-labelledby="drw-static-title"><div class="drawer-head"><h4 id="drw-static-title">Contents</h4><button class="quiet-action close" type="button" aria-label="Close drawer"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="drawer-body"><nav class="navlist" aria-label="Contents, static"><a href="#button" aria-current="location">Button</a><a href="#select">Select</a><a href="#switch">Switch</a></nav></div></div><span class="caption">Open, pinned; Button is the current section</span></div>
@@ -1186,10 +1192,11 @@
       <div class="state"><nav class="navlist" aria-label="Sample routes"><span class="group-label">Guides</span><a href="components.html" aria-current="page">Install</a><a href="#navigation-list">Configure</a><a href="#navigation-list">Release</a></nav><span class="caption">Live; Install is the current page</span></div>
       <div class="state" inert><nav class="navlist" aria-label="Sample routes, pinned"><a href="#navigation-list" class="is-hover">Hover</a><a href="components.html" aria-current="page" class="is-hover">Current page, hover</a><a href="#navigation-list" aria-current="location">Current location</a><a href="#navigation-list" class="is-focus">Focus visible</a></nav><span class="caption">Hover, current page with hover, current location, and focus visible</span></div>
     </div></div>
-    <div class="row"><h4>Phone trigger</h4><div class="states">
-      <div class="state" inert><button class="btn secondary menu-glyph" type="button" data-size="lg">On this page</button><span class="caption">Drawer trigger</span></div>
-      <div class="state" inert><button class="btn secondary menu-glyph is-active" type="button" data-size="lg">On this page</button><span class="caption">Pressed</span></div>
-      <div class="state"><details class="rail-details"><summary class="btn secondary rail-summary" data-size="lg">On this page</summary><nav class="navlist" aria-label="On this page, no JavaScript"><a href="#navigation-list" aria-current="location">Rows</a><a href="#code-block">Next section</a></nav></details><span class="caption">No-JavaScript fallback, live</span></div>
+    <div class="row"><h4>Drawer triggers</h4><div class="states">
+      <div class="state" inert><div class="section-bar"><button class="btn secondary" type="button" data-size="lg" aria-label="Menu"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button></div><span class="caption">Rest: the site shell’s Menu button, in the header row; see Section rail</span></div>
+      <div class="state" inert><button class="btn secondary menu-glyph" type="button" data-size="lg">On this page</button><span class="caption">Rest: a page’s own contents drawer, such as a docs page’s On this page</span></div>
+      <div class="state" inert><button class="btn secondary menu-glyph is-active" type="button" data-size="lg">On this page</button><span class="caption">Pressed: the page’s contents trigger</span></div>
+      <div class="state"><details class="rail-details"><summary class="btn secondary rail-summary" data-size="lg">On this page</summary><nav class="navlist" aria-label="On this page, no JavaScript"><a href="#navigation-list" aria-current="location">Rows</a><a href="#code-block">Next section</a></nav></details><span class="caption">Live: the contents trigger’s no-JavaScript fallback</span></div>
     </div></div>
     <div class="row"><h4>List selection</h4><div class="states">
       <div class="state wide" inert><div class="rows" role="listbox" aria-label="Monitors"><div role="option" aria-selected="false">Active consumers</div><div role="option" aria-selected="false">5xx error rate</div><div role="option" aria-selected="true">API p95 latency</div><div role="option" aria-selected="false" class="is-hover">Request volume</div></div><span class="caption">Selected row, and hover on the next</span></div>
@@ -1633,12 +1640,13 @@
   if (here && strip.scrollWidth > strip.clientWidth) strip.scrollLeft = here.offsetLeft - (strip.clientWidth - here.offsetWidth) / 2;
   trackClip(strip);
 
-  // The skip link moves focus to main, which takes tabindex="-1" only then.
+  // Each skip link moves focus to its target (main, or the rail's list), which takes tabindex="-1" only then.
   const main = document.getElementById('main');
-  document.querySelector('a.skip[href="#main"]').addEventListener('click', () => {
-    main.tabIndex = -1;
-    main.focus({ preventScroll: true });
-  });
+  document.querySelectorAll('body > a.skip').forEach((skip) => skip.addEventListener('click', () => {
+    const target = document.getElementById(skip.hash.slice(1));
+    target.tabIndex = -1;
+    target.focus({ preventScroll: true });
+  }));
 
   const rail = document.getElementById('rail');
   const railHome = rail.parentElement;
@@ -1783,8 +1791,14 @@
     }
     schedule();
   };
+  // A layout change can move the target. A pending jump whose target still sits at the inset measures its
+  // landing again; one whose target moved away ends, so tracking follows the page.
+  const rebase = () => {
+    if (jump && Math.abs(jump.target.el.getBoundingClientRect().top - insetOf()) <= 2) jumpTo(jump.target.el.id);
+    else { jump = undefined; schedule(); }
+  };
   addEventListener('scroll', schedule, { passive: true });
-  addEventListener('resize', schedule);
+  addEventListener('resize', rebase);
   addEventListener('hashchange', () => jumpTo(location.hash.slice(1)));
   // A second click on the same link changes no hash, so clicks start the jump too.
   document.addEventListener('click', (e) => {
@@ -1792,8 +1806,6 @@
     const href = e.target instanceof Element ? e.target.closest('a[href^="#"]')?.getAttribute('href') : undefined;
     if (href && href.length > 1) jumpTo(href.slice(1));
   });
-  if (location.hash) jumpTo(location.hash.slice(1));
-  update();
 
   // Tablet and phone: one sticky header row holds Find and Menu. The drawer holds Find, the pages, the
   // appearance control, and the rail's groups, in that order. Desktop puts each piece back.
@@ -1818,10 +1830,12 @@
       railHome.prepend(rail);
       bar.hidden = true;
     }
-    schedule();
   };
-  tablet.addEventListener('change', place);
+  tablet.addEventListener('change', () => { place(); rebase(); });
   place();
+  // A deep link's landing is measured once the rail has its place, because moving it shifts the page.
+  if (location.hash) jumpTo(location.hash.slice(1));
+  update();
   // detail is 0 for a click made with Enter or Space, and 1 or more for a tap or a mouse click.
   document.getElementById('section-menu').addEventListener('click', (e) => openDrawer({ byPointer: e.detail > 0 }));
   document.getElementById('section-find').addEventListener('click', () => openDrawer({ toFind: true }));

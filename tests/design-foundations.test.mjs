@@ -25,11 +25,13 @@ test('the component catalogue has one section per component spec, in the same la
 })
 
 // Each control section declares the interactive states its spec defines in data-states, and the
-// Control states table shows the same marks. A declared state must appear in the spec's States line.
+// Control states table shows the same marks. The states its spec's States line names, normalized
+// through these words, must equal the declared set: no state missing from either side.
+// "on" counts only as a list item ("Off, on, focus-visible"), not as a preposition.
 const stateWords = {
   hover: /\bhover/i,
   pressed: /\bpress/i,
-  selected: /\b(?:selected|checked|on|current)\b/i,
+  selected: /\b(?:selected|checked|current)\b|(?:^|, )on,/i,
   focus: /\bfocus/i,
   disabled: /\bdisabled\b/i,
   busy: /\bbusy\b/i,
@@ -47,23 +49,49 @@ const tableStates = (html) => {
 const specStates = (md, id) => {
   const slug = (title) => title.toLowerCase().replace(/[^a-z0-9 -]/g, '').trim().replace(/\s+/g, '-')
   const section = md.split(/^(?=## )/m).find((block) => slug(block.match(/^## (.+)/)?.[1] ?? '') === id)
-  return section?.match(/^- \*\*States\.\*\* (.+)$/m)?.[1] ?? ''
+  const line = section?.match(/^- \*\*States\.\*\* (.+)$/m)?.[1] ?? ''
+  return Object.keys(stateWords).filter((state) => stateWords[state].test(line))
 }
-const undeclaredStates = (html, md) => declaredStates(html).flatMap(({ id, states }) =>
-  states.filter((state) => !stateWords[state]?.test(specStates(md, id))).map((state) => `${id}: ${state}`))
-
-test('the state-coverage guard catches a state the spec does not define, and a table that drifts', () => {
-  const html = read('components.html')
-  const planted = html.replace(/(id="slider" data-layer="Core" data-states=")([^"]*)"/, '$1$2 busy"')
-  assert.deepEqual(undeclaredStates(planted, read('components.md')), ['slider: busy'])
-  assert.notDeepEqual(tableStates(planted), declaredStates(planted))
+// Lists "id: state (missing in the spec)" and "id: state (missing in the catalogue)".
+const stateDrift = (html, md) => declaredStates(html).flatMap(({ id, states }) => {
+  const spec = specStates(md, id)
+  return [
+    ...states.filter((state) => !spec.includes(state)).map((state) => `${id}: ${state} (missing in the spec)`),
+    ...spec.filter((state) => !states.includes(state)).map((state) => `${id}: ${state} (missing in the catalogue)`),
+  ]
 })
 
-test('the Control states table matches each section’s data-states, and each state is in its spec', () => {
+test('the state-coverage guard catches a state missing from either the spec or the catalogue, and a table that drifts', () => {
+  const html = read('components.html')
+  const md = read('components.md')
+  const extra = html.replace(/(id="slider" data-layer="Core" data-states=")([^"]*)"/, '$1$2 busy"')
+  assert.deepEqual(stateDrift(extra, md), ['slider: busy (missing in the spec)'])
+  assert.notDeepEqual(tableStates(extra), declaredStates(extra))
+  const missing = html.replace(/(id="slider" data-layer="Core" data-states=")focus ([^"]*)"/, '$1$2"')
+  assert.deepEqual(stateDrift(missing, md), ['slider: focus (missing in the catalogue)'])
+  assert.deepEqual(specStates('## Switch\n\nLayer: Core.\n\n- **States.** Off, on, focus-visible, and disabled.\n', 'switch'), ['selected', 'focus', 'disabled'])
+  assert.deepEqual(specStates('## Slider\n\nLayer: Core.\n\n- **States.** Rest, and focus-visible on the thumb.\n', 'slider'), ['focus'])
+})
+
+test('the Control states table matches each section’s data-states, and each matches its spec both ways', () => {
   const html = read('components.html')
   assert.ok(declaredStates(html).length >= 13)
   assert.deepEqual(tableStates(html), declaredStates(html))
-  assert.deepEqual(undeclaredStates(html, read('components.md')), [])
+  assert.deepEqual(stateDrift(html, read('components.md')), [])
+})
+
+// The Foundations swatch of the current row draws a navigation row, so it takes the row's corners, and
+// the radius list names navigation rows under the token they use.
+const radiusOf = (html, selector) => cssRules(html).find((rule) => rule.selector === selector)?.body.match(/border-radius: ([^;]+);/)?.[1]
+const radiusUse = (html, token) => html.match(new RegExp(`data-token="${token}"><div class="spec-meta"><code>${token}</code><span class="value"></span><span class="use">([^<]+)<`))?.[1] ?? ''
+
+test('the Foundations current-row swatch and radius list follow the navigation row radius', () => {
+  const row = radiusOf(read('components.html'), '.navlist a')
+  assert.equal(row, 'var(--radius-inline)')
+  const reference = read('reference.html')
+  assert.equal(radiusOf(reference, '.nav-current-sample'), row)
+  assert.match(radiusUse(reference, '--radius-inline'), /navigation rows/)
+  assert.doesNotMatch(radiusUse(reference, '--radius-field'), /navigation rows|tabs/)
 })
 
 // Flattens a page's <style> into rules, each with its @media or @supports context.
@@ -119,6 +147,7 @@ const families = [
   { name: 'segmented control', pattern: /^\.segmented\b/, pages: ['reference.html'] },
   { name: 'tabs', pattern: /^\.tab(?:list)?\b/, pages: ['reference.html'] },
   { name: 'navigation row', pattern: /^\.navlist\b/, pages: ['docs.html', 'reference.html'] },
+  { name: 'rail current section', pattern: /^:is\(\.rail, \.rail-specimen\)/, pages: ['docs.html'] },
   { name: 'checkbox and radio', pattern: /^\.check\b/, pages: ['reference.html'] },
   { name: 'badge', pattern: /^\.badge\b/, pages: ['reference.html'] },
   { name: 'alert', pattern: /^\.alert\b/, pages: ['reference.html'] },
@@ -183,6 +212,14 @@ const stateNeeds = [
     ],
   },
   { classes: ['navlist'], states: ['.navlist a:is(:hover, .is-hover)', '.navlist a[aria-current="page"]', '@media (forced-colors: active) .navlist a[aria-current="page"]'] },
+  {
+    classes: ['rail'],
+    states: [
+      ':is(.rail, .rail-specimen) a[aria-current="location"]',
+      ':is(.rail, .rail-specimen) a[aria-current="location"]::before',
+      '@media (forced-colors: active) :is(.rail, .rail-specimen) a[aria-current="location"]',
+    ],
+  },
 ]
 const missingStates = (page, html) => {
   const used = [...html.matchAll(/\bclass="([^"]*)"/g)].map(([, list]) => new Set(list.split(/\s+/)))
@@ -211,6 +248,12 @@ test('the state guard catches a page that drops a whole state rule', () => {
   for (const { line, missing } of drops) {
     assert.deepEqual(missingStates('reference.html', page.replace(page.match(line)[0], '')), [`reference.html: ${missing}`])
   }
+})
+
+test('the state guard catches a rail page that drops the current-section recipe', () => {
+  const page = read('docs.html')
+  const line = page.match(/^:is\(\.rail, \.rail-specimen\) a\[aria-current="location"\] \{ background[^\n]*\n/m)[0]
+  assert.deepEqual(missingStates('docs.html', page.replace(line, '')), ['docs.html: :is(.rail, .rail-specimen) a[aria-current="location"]'])
 })
 
 test('example pages copy the state rules of every component variant their markup uses', () => {
