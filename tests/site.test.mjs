@@ -9,6 +9,8 @@ import { overviewPage } from '../scripts/site/overview.mjs'
 import { parseColour, themeChecks, themesPage } from '../scripts/site/themes.mjs'
 import { shellDrift, sitePage, spanOnce } from '../scripts/site/shell.mjs'
 import { readRenameTable } from '../scripts/rename-tokens.mjs'
+import { readTokens } from '../scripts/build-tokens.mjs'
+import { fileURLToPath } from 'node:url'
 import { read } from './css.mjs'
 
 // The site pages share components.html's shell byte for byte, and the package copy of the
@@ -161,8 +163,7 @@ test('Foundations lists every token in tokens.json once, with its role and forme
 
 test('Themes shows every theme in tokens.json, the default first, and stops on a theme without values', () => {
   const values = JSON.parse(read('dist/tokens.json')).themes
-  const themes = readdirSync(new URL('../tokens/themes/', import.meta.url)).map((file) => ({ id: file.replace('.json', ''), ...JSON.parse(read(`tokens/themes/${file}`)) }))
-    .toSorted((a, b) => Number(b.id === 'graphite-indigo') - Number(a.id === 'graphite-indigo') || a.name.localeCompare(b.name))
+  const themes = readTokens(fileURLToPath(new URL('..', import.meta.url))).themes.map(({ data, ...theme }) => theme)
   const { main } = themesPage({ themes, values, packageName: pkg.name })
   assert.deepEqual([...main.matchAll(/<h2 id="([\w-]+)-title">/g)].map(([, id]) => id), [...Object.keys(values), 'use', 'make'])
   assert.equal(main.split('class="theme-frame"').length - 1, 2 * themes.length)
