@@ -542,8 +542,14 @@ const topLevelParts = (branch) => {
   }
   return part ? [...parts, part] : parts
 }
+// A branch that is one parenthesised group, such as ((hover: hover) and (pointer: fine)), is read inside it.
+const ungroup = (branch) => {
+  const [only, ...rest] = topLevelParts(branch)
+  const inner = only?.slice(1, -1).trim() ?? ''
+  return rest.length === 0 && only.startsWith('(') && only.endsWith(')') && inner.startsWith('(') ? ungroup(inner) : branch
+}
 const requiredBranch = (feature) => (branch) => {
-  const parts = topLevelParts(branch)
+  const parts = topLevelParts(ungroup(branch))
   return !parts.some((part) => /^(?:or|not)$/i.test(part)) && parts.some((part) => feature.test(part))
 }
 const requiredIn = (feature, context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && selectors(rule.slice('@media'.length)).every(requiredBranch(feature)))
@@ -625,14 +631,15 @@ test('no hover rule on any page reaches a disabled control', () => {
 })
 
 // A touch screen keeps :hover on the last element tapped, so a hover fill would stay behind after a
-// tap. Every :hover rule that paints (a background, shadow, border, outline, or text colour) sits in an
+// tap. Every :hover rule that paints (a background, shadow, border, outline, or text colour, or a custom
+// property, which a painting declaration such as box-shadow: var(--depth) can read) sits in an
 // @media query that needs (hover: hover) in every comma branch, the same way forced colors is read above.
 // The scan covers the language pages and the generated site pages. An exception names its page and
 // selector, with the reason it may stick.
 const hoverExceptions = new Map([
   // ['page.html selector', 'reason'],
 ])
-const paints = /(?:^|;\s*)(?:background(?:-color|-image)?|box-shadow|color|outline(?:-color)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-color)?)\s*:/
+const paints = /(?:^|;\s*)(?:--[\w-]+|background(?:-color|-image)?|box-shadow|color|outline(?:-color)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-color)?)\s*:/
 const hoverCapable = /^\(\s*hover\s*:\s*hover\s*\)$/
 const stickyHover = (file, html) => perSelector(cssRules(html))
   .filter(({ context, selector, body }) => /:hover\b/.test(selector) && paints.test(body) && !requiredIn(hoverCapable, context))
@@ -645,12 +652,15 @@ test('the sticky-hover guard catches a painting hover rule outside @media (hover
     .edge:hover { border: 1px solid red } .side:hover { border-top: 1px solid red } .ring:hover { outline: 2px solid red }
     @media (hover: hover) { .ok:hover { background: red } } @media (hover:hover) { .tight:hover { background: red } }
     @media (hover: hover) and ((max-width: 800px) or (pointer: fine)) { .nested:hover { background: red } }
+    @media ((hover: hover) and (pointer: fine)) { .grouped:hover { background: red } }
+    .sink:hover:not(:disabled) { --depth: var(--shadow-sink) } @media (hover: hover) { .sunk:hover { --depth: none } }
     @media (hover: hover), (max-width: 640px) { .either:hover { background: red } }
     @media not (hover: hover) { .negated:hover { background: red } }
     @media (forced-colors: active) { .fc:hover { border-color: red } }</style>`
   assert.deepEqual(stickyHover('planted.html', planted), [
     'planted.html .chip:hover', 'planted.html .row:is(:hover, .is-hover)', 'planted.html .edge:hover', 'planted.html .side:hover',
-    'planted.html .ring:hover', 'planted.html .either:hover', 'planted.html .negated:hover', 'planted.html .fc:hover',
+    'planted.html .ring:hover', 'planted.html .sink:hover:not(:disabled)', 'planted.html .either:hover', 'planted.html .negated:hover',
+    'planted.html .fc:hover',
   ])
 })
 
