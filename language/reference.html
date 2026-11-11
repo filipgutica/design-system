@@ -35,7 +35,7 @@
   /* Fills and shadows drop. The current page takes a system border; the in-page location keeps
      its pip, redrawn in the system highlight, so the two still differ. */
   @media (forced-colors: active) {
-    .navlist a[aria-current="page"], .nav-current-sample { border-inline-start: 2px solid Highlight; }
+    .navlist a[aria-current="page"], .nav-current-sample { border-inline-start: 2px solid Highlight; padding-inline-start: calc(var(--space-3) - 2px); }
     .navlist a[aria-current="location"]::before, .pip-sample::before { forced-color-adjust: none; background: Highlight; }
   }
   .sidebar .navlist a { gap: var(--space-2); }
@@ -388,6 +388,8 @@
   /* The pip and current-row samples take their state from the navigation row rules above. */
   .pip-sample { position: relative; display: inline-flex; align-items: center; min-height: var(--row); padding: 0 var(--space-3); font-size: var(--text-sm); }
   .nav-current-sample { display: inline-flex; align-items: center; min-height: var(--row); padding: 0 var(--space-3); border-radius: var(--radius-inline); font-size: var(--text-sm); }
+  /* The sample's padding above resets the forced-colors trade made with the row rules, so it is made again here. */
+  @media (forced-colors: active) { .nav-current-sample { padding-inline-start: calc(var(--space-3) - 2px); } }
   .header-rule { display: block; height: 0; border-top: 1px solid var(--color-text); }
   .elevation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); padding: var(--space-6); border-radius: var(--radius-panel); background: var(--color-bg); }
   .elevation > div { display: grid; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-panel); background: var(--color-surface-raised); font-size: var(--text-sm); }

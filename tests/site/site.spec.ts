@@ -207,17 +207,100 @@ test.describe('Foundations table', () => {
   })
 })
 
-test('on phones, the sticky bar offers Clear on one line while a filter is on', async ({ page }) => {
+// Header option A: the site name, then the pages, at the same x on every page. Each link is current on
+// one page, so the same width on every page means becoming current changes no width.
+// Forced colors draws the current link's border, which must not widen it either.
+for (const forcedColors of ['none', 'active'] as const) test(`the header links sit at the same x on every page, and the current link keeps its width, with forced colors ${forcedColors}`, async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.emulateMedia({ forcedColors })
+  const boxes: { x: number; width: number }[][] = []
+  for (const { path } of PAGES) {
+    await page.goto(path)
+    await page.evaluate(() => document.fonts.ready)
+    const head = page.locator('.page-head')
+    await expect(head.locator('.crumbs')).toHaveCount(0)
+    await expect(head.getByRole('link', { name: 'Design system', exact: true })).toHaveAttribute('href', 'index.html')
+    const links = head.locator('.strip a')
+    for (const { name } of PAGES) {
+      // The hidden copy that reserves the width holds the label, and stays out of the link's name.
+      await expect(head.getByRole('link', { name, exact: true })).toHaveAttribute('data-label', name)
+    }
+    boxes.push(await links.evaluateAll((as) => as.map((a) => {
+      const { x, width } = a.getBoundingClientRect()
+      return { x, width }
+    })))
+  }
+  const [first, ...rest] = boxes
+  rest.forEach((pageBoxes, p) => pageBoxes.forEach(({ x, width }, i) => {
+    expect(Math.abs(x - first[i].x), `${PAGES[p + 1].name}: link ${i} at x=${x}, ${first[i].x} on Overview`).toBeLessThanOrEqual(0.5)
+    expect(Math.abs(width - first[i].width), `${PAGES[p + 1].name}: link ${i} ${width}px wide, ${first[i].width}px on Overview`).toBeLessThanOrEqual(0.5)
+  }))
+})
+
+test('the breadcrumb sits above the h1 on every page but Overview, with no separator text', async ({ page }) => {
+  for (const { path, name } of PAGES) {
+    await page.goto(path)
+    const trails = page.getByRole('navigation', { name: 'Breadcrumb', exact: true })
+    if (name === 'Overview') {
+      await expect(trails).toHaveCount(0)
+      continue
+    }
+    await expect(trails).toHaveCount(1)
+    const trail = page.locator('main').getByRole('navigation', { name: 'Breadcrumb', exact: true })
+    expect(await trail.evaluate((nav) => nav.nextElementSibling?.tagName), name).toBe('H1')
+    // The snapshot reads CSS generated content too, so a separator drawn as text would show in it.
+    expect(await trail.ariaSnapshot(), name).toBe([
+      '- navigation "Breadcrumb":',
+      '  - list:',
+      '    - listitem:',
+      '      - link "Design system":',
+      '        - /url: index.html',
+      `    - listitem: ${name}`,
+    ].join('\n'))
+    const current = trail.locator('[aria-current="page"]')
+    await expect(current).toHaveText(name)
+    expect(await current.evaluate((el) => el.closest('a')), name).toBeNull()
+  }
+})
+
+// The trail's line, not its links' touch boxes, sets where it sits: at 1280px its text centres on the Find
+// field beside it, as in the approved mock. On phones a two-crumb trail shows in full.
+test('the breadcrumb lines up with Find, and shows both crumbs on phones', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('foundations.html')
+  const middle = (box: { y: number; height: number }) => box.y + box.height / 2
+  const text = await page.locator('main .crumbs a').evaluate((a) => {
+    const range = document.createRange()
+    range.selectNodeContents(a)
+    const { y, height } = range.getBoundingClientRect()
+    return { y, height }
+  })
+  const find = (await page.locator('#find').boundingBox())!
+  expect(Math.abs(middle(text) - middle(find)), `text centre ${middle(text)}, Find centre ${middle(find)}`).toBeLessThanOrEqual(1)
   await page.setViewportSize({ width: 390, height: 844 })
+  for (const item of await page.locator('main .crumbs li').all()) await expect(item).toBeVisible()
+  await expect(page.locator('main .crumbs a')).toHaveText('Design system')
+})
+
+// 320px is the narrowest phone; headless Linux also takes a scrollbar gutter out of 390px.
+for (const width of [390, 320]) test(`on phones, the sticky bar offers Clear on one line while a filter is on, at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 844 })
   await page.goto('foundations.html')
   await page.locator('#section-find').click()
   await page.locator('#find').fill('surface-raised shadow')
   await page.locator('#nav-drawer .close').click()
   const clear = page.locator('#section-bar .bar-clear')
   await expect(clear).toHaveText('Clear “surface-raised shadow”')
-  const lineHeight = await page.locator('.page-head .crumbs a').first().evaluate((a) => a.getBoundingClientRect().height)
+  // The site name beside it stays a one-line touch target.
+  const name = await page.locator('.page-head .site-name').evaluate((a) => {
+    const range = document.createRange()
+    range.selectNodeContents(a)
+    return { height: a.getBoundingClientRect().height, lines: new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size }
+  })
   expect((await clear.boundingBox())!.height).toBeLessThanOrEqual(48)
-  expect(lineHeight).toBeLessThanOrEqual(48)
+  expect(name.height).toBeGreaterThanOrEqual(44)
+  expect(name.height).toBeLessThanOrEqual(48)
+  expect(name.lines).toBe(1)
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0)
   await clear.click()
   await expect(clear).toBeHidden()
@@ -398,16 +481,26 @@ for (const colorScheme of ['light', 'dark'] as const) {
     await context.close()
   })
 
-  test(`the breadcrumb's labels sit level with the header strip in ${colorScheme}`, async ({ browser }) => {
+  test(`the breadcrumb centres its link's ink in ${colorScheme}`, async ({ browser }) => {
     const context = await browser.newContext({ colorScheme, viewport: { width: 1280, height: 900 }, deviceScaleFactor: 4, baseURL: test.info().project.use.baseURL })
     const page = await context.newPage()
     await page.goto('foundations.html')
-    // The current crumb and the current strip row both read "Foundations", so their cap tops should match.
-    const pill = await labelInk(page, '.page-head .strip a[aria-current="page"]')
-    for (const selector of ['.crumbs [aria-current="page"]', '.crumbs a']) {
-      const crumb = await labelInk(page, selector)
-      expect(Math.abs(crumb.top - pill.top), `${selector}: ink starts at ${crumb.top}px, the strip's at ${pill.top}px`).toBeLessThanOrEqual(0.5)
-    }
+    // The trim centres the cap height, so the label is set to one without descenders, whose ink is the cap
+    // height; a line box that kept descender room would leave the ink over 1px high. Glyphs snap to the
+    // pixel grid, so the trail moves down until its label's line starts on a whole pixel, as the header
+    // pill's does, and snapping adds no error of its own.
+    const selector = 'main .crumbs a'
+    await page.locator(selector).evaluate((a) => {
+      a.textContent = 'Overview'
+      const range = document.createRange()
+      range.selectNodeContents(a)
+      const { top } = range.getBoundingClientRect()
+      a.closest('nav')!.style.marginTop = `${Math.ceil(top) - top}px`
+    })
+    const { box, top, bottom } = await labelInk(page, selector)
+    const above = top - box.top
+    const below = box.bottom - bottom
+    expect(Math.abs(above - below), `${above}px above the ink, ${below}px below`).toBeLessThanOrEqual(0.5)
     await context.close()
   })
 }

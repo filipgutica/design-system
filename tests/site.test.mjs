@@ -41,6 +41,20 @@ test('a template change that removes a splice point stops the build', () => {
   assert.throws(() => sitePage({ ...page, template: template.replace('</nav>\n</main>', '</nav>\n  <p>Last</p>\n</main>') }), /expected one "<\/nav>\\n<\/main>", found 0/)
 })
 
+// A strip link's hidden copy (data-label) sets its width at the current weight, so it must hold the link's
+// own label. Without one, the row's -1lh copy is empty and pulls the label off centre.
+const stripLabelProblems = (html) => [...html.matchAll(/<nav class="navlist strip[^"]*"[^>]*>(.*?)<\/nav>/g)]
+  .flatMap(([, strip]) => [...strip.matchAll(/<a\b([^>]*)>([^<]*)<\/a>/g)])
+  .filter(([, attrs, text]) => attrs.match(/ data-label="([^"]*)"/)?.[1] !== text)
+  .map(([link]) => link)
+
+test('every strip link in the catalogue and the site carries its label in data-label', () => {
+  assert.deepEqual(stripLabelProblems(template), [])
+  for (const [file] of pages) assert.deepEqual(stripLabelProblems(files.get(file)), [], file)
+  assert.deepEqual(stripLabelProblems('<nav class="navlist strip" aria-label="X"><a href="a.html" data-label="A">A</a><a href="b.html">B</a><a href="c.html" data-label="C">See</a></nav>'),
+    ['<a href="b.html">B</a>', '<a href="c.html" data-label="C">See</a>'])
+})
+
 test('spanOnce refuses a repeated marker and markers out of order', () => {
   assert.deepEqual(spanOnce('a<b>c</b>d', '<b>', '</b>'), [1, 9])
   assert.throws(() => spanOnce('<b><b></b>', '<b>', '</b>'), /expected one "<b>", found 2/)
@@ -76,7 +90,7 @@ const inLanguage = { exists: (name) => existsSync(`language/${name}`), read: (na
 
 test('every link in the package copy of the language pages and Markdown resolves inside language/', () => {
   assert.deepEqual(deadLinks({ files: linking(languageFiles), ...inLanguage }), [])
-  assert.match(template, /<nav class="navlist strip" aria-label="Pages">.*<a href="reference\.html#foundations">Foundations<\/a>/)
+  assert.match(template, /<nav class="navlist strip" aria-label="Pages">.*<a href="reference\.html#foundations"[^>]*>Foundations<\/a>/)
 })
 
 test('the link check catches a missing page, a missing fragment, and a dead Markdown link', () => {

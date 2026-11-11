@@ -66,13 +66,18 @@ export const between = (html, start, end) => {
 
 const fileOf = (id) => SITE_PAGES.find((page) => page.id === id).file
 
-// The header's first element: the site name on the home page, otherwise a breadcrumb back to it.
+// The header starts with the site name on every page, as a link to Overview. The package catalogue has
+// no Overview, so its own name is text.
 const headStart = '<header class="page-head">\n  '
 const siteName = '<p class="site-name">Design system</p>'
+const siteLink = `<a class="site-name" href="${fileOf('overview')}">Design system</a>`
+
+// Every page but Overview has a breadcrumb back to it, right above its h1.
 const crumbs = (label) => `<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="${fileOf('overview')}">Design system</a></li><li><span aria-current="page">${esc(label)}</span></li></ol></nav>`
+const h1Start = '<h1 id="title">'
 
 const strip = (current) => `<nav class="navlist strip" aria-label="Pages"><span class="group-label" aria-hidden="true">Pages</span>${
-  SITE_PAGES.map(({ id, label, file }) => `<a href="${file}"${id === current ? ' aria-current="page"' : ''}>${label}</a>`).join('')}</nav>`
+  SITE_PAGES.map(({ id, label, file }) => `<a href="${file}"${id === current ? ' aria-current="page"' : ''} data-label="${label}">${label}</a>`).join('')}</nav>`
 
 /** Previous and next site pages, in header order, in the catalogue's pager markup. */
 export const pager = (current) => {
@@ -106,7 +111,7 @@ const templateGroups = (template) => {
 
 /**
  * A site page built on components.html.
- * - `current`: the SITE_PAGES id, which sets the title, header, and pager.
+ * - `current`: the SITE_PAGES id, which sets the title, the header's current link, the breadcrumb, and the pager.
  * - `rail`: { label, noun, groups } for the rail, where noun is what Find looks for ("a token");
  *   omitted, the catalogue's own rail stays.
  * - `main`: the page's <main> content, without the pager; omitted, the catalogue's own stays.
@@ -118,7 +123,7 @@ export const sitePage = ({ template, current, title, rail, main, css = '', js = 
   html = swap(html, '<title>Component catalogue</title>', `<title>${esc(title)}</title>`)
   // The site serves the package's fonts beside the pages; the package pages use the reader's fonts.
   html = swap(html, '<link rel="stylesheet" href="tokens.css">', '<link rel="stylesheet" href="fonts/fonts.css">\n<link rel="stylesheet" href="tokens.css">')
-  html = swap(html, `${headStart}${siteName}`, `${headStart}${current === 'overview' ? siteName : crumbs(label)}`)
+  html = swap(html, `${headStart}${siteName}`, `${headStart}${siteLink}`)
   html = swap(html, templateStrip(template), strip(current))
   html = swap(html, templatePager(template), pager(current))
   if (rail) {
@@ -135,6 +140,7 @@ export const sitePage = ({ template, current, title, rail, main, css = '', js = 
     // The catalogue's live dialog and drawer specimens belong to its own <main>.
     html = swap(html, between(html, '<dialog class="dialog" id="live-dialog"', '</dialog>\n<dialog class="drawer" id="nav-drawer"'), '<dialog class="drawer" id="nav-drawer"')
   }
+  if (current !== 'overview') html = swap(html, h1Start, `${crumbs(label)}\n    ${h1Start}`)
   if (css) html = swap(html, '</style>\n', `</style>\n<style>\n${css.trim()}\n</style>\n`)
   if (js) html = swap(html, '</script>\n', `</script>\n<script>\n(() => {\n${js.trim()}\n})();\n</script>\n`)
   return html

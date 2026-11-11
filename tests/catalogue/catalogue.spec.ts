@@ -229,6 +229,28 @@ test.describe('desktop', () => {
   })
 })
 
+// At 801px the catalogue's five header links overflow the strip, which fades the edges it clips. A link
+// reached with Tab scrolls fully into view, and clear of any fade still showing.
+test('a header link reached with Tab scrolls clear of the strip’s faded edges', async ({ page }) => {
+  await page.setViewportSize({ width: 801, height: 900 })
+  await page.goto(url)
+  const strip = page.locator('.page-head .strip')
+  const links = strip.locator('a')
+  await links.first().focus()
+  for (let i = 1; i < await links.count(); i++) {
+    await page.keyboard.press('Tab')
+    await expect(links.nth(i)).toBeFocused()
+    const label = await links.nth(i).textContent()
+    await expect.poll(() => links.nth(i).evaluate((link) => {
+      const list = link.parentElement!
+      const clip = list.dataset.clip ?? ''
+      const box = list.getBoundingClientRect()
+      const row = link.getBoundingClientRect()
+      return row.left >= box.left + (clip.includes('start') ? 24 : 0) - 0.5 && row.right <= box.right - (clip.includes('end') ? 24 : 0) + 0.5
+    }), `${label} sits clear of the fades`).toBe(true)
+  }
+})
+
 test.describe('reduced motion', () => {
   test.use({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' })
 
@@ -434,7 +456,7 @@ const below = (measured: { name: string; ratio: number; unmeasured?: string }[],
 const shapeRoles: Record<string, string[]> = {
   '--radius-control': ['.btn:not(.rail-summary, .menu-glyph)', '.quiet-action:not(.projects > summary)', '.segmented', '.segmented button', '.segmented button::before'],
   '--radius-pill': ['.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.progress', '.score .pips i', '.badge', '.navlist a[aria-current="location"]::before'],
-  '--radius-inline': ['.check input:not([type="radio"])', '.tab', '.navlist a:not(.projects .navlist a)', '.group-toggle', '.crumbs a', '.key', '.rows [role="option"]'],
+  '--radius-inline': ['.check input:not([type="radio"])', '.tab', '.navlist a:not(.projects .navlist a)', '.group-toggle', '.crumbs a', '.site-name', '.key', '.rows [role="option"]'],
   // One-line controls that are not actions take the field corner: the select, the project-menu trigger,
   // the labelled contents trigger at rest and pressed, its no-JavaScript summary, and the skip link.
   '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
