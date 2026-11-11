@@ -524,35 +524,49 @@ const systemColours = `Canvas CanvasText LinkText VisitedText ActiveText ButtonF
   Highlight HighlightText SelectedItem SelectedItemText Mark MarkText GrayText AccentColor AccentColorText`.split(/\s+/)
 const word = (names) => new RegExp(`(?<![\\w-])(?:${names.join('|')})(?![\\w-])`, 'i')
 const rawColourPatterns = [/#[\da-f]{3,8}(?![\w-])/i, /(?<![\w-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i, word(namedColours)]
-// A rule is in forced colors when one of its @media queries needs forced-colors: active in every comma
-// branch: the feature is a top-level and conjunct, with no top-level or or not. Groups nested inside
-// other conjuncts may use or and not.
+// A rule is in forced colors when one of its @media queries needs forced-colors: active. mandatory()
+// reads the media-condition grammar: every comma branch must need the feature; in an and chain one
+// operand must; in an or chain every operand must; not never does; a parenthesised group is read inside;
+// a single feature is matched by the feature's pattern. Empty or unbalanced input needs nothing.
 const forcedColorsActive = /^\(\s*forced-colors\s*:\s*active\s*\)$/
-const topLevelParts = (branch) => {
+// Splits a condition on whitespace outside parentheses; null when the parentheses do not balance.
+const topLevelParts = (condition) => {
   const parts = []
   let depth = 0
   let part = ''
-  for (const char of branch.trim()) {
+  for (const char of condition.trim()) {
     if (char === '(') depth += 1
     if (char === ')') depth -= 1
+    if (depth < 0) return null
     if (depth === 0 && /\s/.test(char)) {
       if (part) parts.push(part)
       part = ''
     } else part += char
   }
+  if (depth !== 0) return null
   return part ? [...parts, part] : parts
 }
-// A branch that is one parenthesised group, such as ((hover: hover) and (pointer: fine)), is read inside it.
-const ungroup = (branch) => {
-  const [only, ...rest] = topLevelParts(branch)
-  const inner = only?.slice(1, -1).trim() ?? ''
-  return rest.length === 0 && only.startsWith('(') && only.endsWith(')') && inner.startsWith('(') ? ungroup(inner) : branch
+const mandatory = (condition, feature) => {
+  const branches = selectors(condition)
+  if (branches.length > 1) return branches.every((branch) => mandatory(branch, feature))
+  let parts = topLevelParts(condition)
+  if (!parts?.length) return false
+  if (/^only$/i.test(parts[0])) parts = parts.slice(1)
+  if (/^not$/i.test(parts[0])) return false
+  if (parts.length === 1) {
+    const [only] = parts
+    if (feature.test(only)) return true
+    const inner = /^\(.*\)$/.test(only) ? only.slice(1, -1).trim() : ''
+    return /^(?:\(|not\s)/i.test(inner) && mandatory(inner, feature)
+  }
+  const operands = parts.filter((_, i) => i % 2 === 0)
+  const operators = new Set(parts.filter((_, i) => i % 2 === 1).map((word) => word.toLowerCase()))
+  if (parts.length % 2 === 0 || operators.size !== 1) return false
+  if (operators.has('and')) return operands.some((operand) => mandatory(operand, feature))
+  if (operators.has('or')) return operands.every((operand) => mandatory(operand, feature))
+  return false
 }
-const requiredBranch = (feature) => (branch) => {
-  const parts = topLevelParts(ungroup(branch))
-  return !parts.some((part) => /^(?:or|not)$/i.test(part)) && parts.some((part) => feature.test(part))
-}
-const requiredIn = (feature, context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && selectors(rule.slice('@media'.length)).every(requiredBranch(feature)))
+const requiredIn = (feature, context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && mandatory(rule.slice('@media'.length), feature))
 const inForcedColors = (context) => requiredIn(forcedColorsActive, context)
 const isRawColour = (value, forced = false) => rawColourPatterns.some((pattern) => pattern.test(value)) || (!forced && word(systemColours).test(value))
 // SVG colour attributes in markup, outside scripts and style blocks; currentColor, none, and url() refs pass.
@@ -653,13 +667,16 @@ test('the sticky-hover guard catches a painting hover rule outside @media (hover
     @media (hover: hover) { .ok:hover { background: red } } @media (hover:hover) { .tight:hover { background: red } }
     @media (hover: hover) and ((max-width: 800px) or (pointer: fine)) { .nested:hover { background: red } }
     @media ((hover: hover) and (pointer: fine)) { .grouped:hover { background: red } }
+    @media ((hover: hover) and (pointer: fine)) and (min-width: 801px) { .wide:hover { background: red } }
+    @media (hover: hover), { .trailing:hover { background: red } } @media (hover: hover) and ) { .unbalanced:hover { background: red } }
     .sink:hover:not(:disabled) { --depth: var(--shadow-sink) } @media (hover: hover) { .sunk:hover { --depth: none } }
     @media (hover: hover), (max-width: 640px) { .either:hover { background: red } }
     @media not (hover: hover) { .negated:hover { background: red } }
     @media (forced-colors: active) { .fc:hover { border-color: red } }</style>`
   assert.deepEqual(stickyHover('planted.html', planted), [
     'planted.html .chip:hover', 'planted.html .row:is(:hover, .is-hover)', 'planted.html .edge:hover', 'planted.html .side:hover',
-    'planted.html .ring:hover', 'planted.html .sink:hover:not(:disabled)', 'planted.html .either:hover', 'planted.html .negated:hover',
+    'planted.html .ring:hover', 'planted.html .trailing:hover', 'planted.html .unbalanced:hover',
+    'planted.html .sink:hover:not(:disabled)', 'planted.html .either:hover', 'planted.html .negated:hover',
     'planted.html .fc:hover',
   ])
 })
