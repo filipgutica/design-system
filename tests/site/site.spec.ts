@@ -231,8 +231,24 @@ test('Copy writes var(--name) and says so', async ({ page }) => {
   await row.hover()
   await row.getByRole('button', { name: 'Copy var(--color-bg)' }).click()
   expect(await page.evaluate(() => (window as unknown as { copied: string }).copied)).toBe('var(--color-bg)')
-  await expect(row.locator('.copy-result')).toHaveText('Copied')
+  // The icon turns into a tick, with no visible text, and the live region says what was copied.
+  await expect(row.locator('.copy use')).toHaveAttribute('href', '#i-tick')
+  await expect(row.locator('.copy-result')).toBeHidden()
   await expect(page.locator('#copy-status')).toHaveText('Copied var(--color-bg).')
+  await expect(row.locator('.copy use')).toHaveAttribute('href', '#i-copy', { timeout: 3000 })
+})
+
+test('a failed Copy keeps the copy icon and shows the failure', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => { throw new Error('denied') } } })
+  })
+  await page.goto('foundations.html')
+  const row = page.locator('.tokens tbody tr', { has: page.locator('code', { hasText: /^--color-bg$/ }) })
+  await row.hover()
+  await row.getByRole('button', { name: 'Copy var(--color-bg)' }).click()
+  await expect(row.locator('.copy-result')).toHaveText('Copy failed')
+  await expect(row.locator('.copy use')).toHaveAttribute('href', '#i-copy')
+  await expect(page.locator('#copy-status')).toHaveText('Copy failed. Select the name instead.')
 })
 
 test.describe('Copy on a touch screen', () => {
@@ -247,7 +263,7 @@ test.describe('Copy on a touch screen', () => {
     const row = page.locator('.tokens tbody tr', { has: page.locator('.name', { hasText: /^--color-muted$/ }) })
     const copy = row.getByRole('button', { name: 'Copy var(--color-muted)' })
     await copy.tap()
-    await expect(row.locator('.copy-result')).toHaveText('Copied')
+    await expect(copy.locator('use')).toHaveAttribute('href', '#i-tick')
     // A touch screen keeps :hover on the tapped button, so a hover fill would stay.
     await expect(copy).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     // The box that draws the pressed tint and the focus ring ends above the former name.

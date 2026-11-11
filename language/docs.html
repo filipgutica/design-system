@@ -44,9 +44,9 @@ p { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-
 .command pre { min-width: 0; flex: 1; margin: 0; overflow-x: auto; font-size: var(--text-sm); }
 /* Copy is a quiet action: components.html#quiet-action, unchanged. The page adds its size and colour only. */
 :where(.quiet-action) { display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
-.quiet-action.is-hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 12%, transparent); }
-@media (hover: hover) { .quiet-action:hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 12%, transparent); } }
-.quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 18%, transparent); }
+.quiet-action.is-hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
+@media (hover: hover) { .quiet-action:hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); } }
+.quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 12%, transparent); }
 .quiet-action:disabled { opacity: 0.58; cursor: not-allowed; }
 .command button { flex: none; min-width: var(--control-lg); min-height: var(--control-lg); color: var(--color-terminal-caption-text); }
 .meta, #copy-status { color: var(--color-muted); font-size: var(--text-sm); }
