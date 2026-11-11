@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
+import { siteFiles } from '../scripts/build-site.mjs'
 
 const dir = new URL('../language/', import.meta.url)
 const read = (file) => readFileSync(new URL(file, dir), 'utf8')
@@ -541,11 +542,12 @@ const topLevelParts = (branch) => {
   }
   return part ? [...parts, part] : parts
 }
-const forcedBranch = (branch) => {
+const requiredBranch = (feature) => (branch) => {
   const parts = topLevelParts(branch)
-  return !parts.some((part) => /^(?:or|not)$/i.test(part)) && parts.some((part) => forcedColorsActive.test(part))
+  return !parts.some((part) => /^(?:or|not)$/i.test(part)) && parts.some((part) => feature.test(part))
 }
-const inForcedColors = (context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && selectors(rule.slice('@media'.length)).every(forcedBranch))
+const requiredIn = (feature, context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && selectors(rule.slice('@media'.length)).every(requiredBranch(feature)))
+const inForcedColors = (context) => requiredIn(forcedColorsActive, context)
 const isRawColour = (value, forced = false) => rawColourPatterns.some((pattern) => pattern.test(value)) || (!forced && word(systemColours).test(value))
 // SVG colour attributes in markup, outside scripts and style blocks; currentColor, none, and url() refs pass.
 const svgColourAttributes = (file, html) => [...html.replace(/<(script|style)\b[\s\S]*?<\/\1>|<!--[\s\S]*?-->/g, '')
@@ -623,27 +625,48 @@ test('no hover rule on any page reaches a disabled control', () => {
 })
 
 // A touch screen keeps :hover on the last element tapped, so a hover fill would stay behind after a
-// tap. Every :hover rule that paints (background, box-shadow, border colour, or text colour) sits in
-// @media (hover: hover). An exception names its page and selector, with the reason it may stick.
+// tap. Every :hover rule that paints (a background, shadow, border, outline, or text colour) sits in an
+// @media query that needs (hover: hover) in every comma branch, the same way forced colors is read above.
+// The scan covers the language pages and the generated site pages. An exception names its page and
+// selector, with the reason it may stick.
 const hoverExceptions = new Map([
   // ['page.html selector', 'reason'],
 ])
-const paints = /(?:^|;\s*)(?:background(?:-color|-image)?|box-shadow|border(?:-[a-z]+)*-color|color):/
+const paints = /(?:^|;\s*)(?:background(?:-color|-image)?|box-shadow|color|outline(?:-color)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-color)?)\s*:/
+const hoverCapable = /^\(\s*hover\s*:\s*hover\s*\)$/
 const stickyHover = (file, html) => perSelector(cssRules(html))
-  .filter(({ context, selector, body }) => /:hover\b/.test(selector) && paints.test(body) && !/\(hover: hover\)/.test(context))
+  .filter(({ context, selector, body }) => /:hover\b/.test(selector) && paints.test(body) && !requiredIn(hoverCapable, context))
   .map(({ selector }) => `${file} ${selector}`)
   .filter((rule) => !hoverExceptions.has(rule))
 
 test('the sticky-hover guard catches a painting hover rule outside @media (hover: hover)', () => {
-  const planted = `<style>.chip:hover { background: red } .link:hover { text-decoration: underline }
+  const planted = `<style>.chip:hover { background: red } .link:hover { text-decoration: underline; border-radius: 0 }
     .row:is(:hover, .is-hover) { color: red } .btn.is-hover { background: red }
-    @media (hover: hover) { .ok:hover { background: red } } @media (forced-colors: active) { .fc:hover { border-color: red } }</style>`
-  assert.deepEqual(stickyHover('planted.html', planted), ['planted.html .chip:hover', 'planted.html .row:is(:hover, .is-hover)', 'planted.html .fc:hover'])
+    .edge:hover { border: 1px solid red } .side:hover { border-top: 1px solid red } .ring:hover { outline: 2px solid red }
+    @media (hover: hover) { .ok:hover { background: red } } @media (hover:hover) { .tight:hover { background: red } }
+    @media (hover: hover) and ((max-width: 800px) or (pointer: fine)) { .nested:hover { background: red } }
+    @media (hover: hover), (max-width: 640px) { .either:hover { background: red } }
+    @media not (hover: hover) { .negated:hover { background: red } }
+    @media (forced-colors: active) { .fc:hover { border-color: red } }</style>`
+  assert.deepEqual(stickyHover('planted.html', planted), [
+    'planted.html .chip:hover', 'planted.html .row:is(:hover, .is-hover)', 'planted.html .edge:hover', 'planted.html .side:hover',
+    'planted.html .ring:hover', 'planted.html .either:hover', 'planted.html .negated:hover', 'planted.html .fc:hover',
+  ])
+})
+
+// The generated site pages: the language pages plus the CSS that scripts/site adds to them.
+const sitePages = () => siteFiles({ version: '9.9.9' }).filter(([file, text]) => file.endsWith('.html') && typeof text === 'string')
+
+test('the sticky-hover guard reads the CSS that the site scripts add to a generated page', () => {
+  const [file, html] = sitePages().find(([name]) => name === 'foundations.html')
+  const planted = html.replace('</style>', '.token .copy:hover { background: red }\n</style>')
+  assert.deepEqual(stickyHover(file, planted), ['foundations.html .token .copy:hover'])
 })
 
 test('every painting hover rule on every page waits for a pointer that can hover', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
   assert.deepEqual(pages.flatMap((page) => stickyHover(page, read(page))), [])
+  assert.deepEqual(sitePages().flatMap(([file, html]) => stickyHover(`site/${file}`, html)), [])
 })
 
 // The selected fill must keep accent text readable. This reads the default hue pair, the surfaces, and
