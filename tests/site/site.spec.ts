@@ -209,8 +209,10 @@ test.describe('Foundations table', () => {
 
 // Header option A: the site name, then the pages, at the same x on every page. Each link is current on
 // one page, so the same width on every page means becoming current changes no width.
-test('the header links sit at the same x on every page, and the current link keeps its width', async ({ page }) => {
+// Forced colors draws the current link's border, which must not widen it either.
+for (const forcedColors of ['none', 'active'] as const) test(`the header links sit at the same x on every page, and the current link keeps its width, with forced colors ${forcedColors}`, async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 })
+  await page.emulateMedia({ forcedColors })
   const boxes: { x: number; width: number }[][] = []
   for (const { path } of PAGES) {
     await page.goto(path)
@@ -259,6 +261,25 @@ test('the breadcrumb sits above the h1 on every page but Overview, with no separ
     await expect(current).toHaveText(name)
     expect(await current.evaluate((el) => el.closest('a')), name).toBeNull()
   }
+})
+
+// The trail's line, not its links' touch boxes, sets where it sits: at 1280px its text centres on the Find
+// field beside it, as in the approved mock. On phones a two-crumb trail shows in full.
+test('the breadcrumb lines up with Find, and shows both crumbs on phones', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('foundations.html')
+  const middle = (box: { y: number; height: number }) => box.y + box.height / 2
+  const text = await page.locator('main .crumbs a').evaluate((a) => {
+    const range = document.createRange()
+    range.selectNodeContents(a)
+    const { y, height } = range.getBoundingClientRect()
+    return { y, height }
+  })
+  const find = (await page.locator('#find').boundingBox())!
+  expect(Math.abs(middle(text) - middle(find)), `text centre ${middle(text)}, Find centre ${middle(find)}`).toBeLessThanOrEqual(1)
+  await page.setViewportSize({ width: 390, height: 844 })
+  for (const item of await page.locator('main .crumbs li').all()) await expect(item).toBeVisible()
+  await expect(page.locator('main .crumbs a')).toHaveText('Design system')
 })
 
 test('on phones, the sticky bar offers Clear on one line while a filter is on', async ({ page }) => {

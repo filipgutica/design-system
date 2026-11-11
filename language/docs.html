@@ -26,7 +26,7 @@
 :is(.rail, .rail-specimen) a[aria-current="location"]::before { content: none; }
 /* Fills and shadows drop. The current page and the rail's current section take a system border; a
    location outside a rail keeps its pip, redrawn in the system highlight. */
-@media (forced-colors: active) { .navlist a[aria-current="page"] { border-inline-start: 2px solid Highlight; } .navlist a[aria-current="location"]::before { forced-color-adjust: none; background: Highlight; } :is(.rail, .rail-specimen) a[aria-current="location"] { border-inline-start: 2px solid Highlight; } }
+@media (forced-colors: active) { .navlist a[aria-current="page"] { border-inline-start: 2px solid Highlight; padding-inline-start: calc(var(--space-3) - 2px); } .navlist a[aria-current="location"]::before { forced-color-adjust: none; background: Highlight; } :is(.rail, .rail-specimen) a[aria-current="location"] { border-inline-start: 2px solid Highlight; padding-inline-start: calc(var(--space-3) - 2px); } }
 main { min-width: 0; display: grid; gap: var(--space-12); padding-block: var(--space-8) var(--space-16); }
 section { display: grid; gap: var(--space-4); min-width: 0; }
 h1, h2 { font-family: var(--font-mono); }

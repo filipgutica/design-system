@@ -372,15 +372,19 @@
   /* Inset: the rail list scrolls. */
   .group-toggle:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   /* Horizontal strip: the same rows in one line that scrolls sideways. The padding keeps the current row's shadow whole.
-     A clipped edge fades over 24px, as tabs do; the script names the clipped ends in data-clip. */
-  .navlist.strip { display: flex; width: auto; max-width: 100%; overflow-x: auto; padding: 0.125rem; }
+     A clipped edge fades over 24px, as tabs do; the script names the clipped ends in data-clip, and scrolls a
+     focused row clear of the fades (scroll-padding). The fade shows the overflow, so no scrollbar shows. */
+  .navlist.strip { display: flex; width: auto; max-width: 100%; overflow-x: auto; scroll-padding-inline: 24px; scrollbar-width: none; padding: 0.125rem; }
   .navlist.strip a { flex: none; white-space: nowrap; }
   /* Each row is as wide as its label at the current row's weight, so becoming current moves nothing. A
      hidden copy of the label (data-label, with empty alternative text) takes the row's width at that weight
      and overlaps the label's own line by -1lh, so the row keeps one line's height and its text-box trim.
-     Without text-box the row is a flex column, so the copy stacks on the label rather than beside it. */
-  .navlist.strip a[data-label] { flex-direction: column; align-items: stretch; justify-content: center; }
-  .navlist.strip a[data-label]::after { content: attr(data-label) / ""; display: block; margin-top: -1lh; font-weight: var(--weight-medium); visibility: hidden; }
+     Without text-box the row is a flex column, so the copy stacks on the label rather than beside it.
+     Without lh there is no copy, so the label stays in place and only the width can change. */
+  @supports (margin-top: -1lh) {
+    .navlist.strip a[data-label] { flex-direction: column; align-items: stretch; justify-content: center; }
+    .navlist.strip a[data-label]::after { content: attr(data-label) / ""; display: block; margin-top: -1lh; font-weight: var(--weight-medium); visibility: hidden; }
+  }
   .navlist.strip[data-clip="start"] { mask-image: linear-gradient(to right, transparent, #000 24px); }
   .navlist.strip[data-clip="end"] { mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent); }
   .navlist.strip[data-clip="start end"] { mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent); }
@@ -428,7 +432,10 @@
     .crumbs a:not(:has(> *)) { display: block; align-content: center; padding-block: var(--space-2); text-box: trim-both cap alphabetic; }
     .crumbs [aria-current="page"] { text-box: trim-both cap alphabetic; }
   }
-  /* Phones show only the parent, as a back link; .is-back pins that for the specimen. */
+  /* A page-level trail sits on its text, not on its links' touch boxes: it moves up by half the room the
+     box adds around the line, and takes the same room back below, so the h1 does not move. */
+  .intro > .crumbs > ol { margin-block: calc((1lh - var(--control-sm)) / 2) calc((var(--control-sm) - 1lh) / 2); }
+  /* Phones show only the parent of a trail of three or more, as a back link; .is-back pins that for the specimen. */
   .crumbs.is-back li:not(:nth-last-child(2)) { display: none; }
   .crumbs.is-back li::before { content: none; }
   .crumbs.is-back li:nth-last-child(2) a { position: relative; padding-inline-start: 0.875rem; }
@@ -646,10 +653,11 @@
     :is(.switch[aria-checked="true"] .switch-track, .toggle[aria-pressed="true"] .toggle-track)::after { background: HighlightText; }
     /* Fills and shadows drop. The current page takes a system border; the in-page location keeps
        its pip, redrawn in the system highlight, so the two still differ. */
-    .navlist a[aria-current="page"] { border-inline-start: 2px solid Highlight; }
+    /* The padding absorbs each border, so a row keeps its width and its label does not move. */
+    .navlist a[aria-current="page"] { border-inline-start: 2px solid Highlight; padding-inline-start: calc(var(--space-3) - 2px); }
     .navlist a[aria-current="location"]::before { forced-color-adjust: none; background: Highlight; }
     /* A rail's current section has no pip, so it takes the current page's system border. */
-    :is(.rail, .rail-specimen) a[aria-current="location"] { border-inline-start: 2px solid Highlight; }
+    :is(.rail, .rail-specimen) a[aria-current="location"] { border-inline-start: 2px solid Highlight; padding-inline-start: calc(var(--space-3) - 2px); }
     .key { border-color: CanvasText; }
     /* The tone dot is a fill, so it opts out of adjustment and takes the label's system colour. */
     .badge:is(.success, .warning, .danger, .info)::before { forced-color-adjust: none; background: CanvasText; }
@@ -670,10 +678,12 @@
   html { scroll-padding-top: var(--space-4); }
   .frame { width: min(calc(var(--page-max) + var(--sidebar)), calc(100% - var(--space-12))); margin-inline: auto; }
   /* Header: the site name, the design system's pages as a navigation strip, and the appearance control.
-     The site name is the same on every page, in the project-menu trigger's type and ~/ mark. */
+     The site name is the same on every page, in the project-menu trigger's type, with a ~/ mark one
+     character wide before it. As a link it is a place, so it takes the 6px corner. */
   .page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3) var(--space-6); min-height: var(--space-16); border-bottom: 1px solid var(--color-border-subtle); }
-  .site-name { margin: 0 auto 0 0; color: var(--color-text); font: var(--weight-semibold) var(--text-sm) / 1 var(--font-mono); text-decoration: none; }
-  .site-name::before { content: "~/" / ""; margin-inline-end: var(--space-1); color: var(--color-accent); }
+  .site-name { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-sm); margin: 0 auto 0 0; border-radius: var(--radius-inline); color: var(--color-text); font: var(--weight-semibold) var(--text-sm) / 1 var(--font-mono); text-decoration: none; }
+  .site-name::before { content: "~/" / ""; color: var(--color-accent); }
+  @media (hover: hover) { a.site-name:hover { text-decoration: underline; text-underline-offset: 0.2em; } }
   /* Desktop: the strip starts right after the site name, so its links sit at the same x on every page. */
   @media (min-width: 801px) {
     .page-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: var(--space-8); }
@@ -768,7 +778,7 @@
     .page-head { padding-block: var(--space-3); }
     .page-head:has(> .section-bar) { position: sticky; top: 0; z-index: 5; flex-wrap: nowrap; background: var(--color-bg); }
     /* The site name is a touch target on one line; the bar's Clear gives way to it. */
-    .page-head > .site-name { display: inline-flex; align-items: center; min-height: var(--control-lg); white-space: nowrap; }
+    .page-head > .site-name { min-height: var(--control-lg); white-space: nowrap; }
     .page-head:has(> .section-bar) > .site-name { flex: none; }
     /* The buttons sit inside the scroll inset, so they cancel it; otherwise focusing one scrolls the page. */
     .page-head > .section-bar > * { scroll-margin-top: calc(-1 * (var(--head-inset) + var(--space-4))); }
@@ -790,16 +800,17 @@
     .check:not([data-size]), .switch:not([data-size]), .toggle:not([data-size]) { min-height: var(--control-lg); }
     .copy-link { width: var(--control-lg); height: var(--control-lg); }
     .crumbs a, .group-toggle { min-height: var(--control-lg); }
+    .intro > .crumbs > ol { margin-block: calc((1lh - var(--control-lg)) / 2) calc((var(--control-lg) - 1lh) / 2); }
     .folio-display { font-size: var(--text-display-sm); }
   }
   @media (max-width: 640px) {
     /* Phones: a dialog becomes a bottom sheet with rounded top corners. */
     dialog.dialog { width: 100%; max-width: none; margin: auto 0 0; border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
-    /* Breadcrumbs show only the parent, as a back link. */
-    .crumbs li:not(:nth-last-child(2)) { display: none; }
-    .crumbs li::before { content: none; }
-    .crumbs li:nth-last-child(2) a { position: relative; padding-inline-start: 0.875rem; }
-    .crumbs li:nth-last-child(2) a::before { content: ""; position: absolute; inset-inline-start: 0.25rem; top: 50%; transform: translateY(-50%) rotate(-135deg); }
+    /* A trail of three or more crumbs shows only the parent, as a back link; a two-crumb trail fits in full. */
+    .crumbs ol:has(> li:nth-child(3)) > li:not(:nth-last-child(2)) { display: none; }
+    .crumbs ol:has(> li:nth-child(3)) > li::before { content: none; }
+    .crumbs ol:has(> li:nth-child(3)) > li:nth-last-child(2) a { position: relative; padding-inline-start: 0.875rem; }
+    .crumbs ol:has(> li:nth-child(3)) > li:nth-last-child(2) a::before { content: ""; position: absolute; inset-inline-start: 0.25rem; top: 50%; transform: translateY(-50%) rotate(-135deg); }
     .pager { grid-template-columns: minmax(0, 1fr); }
     .pager a[rel="next"] { grid-column: 1; }
     .definitions { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-1); }
@@ -1338,7 +1349,7 @@
     <div class="row"><h4>Trail</h4><div class="states">
       <div class="state"><nav class="crumbs" aria-label="Breadcrumb, specimen"><ol><li><a href="#breadcrumbs">Design system</a></li><li><a href="#breadcrumbs">Components</a></li><li><span aria-current="page">Navigation</span></li></ol></nav><span class="caption">Rest, live; the current page is text</span></div>
       <div class="state" inert><nav class="crumbs" aria-label="Breadcrumb, pinned"><ol><li><a href="#breadcrumbs" class="is-hover">Design system</a></li><li><a href="#breadcrumbs" class="is-focus">Components</a></li><li><span aria-current="page">Navigation</span></li></ol></nav><span class="caption">Hover on Design system, focus visible on Components</span></div>
-      <div class="state" inert><nav class="crumbs is-back" aria-label="Breadcrumb, phone"><ol><li><a href="#breadcrumbs">Design system</a></li><li><a href="#breadcrumbs">Components</a></li><li><span aria-current="page">Navigation</span></li></ol></nav><span class="caption">Phone: the parent only, as a back link</span></div>
+      <div class="state" inert><nav class="crumbs is-back" aria-label="Breadcrumb, phone"><ol><li><a href="#breadcrumbs">Design system</a></li><li><a href="#breadcrumbs">Components</a></li><li><span aria-current="page">Navigation</span></li></ol></nav><span class="caption">Phone, three or more crumbs: the parent only, as a back link</span></div>
     </div></div>
   </section>
 
@@ -1596,14 +1607,17 @@
     if (value) value.value = `${r.value}%`;
   }));
 
-  // A list that scrolls sideways names its clipped ends in data-clip, so CSS fades only those edges.
+  // A list that scrolls sideways names its clipped ends in data-clip, so CSS fades only those edges. An
+  // edge with 12px or less hidden is not faded, because the fade would cover more than it hides. A focused
+  // item scrolls clear of the fades, which the list's scroll-padding reserves.
   const trackClip = (list) => {
     const clip = () => {
       const hidden = list.scrollWidth - list.clientWidth;
-      const ends = [list.scrollLeft > 1 && 'start', list.scrollLeft < hidden - 1 && 'end'].filter(Boolean).join(' ');
+      const ends = [list.scrollLeft > 12 && 'start', hidden - list.scrollLeft > 12 && 'end'].filter(Boolean).join(' ');
       if (ends) list.dataset.clip = ends; else delete list.dataset.clip;
     };
     list.addEventListener('scroll', clip, { passive: true });
+    list.addEventListener('focusin', (e) => e.target.scrollIntoView({ block: 'nearest', inline: 'nearest' }));
     new ResizeObserver(clip).observe(list);
   };
 

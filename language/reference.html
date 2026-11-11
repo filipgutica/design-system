@@ -35,7 +35,7 @@
   /* Fills and shadows drop. The current page takes a system border; the in-page location keeps
      its pip, redrawn in the system highlight, so the two still differ. */
   @media (forced-colors: active) {
-    .navlist a[aria-current="page"], .nav-current-sample { border-inline-start: 2px solid Highlight; }
+    .navlist a[aria-current="page"], .nav-current-sample { border-inline-start: 2px solid Highlight; padding-inline-start: calc(var(--space-3) - 2px); }
     .navlist a[aria-current="location"]::before, .pip-sample::before { forced-color-adjust: none; background: Highlight; }
   }
   .sidebar .navlist a { gap: var(--space-2); }
