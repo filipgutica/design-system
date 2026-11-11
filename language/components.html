@@ -67,9 +67,9 @@
      never a text glyph such as ×: a font draws a glyph's ink off its box centre.
      :where keeps the base below each component's own size and layout. */
   :where(.quiet-action) { display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
-  .quiet-action.is-hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 12%, transparent); }
-  @media (hover: hover) { .quiet-action:hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 12%, transparent); } }
-  .quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 18%, transparent); }
+  .quiet-action.is-hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
+  @media (hover: hover) { .quiet-action:hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); } }
+  .quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 12%, transparent); }
   .quiet-action:disabled { opacity: 0.58; cursor: not-allowed; }
 
   /* Fields: input, textarea, select */
@@ -455,28 +455,33 @@
   .rows [role="option"][aria-selected="true"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); font-weight: var(--weight-medium); }
   @media (forced-colors: active) { .rows [role="option"][aria-selected="true"] { border-inline-start: 2px solid Highlight; } }
 
-  /* Code block: a source well */
-  .code { width: 100%; max-width: var(--measure); min-width: 0; overflow: hidden; border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-code); color: var(--color-code-text); box-shadow: var(--shadow-surface); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-  .code-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); min-height: 2.5rem; padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3); border-bottom: 1px solid var(--color-border-subtle); background: var(--color-surface-raised); font-size: var(--text-xs); }
+  /* Code block: a frame that holds the header, with the source in an inset panel */
+  .code { width: 100%; max-width: var(--measure); min-width: 0; overflow: hidden; padding: var(--space-1); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-panel); background: var(--color-surface-raised); color: var(--color-code-text); box-shadow: var(--shadow-surface); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  /* The header sits on the frame, so the frame drops its top padding under one. */
+  .code:has(> .code-head) { padding-top: 0; }
+  .code-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); min-height: 2.5rem; padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3); font-size: var(--text-xs); }
   .code-head b { font-weight: var(--weight-semibold); }
   .code-head .lang { color: var(--color-muted); }
   /* Copy is a quiet action; this sets its size and place. */
   .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-lg); min-height: var(--control-lg); margin-left: auto; padding: var(--space-1) 0.375rem; color: inherit; }
-  /* The code block has its own palette, so its Copy keeps the plate's text colour on hover. */
-  .code .copy.is-hover:where(:not(:disabled)) { color: inherit; }
-  @media (hover: hover) { .code .copy:hover:where(:not(:disabled)) { color: inherit; } }
+  /* Copy is muted at rest. The code block has its own palette, so on hover and while the tick shows it takes the block's text colour. */
+  .code .copy { color: var(--color-muted); }
+  .code .copy[data-copied] { color: var(--color-code-text); }
+  .code .copy.is-hover:where(:not(:disabled)) { color: var(--color-code-text); }
+  @media (hover: hover) { .code .copy:hover:where(:not(:disabled)) { color: var(--color-code-text); } }
   /* Inset: the code block clips its content. */
   .code pre:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   .code .copy.quiet-action:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
-  .code pre { margin: 0; padding: var(--space-4); overflow: auto; max-height: 32rem; font-size: var(--text-code); line-height: 1.65; tab-size: 2; }
+  /* The source is an inset panel. It sits --space-1 inside the frame, so its corners are concentric with the frame's. */
+  .code pre { margin: 0; padding: var(--space-4); overflow: auto; max-height: 32rem; border: 1px solid transparent; border-radius: calc(var(--radius-panel) - var(--space-1)); background: var(--color-code); font-size: var(--text-code); line-height: 1.65; tab-size: 2; }
   /* Each line is a baseline-aligned row, so a prompt or line number sits on the text's baseline. */
   .code .line { display: flex; align-items: baseline; min-height: 1.65em; }
   .code .line > span { white-space: pre; }
   .code .ln { min-width: 2.5em; padding-right: 1em; flex: none; text-align: right; color: var(--color-muted); user-select: none; }
   .code .k { color: var(--color-syntax-keyword); } .code .s { color: var(--color-syntax-string); } .code .n { color: var(--color-syntax-number); } .code .c { color: var(--color-syntax-comment); }
-  .code.compact { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
-  .code.compact pre { padding: var(--space-2) var(--space-3); }
-  .code.compact .copy { margin: var(--space-1); }
+  /* The panel fills the row beside Copy, so it sits --space-1 from the frame and from Copy on every side, and centres its line. */
+  .code.compact { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-1); }
+  .code.compact pre { align-content: center; padding: var(--space-2) var(--space-3); }
 
   /* Code block with a live example: a live stage over its source, in one frame. */
   .example { width: 100%; min-width: 0; margin: 0; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-panel); background: var(--color-bg); }
@@ -485,16 +490,17 @@
   .example-stage > * { min-width: 0; }
   /* The frame draws the edge, so the source is flat and full width, with one hairline above it.
      Copy comes first in DOM order and is placed in the source's top right corner. */
-  .example > .code { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; max-width: none; border-width: 1px 0 0; border-color: var(--color-border-subtle); border-radius: 0; box-shadow: none; }
-  .example > .code > pre { grid-row: 1; grid-column: 1; }
+  .example > .code { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; max-width: none; padding: 0; border-width: 1px 0 0; border-radius: 0; background: var(--color-code); box-shadow: none; }
+  .example > .code > pre { grid-row: 1; grid-column: 1; border: 0; border-radius: 0; }
   .example > .code > .copy { grid-row: 1; grid-column: 2; margin: var(--space-1); }
 
   /* ================= Identity: terminal folio ================= */
 
-  /* Command plate: dark in both themes and tinted with the project hue. */
-  /* The plate is dark in both themes, so its focus ring takes the dark-theme accent, which reaches 3:1 on it. */
-  .code.command { --color-code-text: var(--color-terminal-text); --color-focus: var(--color-project-dark); border-color: var(--color-command-border); background: var(--color-command-bg); color: var(--color-terminal-text); }
-  .code.command .code-head { border-color: var(--color-command-border); background: transparent; color: var(--color-terminal-caption-text); }
+  /* Command plate: dark in both themes and tinted with the project hue. Its source panel is the plate darkened, so it reads as a panel on it. */
+  /* The plate is dark in both themes, so its focus ring takes the dark-theme accent, which reaches 3:1 on it,
+     and muted text, such as Copy at rest, takes the caption colour. */
+  .code.command { --color-code: color-mix(in srgb, var(--color-command-bg) 55%, var(--color-terminal)); --color-code-text: var(--color-terminal-text); --color-muted: var(--color-terminal-caption-text); --color-focus: var(--color-project-dark); border-color: var(--color-command-border); background: var(--color-command-bg); color: var(--color-terminal-text); }
+  .code.command .code-head { color: var(--color-terminal-caption-text); }
   .code.command .code-head .lang { color: var(--color-terminal-caption-text); }
   /* The prompt is drawn by CSS, so copied and spoken text omit it. */
   .code.command .line::before { content: "$ " / ""; flex: none; white-space: pre; color: var(--color-project-dark); user-select: none; }
@@ -544,7 +550,7 @@
   /* The ~/ mark is decorative: the empty alternative text keeps it out of the name. */
   .projects > summary::before { content: "~/" / ""; color: var(--color-project); }
   /* The open menu keeps the hover tint. :where keeps it below the quiet action's press. */
-  :where(.projects[open]) > summary { background: color-mix(in srgb, currentColor 12%, transparent); }
+  :where(.projects[open]) > summary { background: color-mix(in srgb, currentColor 6%, transparent); }
   .projects .icon { transition: transform var(--duration-fast) var(--ease-out); }
   .projects[open] .icon { transform: rotate(180deg); }
   .projects .navlist { position: absolute; z-index: 3; top: 100%; left: 0; min-width: 224px; margin-top: var(--space-1); padding: var(--space-1); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); box-shadow: var(--shadow-dialog); }
@@ -798,6 +804,7 @@
   <symbol id="i-help" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M6.6 6.4a1.5 1.5 0 1 1 2 1.4c-.4.2-.6.5-.6.9M8 10.8v.2"/></symbol>
   <symbol id="i-alert" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.5M8 10.8v.2"/></symbol>
   <symbol id="i-check" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M5.8 8.2l1.5 1.5 2.9-3"/></symbol>
+  <symbol id="i-tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></symbol>
   <symbol id="i-expand" viewBox="0 0 16 16"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></symbol>
   <symbol id="i-list" viewBox="0 0 16 16"><path d="M5.5 4.5h8M5.5 8h8M5.5 11.5h8M2.5 4.5h.01M2.5 8h.01M2.5 11.5h.01"/></symbol>
   <symbol id="i-grid" viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1"/><rect x="9" y="9" width="4.5" height="4.5" rx="1"/></symbol>
@@ -1675,9 +1682,26 @@
     return [...lines].map((line) => [...line.childNodes].filter((n) => !(n instanceof Element && n.classList.contains('ln'))).map((n) => n.textContent).join('')).join('\n');
   };
   const status = document.getElementById('copy-status');
+  // A successful copy swaps the button's icon for a tick for 1.5s, and marks the button data-copied for the
+  // colour. A repeat click restarts the wait, and a failure puts the icon back at once. The label and
+  // accessible name do not change.
+  const ticks = new WeakMap();
+  const showCopied = (button, ok) => {
+    const use = button.querySelector('.icon use');
+    use.dataset.icon ??= use.getAttribute('href');
+    const restore = () => { use.setAttribute('href', use.dataset.icon); delete button.dataset.copied; };
+    clearTimeout(ticks.get(button));
+    if (!ok) { restore(); return; }
+    use.setAttribute('href', '#i-tick');
+    button.dataset.copied = '';
+    ticks.set(button, setTimeout(restore, 1500));
+  };
   document.querySelectorAll('[data-copy]').forEach((button) => button.addEventListener('click', async () => {
     const text = copyText(document.getElementById(button.dataset.copy));
-    try { await navigator.clipboard.writeText(text); status.textContent = 'Copied.'; } catch (e) { status.textContent = 'Copy failed. Select the text instead.'; }
+    let ok = true;
+    try { await navigator.clipboard.writeText(text); } catch (e) { ok = false; }
+    status.textContent = ok ? 'Copied.' : 'Copy failed. Select the text instead.';
+    showCopied(button, ok);
   }));
 
   // Live dialog and drawer: native modal dialogs return focus to the trigger on close.
@@ -1948,10 +1972,13 @@
   document.getElementById('section-menu').addEventListener('click', (e) => openDrawer({ byPointer: e.detail > 0 }));
   document.getElementById('section-find').addEventListener('click', () => openDrawer({ toFind: true }));
 
-  // Copy link: writes the component's URL and announces the result.
+  // Copy link: writes the component's URL, announces the result, and shows a tick as Copy does.
   document.querySelectorAll('[data-copy-link]').forEach((button) => button.addEventListener('click', async () => {
     const url = new URL(`#${button.dataset.copyLink}`, location.href).href;
-    try { await navigator.clipboard.writeText(url); status.textContent = 'Link copied.'; } catch (e) { status.textContent = 'Copy failed. Use the address bar instead.'; }
+    let ok = true;
+    try { await navigator.clipboard.writeText(url); } catch (e) { ok = false; }
+    status.textContent = ok ? 'Link copied.' : 'Copy failed. Use the address bar instead.';
+    showCopied(button, ok);
   }));
 })();
 </script>

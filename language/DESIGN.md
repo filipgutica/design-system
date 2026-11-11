@@ -117,13 +117,14 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | Role | Use for | Fill | Border | Radius | Shadow |
   | --- | --- | --- | --- | --- | --- |
   | Page | The canvas and example stages | `--color-bg` | None | None | None |
-  | Well | Source code, screenshots, figures, and inset previews other than example stages | `--color-surface` | Source code: transparent 1px; figures: `--color-border-subtle` | `--radius-panel` | Source code: `--shadow-surface`; figures: none |
+  | Well | Screenshots, figures, and inset previews other than example stages | `--color-surface` | `--color-border-subtle` | `--radius-panel` | None |
+  | Code block | Source code: a frame that holds the header, with the source in an inset panel | Frame: `--color-surface-raised`; panel: `--color-code` | Frame: `--color-border-subtle`; panel: transparent 1px | Frame: `--radius-panel`; panel: `calc(var(--radius-panel) - var(--space-1))` | Frame: `--shadow-surface`; panel: none |
   | Panel | Cards, forms, charts, and detail views | `--color-surface-raised` | Transparent 1px | `--radius-panel` | `--shadow-surface` |
   | Field | Inputs, selects, textareas, and search fields | `--color-field-bg`; disabled: `--color-well` | `--color-field-edge` | `--radius-field` | `--shadow-field`; disabled: none |
   | Track | Segmented and switch tracks, and selected radio cards | `--color-well` | Transparent 1px | Segmented tracks: `--radius-control`; switch tracks: `--radius-pill`; radio cards: `--radius-panel` | `--shadow-sink` |
   | Floating layer | Menus, popovers, pickers, and dialogs | `--color-surface-raised` | Transparent 1px; the shadow's ring draws the edge | `--radius-panel` | `--shadow-dialog` |
 
-- Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--color-field-edge`. `--color-border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--color-border-subtle` edge and no rest raise. Invalid fields show a `--color-error` edge, except in forced colors, where the system edge wins. Figures, example frames, and dividers use `--color-border-subtle`.
+- Borders stay 1px and transparent on buttons, quiet actions, tracks, panels, and radio cards, so forced colors can draw them. Fields keep `--color-field-edge`. `--color-border` keeps unchecked checkbox and radio edges visible. The toggle card is a named exception: a visible `--color-border-subtle` edge and no rest raise. Invalid fields show a `--color-error` edge, except in forced colors, where the system edge wins. Figures, example frames, code block frames, and dividers use `--color-border-subtle`.
 - Shape follows role. A pill acts, or sets a value in place; a rectangle is a place, or holds content. Pick a new component's radius from its role in this table, not from the component it looks like.
 
   | Role | Shape | Token | Members |
@@ -135,7 +136,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | Holds other things | 16px | `--radius-panel` | Wells, plates, panels, cards, radio cards, alerts, code blocks, example frames, and floating layers |
 
   - A pill never holds text that can wrap. A control whose label can wrap, such as a toggle card or a radio card, is a rectangle.
-  - Nested rectangles are concentric: a rectangle that sits closer to a rounded container's edge than the container's radius takes that radius minus the gap. Option rows in a select picker and the rows of a floating menu, such as the project menu, each `--space-1` inside a 16px panel, take `calc(var(--radius-panel) - var(--space-1))`, 12px. A shape with more room than that, such as a field in a dialog, keeps the radius of its role.
+  - Nested rectangles are concentric: a rectangle that sits closer to a rounded container's edge than the container's radius takes that radius minus the gap. Option rows in a select picker, the rows of a floating menu, such as the project menu, and a code block's source panel, each `--space-1` inside a 16px container, take `calc(var(--radius-panel) - var(--space-1))`, 12px. A shape with more room than that, such as a field in a dialog, keeps the radius of its role.
   - Round marks (radios, slider thumbs, badge dots, and the busy spinner) take `50%`, a fill inside a shape inherits its corners, and an edge that meets another shape takes `0`. A page writes no other literal radius.
 - Avoid nesting panels. Cards are for a few parallel self-contained options that a reader compares. Running prose belongs in open sections. Product screenshots need one frame, not a frame around a frame.
 - [Depth](#depth) gives each role its shadow. Stable hover states keep normal content quiet.
@@ -165,7 +166,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 - Callouts carry a real caveat, not decorative emphasis.
 - Lists and properties: align short labels, values, and metadata. Use definition lists for terms and short meanings; use tables for actual comparisons.
 - Figures: number them when the prose refers to any of them, and then number them all. Place a figure beside the paragraph that explains it, once the terms it uses have been introduced.
-- Source code sits in a theme-matched well with syntax colours; multiline samples may have a small descriptive header and Copy action. Put useful setup context above a command; omit repeated language labels.
+- Source code sits in a theme-matched panel with syntax colours, inset in the code block's frame; multiline samples may have a small descriptive header and Copy action. Put useful setup context above a command; omit repeated language labels.
 - Examples: show a live component on a stage above its code, in one frame, with Copy in the code's corner. The stage sits on the page background. See [code block with a live example](components.md#with-a-live-example).
 - A screenshot opens at full size when clicked; use a native accessible trigger and restore its focus on close.
 

@@ -372,6 +372,9 @@ const contrastPairs: Record<string, Pair> = {
   'every selected segmented label on its thumb': { selector: '.segmented button[aria-pressed="true"]:not(:disabled)', fillPseudo: '::before', min: 4.5 },
   'the command plate text': { selector: '.code.command .line', min: 4.5 },
   'the command plate prompt': { selector: '.code.command .line', textPseudo: '::before', min: 3 },
+  'every code block header label and Copy on the frame': { selector: '.code-head :is(b, .lang, .copy)', min: 4.5 },
+  'every code block Copy at rest, in muted text': { selector: '.code .copy:not(.is-hover, [data-copied])', min: 4.5 },
+  'every source line, line number, and syntax colour on its panel': { selector: '.code :is(.line, .ln, .k, .s, .n, .c)', min: 4.5 },
   'every focused field edge, on its fill and on the surface around it': { selector: ':is(.input, .select, .textarea, .search).is-focus', edge: true, min: 3 },
 }
 // Each specimen's text (or edge) colour over the background colours stacked under it. Chromium computes
@@ -436,8 +439,8 @@ const shapeRoles: Record<string, string[]> = {
   '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
   '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist'],
 }
-// Rows that sit --space-1 inside a panel are concentric with it.
-const concentricRows = ['.select option', '.picker li', '.projects .navlist a']
+// Rows that sit --space-1 inside a panel are concentric with it, as is a code block's source panel.
+const concentricRows = ['.select option', '.picker li', '.projects .navlist a', '.code:not(.example > .code) > pre']
 const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
   const corners = (style: CSSStyleDeclaration) => [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].join(' ')
   const probe = document.body.appendChild(document.createElement('i'))
@@ -572,6 +575,163 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(alerts).toHaveLength(5)
       for (const { text, icon } of alerts) expect(icon).toBe(text)
     })
+  })
+}
+
+// The code block is a frame that holds the header, with the source in a panel --space-1 inside it on the
+// other sides. A live example's source is flush with its frame and is left out.
+test('the code block source is a 12px panel 4px inside a 16px frame', async ({ page }) => {
+  await page.goto(url)
+  const blocks = await page.locator('.code:not(.example > .code)').evaluateAll((frames) => frames.map((frame) => {
+    const pre = frame.querySelector(':scope > pre')!
+    const head = frame.querySelector(':scope > .code-head')
+    const [outer, panel] = [frame.getBoundingClientRect(), pre.getBoundingClientRect()]
+    const border = parseFloat(getComputedStyle(frame).borderTopWidth)
+    return {
+      head: !!head,
+      frame: getComputedStyle(frame).borderRadius,
+      panel: getComputedStyle(pre).borderRadius,
+      top: head ? panel.top - head.getBoundingClientRect().bottom : panel.top - outer.top - border,
+      left: panel.left - outer.left - border,
+      bottom: outer.bottom - panel.bottom - border,
+      // In a compact block Copy sits beside the panel, --space-1 away, as the frame is on the other sides.
+      right: head ? outer.right - panel.right - border : frame.querySelector(':scope > .copy')!.getBoundingClientRect().left - panel.right,
+    }
+  }))
+  // Specimens with and without a header, on the source well and on the command plate.
+  expect(blocks.filter(({ head }) => head).length).toBeGreaterThanOrEqual(2)
+  expect(blocks.filter(({ head }) => !head).length).toBeGreaterThanOrEqual(3)
+  // Under a header the panel meets the header; without one it sits 4px below the frame's edge.
+  for (const block of blocks) expect(block).toEqual({ head: block.head, frame: '16px', panel: '12px', top: block.head ? 0 : 4, left: 4, bottom: 4, right: 4 })
+})
+
+// Quiet actions take a faint overlay of their own colour: 6% under a hovering pointer and 12% pressed.
+const alphaOf = (value: string) => {
+  if (value === 'transparent') return 0
+  const alpha = value.match(/^(?:rgba\(.*, |color\(srgb .* \/ )([\d.]+)\)$/)
+  return alpha ? Number(alpha[1]) : 1
+}
+const stubClipboard = (page: Page) => page.addInitScript(() => {
+  // A test sets window.failCopy to make the next copies fail.
+  Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => { if ((window as unknown as { failCopy?: boolean }).failCopy) throw new Error('denied') } } })
+})
+
+test.describe('quiet action fill', () => {
+  test.use({ viewport: { width: 1280, height: 900 } })
+
+  test('a hovering pointer adds a 6% fill, and a press 12%', async ({ page }) => {
+    await page.goto(url)
+    const copy = page.locator('#code-block .code-head .copy')
+    const alpha = () => copy.evaluate((button) => getComputedStyle(button).backgroundColor).then(alphaOf)
+    await copy.hover()
+    await expect.poll(alpha).toBeCloseTo(0.06, 3)
+    await page.mouse.down()
+    await expect.poll(alpha).toBeCloseTo(0.12, 3)
+    await page.mouse.up()
+  })
+})
+
+test.describe('quiet action fill on a touch screen', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } })
+
+  test('a tap leaves no fill behind', async ({ page }) => {
+    await stubClipboard(page)
+    await page.goto(url)
+    expect(await page.evaluate(() => matchMedia('(hover: hover)').matches)).toBe(false)
+    const copy = page.locator('#code-block .code-head .copy')
+    await copy.tap()
+    await expect(copy.locator('use')).toHaveAttribute('href', '#i-tick')
+    // A touch screen keeps :hover on the tapped button, so a hover fill would stay.
+    await expect(copy).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  })
+})
+
+// A successful copy swaps the icon for a tick for 1.5s and announces it. The label and name stay.
+test.describe('copy feedback', () => {
+  test.use({ viewport: { width: 1280, height: 900 } })
+
+  test.beforeEach(async ({ page }) => {
+    await page.clock.install()
+    await stubClipboard(page)
+    await page.goto(url)
+  })
+
+  test('Copy shows a tick for 1.5s, and a second click restarts the wait', async ({ page }) => {
+    const copy = page.locator('#code-block .code-head .copy')
+    const icon = copy.locator('use')
+    // Muted at rest; the block's text colour while the tick shows.
+    const colour = (selector: string) => page.locator(selector).first().evaluate((node) => getComputedStyle(node).color)
+    const [muted, codeText] = [await colour('#code-block .code-head .lang'), await colour('#code-block .code .line')]
+    expect(muted).not.toBe(codeText)
+    await expect(copy).toHaveCSS('color', muted)
+    await copy.click()
+    await expect(icon).toHaveAttribute('href', '#i-tick')
+    // With the pointer off, only the copied state can hold the text colour.
+    await page.mouse.move(0, 0)
+    await expect(copy).toHaveCSS('color', codeText)
+    await expect(page.locator('#copy-status')).toHaveText('Copied.')
+    await expect(copy).toHaveText('Copy')
+    await expect(copy).toHaveAccessibleName('Copy')
+    await page.clock.runFor(1000)
+    await copy.click()
+    await page.clock.runFor(1000)
+    // 2s after the first click: the first wait did not end the second.
+    await expect(icon).toHaveAttribute('href', '#i-tick')
+    await page.clock.runFor(600)
+    await expect(icon).toHaveAttribute('href', '#i-copy')
+    await page.mouse.move(0, 0)
+    await expect(copy).toHaveCSS('color', muted)
+  })
+
+  test('copy link shows a tick, then its link icon again', async ({ page }) => {
+    const link = page.locator('[data-copy-link="code-block"]')
+    await link.click()
+    await expect(link.locator('use')).toHaveAttribute('href', '#i-tick')
+    await expect(page.locator('#copy-status')).toHaveText('Link copied.')
+    await expect(link).toHaveAccessibleName('Copy link to Code block')
+    await page.clock.runFor(1500)
+    await expect(link.locator('use')).toHaveAttribute('href', '#i-link')
+  })
+
+  test('a failed copy keeps the copy icon and says so', async ({ page }) => {
+    const copy = page.locator('#code-block .code-head .copy')
+    const icon = copy.locator('use')
+    await page.evaluate(() => { (window as unknown as { failCopy: boolean }).failCopy = true })
+    await copy.click()
+    await expect(page.locator('#copy-status')).toHaveText('Copy failed. Select the text instead.')
+    await expect(icon).toHaveAttribute('href', '#i-copy')
+    // A failure during a tick puts the copy icon back at once.
+    await page.evaluate(() => { (window as unknown as { failCopy: boolean }).failCopy = false })
+    await copy.click()
+    await expect(icon).toHaveAttribute('href', '#i-tick')
+    await page.evaluate(() => { (window as unknown as { failCopy: boolean }).failCopy = true })
+    await copy.click()
+    await expect(page.locator('#copy-status')).toHaveText('Copy failed. Select the text instead.')
+    await expect(icon).toHaveAttribute('href', '#i-copy')
+  })
+})
+
+// Two copies in flight finish 1s apart. Each finished copy restarts the wait, so the tick stays until 1.5s after the
+// last one, on the catalogue and on the reference page's own copy script.
+for (const [file, selector] of [['components.html', '#code-block .code-head .copy'], ['reference.html', '#detail .copy']]) {
+  test(`${file}: two copies in flight keep the tick until 1.5s after the last one finishes`, async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.clock.install()
+    await page.addInitScript(() => {
+      // The first copy finishes after 1s and the second after 2s, counted from the clicks.
+      const delays = [1000, 2000]
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText: () => new Promise((resolve) => setTimeout(resolve, delays.shift())) } })
+    })
+    await page.goto(new URL(`../../language/${file}`, import.meta.url).href)
+    const copy = page.locator(selector)
+    const icon = copy.locator('use')
+    await copy.click()
+    await copy.click()
+    await page.clock.runFor(2600)
+    // The first copy's wait would have ended at 2.5s.
+    await expect(icon).toHaveAttribute('href', '#i-tick')
+    await page.clock.runFor(1000)
+    await expect(icon).toHaveAttribute('href', '#i-copy')
   })
 }
 

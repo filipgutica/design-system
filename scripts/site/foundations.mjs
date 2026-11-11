@@ -200,20 +200,23 @@ const FOUNDATIONS_JS = `
   document.getElementById('find-summary-clear').addEventListener('click', () => { clear(); find.focus(); });
   barClear.addEventListener('click', clear);
 
-  // Copy needs the script, so it shows only once the script runs. It shows its result for a moment, and announces it.
+  // Copy needs the script, so it shows only once the script runs. It announces its result. A success swaps the
+  // icon for a tick for 1.5s; a failure shows "Copy failed" in place of the icon for 4s. A repeat click restarts the wait.
   document.querySelectorAll('[data-copy-token]').forEach((button) => {
     button.hidden = false;
     const result = button.querySelector('.copy-result');
     const icon = button.querySelector('.icon');
+    const use = icon.querySelector('use');
     button.addEventListener('click', async () => {
       let ok = true;
       try { await navigator.clipboard.writeText(button.dataset.copyToken); } catch (e) { ok = false; }
-      result.textContent = ok ? 'Copied' : 'Copy failed';
       status.textContent = ok ? \`Copied \${button.dataset.copyToken}.\` : 'Copy failed. Select the name instead.';
-      icon.hidden = true;
-      result.hidden = false;
+      use.setAttribute('href', ok ? '#i-tick' : '#i-copy');
+      icon.hidden = !ok;
+      result.textContent = ok ? '' : 'Copy failed';
+      result.hidden = ok;
       clearTimeout(button.restore);
-      button.restore = setTimeout(() => { icon.hidden = false; result.hidden = true; }, ok ? 1500 : 4000);
+      button.restore = setTimeout(() => { use.setAttribute('href', '#i-copy'); icon.hidden = false; result.hidden = true; }, ok ? 1500 : 4000);
     });
   });
 `

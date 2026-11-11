@@ -71,7 +71,7 @@ Layer: Core. ui: `UiButton`.
 Layer: Core. ui: the `fg-quiet-action` class.
 
 - **Anatomy.** A native `<button>`, or the `<summary>` of a menu. Transparent fill, a transparent 1px border, `--radius-control`, and `--color-muted`. The project trigger overrides the corner with `--radius-field`, because it opens a menu and does not act (see [Site header](#site-header)). The content is centred in the box. An icon-only action holds an SVG icon, never a text glyph such as ×, because a font draws a glyph's ink off the centre of its box. Give the shared recipe zero specificity (`:where()`), so each component sets the action's size, place, and resting colour.
-- **States.** Hover turns the text `--color-text` and fills `currentColor` at 12% over transparent. Pressed fills `currentColor` at 18%, with no sink. Focus-visible is the focus ring, inset where the parent clips. An open menu keeps its trigger at the 12% tint, below the press. The code block's Copy keeps the block's text colour on hover. A disabled quiet action follows the shared [disabled](#rules-for-every-control) rule.
+- **States.** Hover turns the text `--color-text` and fills `currentColor` at 6% over transparent, only where the pointer can hover (`@media (hover: hover)`). Pressed fills `currentColor` at 12%, with no sink. Focus-visible is the focus ring, inset where the parent clips. An open menu keeps its trigger at the 6% hover tint, below the press. The code block's Copy is `--color-muted` at rest and takes the block's text colour (`--color-code-text`) on hover and while its tick shows. A disabled quiet action follows the shared [disabled](#rules-for-every-control) rule.
 - **Do.** Use it for an action inside a component: Copy in a code block or command list, close in a dialog or drawer, Full size on a capture, and the project trigger.
 - **Don't.** An action that stands on its own in the page, such as Save or Next. That is a button.
 - **Keyboard and screen reader.** Native button behavior. An icon-only action needs `aria-label`.
@@ -406,15 +406,20 @@ Layer: Core. ui: none yet.
 
 Layer: Core. ui: `UiCodeBlock`.
 
-- **Anatomy.** A source code well: `--color-code`, transparent 1px border, `--radius-panel`, `--shadow-surface`. An optional header (at least 40px, `--color-surface-raised`, `--text-xs`, a `--color-border-subtle` rule below) holds the title in semibold, the language in muted text, and a Copy button. The `<pre>` has `--space-4` padding, scrolls in both directions, is at most 32rem tall, and sets `--font-mono` at `--text-code` with a line height of 1.65. Line numbers are muted and right-aligned. Syntax uses the `--color-syntax-*` tokens. A compact variant puts the code and the Copy button on one row, with no header.
+- **Anatomy.** A frame that holds an optional header and the source panel.
+  - **Frame.** `--color-surface-raised`, a 1px `--color-border-subtle` border, `--radius-panel`, and `--shadow-surface`. Its padding is `0 var(--space-1) var(--space-1)` under a header, and `var(--space-1)` on every side without one.
+  - **Header.** At least 40px and `--text-xs`, on the frame with no fill and no rule below. It holds the title in semibold, the language in muted text, and a Copy button.
+  - **Source panel.** The `<pre>`: `--color-code`, a transparent 1px border, and `calc(var(--radius-panel) - var(--space-1))` corners (12px), so its curve is concentric with the frame's. It has `--space-4` padding, scrolls in both directions, is at most 32rem tall, and sets `--font-mono` at `--text-code` with a line height of 1.65. Line numbers are muted and right-aligned. Syntax uses the `--color-syntax-*` tokens.
+  - **Compact.** The panel and the Copy button share one row, with no header, and a `--space-1` column gap. The panel fills the row's height, so it sits `--space-1` from the frame and from Copy on every side, and centres its line.
 - **Phone text.** Set `text-size-adjust: 100%` (and `-webkit-text-size-adjust`) on the block, and align each line's items to the baseline, so iOS Safari does not enlarge one line.
-- **Copy.** Copies the code text only: no line numbers or prompts, and one line per row joined with newlines. A [quiet action](#quiet-action) at least 44×44 with an accessible name. Announce the result in a polite live region; in the compact variant the success message is visually hidden.
-- **States.** Rest, and focus-visible on Copy and on the `<pre>` when it scrolls. Copy takes the quiet action states and announces "Copied." or a failure.
+- **Copy.** Copies the code text only: no line numbers or prompts, and one line per row joined with newlines. A [quiet action](#quiet-action) at least 44×44 with an accessible name. It is `--color-muted` at rest (7.09:1 on the frame in light, 6.63:1 in dark), and `--color-code-text` on hover and while the tick shows, which the script marks with `data-copied`. Announce the result in a polite live region; in the compact variant the success message is visually hidden.
+- **Copy feedback.** This applies to every copy action: the code block's Copy, a token's Copy, and Copy link. On success, the icon turns into a plain tick (`#i-tick`) for 1.5s and then turns back. A second click within the 1.5s restarts the wait. The visible label, such as Copy, and the accessible name do not change, and no "Copied" text appears. The polite live region announces "Copied." or the failure. On failure, the icon does not change and the failure shows as before: a token's Copy shows "Copy failed" in place of its icon. Under reduced motion nothing changes, because the swap has no animation.
+- **States.** Rest, and focus-visible on Copy and on the `<pre>` when it scrolls. Copy takes the quiet action states, shows the tick after a copy, and announces "Copied." or a failure.
 - **Do.** Use a code block for source with no live result. When the reader should see the result too, use the variant with a live example.
 - **Don't.** The same language label on every block of a page. Put useful setup context above the block instead.
-- **Keyboard and screen reader.** The `<pre>` is focusable when it scrolls. Its focus ring and the Copy button's ring are inset, because the block clips its content.
+- **Keyboard and screen reader.** The `<pre>` is focusable when it scrolls. Its focus ring and the Copy button's ring are inset, because the block clips its content. The `<pre>` ring follows the panel's 12px corners.
 - **Motion.** None: the block is static, and Copy changes as a quiet action does.
-- **Forced colors.** The shadow drops and the transparent border draws as the system edge. Syntax colours take the system text colour, so code reads as plain text.
+- **Forced colors.** The shadow drops, and the frame's border and the panel's transparent border draw as system edges. Syntax colours take the system text colour, so code reads as plain text.
 
 ### With a live example
 
@@ -423,7 +428,7 @@ ui: `UiExample`.
 - **Anatomy.** One frame: a `<figure>` with a 1px `--color-border-subtle` edge, `--radius-panel`, no shadow, and its content clipped to the corners. The stage comes first and holds the live preview, centred, at least 8rem tall, with `--space-8` padding. The code block follows directly below the stage, after one `--color-border-subtle` hairline. There is no header row and no language label. An optional caption follows the frame, as a [figure](#figure) caption does.
 - **Tokens.** Frame edge `--color-border-subtle` and corners `--radius-panel`. Stage `--color-bg`. Hairline `--color-border-subtle`.
 - **Stage.** The stage sits on the page background, not in a well or a panel. This is a named exception to the container [depth](DESIGN.md#depth) tier: a preview shows each component on the surface it sits on in a page; see [decisions](decisions.md).
-- **Source.** Inside the frame the code block has no radius, border, or shadow of its own, and it spans the frame's full width, not `--measure`.
+- **Source.** Inside the frame the code block has no radius, border, padding, or shadow of its own, and it spans the frame's full width, not `--measure`. It takes `--color-code`, and its panel is flush with no corners, so the source fills the frame below the hairline.
 - **Copy.** Icon-only and named "Copy code", in the source's top right corner. It comes before the `<pre>` in DOM order, so the reader reaches it before the code.
 - **States.** The frame has no states. Components on the stage show their own states.
 - **Keyboard and screen reader.** Tab order is the stage's controls, then Copy, then the `<pre>`. Name the `<pre>` for its role, for example "Example source", when it scrolls. Focus rings on Copy and the `<pre>` are inset, because the frame clips its content.
@@ -435,14 +440,14 @@ ui: `UiExample`.
 
 Layer: Identity. ui: `UiCodeBlock` with a shell language or the compact variant.
 
-- **Anatomy.** A code block for a shell command, drawn as a dark plate in both themes: `--color-command-bg` with a `--color-command-border` edge (transparent in light). Text, syntax, and the caption all use `--color-terminal-text` or `--color-terminal-caption-text`. Each line starts with a `$ ` prompt in `--color-project-dark`, drawn with `content: "$ " / ""` and `user-select: none`, so copied and spoken text omit it. The plate sets `--color-focus: var(--color-project-dark)`, the dark-theme accent, so every ring on it, Copy's included, reads at 3:1 or more on the dark plate in both page themes.
+- **Anatomy.** A code block for a shell command, drawn as a dark plate in both themes: the frame is `--color-command-bg` with a `--color-command-border` edge (transparent in light). The source panel is the plate darkened, `color-mix(in srgb, var(--color-command-bg) 55%, var(--color-terminal))`, set as the plate's `--color-code`, so it reads as a panel on the plate. Text, syntax, and the caption all use `--color-terminal-text` or `--color-terminal-caption-text`. Each line starts with a `$ ` prompt in `--color-project-dark`, drawn with `content: "$ " / ""` and `user-select: none`, so copied and spoken text omit it. The plate sets `--color-muted: var(--color-terminal-caption-text)`, so Copy at rest takes the caption colour, and `--color-focus: var(--color-project-dark)`, the dark-theme accent, so every ring on it, Copy's included, reads at 3:1 or more on the dark plate in both page themes.
 - **States.** As for the code block.
 - **Do.** Use it for a shell command the reader runs, one command per line.
 - **Don't.** A `$` typed into the command. CSS draws the prompt; a typed one is copied with the command.
 - **Keyboard and screen reader.** As for the code block.
 - **Motion.** None: as for the code block.
 - **Forced colors.** The dark plate drops to the system background, with system text and edge, and the prompt takes the system text colour.
-- **Contrast.** Plate text at least 4.5:1 and the prompt at least 3:1 on `--color-command-bg`, for each project hue.
+- **Contrast.** Text at least 4.5:1 and the prompt at least 3:1 on the source panel, and the header text at least 4.5:1 on `--color-command-bg`, for each project hue.
 
 ## Terminal capture
 
