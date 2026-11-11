@@ -2,7 +2,7 @@
 //
 //   node scripts/build-site.mjs
 //
-// - index.html (Overview), foundations.html, and components.html share one shell, taken from
+// - index.html (Overview), foundations.html, components.html, and themes.html share one shell, taken from
 //   language/components.html (scripts/site/shell.mjs says how).
 // - index.json and llms.txt index the components for agents and tools.
 // - The language pages and files the site links to, and the fonts, are copied as they ship.
@@ -17,6 +17,8 @@ import { COMPONENTS_CSS, catalogueComponents, componentIndex, implementationProb
 import { foundationsPage } from './site/foundations.mjs'
 import { overviewPage } from './site/overview.mjs'
 import { sitePage } from './site/shell.mjs'
+import { themesPage } from './site/themes.mjs'
+import { readTokens } from './build-tokens.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const read = (path) => readFileSync(`${root}${path}`, 'utf8')
@@ -53,11 +55,17 @@ export const siteFiles = ({ version }) => {
     packageName: pkg.name,
   })
   const catalogue = sitePage({ template, current: 'components', title: 'Components · Design system', css: COMPONENTS_CSS })
+  const themes = themesPage({
+    themes: readTokens(root).themes.map(({ data, ...theme }) => theme),
+    values: readJson('dist/tokens.json').themes,
+    packageName: pkg.name,
+  })
 
   return [
     ['index.html', sitePage({ template, current: 'overview', ...overview })],
     ['foundations.html', sitePage({ template, current: 'foundations', ...foundations })],
     ['components.html', withImplementationLinks({ html: catalogue, implementations })],
+    ['themes.html', sitePage({ template, current: 'themes', ...themes })],
     ['index.json', `${JSON.stringify(componentIndex({ components, guidance, implementations, pkg, version }), null, 2)}\n`],
     ['llms.txt', llmsTxt({ components, pkg, version })],
   ]

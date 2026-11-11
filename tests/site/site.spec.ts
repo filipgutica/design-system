@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { tokens } from '@filipgutica/design-system'
 
 // The built site, served under /design-system/ as on GitHub Pages: each page's layout, accessibility,
 // script, and links, the header and pager order, and Foundations' Find and Copy.
@@ -7,6 +8,7 @@ const PAGES = [
   { path: '', name: 'Overview', find: 'a section' },
   { path: 'foundations.html', name: 'Foundations', find: 'a token' },
   { path: 'components.html', name: 'Components', find: 'a component' },
+  { path: 'themes.html', name: 'Themes', find: 'a theme' },
 ]
 const SITE_URL = 'https://filipgutica.github.io/design-system/'
 
@@ -41,7 +43,7 @@ for (const { path, name, find } of PAGES) {
       })
     }
 
-    test('the header strip and the pager run Overview, Foundations, Components', async ({ page }) => {
+    test('the header strip and the pager run Overview, Foundations, Components, Themes', async ({ page }) => {
       await page.goto(path)
       const strip = page.locator('.page-head .strip a')
       await expect(strip).toHaveText(PAGES.map((p) => p.name))
@@ -409,3 +411,52 @@ for (const colorScheme of ['light', 'dark'] as const) {
     await context.close()
   })
 }
+
+// One labelled theme per preview: every preview names its theme and mode, and renders in exactly those,
+// as tokens.json resolves them.
+test('Themes: every preview names its theme and mode, and renders in them', async ({ page }) => {
+  await page.goto('themes.html')
+  const frames = await page.locator('.theme-frame').evaluateAll((nodes) => nodes.map((node) => {
+    const frame = node as HTMLElement
+    const colour = (host: Element, value: string) => {
+      const probe = document.createElement('i')
+      probe.style.color = value
+      host.append(probe)
+      const out = getComputedStyle(probe).color
+      probe.remove()
+      return out
+    }
+    return {
+      id: frame.dataset.themeId as keyof typeof tokens.themes,
+      mode: frame.dataset.mode as 'light' | 'dark',
+      label: frame.querySelector('figcaption')?.textContent,
+      heading: frame.closest('section')?.querySelector('h2')?.textContent,
+      scheme: getComputedStyle(frame).colorScheme,
+      accent: colour(frame, 'var(--color-accent)'),
+    }
+  }))
+  expect(frames.map(({ id, mode }) => `${id} ${mode}`)).toEqual(Object.keys(tokens.themes).flatMap((id) => [`${id} light`, `${id} dark`]))
+  for (const frame of frames) {
+    expect(frame.label).toBe(`${frame.heading}${frame.mode === 'light' ? 'Light' : 'Dark'}`)
+    expect(frame.scheme).toBe(frame.mode)
+    const expected = await page.evaluate((value) => {
+      const probe = document.createElement('i')
+      probe.style.color = value
+      document.body.append(probe)
+      const out = getComputedStyle(probe).color
+      probe.remove()
+      return out
+    }, tokens.themes[frame.id][frame.mode]['color-accent'])
+    expect(frame.accent, `${frame.id} ${frame.mode}`).toBe(expected)
+  }
+})
+
+test('Themes: every contrast check passes, and the table needs no script', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, baseURL: test.info().project.use.baseURL })
+  const page = await context.newPage()
+  await page.goto('themes.html')
+  const results = page.locator('table.checks .result')
+  expect(await results.count()).toBe(Object.keys(tokens.themes).length * 5 * 2)
+  await expect(page.locator('table.checks .result.fail')).toHaveCount(0)
+  await context.close()
+})
