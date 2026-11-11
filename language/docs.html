@@ -15,7 +15,8 @@
 .sidebar { position: sticky; top: var(--space-6); align-self: start; display: grid; gap: var(--space-1); padding-block: var(--space-6); }
 /* Navigation rows: components.html#navigation-list, unchanged. Only the rail's placement and spacing are local. */
 .navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-inline); color: var(--color-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
-.navlist a:is(:hover, .is-hover) { background: var(--color-row-hover); color: var(--color-text); text-decoration: none; }
+.navlist a.is-hover { background: var(--color-row-hover); color: var(--color-text); text-decoration: none; }
+@media (hover: hover) { .navlist a:hover { background: var(--color-row-hover); color: var(--color-text); text-decoration: none; } }
 .navlist a[aria-current="page"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); font-weight: var(--weight-medium); }
 .navlist a[aria-current="location"] { color: var(--color-text); font-weight: var(--weight-medium); }
 .navlist a[aria-current="location"]::before { content: ""; position: absolute; inset-inline-start: var(--space-1); width: 3px; height: 14px; border-radius: var(--radius-pill); background: var(--color-accent); }
@@ -43,7 +44,8 @@ p { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-
 .command pre { min-width: 0; flex: 1; margin: 0; overflow-x: auto; font-size: var(--text-sm); }
 /* Copy is a quiet action: components.html#quiet-action, unchanged. The page adds its size and colour only. */
 :where(.quiet-action) { display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
-.quiet-action:is(:hover, .is-hover):where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 12%, transparent); }
+.quiet-action.is-hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 12%, transparent); }
+@media (hover: hover) { .quiet-action:hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 12%, transparent); } }
 .quiet-action:is(:active, .is-active):where(:not(:disabled)) { background: color-mix(in srgb, currentColor 18%, transparent); }
 .quiet-action:disabled { opacity: 0.58; cursor: not-allowed; }
 .command button { flex: none; min-width: var(--control-lg); min-height: var(--control-lg); color: var(--color-terminal-caption-text); }

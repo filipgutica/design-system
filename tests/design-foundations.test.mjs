@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
+import { siteFiles } from '../scripts/build-site.mjs'
 
 const dir = new URL('../language/', import.meta.url)
 const read = (file) => readFileSync(new URL(file, dir), 'utf8')
@@ -247,16 +248,16 @@ test('example pages copy the catalogue rules for the shared controls and compone
 // "without"), and the catalogue state rules that variant needs, so a page that uses it must copy them.
 const pressed = ':is(:active, [aria-pressed="true"], .is-active):not(:disabled)'
 const stateNeeds = [
-  { classes: ['btn'], states: ['.btn:is(:hover, .is-hover):not(:disabled)', `.btn:not(.text)${pressed}`] },
+  { classes: ['btn'], states: ['@media (hover: hover) .btn:hover:not(:disabled)', `.btn:not(.text)${pressed}`] },
   { classes: ['btn'], without: ['secondary', 'ghost', 'danger', 'text'], states: [`.btn:not(.secondary, .ghost, .danger, .text)${pressed}`] },
-  { classes: ['btn', 'secondary'], states: ['.btn.secondary:is(:hover, .is-hover):not(:disabled)', `.btn:is(.secondary, .ghost)${pressed}`] },
-  { classes: ['btn', 'ghost'], states: ['.btn.ghost:is(:hover, .is-hover):not(:disabled)', `.btn:is(.secondary, .ghost)${pressed}`] },
-  { classes: ['btn', 'danger'], states: ['.btn.danger:is(:hover, .is-hover):not(:disabled)', `.btn.danger${pressed}`] },
-  { classes: ['quiet-action'], states: ['.quiet-action:is(:hover, .is-hover):where(:not(:disabled))', '.quiet-action:is(:active, .is-active):where(:not(:disabled))'] },
+  { classes: ['btn', 'secondary'], states: ['@media (hover: hover) .btn.secondary:hover:not(:disabled)', `.btn:is(.secondary, .ghost)${pressed}`] },
+  { classes: ['btn', 'ghost'], states: ['@media (hover: hover) .btn.ghost:hover:not(:disabled)', `.btn:is(.secondary, .ghost)${pressed}`] },
+  { classes: ['btn', 'danger'], states: ['@media (hover: hover) .btn.danger:hover:not(:disabled)', `.btn.danger${pressed}`] },
+  { classes: ['quiet-action'], states: ['@media (hover: hover) .quiet-action:hover:where(:not(:disabled))', '.quiet-action:is(:active, .is-active):where(:not(:disabled))'] },
   {
     classes: ['segmented'],
     states: [
-      '.segmented button:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"])',
+      '@media (hover: hover) .segmented button:hover:not(:disabled, [aria-pressed="true"])',
       '.segmented button[aria-pressed="true"]',
       '.segmented button[aria-pressed="true"]::before',
       '@media (forced-colors: active) .segmented button[aria-pressed="true"]',
@@ -266,7 +267,7 @@ const stateNeeds = [
   {
     classes: ['tab'],
     states: [
-      '.tab:is(:hover, .is-hover):where(:not(:disabled))',
+      '@media (hover: hover) .tab:hover:where(:not(:disabled))',
       '.tab[aria-selected="true"]',
       '.tab[aria-selected="true"]::before',
       '@media (forced-colors: active) .tab[aria-selected="true"]',
@@ -276,7 +277,7 @@ const stateNeeds = [
   {
     classes: ['navlist'],
     states: [
-      '.navlist a:is(:hover, .is-hover)', '.navlist a[aria-current="page"]', '@media (forced-colors: active) .navlist a[aria-current="page"]',
+      '@media (hover: hover) .navlist a:hover', '.navlist a[aria-current="page"]', '@media (forced-colors: active) .navlist a[aria-current="page"]',
       '@supports (text-box: trim-both cap alphabetic) .navlist a:not(:has(> *))',
       '@supports (text-box: trim-both cap alphabetic) .navlist a:not(:has(> *))[aria-current="location"]::before',
     ],
@@ -523,29 +524,54 @@ const systemColours = `Canvas CanvasText LinkText VisitedText ActiveText ButtonF
   Highlight HighlightText SelectedItem SelectedItemText Mark MarkText GrayText AccentColor AccentColorText`.split(/\s+/)
 const word = (names) => new RegExp(`(?<![\\w-])(?:${names.join('|')})(?![\\w-])`, 'i')
 const rawColourPatterns = [/#[\da-f]{3,8}(?![\w-])/i, /(?<![\w-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/i, word(namedColours)]
-// A rule is in forced colors when one of its @media queries needs forced-colors: active in every comma
-// branch: the feature is a top-level and conjunct, with no top-level or or not. Groups nested inside
-// other conjuncts may use or and not.
+// A rule is in forced colors when one of its @media queries needs forced-colors: active. mandatory()
+// reads the media-condition grammar: every comma branch must need the feature; in an and chain one
+// operand must; in an or chain every operand must; not never does; a parenthesised group is read inside;
+// a single feature is matched by the feature's pattern. Empty or unbalanced input needs nothing.
 const forcedColorsActive = /^\(\s*forced-colors\s*:\s*active\s*\)$/
-const topLevelParts = (branch) => {
+// Splits a condition on whitespace outside parentheses; null when the parentheses do not balance.
+const topLevelParts = (condition) => {
   const parts = []
   let depth = 0
   let part = ''
-  for (const char of branch.trim()) {
+  for (const char of condition.trim()) {
     if (char === '(') depth += 1
     if (char === ')') depth -= 1
+    if (depth < 0) return null
     if (depth === 0 && /\s/.test(char)) {
       if (part) parts.push(part)
       part = ''
     } else part += char
   }
+  if (depth !== 0) return null
   return part ? [...parts, part] : parts
 }
-const forcedBranch = (branch) => {
-  const parts = topLevelParts(branch)
-  return !parts.some((part) => /^(?:or|not)$/i.test(part)) && parts.some((part) => forcedColorsActive.test(part))
+const mandatory = (condition, feature) => {
+  const branches = selectors(condition)
+  if (branches.length > 1) return branches.every((branch) => mandatory(branch, feature))
+  let parts = topLevelParts(condition)
+  if (!parts?.length) return false
+  if (/^only$/i.test(parts[0])) parts = parts.slice(1)
+  if (/^not$/i.test(parts[0])) return false
+  if (parts.length === 1) {
+    const [only] = parts
+    if (feature.test(only)) return true
+    const inner = /^\(.*\)$/.test(only) ? only.slice(1, -1).trim() : ''
+    return /^(?:\(|not\s)/i.test(inner) && mandatory(inner, feature)
+  }
+  const operands = parts.filter((_, i) => i % 2 === 0)
+  const operators = new Set(parts.filter((_, i) => i % 2 === 1).map((word) => word.toLowerCase()))
+  // An operand is a parenthesised group or a media type; anything else makes the query unreadable.
+  const valid = operands.every((operand) => /^\(.*\)$/.test(operand) || /^(?:all|screen|print)$/.test(operand))
+  if (parts.length % 2 === 0 || operators.size !== 1 || !valid) return false
+  if (operators.has('and')) return operands.some((operand) => mandatory(operand, feature))
+  if (operators.has('or')) return operands.every((operand) => mandatory(operand, feature))
+  return false
 }
-const inForcedColors = (context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && selectors(rule.slice('@media'.length)).every(forcedBranch))
+// Lowercase, and space every parenthesis, so (hover:hover)and (pointer:fine) splits like the spaced form.
+const normalise = (condition) => condition.toLowerCase().replace(/[()]/g, ' $& ').replace(/\s+/g, ' ').trim()
+const requiredIn = (feature, context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && mandatory(normalise(rule.slice('@media'.length)), feature))
+const inForcedColors = (context) => requiredIn(forcedColorsActive, context)
 const isRawColour = (value, forced = false) => rawColourPatterns.some((pattern) => pattern.test(value)) || (!forced && word(systemColours).test(value))
 // SVG colour attributes in markup, outside scripts and style blocks; currentColor, none, and url() refs pass.
 const svgColourAttributes = (file, html) => [...html.replace(/<(script|style)\b[\s\S]*?<\/\1>|<!--[\s\S]*?-->/g, '')
@@ -567,7 +593,8 @@ test('the raw-colour guard catches hex, colour functions, named colours, SVG col
     @media (forced-colors: active) and (prefers-color-scheme: dark), (forced-colors: active) { .q { color: CanvasText } }
     @media ((forced-colors: active) or (min-width: 801px)) { .r { color: CanvasText } }
     @media (forced-colors: active) and (not (prefers-color-scheme: dark)) { .s { color: CanvasText } }
-    @media (forced-colors: active) and ((min-width: 801px) or (prefers-color-scheme: dark)) { .t { color: CanvasText } }</style><p style="color: navy"></p>
+    @media (forced-colors: active) and ((min-width: 801px) or (prefers-color-scheme: dark)) { .t { color: CanvasText } }
+    @media (forced-colors:active)and (prefers-color-scheme:dark) { .u { color: CanvasText } }</style><p style="color: navy"></p>
     <svg><path stroke="#ff0000" fill="none"/><path fill='currentColor' stroke="url(#g)"/><stop stop-color="white"/><path fill = "#ff0000"/><path fill=red /></svg>`
   assert.deepEqual(rawColours('planted.html', planted).map((line) => line.split(' { ')[0]), [
     'planted.html: .a', 'planted.html: .b', 'planted.html: .c', 'planted.html: .d', 'planted.html: .e', 'planted.html: .f',
@@ -620,6 +647,60 @@ test('the hover guard catches a hover rule that reaches a disabled button, input
 test('no hover rule on any page reaches a disabled control', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
   assert.deepEqual(pages.flatMap((page) => hoverOnDisabled(page, read(page))), [])
+})
+
+// A touch screen keeps :hover on the last element tapped, so a hover fill would stay behind after a
+// tap. Every :hover rule that paints (a background, shadow, border, outline, or text colour, or a custom
+// property, which a painting declaration such as box-shadow: var(--depth) can read) sits in an
+// @media query that needs (hover: hover) in every comma branch, the same way forced colors is read above.
+// The scan covers the language pages and the generated site pages. An exception names its page and
+// selector, with the reason it may stick.
+const hoverExceptions = new Map([
+  // ['page.html selector', 'reason'],
+])
+const paints = /(?:^|;\s*)(?:--[\w-]+|background(?:-color|-image)?|box-shadow|color|outline(?:-color)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-color)?)\s*:/
+const hoverCapable = /^\(\s*hover\s*(?::\s*hover\s*)?\)$/
+const stickyHover = (file, html) => perSelector(cssRules(html))
+  .filter(({ context, selector, body }) => /:hover\b/.test(selector) && paints.test(body) && !requiredIn(hoverCapable, context))
+  .map(({ selector }) => `${file} ${selector}`)
+  .filter((rule) => !hoverExceptions.has(rule))
+
+test('the sticky-hover guard catches a painting hover rule outside @media (hover: hover)', () => {
+  const planted = `<style>.chip:hover { background: red } .link:hover { text-decoration: underline; border-radius: 0 }
+    .row:is(:hover, .is-hover) { color: red } .btn.is-hover { background: red }
+    .edge:hover { border: 1px solid red } .side:hover { border-top: 1px solid red } .ring:hover { outline: 2px solid red }
+    @media (hover: hover) { .ok:hover { background: red } } @media (hover:hover) { .tight:hover { background: red } }
+    @media (hover: hover) and ((max-width: 800px) or (pointer: fine)) { .nested:hover { background: red } }
+    @media ((hover: hover) and (pointer: fine)) { .grouped:hover { background: red } }
+    @media ((hover: hover) and (pointer: fine)) and (min-width: 801px) { .wide:hover { background: red } }
+    @media (hover:hover)and (pointer:fine) { .glued:hover { background: red } } @media (hover) { .bare:hover { background: red } }
+    @media (HOVER: HOVER) { .caps:hover { background: red } } @media (hover: hover) and garbage { .garbage:hover { background: red } }
+    @media (hover: hover), { .trailing:hover { background: red } } @media (hover: hover) and ) { .unbalanced:hover { background: red } }
+    .sink:hover:not(:disabled) { --depth: var(--shadow-sink) } @media (hover: hover) { .sunk:hover { --depth: none } }
+    @media (hover: hover), (max-width: 640px) { .either:hover { background: red } }
+    @media not (hover: hover) { .negated:hover { background: red } }
+    @media (forced-colors: active) { .fc:hover { border-color: red } }</style>`
+  assert.deepEqual(stickyHover('planted.html', planted), [
+    'planted.html .chip:hover', 'planted.html .row:is(:hover, .is-hover)', 'planted.html .edge:hover', 'planted.html .side:hover',
+    'planted.html .ring:hover', 'planted.html .garbage:hover', 'planted.html .trailing:hover', 'planted.html .unbalanced:hover',
+    'planted.html .sink:hover:not(:disabled)', 'planted.html .either:hover', 'planted.html .negated:hover',
+    'planted.html .fc:hover',
+  ])
+})
+
+// The generated site pages: the language pages plus the CSS that scripts/site adds to them.
+const sitePages = () => siteFiles({ version: '9.9.9' }).filter(([file, text]) => file.endsWith('.html') && typeof text === 'string')
+
+test('the sticky-hover guard reads the CSS that the site scripts add to a generated page', () => {
+  const [file, html] = sitePages().find(([name]) => name === 'foundations.html')
+  const planted = html.replace('</style>', '.token .copy:hover { background: red }\n</style>')
+  assert.deepEqual(stickyHover(file, planted), ['foundations.html .token .copy:hover'])
+})
+
+test('every painting hover rule on every page waits for a pointer that can hover', () => {
+  const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
+  assert.deepEqual(pages.flatMap((page) => stickyHover(page, read(page))), [])
+  assert.deepEqual(sitePages().flatMap(([file, html]) => stickyHover(`site/${file}`, html)), [])
 })
 
 // The selected fill must keep accent text readable. This reads the default hue pair, the surfaces, and
