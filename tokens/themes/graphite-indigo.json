@@ -1,0 +1,8 @@
+{
+  "name": "Graphite Indigo",
+  "note": "The default: an indigo hue on graphite neutrals.",
+  "hue": {
+    "light": "#4b45d1",
+    "dark": "#a5a1ff"
+  }
+}

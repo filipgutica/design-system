@@ -3,7 +3,7 @@
     {
       "id": "identity-inputs",
       "title": "Identity inputs",
-      "note": "The four lines a project sets on `:root`: the hue for light and dark, and the two font stacks. Every other token follows from them.",
+      "note": "The four lines a theme sets on `:root`: the hue for light and dark, from its file in `tokens/themes/`, and the two font stacks. Every other token follows from them.",
       "comment": "Identity layer: a project swaps these four lines. --color-project is the light-theme hue;\n--color-project-dark is the dark-theme hue, also used on dark plates in both themes.",
       "identity": true,
       "roles": {
@@ -13,11 +13,8 @@
         "font-mono": "Identity, documentation and product page titles and section headings, navigation rails, metadata, captions, code, identifiers, and keys"
       },
       "tokens": {
-        "color-project": [
-          "#4b45d1",
-          "{color-project-dark}"
-        ],
-        "color-project-dark": "#a5a1ff",
+        "color-project": null,
+        "color-project-dark": null,
         "font-ui": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
         "font-mono": "\"IBM Plex Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace"
       }

@@ -8,6 +8,7 @@ export const SITE_PAGES = [
   { id: 'overview', label: 'Overview', file: 'index.html' },
   { id: 'foundations', label: 'Foundations', file: 'foundations.html' },
   { id: 'components', label: 'Components', file: 'components.html' },
+  { id: 'themes', label: 'Themes', file: 'themes.html' },
 ]
 
 /** Where Pages serves site/. Generated indexes use absolute URLs, because agents read them out of context. */

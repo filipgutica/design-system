@@ -6,8 +6,11 @@ import { COPIED, siteFiles } from '../scripts/build-site.mjs'
 import { catalogueComponents, implementationProblems, specGuidance } from '../scripts/site/components.mjs'
 import { foundationsPage } from '../scripts/site/foundations.mjs'
 import { overviewPage } from '../scripts/site/overview.mjs'
+import { parseColour, themeChecks, themesPage } from '../scripts/site/themes.mjs'
 import { shellDrift, sitePage, spanOnce } from '../scripts/site/shell.mjs'
 import { readRenameTable } from '../scripts/rename-tokens.mjs'
+import { readTokens } from '../scripts/build-tokens.mjs'
+import { fileURLToPath } from 'node:url'
 import { read } from './css.mjs'
 
 // The site pages share components.html's shell byte for byte, and the package copy of the
@@ -15,7 +18,7 @@ import { read } from './css.mjs'
 const template = read('language/components.html')
 const pkg = JSON.parse(read('package.json'))
 const files = new Map(siteFiles({ version: '9.9.9' }))
-const pages = [['index.html', 'a section'], ['foundations.html', 'a token'], ['components.html', 'a component']]
+const pages = [['index.html', 'a section'], ['foundations.html', 'a token'], ['components.html', 'a component'], ['themes.html', 'a theme']]
 
 test('every site page shares the shell CSS, icons, script, and shell markup with components.html', () => {
   for (const [file, noun] of pages) assert.deepEqual(shellDrift({ template, page: files.get(file), noun }), [], file)
@@ -145,7 +148,7 @@ test('Overview takes its version and exports from the build and package.json', (
 
 test('Foundations lists every token in tokens.json once, with its role and former name', () => {
   const values = JSON.parse(read('dist/tokens.json')).themes['graphite-indigo']
-  const source = JSON.parse(read('tokens/graphite-indigo.json'))
+  const source = JSON.parse(read('tokens/core.json'))
   const renames = readRenameTable(read('language/decisions.md'))
   const { main, total } = foundationsPage({ source, values, renames, version: '9.9.9', packageName: pkg.name })
   const rows = [...main.matchAll(/<th scope="row"><div class="token"><code class="name">--([^<]+(?:<wbr>[^<]+)*)<\/code>/g)].map(([, name]) => name.replaceAll('<wbr>', ''))
@@ -156,4 +159,26 @@ test('Foundations lists every token in tokens.json once, with its role and forme
   // A source group the page does not place stops the build instead of dropping its tokens.
   const extra = { ...source, groups: [...source.groups, { id: 'new-group', title: 'New', note: 'New.', roles: {}, tokens: {} }] }
   assert.throws(() => foundationsPage({ source: extra, values, renames, version: '9.9.9', packageName: pkg.name }), /no rail group for new-group/)
+})
+
+test('Themes shows every theme in tokens.json, the default first, and stops on a theme without values', () => {
+  const values = JSON.parse(read('dist/tokens.json')).themes
+  const themes = readTokens(fileURLToPath(new URL('..', import.meta.url))).themes.map(({ data, ...theme }) => theme)
+  const { main } = themesPage({ themes, values, packageName: pkg.name })
+  assert.deepEqual([...main.matchAll(/<h2 id="([\w-]+)-title">/g)].map(([, id]) => id), [...Object.keys(values), 'use', 'make'])
+  assert.equal(main.split('class="theme-frame"').length - 1, 2 * themes.length)
+  assert.throws(() => themesPage({ themes: themes.slice(1), values, packageName: pkg.name }), /disagree/)
+})
+
+test('the theme contrast reader mixes as the browser does and refuses a colour it cannot read', () => {
+  assert.deepEqual(parseColour('#00543f'), [0, 84, 63, 1])
+  assert.deepEqual(parseColour('color-mix(in srgb, #ffffff 50%, black)'), [127.5, 127.5, 127.5, 1])
+  // Mixing with transparent keeps the colour and lowers its alpha.
+  assert.deepEqual(parseColour('color-mix(in srgb, #3fe0c0 20%, transparent)').map((c) => Math.round(c * 100) / 100), [63, 224, 192, 0.2])
+  assert.throws(() => parseColour('rgb(0 0 0)'), /unsupported colour/)
+  // A pale accent fails the focus and current-row checks in light mode.
+  const values = JSON.parse(read('dist/tokens.json')).themes['graphite-indigo']
+  const pale = Object.fromEntries(Object.entries(values.light).map(([name, value]) => [name, value.replaceAll('#4b45d1', '#c9c7f5')]))
+  const failing = themeChecks({ light: pale, dark: values.dark }).filter(({ light, min }) => light < min).map(({ id }) => id)
+  assert.deepEqual(failing, ['focus', 'nav', 'thumb', 'primary'])
 })

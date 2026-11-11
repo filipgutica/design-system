@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
+import { tokens } from '@filipgutica/design-system'
 
 // Behaviour of the catalogue shell in language/components.html: Find, the / shortcut, location
 // tracking, the tablet drawer, the tab glide, the live slider's value, the page without JavaScript,
@@ -472,6 +473,17 @@ const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
   return [...problems]
 }, { roles: shapeRoles, concentric: concentricRows })
 
+// Every theme in tokens.json, the default first. Each one renders the recipes with its theme file loaded
+// after tokens.css on :root, as a consumer loads it.
+const { themes } = tokens
+const openInTheme = async (page: Page, theme: string) => {
+  await page.goto(url)
+  await page.addStyleTag({ url: new URL(`../../dist/themes/${theme}.css`, import.meta.url).href })
+  // The new hue starts each control's colour transition from the default one; measure where they end.
+  // Only transitions: the busy spinner's animation never ends.
+  await page.evaluate(() => Promise.all(document.getAnimations().filter((animation) => animation instanceof CSSTransition).map((animation) => animation.finished)))
+}
+
 test.describe('rendered recipes', () => {
   test.use({ viewport: { width: 1280, height: 900 } })
 
@@ -479,19 +491,45 @@ test.describe('rendered recipes', () => {
     test.describe(colorScheme, () => {
       test.use({ colorScheme })
 
-      for (const [name, pair] of Object.entries(contrastPairs)) {
-        test(`contrast: ${name} reaches ${pair.min}:1`, async ({ page }) => {
-          await page.goto(url)
-          const measured = await ratios(page, pair)
-          expect(measured.length).toBeGreaterThan(0)
-          expect(below(measured, pair.min)).toEqual([])
+      for (const theme of Object.keys(themes) as (keyof typeof themes)[]) {
+        test.describe(theme, () => {
+          test('the theme file sets the accent and the tokens that follow it to its tokens.json values', async ({ page }) => {
+            await openInTheme(page, theme)
+            const names = ['color-project', 'color-accent', 'color-focus', 'color-nav-current-text']
+            const rendered = await page.evaluate((list) => list.map((name) => {
+              const probe = document.createElement('i')
+              probe.style.color = `var(--${name})`
+              document.body.append(probe)
+              const value = getComputedStyle(probe).color
+              probe.remove()
+              return value
+            }), names)
+            const expected = await page.evaluate((list) => list.map((value) => {
+              const probe = document.createElement('i')
+              probe.style.color = value
+              document.body.append(probe)
+              const out = getComputedStyle(probe).color
+              probe.remove()
+              return out
+            }), names.map((name) => themes[theme][colorScheme][name as keyof (typeof themes)[typeof theme]['light']]))
+            expect(rendered).toEqual(expected)
+          })
+
+          for (const [name, pair] of Object.entries(contrastPairs)) {
+            test(`contrast: ${name} reaches ${pair.min}:1`, async ({ page }) => {
+              await openInTheme(page, theme)
+              const measured = await ratios(page, pair)
+              expect(measured.length).toBeGreaterThan(0)
+              expect(below(measured, pair.min)).toEqual([])
+            })
+          }
+
+          test('each component renders the corner radius of its role, and no other part has one', async ({ page }) => {
+            await openInTheme(page, theme)
+            expect(await shapeProblems(page)).toEqual([])
+          })
         })
       }
-
-      test('each component renders the corner radius of its role, and no other part has one', async ({ page }) => {
-        await page.goto(url)
-        expect(await shapeProblems(page)).toEqual([])
-      })
 
       test('contrast: the toggle card ratios in decisions.md match the render', async ({ page }) => {
         const row = (await docText(page, 'decisions.md')).split('\n').find((line) => line.startsWith('| Toggle card |'))

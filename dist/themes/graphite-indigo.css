@@ -1,5 +1,7 @@
-/* Generated from tokens/graphite-indigo.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
- * The graphite-indigo identity inputs for tokens.css. Load after tokens.css. */
+/* Generated from tokens/themes/graphite-indigo.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
+ * The Graphite Indigo identity inputs for tokens.css. Load after tokens.css, on :root only: the tokens that
+ * follow the hue resolve on :root, so a theme scoped to an element below it changes the hue there, but
+ * the accent, focus ring, and selection keep the default theme's colours. */
 
 :root {
   --color-project: #4b45d1;

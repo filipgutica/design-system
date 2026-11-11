@@ -3,9 +3,9 @@ import assert from 'node:assert/strict'
 import { docProblems } from '../scripts/build-tokens.mjs'
 import { read } from './css.mjs'
 
-// The Foundations page shows every token's role from tokens/graphite-indigo.json, and tokens:check
-// refuses a token without one, so a new token cannot ship undocumented.
-const source = () => JSON.parse(read('tokens/graphite-indigo.json'))
+// The Foundations page shows every token's role from tokens/core.json, and tokens:check refuses a
+// token without one, so a new token cannot ship undocumented.
+const source = () => JSON.parse(read('tokens/core.json'))
 
 test('every token group has its reader-facing text, and every token a plain-text role', () => {
   assert.deepEqual(docProblems(source()), [])
