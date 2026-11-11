@@ -1,6 +1,6 @@
 {
   "name": "Mauve",
-  "note": "The quiet theme: a dusty rose-plum, low in chroma. Selection reads from the raised fill and the tint as much as from colour.",
+  "note": "The quiet theme: a dusty rose-plum, low in chroma. Selection reads mostly from the raised fill and its shadow; the hue is a hint.",
   "hue": {
     "light": "#6c5267",
     "dark": "#d1b3c8"

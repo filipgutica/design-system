@@ -74,26 +74,27 @@ export const themeChecks = (values) => CHECKS.map(({ measure, ...check }) => ({
 const icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`
 const MODES = [['light', 'Light'], ['dark', 'Dark']]
 
-// The parts the hue reaches, in the catalogue's markup. Previews are inert: they show states, not controls.
+// The parts the hue reaches, in the catalogue's markup. The specimen is inert: it shows states, not controls,
+// while the preview's label stays readable to assistive technology.
 const preview = (id, mode) => {
   const n = `${id}-${mode}`
-  return `<div class="specimen">
+  return `<div class="specimen" inert>
         <div class="spec-row"><button class="btn" type="button">${icon('plus')}New monitor</button><button class="btn secondary" type="button">Cancel</button><button class="btn is-focus" type="button">Focused</button></div>
         <div class="spec-row"><div class="segmented" role="group" aria-label="View"><button type="button" aria-pressed="true">List</button><button type="button" aria-pressed="false">Board</button><button type="button" aria-pressed="false">Timeline</button></div></div>
         <div class="spec-split">
-          <div class="navlist" role="group" aria-label="Rows"><a href="#${id}" aria-current="page">Overview</a><a href="#${id}">Checks</a></div>
+          <div class="navlist" role="group" aria-label="Rows"><a href="#${id}" aria-current="page">Overview</a><a class="is-hover" href="#${id}">Checks</a><a href="#${id}">History</a></div>
           <div class="spec-stack">
             <div class="switch-row"><button class="switch" id="sw-${n}" type="button" role="switch" aria-checked="true" aria-labelledby="sw-${n}-label"><span class="switch-track" aria-hidden="true"></span></button><label id="sw-${n}-label" for="sw-${n}">Alerts</label></div>
             <label class="check"><input type="checkbox" checked>Notify on recovery</label>
           </div>
         </div>
         <div class="field"><label class="field-label" for="in-${n}">Service</label><input class="input is-focus" id="in-${n}" value="checkout-api"></div>
-        <div class="code command compact"><pre><code><span class="line"><span>pnpm add @filipgutica/design-system</span></span></code></pre></div>
+        <div class="code command compact"><pre><code><span class="line"><span>pnpm tokens:build</span></span></code></pre></div>
       </div>`
 }
 
 // One labelled preview: the theme's name and the mode are always visible.
-const frame = ({ id, name }, mode, label) => `<figure class="theme-frame" data-theme-id="${id}" data-mode="${mode}" inert>
+const frame = ({ id, name }, mode, label) => `<figure class="theme-frame" data-theme-id="${id}" data-mode="${mode}">
         <figcaption class="frame-label"><b>${esc(name)}</b><span>${label}</span></figcaption>
         ${preview(id, mode)}
       </figure>`
@@ -103,6 +104,7 @@ const result = (value, min) => {
   return `<div><span class="result ${pass ? 'pass' : 'fail'}">${icon(pass ? 'check' : 'alert')}${pass ? 'Pass' : 'Fail'}</span><span class="ratio">${value.toFixed(2)}:1</span></div>`
 }
 const checkTable = ({ id, name }, checks) => `<table class="checks stack" aria-label="${esc(name)} contrast checks" data-checks="${id}">
+      <colgroup><col><col class="c-mode"><col class="c-mode"></colgroup>
       <thead><tr><th scope="col">Check</th><th scope="col">Light</th><th scope="col">Dark</th></tr></thead>
       <tbody>
       ${checks.map(({ id: check, label, min, light, dark }) => `<tr data-check="${check}"><th scope="row">${label}<small>Needs ${min}:1</small></th><td data-label="Light">${result(light, min)}</td><td data-label="Dark">${result(dark, min)}</td></tr>`).join('\n      ')}
@@ -119,11 +121,9 @@ const inputs = (theme, defaultTheme, values) => {
     : same(defaultTheme)
   return `<dl class="inputs">
       <dt>Hue</dt>
-      <dd>${MODES.map(([mode, label]) => `<span class="hue"><i class="chip" data-theme-id="${theme.id}" data-mode="${mode}" aria-hidden="true"></i>${label} <code>${theme.hue[mode]}</code></span>`).join('')}</dd>
+      <dd>${MODES.map(([mode, label]) => `<span class="hue"><i class="chip" aria-hidden="true"><i data-theme-id="${theme.id}" data-mode="${mode}"></i></i>${label} <code>${theme.hue[mode]}</code></span>`).join('')}</dd>
       <dt>Fonts</dt>
       <dd>${fonts}</dd>
-      <dt>Icons</dt>
-      <dd><span class="muted">None yet</span></dd>
     </dl>`
 }
 
@@ -145,7 +145,7 @@ const useSection = (packageName, example) => `  <section class="theme" id="use" 
     <header class="layer-head"><h2 id="use-title">Use a theme</h2></header>
     <p class="theme-note"><code>tokens.css</code> carries the default theme. To use another, load its theme file after <code>tokens.css</code>. It sets the identity inputs on <code>:root</code>, and light and dark both follow.</p>
     ${source({ id: 'src-use', file: 'styles.css', lines: [`@import "${packageName}/tokens.css";`, `@import "${packageName}/themes/${example.id}.css";`] })}
-    <p class="theme-note">Load a theme on <code>:root</code> only. The tokens that follow the hue resolve there, so a theme file scoped to an element below it changes only its own lines.</p>
+    <p class="theme-note">Load a theme on <code>:root</code> only. The tokens that follow the hue resolve there, so a theme scoped to an element below <code>:root</code> changes the hue there, but the accent, focus ring, and selection keep the default theme's colours.</p>
   </section>`
 
 const makeSection = (example) => `  <section class="theme" id="make" aria-labelledby="make-title">
@@ -170,7 +170,10 @@ const CSS = `
   .inputs dd { margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); align-items: center; }
   .hue { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); }
   .hue code { font-size: var(--text-xs); }
-  .chip { flex: none; width: 1.5rem; height: 1.5rem; border-radius: var(--radius-inline); background: var(--color-project); box-shadow: inset 0 0 0 1px var(--color-border-subtle); }
+  /* The fill takes the theme's hue; the outline stays the page's, so both chips draw the same edge. */
+  .chip { display: grid; flex: none; width: 1.5rem; height: 1.5rem; overflow: hidden; border-radius: var(--radius-inline); }
+  .chip > i { grid-area: 1 / 1; background: var(--color-project); }
+  .chip::after { content: ""; grid-area: 1 / 1; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--color-border-subtle); }
   .frames { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--space-4); }
   .theme-frame { display: grid; gap: var(--space-4); align-content: start; margin: 0; padding: var(--space-4); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-panel); background: var(--color-bg); color: var(--color-text); font-family: var(--font-ui); }
   .frame-label { display: flex; flex-wrap: wrap; gap: var(--space-2); font: var(--weight-regular) var(--text-xs) / 1.3 var(--font-mono); color: var(--color-muted); }
@@ -181,7 +184,8 @@ const CSS = `
   .spec-split { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); align-items: start; gap: var(--space-3) var(--space-6); }
   .spec-stack { display: grid; gap: var(--space-3); }
   .theme-frame .code { margin: 0; }
-  .checks { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+  .checks { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: var(--text-sm); }
+  .checks .c-mode { width: 10rem; }
   .checks th, .checks td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border-subtle); text-align: left; vertical-align: top; }
   .checks :is(th, td):first-child { padding-inline-start: 0; }
   .checks thead th { font-size: var(--text-xs); font-weight: var(--weight-medium); color: var(--color-muted); white-space: nowrap; }

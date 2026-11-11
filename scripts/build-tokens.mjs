@@ -339,7 +339,8 @@ export const renderStandaloneTheme = ({ id, name, data }) => {
   return [
     `/* Generated from tokens/themes/${id}.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
     ` * The ${name} identity inputs for tokens.css. Load after tokens.css, on :root only: the tokens that`,
-    ' * follow the hue resolve on :root, so a theme set on an element below it changes only its own lines. */',
+    ' * follow the hue resolve on :root, so a theme scoped to an element below it changes the hue there, but',
+    " * the accent, focus ring, and selection keep the default theme's colours. */",
     '',
     ':root {',
     ...block('  ', identity.map((name) => [`--${name}`, resolve(name, LIGHT)])),
