@@ -13,11 +13,8 @@
         "font-mono": "Identity, documentation and product page titles and section headings, navigation rails, metadata, captions, code, identifiers, and keys"
       },
       "tokens": {
-        "color-project": [
-          "#4b45d1",
-          "{color-project-dark}"
-        ],
-        "color-project-dark": "#a5a1ff",
+        "color-project": null,
+        "color-project-dark": null,
         "font-ui": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
         "font-mono": "\"IBM Plex Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace"
       }

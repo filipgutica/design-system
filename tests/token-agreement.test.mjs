@@ -1,5 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { fileURLToPath } from 'node:url'
+import { readTokens } from '../scripts/build-tokens.mjs'
 import { declarations, read, resolveCss, ruleBody } from './css.mjs'
 
 // Each language/tokens.css line must carry the same light and dark value as the JSON token behind its
@@ -7,7 +9,8 @@ import { declarations, read, resolveCss, ruleBody } from './css.mjs'
 // same-name variable. A use-site fallback, var(--color-x, var(--color-y)), is checked through
 // --color-y. Every line must be covered, so a "ui:" comment cannot name a variable the JSON lacks.
 const tokensCss = read('language/tokens.css')
-const tokenData = JSON.parse(read('tokens/graphite-indigo.json'))
+// tokens.css carries the default theme, the first one.
+const tokenData = readTokens(fileURLToPath(new URL('..', import.meta.url))).themes[0].data
 
 const LIGHT = 0
 const DARK = 1

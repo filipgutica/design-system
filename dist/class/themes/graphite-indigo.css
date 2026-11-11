@@ -1,4 +1,4 @@
-/* Generated from tokens/graphite-indigo.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
+/* Generated from tokens/core.json and tokens/themes/graphite-indigo.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
  * Opt-in Graphite Indigo roles for the class flavour. Import after class/base.css (theme.css in @filipgutica/ui).
  * Dark mode uses the same .dark class as the base. Keep exactly one :root.dark block:
  * sites copy it into a <noscript> prefers-color-scheme rule. */

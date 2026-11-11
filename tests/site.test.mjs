@@ -145,7 +145,7 @@ test('Overview takes its version and exports from the build and package.json', (
 
 test('Foundations lists every token in tokens.json once, with its role and former name', () => {
   const values = JSON.parse(read('dist/tokens.json')).themes['graphite-indigo']
-  const source = JSON.parse(read('tokens/graphite-indigo.json'))
+  const source = JSON.parse(read('tokens/core.json'))
   const renames = readRenameTable(read('language/decisions.md'))
   const { main, total } = foundationsPage({ source, values, renames, version: '9.9.9', packageName: pkg.name })
   const rows = [...main.matchAll(/<th scope="row"><div class="token"><code class="name">--([^<]+(?:<wbr>[^<]+)*)<\/code>/g)].map(([, name]) => name.replaceAll('<wbr>', ''))

@@ -1,4 +1,4 @@
-/* Generated from tokens/graphite-indigo.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
+/* Generated from tokens/core.json and tokens/themes/graphite-indigo.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
  * Base tokens for the class flavour: toggle .dark on <html> for dark mode.
  * Keep exactly one :root.dark block: sites copy it into a <noscript> prefers-color-scheme rule. */
 

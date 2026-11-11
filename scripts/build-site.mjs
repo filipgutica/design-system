@@ -46,7 +46,7 @@ export const siteFiles = ({ version }) => {
 
   const overview = overviewPage({ pkg, version })
   const foundations = foundationsPage({
-    source: readJson('tokens/graphite-indigo.json'),
+    source: readJson('tokens/core.json'),
     values: readJson('dist/tokens.json').themes['graphite-indigo'],
     renames: readRenameTable(read('language/decisions.md')),
     version,

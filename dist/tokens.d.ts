@@ -1,4 +1,4 @@
-// Generated from tokens/graphite-indigo.json by scripts/build-tokens.mjs. Do not edit.
+// Generated from tokens/core.json and tokens/themes/ by scripts/build-tokens.mjs. Do not edit.
 /** A token name: its CSS variable in tokens.css without the leading dashes. */
 export type TokenName =
   | 'color-project'
@@ -106,7 +106,7 @@ export type TokenName =
   | 'duration'
   | 'ease-out'
 
-export type ThemeName = 'graphite-indigo'
+export type ThemeName = 'graphite-indigo' | 'mauve' | 'pine'
 
 /** Resolved values, as getComputedStyle reports them on the root element. */
 export declare const tokens: {

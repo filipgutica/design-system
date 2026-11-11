@@ -753,6 +753,19 @@ const navCurrentText = (css) => {
   })
 }
 
+// tokens.css as a page sees it with one theme loaded after it on :root: the theme file's identity lines
+// replace the default ones in the light block, and the dark blocks keep following --color-project-dark.
+const distFile = (path) => readFileSync(new URL(`../dist/${path}`, import.meta.url), 'utf8')
+const themeIds = Object.keys(JSON.parse(distFile('tokens.json')).themes)
+const withTheme = (id) => [...distFile(`themes/${id}.css`).matchAll(/^\s*(--[\w-]+):\s*([^;]+);/gm)]
+  .reduce((css, [, name, value]) => css.replace(new RegExp(`^(\\s*${name}:)[^;]+;`, 'm'), `$1 ${value};`), read('tokens.css'))
+
+test('every theme in tokens.json has a theme file, and loading the default one changes nothing', () => {
+  assert.ok(themeIds.length >= 3)
+  assert.equal(withTheme('graphite-indigo'), read('tokens.css'))
+  assert.match(withTheme('pine'), /^\s*--color-project: #00543f;/m)
+})
+
 // A ratio that is not a finite number at or above the minimum (4.5:1 for text by default) fails.
 const belowContrast = (results, min = 4.5) => results.filter(({ ratio }) => !(Number.isFinite(ratio) && ratio >= min))
 
@@ -769,11 +782,13 @@ test('the nav-current contrast guard reads shorthand hex and fails a dark accent
   assert.throws(() => navCurrentText(css.replace('--color-project-dark: #a5a1ff;', '--color-project-dark: rgb(0 0 0);')), /unsupported colour/)
 })
 
-test('accent text on the selected fill reaches 4.5:1 on every surface in both themes', () => {
-  const results = navCurrentText(read('tokens.css'))
-  assert.equal(results.length, 9)
-  assert.deepEqual(belowContrast(results), [])
-})
+for (const id of themeIds) {
+  test(`accent text on the selected fill reaches 4.5:1 on every surface in light and dark: ${id}`, () => {
+    const results = navCurrentText(withTheme(id))
+    assert.equal(results.length, 9)
+    assert.deepEqual(belowContrast(results), [])
+  })
+}
 
 // The focus ring is the accent, so the accent must reach 3:1 (WCAG 1.4.11) on every surface a ring
 // sits on, in both themes.
@@ -800,11 +815,13 @@ test('the focus ring tokens draw a 2px ring with a 3px gap', () => {
   assert.match(root, /--focus-offset:\s*3px;/)
 })
 
-test('the accent focus ring reaches 3:1 on --color-bg, --color-surface, and --color-surface-raised in both themes', () => {
-  const results = focusRingContrast(read('tokens.css'))
-  assert.equal(results.length, 9)
-  assert.deepEqual(belowContrast(results, 3), [])
-})
+for (const id of themeIds) {
+  test(`the accent focus ring reaches 3:1 on --color-bg, --color-surface, and --color-surface-raised in light and dark: ${id}`, () => {
+    const results = focusRingContrast(withTheme(id))
+    assert.equal(results.length, 9)
+    assert.deepEqual(belowContrast(results, 3), [])
+  })
+}
 
 // The native clear cross sits at the input's trailing edge. A fixed-width search input inside a wider
 // field wrapper leaves the cross floating mid-field, so the wrapper carries the width instead.
