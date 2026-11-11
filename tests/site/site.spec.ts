@@ -451,6 +451,15 @@ test('Themes: every preview names its theme and mode, and renders in them', asyn
   }
 })
 
+test('Themes: every preview is a figure that assistive technology can reach', async ({ page }) => {
+  await page.goto('themes.html')
+  // Chromium's own accessibility tree: Playwright's role queries still match inert content, this tree does not.
+  // The labels are checked against each frame's theme and mode above.
+  const cdp = await page.context().newCDPSession(page)
+  const { nodes } = await cdp.send('Accessibility.getFullAXTree') as { nodes: { ignored: boolean, role?: { value: string } }[] }
+  expect(nodes.filter((node) => !node.ignored && node.role?.value === 'figure')).toHaveLength(2 * Object.keys(tokens.themes).length)
+})
+
 test('Themes: every contrast check passes, and the table needs no script', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false, baseURL: test.info().project.use.baseURL })
   const page = await context.newPage()
