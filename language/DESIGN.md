@@ -128,7 +128,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
   | Role | Shape | Token | Members |
   | --- | --- | --- | --- |
-  | Acts, or sets a value on one line | Pill | `--radius-control` | Buttons, quiet actions other than the project-menu trigger, and segmented controls with their thumbs |
+  | Acts, or sets a value in place with every option shown, on one line | Pill | `--radius-control` | Buttons, quiet actions other than the project-menu trigger, and segmented controls with their thumbs |
   | Small state mark | Pill | `--radius-pill` | Status badges, switch tracks and knobs, slider and progress tracks, score pips, and the in-page location pip |
   | A place, or a row you pick | 6px | `--radius-inline` | Navigation rows outside a floating menu, group labels, breadcrumb links, tabs, list rows, checkboxes, and keyboard keys |
   | Something you type in, a control whose label wraps, or a one-line control that is not an action | 10px | `--radius-field` | Inputs, textareas, search fields, toggle cards, pager links, and one-line controls that are not actions: the select, the project-menu trigger, and the skip link |
