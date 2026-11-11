@@ -162,6 +162,9 @@ const FOUNDATIONS_CSS = `
   .find-summary { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
   /* The phone bar's Clear names the query on one line, cut short with an ellipsis; the bar's icon buttons keep their size. */
   .section-bar > .bar-clear { display: block; width: auto; max-width: 7.5rem; padding-inline: var(--space-2); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  /* The site name keeps its one line, so the bar may shrink below its content and Clear gives way; the icon buttons keep their size. */
+  .page-head > .section-bar { min-width: 0; }
+  .section-bar > .btn:not(.bar-clear) { flex: none; }
   @media (forced-colors: active) { .chip { forced-color-adjust: none; } }
 ${stackedTablesCss(STACK_BELOW)}`
 

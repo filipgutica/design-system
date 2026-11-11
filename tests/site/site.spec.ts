@@ -282,8 +282,9 @@ test('the breadcrumb lines up with Find, and shows both crumbs on phones', async
   await expect(page.locator('main .crumbs a')).toHaveText('Design system')
 })
 
-test('on phones, the sticky bar offers Clear on one line while a filter is on', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 })
+// 320px is the narrowest phone; headless Linux also takes a scrollbar gutter out of 390px.
+for (const width of [390, 320]) test(`on phones, the sticky bar offers Clear on one line while a filter is on, at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 844 })
   await page.goto('foundations.html')
   await page.locator('#section-find').click()
   await page.locator('#find').fill('surface-raised shadow')
