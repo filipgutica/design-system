@@ -561,12 +561,16 @@ const mandatory = (condition, feature) => {
   }
   const operands = parts.filter((_, i) => i % 2 === 0)
   const operators = new Set(parts.filter((_, i) => i % 2 === 1).map((word) => word.toLowerCase()))
-  if (parts.length % 2 === 0 || operators.size !== 1) return false
+  // An operand is a parenthesised group or a media type; anything else makes the query unreadable.
+  const valid = operands.every((operand) => /^\(.*\)$/.test(operand) || /^(?:all|screen|print)$/.test(operand))
+  if (parts.length % 2 === 0 || operators.size !== 1 || !valid) return false
   if (operators.has('and')) return operands.some((operand) => mandatory(operand, feature))
   if (operators.has('or')) return operands.every((operand) => mandatory(operand, feature))
   return false
 }
-const requiredIn = (feature, context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && mandatory(rule.slice('@media'.length), feature))
+// Lowercase, and space every parenthesis, so (hover:hover)and (pointer:fine) splits like the spaced form.
+const normalise = (condition) => condition.toLowerCase().replace(/[()]/g, ' $& ').replace(/\s+/g, ' ').trim()
+const requiredIn = (feature, context) => context.split(/(?=@)/).some((rule) => rule.startsWith('@media') && mandatory(normalise(rule.slice('@media'.length)), feature))
 const inForcedColors = (context) => requiredIn(forcedColorsActive, context)
 const isRawColour = (value, forced = false) => rawColourPatterns.some((pattern) => pattern.test(value)) || (!forced && word(systemColours).test(value))
 // SVG colour attributes in markup, outside scripts and style blocks; currentColor, none, and url() refs pass.
@@ -589,7 +593,8 @@ test('the raw-colour guard catches hex, colour functions, named colours, SVG col
     @media (forced-colors: active) and (prefers-color-scheme: dark), (forced-colors: active) { .q { color: CanvasText } }
     @media ((forced-colors: active) or (min-width: 801px)) { .r { color: CanvasText } }
     @media (forced-colors: active) and (not (prefers-color-scheme: dark)) { .s { color: CanvasText } }
-    @media (forced-colors: active) and ((min-width: 801px) or (prefers-color-scheme: dark)) { .t { color: CanvasText } }</style><p style="color: navy"></p>
+    @media (forced-colors: active) and ((min-width: 801px) or (prefers-color-scheme: dark)) { .t { color: CanvasText } }
+    @media (forced-colors:active)and (prefers-color-scheme:dark) { .u { color: CanvasText } }</style><p style="color: navy"></p>
     <svg><path stroke="#ff0000" fill="none"/><path fill='currentColor' stroke="url(#g)"/><stop stop-color="white"/><path fill = "#ff0000"/><path fill=red /></svg>`
   assert.deepEqual(rawColours('planted.html', planted).map((line) => line.split(' { ')[0]), [
     'planted.html: .a', 'planted.html: .b', 'planted.html: .c', 'planted.html: .d', 'planted.html: .e', 'planted.html: .f',
@@ -654,7 +659,7 @@ const hoverExceptions = new Map([
   // ['page.html selector', 'reason'],
 ])
 const paints = /(?:^|;\s*)(?:--[\w-]+|background(?:-color|-image)?|box-shadow|color|outline(?:-color)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-color)?)\s*:/
-const hoverCapable = /^\(\s*hover\s*:\s*hover\s*\)$/
+const hoverCapable = /^\(\s*hover\s*(?::\s*hover\s*)?\)$/
 const stickyHover = (file, html) => perSelector(cssRules(html))
   .filter(({ context, selector, body }) => /:hover\b/.test(selector) && paints.test(body) && !requiredIn(hoverCapable, context))
   .map(({ selector }) => `${file} ${selector}`)
@@ -668,6 +673,8 @@ test('the sticky-hover guard catches a painting hover rule outside @media (hover
     @media (hover: hover) and ((max-width: 800px) or (pointer: fine)) { .nested:hover { background: red } }
     @media ((hover: hover) and (pointer: fine)) { .grouped:hover { background: red } }
     @media ((hover: hover) and (pointer: fine)) and (min-width: 801px) { .wide:hover { background: red } }
+    @media (hover:hover)and (pointer:fine) { .glued:hover { background: red } } @media (hover) { .bare:hover { background: red } }
+    @media (HOVER: HOVER) { .caps:hover { background: red } } @media (hover: hover) and garbage { .garbage:hover { background: red } }
     @media (hover: hover), { .trailing:hover { background: red } } @media (hover: hover) and ) { .unbalanced:hover { background: red } }
     .sink:hover:not(:disabled) { --depth: var(--shadow-sink) } @media (hover: hover) { .sunk:hover { --depth: none } }
     @media (hover: hover), (max-width: 640px) { .either:hover { background: red } }
@@ -675,7 +682,7 @@ test('the sticky-hover guard catches a painting hover rule outside @media (hover
     @media (forced-colors: active) { .fc:hover { border-color: red } }</style>`
   assert.deepEqual(stickyHover('planted.html', planted), [
     'planted.html .chip:hover', 'planted.html .row:is(:hover, .is-hover)', 'planted.html .edge:hover', 'planted.html .side:hover',
-    'planted.html .ring:hover', 'planted.html .trailing:hover', 'planted.html .unbalanced:hover',
+    'planted.html .ring:hover', 'planted.html .garbage:hover', 'planted.html .trailing:hover', 'planted.html .unbalanced:hover',
     'planted.html .sink:hover:not(:disabled)', 'planted.html .either:hover', 'planted.html .negated:hover',
     'planted.html .fc:hover',
   ])
