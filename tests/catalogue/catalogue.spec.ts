@@ -428,11 +428,12 @@ const below = (measured: { name: string; ratio: number; unmeasured?: string }[],
 // The slider track and the select picker are engine pseudo-elements that computed styles cannot reach;
 // the node literal-radius guard covers them.
 const shapeRoles: Record<string, string[]> = {
-  '--radius-control': ['.btn', '.quiet-action:not(.projects > summary)', '.segmented', '.segmented button', '.segmented button::before'],
+  '--radius-control': ['.btn:not(.rail-summary)', '.quiet-action:not(.projects > summary)', '.segmented', '.segmented button', '.segmented button::before'],
   '--radius-pill': ['.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.progress', '.score .pips i', '.badge', '.navlist a[aria-current="location"]::before'],
   '--radius-inline': ['.check input:not([type="radio"])', '.tab', '.navlist a:not(.projects .navlist a)', '.group-toggle', '.crumbs a', '.key', '.rows [role="option"]'],
-  // One-line controls that are not actions take the field corner: the select, the project-menu trigger, and the skip link.
-  '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.projects > summary', '.skip'],
+  // One-line controls that are not actions take the field corner: the select, the project-menu trigger,
+  // the contents trigger's no-JavaScript summary, and the skip link.
+  '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.projects > summary', '.rail-summary', '.skip'],
   '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist'],
 }
 // Rows that sit --space-1 inside a panel are concentric with it.

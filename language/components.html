@@ -342,7 +342,7 @@
   /* Phone trigger: a secondary button with a three-line menu glyph, because it opens a side drawer. */
   .menu-glyph::before { content: ""; flex: none; width: 14px; height: 10px; border-block: 1.5px solid currentColor; background: linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat; }
   /* No-JavaScript fallback: the list opens in place. The summary is a secondary button with a chevron; only the chevron is local. */
-  .rail-summary { list-style: none; width: max-content; max-width: 100%; }
+  .rail-summary { list-style: none; width: max-content; max-width: 100%; border-radius: var(--radius-field); }
   .rail-summary::-webkit-details-marker { display: none; }
   .rail-summary::after { content: ""; width: 6px; height: 6px; margin-left: var(--space-1); border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: rotate(45deg); }
   details.rail-details[open] > .navlist { margin-top: var(--space-2); }
