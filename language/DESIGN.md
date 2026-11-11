@@ -128,10 +128,10 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
   | Role | Shape | Token | Members |
   | --- | --- | --- | --- |
-  | Acts, or sets a value in place with every option shown, on one line | Pill | `--radius-control` | Buttons other than the contents trigger's no-JavaScript summary, quiet actions other than the project-menu trigger, and segmented controls with their thumbs |
+  | Acts, or sets a value in place with every option shown, on one line | Pill | `--radius-control` | Buttons other than the labelled contents trigger and its no-JavaScript summary, quiet actions other than the project-menu trigger, and segmented controls with their thumbs |
   | Small state mark | Pill | `--radius-pill` | Status badges, switch tracks and knobs, slider and progress tracks, score pips, and the in-page location pip |
   | A place, or a row you pick | 6px | `--radius-inline` | Navigation rows outside a floating menu, group labels, breadcrumb links, tabs, list rows, checkboxes, and keyboard keys |
-  | Something you type in, a control whose label wraps, or a one-line control that is not an action | 10px | `--radius-field` | Inputs, textareas, search fields, toggle cards, pager links, and one-line controls that are not actions: the select, the project-menu trigger, the contents trigger's no-JavaScript summary, and the skip link |
+  | Something you type in, a control whose label wraps, or a one-line control that is not an action | 10px | `--radius-field` | Inputs, textareas, search fields, toggle cards, pager links, and one-line controls that are not actions: the select, the project-menu trigger, the labelled contents trigger and its no-JavaScript summary, and the skip link |
   | Holds other things | 16px | `--radius-panel` | Wells, plates, panels, cards, radio cards, alerts, code blocks, example frames, and floating layers |
 
   - A pill never holds text that can wrap. A control whose label can wrap, such as a toggle card or a radio card, is a rectangle.

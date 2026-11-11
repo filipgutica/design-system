@@ -339,7 +339,9 @@
   }
   /* Inset: the rail and the drawer scroll. */
   .navlist a:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
-  /* Phone trigger: a secondary button with a three-line menu glyph, because it opens a side drawer. */
+  /* Phone trigger: a secondary button with a three-line menu glyph, because it opens a side drawer. It shows the page’s
+     contents and does not act, so it takes the field corner, as its no-JavaScript summary does. */
+  .menu-glyph { border-radius: var(--radius-field); }
   .menu-glyph::before { content: ""; flex: none; width: 14px; height: 10px; border-block: 1.5px solid currentColor; background: linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat; }
   /* No-JavaScript fallback: the list opens in place. The summary is a secondary button with a chevron; only the chevron is local. */
   .rail-summary { list-style: none; width: max-content; max-width: 100%; border-radius: var(--radius-field); }
