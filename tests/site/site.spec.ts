@@ -235,6 +235,38 @@ test('Copy writes var(--name) and says so', async ({ page }) => {
   await expect(page.locator('#copy-status')).toHaveText('Copied var(--color-bg).')
 })
 
+test.describe('Copy on a touch screen', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } })
+
+  test('leaves no hover tint after a tap and keeps its tint on the name line', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => {} } })
+    })
+    await page.goto('foundations.html')
+    expect(await page.evaluate(() => matchMedia('(hover: hover)').matches)).toBe(false)
+    const row = page.locator('.tokens tbody tr', { has: page.locator('.name', { hasText: /^--color-muted$/ }) })
+    const copy = row.getByRole('button', { name: 'Copy var(--color-muted)' })
+    await copy.tap()
+    await expect(row.locator('.copy-result')).toHaveText('Copied')
+    // A touch screen keeps :hover on the tapped button, so a hover fill would stay.
+    await expect(copy).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    // The box that draws the pressed tint and the focus ring ends above the former name.
+    const box = (await copy.boundingBox())!
+    const was = (await row.locator('.was').boundingBox())!
+    expect(box.y + box.height).toBeLessThanOrEqual(was.y + 0.5)
+    // The touch target stays 44px tall.
+    expect(await copy.evaluate((b) => getComputedStyle(b, '::after').height)).toBe('44px')
+  })
+})
+
+test('Copy still takes the hover tint where the pointer can hover', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('foundations.html')
+  const copy = page.getByRole('button', { name: 'Copy var(--color-muted)' })
+  await copy.hover()
+  await expect(copy).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+})
+
 test('each component header links its implementations', async ({ page }) => {
   await page.goto('components.html')
   const button = page.locator('#button > header .impl')

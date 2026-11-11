@@ -247,16 +247,16 @@ test('example pages copy the catalogue rules for the shared controls and compone
 // "without"), and the catalogue state rules that variant needs, so a page that uses it must copy them.
 const pressed = ':is(:active, [aria-pressed="true"], .is-active):not(:disabled)'
 const stateNeeds = [
-  { classes: ['btn'], states: ['.btn:is(:hover, .is-hover):not(:disabled)', `.btn:not(.text)${pressed}`] },
+  { classes: ['btn'], states: ['@media (hover: hover) .btn:hover:not(:disabled)', `.btn:not(.text)${pressed}`] },
   { classes: ['btn'], without: ['secondary', 'ghost', 'danger', 'text'], states: [`.btn:not(.secondary, .ghost, .danger, .text)${pressed}`] },
-  { classes: ['btn', 'secondary'], states: ['.btn.secondary:is(:hover, .is-hover):not(:disabled)', `.btn:is(.secondary, .ghost)${pressed}`] },
-  { classes: ['btn', 'ghost'], states: ['.btn.ghost:is(:hover, .is-hover):not(:disabled)', `.btn:is(.secondary, .ghost)${pressed}`] },
-  { classes: ['btn', 'danger'], states: ['.btn.danger:is(:hover, .is-hover):not(:disabled)', `.btn.danger${pressed}`] },
-  { classes: ['quiet-action'], states: ['.quiet-action:is(:hover, .is-hover):where(:not(:disabled))', '.quiet-action:is(:active, .is-active):where(:not(:disabled))'] },
+  { classes: ['btn', 'secondary'], states: ['@media (hover: hover) .btn.secondary:hover:not(:disabled)', `.btn:is(.secondary, .ghost)${pressed}`] },
+  { classes: ['btn', 'ghost'], states: ['@media (hover: hover) .btn.ghost:hover:not(:disabled)', `.btn:is(.secondary, .ghost)${pressed}`] },
+  { classes: ['btn', 'danger'], states: ['@media (hover: hover) .btn.danger:hover:not(:disabled)', `.btn.danger${pressed}`] },
+  { classes: ['quiet-action'], states: ['@media (hover: hover) .quiet-action:hover:where(:not(:disabled))', '.quiet-action:is(:active, .is-active):where(:not(:disabled))'] },
   {
     classes: ['segmented'],
     states: [
-      '.segmented button:is(:hover, .is-hover):not(:disabled, [aria-pressed="true"])',
+      '@media (hover: hover) .segmented button:hover:not(:disabled, [aria-pressed="true"])',
       '.segmented button[aria-pressed="true"]',
       '.segmented button[aria-pressed="true"]::before',
       '@media (forced-colors: active) .segmented button[aria-pressed="true"]',
@@ -266,7 +266,7 @@ const stateNeeds = [
   {
     classes: ['tab'],
     states: [
-      '.tab:is(:hover, .is-hover):where(:not(:disabled))',
+      '@media (hover: hover) .tab:hover:where(:not(:disabled))',
       '.tab[aria-selected="true"]',
       '.tab[aria-selected="true"]::before',
       '@media (forced-colors: active) .tab[aria-selected="true"]',
@@ -276,7 +276,7 @@ const stateNeeds = [
   {
     classes: ['navlist'],
     states: [
-      '.navlist a:is(:hover, .is-hover)', '.navlist a[aria-current="page"]', '@media (forced-colors: active) .navlist a[aria-current="page"]',
+      '@media (hover: hover) .navlist a:hover', '.navlist a[aria-current="page"]', '@media (forced-colors: active) .navlist a[aria-current="page"]',
       '@supports (text-box: trim-both cap alphabetic) .navlist a:not(:has(> *))',
       '@supports (text-box: trim-both cap alphabetic) .navlist a:not(:has(> *))[aria-current="location"]::before',
     ],
@@ -620,6 +620,30 @@ test('the hover guard catches a hover rule that reaches a disabled button, input
 test('no hover rule on any page reaches a disabled control', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
   assert.deepEqual(pages.flatMap((page) => hoverOnDisabled(page, read(page))), [])
+})
+
+// A touch screen keeps :hover on the last element tapped, so a hover fill would stay behind after a
+// tap. Every :hover rule that paints (background, box-shadow, border colour, or text colour) sits in
+// @media (hover: hover). An exception names its page and selector, with the reason it may stick.
+const hoverExceptions = new Map([
+  // ['page.html selector', 'reason'],
+])
+const paints = /(?:^|;\s*)(?:background(?:-color|-image)?|box-shadow|border(?:-[a-z]+)*-color|color):/
+const stickyHover = (file, html) => perSelector(cssRules(html))
+  .filter(({ context, selector, body }) => /:hover\b/.test(selector) && paints.test(body) && !/\(hover: hover\)/.test(context))
+  .map(({ selector }) => `${file} ${selector}`)
+  .filter((rule) => !hoverExceptions.has(rule))
+
+test('the sticky-hover guard catches a painting hover rule outside @media (hover: hover)', () => {
+  const planted = `<style>.chip:hover { background: red } .link:hover { text-decoration: underline }
+    .row:is(:hover, .is-hover) { color: red } .btn.is-hover { background: red }
+    @media (hover: hover) { .ok:hover { background: red } } @media (forced-colors: active) { .fc:hover { border-color: red } }</style>`
+  assert.deepEqual(stickyHover('planted.html', planted), ['planted.html .chip:hover', 'planted.html .row:is(:hover, .is-hover)', 'planted.html .fc:hover'])
+})
+
+test('every painting hover rule on every page waits for a pointer that can hover', () => {
+  const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
+  assert.deepEqual(pages.flatMap((page) => stickyHover(page, read(page))), [])
 })
 
 // The selected fill must keep accent text readable. This reads the default hue pair, the surfaces, and

@@ -137,11 +137,13 @@ const FOUNDATIONS_CSS = `
   .tokens tbody th { font-weight: var(--weight-regular); }
   .tokens code { font-size: var(--text-xs); }
   /* The name and its former name stack on the cell's first lines, level with the values. Copy sits right
-     after the name, centred on its line; negative margins take back the 44px target's extra height, so it
-     never pushes the former name down. */
+     after the name, centred on its line. Its box, and so its tint and focus ring, fit that line, so they
+     never draw over the former name; a transparent ::after keeps the 44px touch target. */
   .token { display: grid; grid-template-columns: minmax(0, max-content) auto; justify-content: start; column-gap: var(--space-1); align-items: start; }
   .token .name { min-width: 0; overflow-wrap: anywhere; color: var(--color-text); }
-  .token .copy { grid-row: 1; grid-column: 2; align-self: center; margin-block: -0.875rem; }
+  .token .copy { position: relative; grid-row: 1; grid-column: 2; align-self: center; justify-self: start; min-width: 0; min-height: 0; margin: 0; padding-block: 0; }
+  .token .copy::after { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, var(--control-lg)); height: var(--control-lg); translate: -50% -50%; }
+  .token .copy:focus-visible { outline-offset: calc(var(--focus-width) * -1); }
   .copy-result { font-size: var(--text-xs); }
   .was { grid-column: 1 / -1; color: var(--color-muted); font-size: var(--text-xs); }
   .was code { color: var(--color-muted); }
