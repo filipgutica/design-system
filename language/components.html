@@ -464,9 +464,11 @@
   .code-head .lang { color: var(--color-muted); }
   /* Copy is a quiet action; this sets its size and place. */
   .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-lg); min-height: var(--control-lg); margin-left: auto; padding: var(--space-1) 0.375rem; color: inherit; }
-  /* The code block has its own palette, so its Copy keeps the plate's text colour on hover. */
-  .code .copy.is-hover:where(:not(:disabled)) { color: inherit; }
-  @media (hover: hover) { .code .copy:hover:where(:not(:disabled)) { color: inherit; } }
+  /* Copy is muted at rest. The code block has its own palette, so on hover and while the tick shows it takes the block's text colour. */
+  .code .copy { color: var(--color-muted); }
+  .code .copy[data-copied] { color: var(--color-code-text); }
+  .code .copy.is-hover:where(:not(:disabled)) { color: var(--color-code-text); }
+  @media (hover: hover) { .code .copy:hover:where(:not(:disabled)) { color: var(--color-code-text); } }
   /* Inset: the code block clips its content. */
   .code pre:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   .code .copy.quiet-action:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
@@ -477,8 +479,8 @@
   .code .line > span { white-space: pre; }
   .code .ln { min-width: 2.5em; padding-right: 1em; flex: none; text-align: right; color: var(--color-muted); user-select: none; }
   .code .k { color: var(--color-syntax-keyword); } .code .s { color: var(--color-syntax-string); } .code .n { color: var(--color-syntax-number); } .code .c { color: var(--color-syntax-comment); }
-  /* The panel fills the row beside Copy, so it sits --space-1 inside the frame on every side, and centres its line. */
-  .code.compact { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  /* The panel fills the row beside Copy, so it sits --space-1 from the frame and from Copy on every side, and centres its line. */
+  .code.compact { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-1); }
   .code.compact pre { align-content: center; padding: var(--space-2) var(--space-3); }
 
   /* Code block with a live example: a live stage over its source, in one frame. */
@@ -495,8 +497,9 @@
   /* ================= Identity: terminal folio ================= */
 
   /* Command plate: dark in both themes and tinted with the project hue. Its source panel is the plate darkened, so it reads as a panel on it. */
-  /* The plate is dark in both themes, so its focus ring takes the dark-theme accent, which reaches 3:1 on it. */
-  .code.command { --color-code: color-mix(in srgb, var(--color-command-bg) 55%, var(--color-terminal)); --color-code-text: var(--color-terminal-text); --color-focus: var(--color-project-dark); border-color: var(--color-command-border); background: var(--color-command-bg); color: var(--color-terminal-text); }
+  /* The plate is dark in both themes, so its focus ring takes the dark-theme accent, which reaches 3:1 on it,
+     and muted text, such as Copy at rest, takes the caption colour. */
+  .code.command { --color-code: color-mix(in srgb, var(--color-command-bg) 55%, var(--color-terminal)); --color-code-text: var(--color-terminal-text); --color-muted: var(--color-terminal-caption-text); --color-focus: var(--color-project-dark); border-color: var(--color-command-border); background: var(--color-command-bg); color: var(--color-terminal-text); }
   .code.command .code-head { color: var(--color-terminal-caption-text); }
   .code.command .code-head .lang { color: var(--color-terminal-caption-text); }
   /* The prompt is drawn by CSS, so copied and spoken text omit it. */
@@ -1679,15 +1682,19 @@
     return [...lines].map((line) => [...line.childNodes].filter((n) => !(n instanceof Element && n.classList.contains('ln'))).map((n) => n.textContent).join('')).join('\n');
   };
   const status = document.getElementById('copy-status');
-  // A successful copy swaps the button's icon for a tick for 1.5s. A repeat click restarts the wait,
-  // and a failure puts the icon back at once. The label and accessible name do not change.
+  // A successful copy swaps the button's icon for a tick for 1.5s, and marks the button data-copied for the
+  // colour. A repeat click restarts the wait, and a failure puts the icon back at once. The label and
+  // accessible name do not change.
   const ticks = new WeakMap();
   const showCopied = (button, ok) => {
     const use = button.querySelector('.icon use');
     use.dataset.icon ??= use.getAttribute('href');
+    const restore = () => { use.setAttribute('href', use.dataset.icon); delete button.dataset.copied; };
     clearTimeout(ticks.get(button));
-    use.setAttribute('href', ok ? '#i-tick' : use.dataset.icon);
-    if (ok) ticks.set(button, setTimeout(() => use.setAttribute('href', use.dataset.icon), 1500));
+    if (!ok) { restore(); return; }
+    use.setAttribute('href', '#i-tick');
+    button.dataset.copied = '';
+    ticks.set(button, setTimeout(restore, 1500));
   };
   document.querySelectorAll('[data-copy]').forEach((button) => button.addEventListener('click', async () => {
     const text = copyText(document.getElementById(button.dataset.copy));
