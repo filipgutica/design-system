@@ -1693,6 +1693,7 @@
   });
 
   // Full size: open the selected capture in a named modal; the native dialog restores focus to the trigger.
+  // Safari does not focus a button on click, so the trigger takes focus first and the dialog has it to return to.
   const viewer = document.getElementById('capture-viewer');
   document.querySelectorAll('[data-full-size]').forEach((button) => button.addEventListener('click', () => {
     const panel = button.closest('.capture').querySelector('.tabpanel:not([hidden])');
@@ -1701,6 +1702,7 @@
     const screen = panel.querySelector('.screen').cloneNode(true);
     screen.setAttribute('aria-label', `${name} capture, full size`);
     document.getElementById('capture-viewer-body').replaceChildren(screen, panel.querySelector('.capture-caption').cloneNode(true));
+    button.focus({ preventScroll: true });
     viewer.showModal();
   }));
 

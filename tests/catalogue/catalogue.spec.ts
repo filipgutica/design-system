@@ -433,13 +433,13 @@ test.describe('tablet and phone', () => {
 })
 
 // The backdrop belongs to the dialog element, so a press on it is a press on the dialog outside the dialog's box.
-// The dialog is centred at both widths, so the top left corner is outside it.
-test.describe('outside the live dialog', { tag: '@webkit' }, () => {
-  const outside = { x: 20, y: 20 }
-  const open = async (page: Page) => {
+// The dialogs are centred with a margin at both widths, so the top left corner is outside them.
+test.describe('outside a dialog', { tag: '@webkit' }, () => {
+  const outside = { x: 8, y: 8 }
+  const open = async (page: Page, { opener = '[data-open="live-dialog"]', id = 'live-dialog' } = {}) => {
     await page.goto(url)
-    const button = page.locator('[data-open="live-dialog"]')
-    const dialog = page.locator('#live-dialog')
+    const button = page.locator(opener)
+    const dialog = page.locator(`#${id}`)
     await button.click()
     await expect(dialog).toBeVisible()
     const box = (await dialog.boundingBox())!
@@ -466,6 +466,13 @@ test.describe('outside the live dialog', { tag: '@webkit' }, () => {
         await page.mouse.move(outside.x, outside.y)
         await page.mouse.up()
         await expect(dialog).toBeVisible()
+        await (input === 'tap' ? page.touchscreen.tap(outside.x, outside.y) : page.mouse.click(outside.x, outside.y))
+        await expect(dialog).toBeHidden()
+        await expect(button).toBeFocused()
+      })
+
+      test(`a ${input} outside closes the full size capture and focuses its button`, async ({ page }) => {
+        const { button, dialog } = await open(page, { opener: '[data-full-size]', id: 'capture-viewer' })
         await (input === 'tap' ? page.touchscreen.tap(outside.x, outside.y) : page.mouse.click(outside.x, outside.y))
         await expect(dialog).toBeHidden()
         await expect(button).toBeFocused()
