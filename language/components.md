@@ -1,6 +1,6 @@
 # Component specs
 
-One section for each component in the design language. Write any framework's version of a component from its section. [`components.html`](components.html) shows each state as static markup, and [`tokens.css`](tokens.css) holds the values. The [decisions](decisions.md) record why each choice was made. `@filipgutica/ui` is the Vue implementation; the `ui:` line in each section names its component, for comparison only.
+One section for each component in the design language. Write any framework's version of a component from its section. [`components.html`](components.html) shows each state as static markup, and [`tokens.css`](tokens.css) holds the values. The [decisions](decisions.md) record why each choice was made.
 
 Each section has these parts: anatomy, states, then Do and Don't, keyboard and screen reader, motion, and forced colors. A part that does not apply says "None", with the reason. Do names the choice to make, and Don't names the mistake to avoid; neither repeats the spec. A section may add tokens and parts of its own. Sizes are in CSS pixels at the default 16px root font size. Type, spacing, and control sizes are set in rem (pixels ÷ 16), so they follow the reader's font-size setting; borders, focus rings, and shadows stay in pixels. A percentage mix means `color-mix(in srgb, A n%, B)`.
 
@@ -45,9 +45,9 @@ A control's **States** line names each interactive state it has. In `components.
 
 ## Button
 
-Layer: Core. ui: `UiButton`.
+Layer: Core.
 
-- **Anatomy.** A native `<button>` with a label and an optional 16px leading icon. A link that should look like a button is an `<a>` with the same classes and no underline; in `@filipgutica/ui`, `class="fg-button"` with `data-variant` and `data-size`. Medium weight, `-0.01em` tracking, line height 1.25, `--radius-control` (pill). Horizontal padding is 10px at `sm`, `--space-3` at `md`, and `--space-4` at `lg`.
+- **Anatomy.** A native `<button>` with a label and an optional 16px leading icon. A link that should look like a button is an `<a>` with the same classes and no underline. Medium weight, `-0.01em` tracking, line height 1.25, `--radius-control` (pill). Horizontal padding is 10px at `sm`, `--space-3` at `md`, and `--space-4` at `lg`.
 - **Variants.**
 
   | Variant | Rest | Hover | Pressed |
@@ -68,7 +68,7 @@ Layer: Core. ui: `UiButton`.
 
 ## Quiet action
 
-Layer: Core. ui: the `fg-quiet-action` class.
+Layer: Core.
 
 - **Anatomy.** A native `<button>`, or the `<summary>` of a menu. Transparent fill, a transparent 1px border, `--radius-control`, and `--color-muted`. The project trigger overrides the corner with `--radius-field`, because it opens a menu and does not act (see [Site header](#site-header)). The content is centred in the box. An icon-only action holds an SVG icon, never a text glyph such as ×, because a font draws a glyph's ink off the centre of its box. Give the shared recipe zero specificity (`:where()`), so each component sets the action's size, place, and resting colour.
 - **States.** Hover turns the text `--color-text` and fills `currentColor` at 6% over transparent, only where the pointer can hover (`@media (hover: hover)`). Pressed fills `currentColor` at 12%, with no sink. Focus-visible is the focus ring, inset where the parent clips. An open menu keeps its trigger at the 6% hover tint, below the press. The code block's Copy is `--color-muted` at rest and takes the block's text colour (`--color-code-text`) on hover and while its tick shows. A disabled quiet action follows the shared [disabled](#rules-for-every-control) rule.
@@ -80,7 +80,7 @@ Layer: Core. ui: the `fg-quiet-action` class.
 
 ## Checkbox and radio
 
-Layer: Core. ui: `UiCheckbox`. ui has no standalone radio; radio cards cover radio choices there.
+Layer: Core.
 
 - **Anatomy.** A `<label>` around the box and its text, with a gap of about 9px. The box is 16px at `sm`, 18px at `md`, and 20px at `lg`. Checkbox corners are `--radius-inline`; a radio is round. The row is at least the control height of its size, and the label takes that size's text: `--text-sm` at `sm`, `--text-md` at `md`, and `--text-lg` at `lg`.
 - **Tokens.** Unchecked: `--color-surface-raised` fill and a 1px `--color-border` edge. Checked: `--color-accent` fill and edge, with a check mark in `--color-accent-text`. A checked radio shows a 5px `--color-accent` ring around a `--color-surface-raised` centre.
@@ -93,7 +93,7 @@ Layer: Core. ui: `UiCheckbox`. ui has no standalone radio; radio cards cover rad
 
 ## Radio card group
 
-Layer: Core. ui: `UiRadioCardGroup`, `UiRadioCard`.
+Layer: Core.
 
 - **Anatomy.** A grid of cards (`repeat(auto-fit, minmax(160px, 1fr))`, `--space-3` gap). Each card is a `<label>` with a title, an optional muted description, and a 16px round indicator in the top right corner. The native radio stays inside the card.
 - **Tokens.** Unselected: `--color-surface-raised`, `--shadow-raise`, transparent border, `--radius-panel`, `--space-3` padding. Hover: `--color-surface-muted` 45% into `--color-surface-raised`. Selected: `--color-well` fill and `--shadow-sink`, with the indicator filled `--color-accent` and an `--color-accent-text` check. The selected card has no accent ring.
@@ -106,7 +106,7 @@ Layer: Core. ui: `UiRadioCardGroup`, `UiRadioCard`.
 
 ## Switch
 
-Layer: Core. ui: `UiSwitch`.
+Layer: Core.
 
 - **Anatomy.** A `<button role="switch" aria-checked>` that contains the track, and a separate `<label for>` with an optional description. The button's hit area is at least 32px wide and the control height tall. The track is 44×22 with a pill radius; the knob is 18px, inset 2px. `sm` scales both by 0.8 and `lg` by 1.2.
 - **Tokens.** Off track: `--color-border` 90% into `--color-well`, `--shadow-sink`, transparent 1px border. Knob: `--color-surface-raised` with `--shadow-raise`. On: `--color-accent` track, `--color-accent-text` knob moved 22px to the right.
@@ -119,7 +119,7 @@ Layer: Core. ui: `UiSwitch`.
 
 ## Toggle button
 
-Layer: Core. ui: `UiToggleButton`.
+Layer: Core.
 
 - **Anatomy.** A `<button aria-pressed>` with a switch track at the start, then a label and an optional `--text-xs` muted description. `--radius-field` corners (a labelled card, so wrapped labels sit square), `--space-2` `--space-3` padding, `--color-surface-raised` fill, a 1px `--color-border-subtle` edge, and no shadow. The visible edge and the missing raise are a named exception; see [decisions](decisions.md).
 - **States.** Rest, hover (`--color-border` edge), pressed (the track turns on as in the switch and carries the state; the card takes `--color-accent` at 8% over `--color-surface-raised` and a hairline of `--color-accent` at 35%), focus-visible, and disabled.
@@ -131,7 +131,7 @@ Layer: Core. ui: `UiToggleButton`.
 
 ## Segmented control
 
-Layer: Core. ui: `UiSegmentedControl`.
+Layer: Core.
 
 - **Anatomy.** A `role="group"` with an accessible name, containing one `<button aria-pressed>` for each option. The track is undivided: `--color-well` fill, `--shadow-sink`, a transparent 1px border, and `--radius-control`. Each button is the full control height (`--item`) with `--space-3` padding, and square when icon-only. At tablet width an unsized control sets `--item` to `--control-lg`, so its buttons grow to the touch size and icon-only options stay square. Its thumb is a `::before` layer inset 2px inside the button, behind the label.
 - **Tokens.** Labels are `--color-muted`. The pressed option's thumb is `--color-control-thumb` with `--shadow-raise` and no ring. Its label is `--color-segmented-current-text`: `--color-accent` where it reaches 4.5:1 on the thumb, on the page and on a surface, and otherwise the first of `--color-text`, black, and white that does. An icon-only option needs 3:1. Hover on an unpressed option shows the thumb at 45% and turns the label `--color-text`.
@@ -144,7 +144,7 @@ Layer: Core. ui: `UiSegmentedControl`.
 
 ## Text input and textarea
 
-Layer: Core. ui: `UiInput`. ui has no textarea; a textarea uses the same field recipe.
+Layer: Core. A textarea uses the same field recipe.
 
 - **Anatomy.** A native `<input>` or `<textarea>`. Full width, line height 1.35. Input heights follow the control size, and horizontal padding is about 9px, 10px, or 11px.
 - **Tokens.** Fill `--color-field-bg` (`--color-surface-raised` in light, the sunk `--color-well` well in dark), text `--color-text`, placeholder `--color-muted` at full opacity, corners `--radius-field`, border 1px `--color-field-edge` (`--color-border-subtle`), shadow `--shadow-field` (none in light, `--shadow-sink` in dark).
@@ -158,7 +158,7 @@ Layer: Core. ui: `UiInput`. ui has no textarea; a textarea uses the same field r
 
 ## Select
 
-Layer: Core. ui: `UiSelect`.
+Layer: Core.
 
 - **Anatomy.** A native `<select>` with the input's field recipe and a chevron on the right. Draw the chevron in `currentColor`, or with an 8px border corner in `--color-muted` turned 45°. Right padding leaves room for it at every size.
 - **Picker.** Where `appearance: base-select` is supported, the open list is a floating layer: `--color-surface-raised`, a transparent 1px border, `--radius-panel`, `--shadow-dialog`, 4px padding, at least the select's width, and at most `min(20rem, 50dvh)` tall. Options are at least 32px tall (44px on coarse pointers), with `--space-2` `--space-3` padding and corners of `--radius-panel` minus 4px. Hover fills `--color-row-hover`. An `--color-accent` check at the end marks the checked option. The check carries the state: the option's `--color-row-selected` fill equals `--color-surface-raised`. Keyboard focus is the focus ring, inset because the list scrolls. Other browsers keep the native picker.
@@ -171,7 +171,7 @@ Layer: Core. ui: `UiSelect`.
 
 ## Field wrapper
 
-Layer: Core. ui: `UiField`.
+Layer: Core.
 
 - **Anatomy.** A grid with a 6px gap: label, control, then a description or an error. The error replaces the description.
 - **Tokens.** Label `--text-sm` semibold `--color-text`. Description `--text-sm` `--color-muted`. Error `--text-sm` `--color-error`.
@@ -184,7 +184,7 @@ Layer: Core. ui: `UiField`.
 
 ## Slider
 
-Layer: Core. ui: `UiSlider`.
+Layer: Core.
 
 - **Anatomy.** A 6px track with `--radius-pill` and `--color-surface-muted`, an `--color-accent` range, and a round thumb (16px, 18px, or 20px) with a 2px `--color-accent` edge and a `--color-surface-raised` fill. The current value follows the track as `--text-sm` text in tabular numbers, in an `<output>` whose `for` names the slider.
 - **States.** Rest, dragging (`cursor: grabbing`), focus-visible on the thumb, and disabled.
@@ -196,7 +196,7 @@ Layer: Core. ui: `UiSlider`.
 
 ## Progress
 
-Layer: Core. ui: `UiProgress`.
+Layer: Core.
 
 - **Anatomy.** A track about 9px tall with a 1px `--color-border-subtle` edge, `--radius-pill`, and `--color-surface-muted`, holding an `--color-accent` indicator moved with `translateX`.
 - **States.** None: a progress bar takes no input, so it has no interaction states. Its value follows `aria-valuenow`.
@@ -208,7 +208,7 @@ Layer: Core. ui: `UiProgress`.
 
 ## Score
 
-Layer: Core. ui: `UiScore`.
+Layer: Core.
 
 - **Anatomy.** A row of 8px round pips (`--radius-pill`) with 3px gaps, then the value in medium weight and `/max` in muted regular weight, in tabular numbers. Empty pips have a 1px `--color-border` edge; filled pips are `--color-accent`.
 - **States.** None: a score is static, so it has no interaction states.
@@ -220,7 +220,7 @@ Layer: Core. ui: `UiScore`.
 
 ## Badge
 
-Layer: Core. ui: `UiBadge`.
+Layer: Core.
 
 - **Anatomy.** An inline pill: `--radius-pill`, about 3px by 9px padding, `--text-xs`, medium weight, and a transparent 1px border.
 - **Tokens.** Neutral: `--color-surface-muted` fill, `--color-muted`, no dot. Status tones (success, warning, danger, info): the tone at 22% over `--color-surface-raised`, text of the tone mixed 75% with `--color-text` in light and 85% in dark, and a leading 6px dot in `currentColor`.
@@ -233,7 +233,7 @@ Layer: Core. ui: `UiBadge`.
 
 ## Alert
 
-Layer: Core. ui: `UiAlert`.
+Layer: Core.
 
 - **Anatomy.** An optional 16px icon and short text. `--space-3` `--space-4` padding, `--radius-panel`, and a transparent 1px border.
 - **Tokens.** Neutral: `--color-surface`. Status tones use their `--color-*-surface` tint with `--color-text`; the icon takes the status colour.
@@ -246,7 +246,7 @@ Layer: Core. ui: `UiAlert`.
 
 ## Surface and card
 
-Layer: Core. ui: `UiSurface`, `UiCard`.
+Layer: Core.
 
 - **Anatomy.** A panel: `--color-surface-raised`, transparent 1px border, `--radius-panel`, and `--shadow-surface`. A card adds a header (title in `--text-md` medium weight, with actions at the end), a body, and an optional footer above a `--color-border-subtle` rule in `--text-sm` muted text. Header and body padding is `--space-4`; padding is compact (`--space-3`) or default (`--space-4`).
 - **States.** None: a panel is static. Controls inside it keep their own states.
@@ -258,7 +258,7 @@ Layer: Core. ui: `UiSurface`, `UiCard`.
 
 ## Figure
 
-Layer: Core. ui: `UiFigure`.
+Layer: Core.
 
 - **Anatomy.** A well (`--color-surface`, 1px `--color-border-subtle`, `--radius-panel`, `--space-5` padding, or `--space-4` on phones) with a caption below it in `--text-sm` muted text. Wide content scrolls inside the well. A figure number is `--color-text` in medium weight.
 - **States.** None: a figure is static.
@@ -271,7 +271,7 @@ Layer: Core. ui: `UiFigure`.
 
 ## Dialog
 
-Layer: Core. ui: `UiDialog`.
+Layer: Core.
 
 - **Anatomy.** A floating layer centred on an `--color-overlay` backdrop, at most 512px wide and 672px tall. It has a header (title in 18px semibold with an optional muted description, and a 44px close button), a body that scrolls, and an optional footer on `--color-surface` with its actions at the end. Rules between the parts are `--color-border-subtle`. On phones it becomes a bottom sheet with rounded top corners.
 - **Tokens.** `--color-surface-raised`, a transparent 1px border, `--radius-panel`, `--shadow-dialog`. The close button is a [quiet action](#quiet-action).
@@ -285,7 +285,7 @@ Layer: Core. ui: `UiDialog`.
 
 ## Drawer
 
-Layer: Core. ui: `UiDrawer`.
+Layer: Core.
 
 - **Anatomy.** A dialog fixed to the edge its trigger sits on, full height, `min(--sidebar + 48px, 100vw - 48px)` wide, with a header (title and close button) and a body that scrolls on its own. It is a floating layer with square corners: `--color-surface-raised`, a transparent 1px border, and `--shadow-dialog`. The close button is a [quiet action](#quiet-action). The family's navigation triggers sit at the start, so navigation drawers open from the left.
 - **Navigation drawer.** A drawer that holds navigation opens on the current row, scrolled to the centre of the body. A keyboard open moves focus to that row; a tap moves focus to the body, so no ring shows and no on-screen keyboard opens. An open with the `/` shortcut moves focus to the [find field](#find-field), which stays pinned at the top of the body while the list scrolls under it.
@@ -300,7 +300,7 @@ Layer: Core. ui: `UiDrawer`.
 
 ## Navigation list
 
-Layer: Core. The mono font on rail rows is identity. ui: the rows in `UiSiteNav` and the project menu.
+Layer: Core. The mono font on rail rows is identity.
 
 - **Anatomy.** A `<nav>` with a name, holding links in rows: at least `--row` tall (`--control-lg` at tablet width), `0 --space-3` padding, `--radius-inline` corners (`calc(var(--radius-panel) - var(--space-1))`, 12px, inside a floating menu such as the project menu, so they are concentric with it), `--text-sm`, and `--color-muted`. A row may hold a leading 16px icon and a trailing muted count. A text-only row centres its label on the cap height: where `text-box` is supported, it is a block with `align-content: center`, `--space-2` block padding, and `text-box: trim-both cap alphabetic`, and the location pip centres itself. The padding keeps a wrapped label's first and last lines clear of the fill's edges and the focus ring. Rows with an icon or a count, and browsers without `text-box`, centre the line box, which leaves a label without descenders about 1px above centre. Groups have a `--text-xs` semibold muted label and 2px gaps between rows.
 - **Groups.** Name groups by purpose, with 2 to 8 rows each. Collapse groups only in a list of more than about 40 rows. A collapsible group's label is a `<button aria-expanded>` in the label type, with `--radius-inline` corners and a chevron that turns −90° when the group is closed. Never collapse the group that holds the current row.
@@ -316,7 +316,7 @@ Layer: Core. The mono font on rail rows is identity. ui: the rows in `UiSiteNav`
 
 ## Section rail
 
-Layer: Core. ui: `UiSiteNav`.
+Layer: Core.
 
 - **Anatomy.** A named `<aside>`, so the find field and the footer sit in a landmark, with `position: sticky; top: 0`, `height: 100dvh`, and a column flex layout with `--space-3` gaps. An optional [find field](#find-field) sits at the top. Below it, a named `<nav>` holds grouped [navigation list](#navigation-list) rows and scrolls on its own (`overflow-y: auto`, `overscroll-behavior: contain`). An optional footer for rail settings, such as the single-key shortcut switch, sits last, above a `--color-border-subtle` rule. The element that draws a divider never scrolls. The rail's rows follow the page order.
 - **States.** Rows take the navigation list states. The current section keeps `aria-current="location"` but takes the current-page look: `--color-nav-current` fill, `--shadow-nav-current`, and `--color-nav-current-text` in medium weight, with no pip. When the location changes, the rail scrolls its own list, never the page, to centre the current row if it is out of view. It leaves the list alone while the pointer is over the rail or focus is inside it.
@@ -329,7 +329,7 @@ Layer: Core. ui: `UiSiteNav`.
 
 ## Find field
 
-Layer: Core. ui: none yet.
+Layer: Core.
 
 - **Anatomy.** An `<input type="search">` in the [field](#text-input-and-textarea) recipe, with a leading 16px search icon in `--color-muted` (32px start padding) and a trailing [keyboard key](#keyboard-key) hint showing `/` (36px end padding). A visually hidden `role="status"` element, named in the field's `aria-describedby`, holds the match count.
 - **States.** Rest, focus-visible (field focus), and a query. The key hint hides while the field has focus or a value, when shortcuts are off, and under `(hover: none)`. With no matches, the list shows "No component matches <q>…</q>." in `--text-sm` `--color-muted`, and a text-button Clear.
@@ -343,7 +343,7 @@ Layer: Core. ui: none yet.
 
 ## Breadcrumbs
 
-Layer: Core. ui: none yet.
+Layer: Core.
 
 - **Anatomy.** `<nav aria-label="Breadcrumb">` holding an `<ol>` in `--text-sm`, right above the page's h1. Separators are `--color-muted` chevrons, a 6px box (`0.375rem`) with 1.5px top and right borders turned 45°, so they hold no text to read. The labels centre on the cap height like navigation rows, and the chevrons centre on the row. Ancestors are `--color-muted` links with no underline, at least `--control-sm` tall (`--control-lg` at tablet width), with `--radius-inline` corners. The current page is plain text with `aria-current="page"`, in `--color-text` and medium weight. On folio sites the trail is mono (identity).
 - **States.** Hover: `--color-text` and an underline. Focus-visible: the focus ring.
@@ -357,7 +357,7 @@ Layer: Core. ui: none yet.
 
 ## Pager
 
-Layer: Core. ui: none yet.
+Layer: Core.
 
 - **Anatomy.** `<nav aria-label="…">` at the end of `main`, with two equal columns and a `--space-4` gap, below a `--color-border-subtle` rule with `--space-6` padding. Each link is a block row with `--space-3` `--space-4` padding, `--radius-field` corners, and a transparent 1px border: a `--text-xs` `--color-muted` direction with an arrow ("Previous", "Next"), then a medium `--color-text` title. Links take `rel="prev"` and `rel="next"`. Next sits in the end column, end-aligned, even when it is alone.
 - **States.** Hover: `--color-row-hover` fill. Focus-visible: the focus ring. There is no current state.
@@ -370,7 +370,7 @@ Layer: Core. ui: none yet.
 
 ## Tabs
 
-Layer: Core. ui: `UiTabs`.
+Layer: Core.
 
 - **Anatomy.** A `role="tablist"` with no rule below it and a 12px gap below it. It scrolls sideways when needed, and a 24px mask fades each clipped edge. Scrolling clips on every side, so the list has 4px (`--space-1`) padding all round: it keeps the selected tab's shadow whole and its fill off the frame edge. Each tab is a borderless button at least `--control-md` tall (`--control-lg` on phones), with `--space-2` `--space-3` padding, `--radius-inline` corners, medium weight, and `--color-muted`. The selected tab's fill is a `::before` layer behind the label, inset 0, with the tab's corners; the list sets `isolation: isolate`, so the layer stays inside it.
 - **States.** Hover fills `--color-row-hover` and turns the text `--color-text`. The selected tab takes the [navigation row](#navigation-list)'s current-page recipe: `--color-nav-current` fill and `--shadow-nav-current`, with no underline. Its text is `--color-nav-current-text`: the first of `--color-accent`, `--color-text`, black, and white that reaches 4.5:1 over the tinted fill, both on the page and on a surface (composite a translucent fill over each first). Focus-visible is the focus ring, inset because the list scrolls.
@@ -382,7 +382,7 @@ Layer: Core. ui: `UiTabs`.
 
 ## Skip link
 
-Layer: Core. ui: the `fg-site-skip` class.
+Layer: Core.
 
 - **Anatomy.** The first focusable element on the page, linking to `main` (`id="main"`) and named "Skip to content". It sits above the page until it takes focus, then shows at the top left as a floating layer: `--color-surface-raised`, a transparent 1px border, `--radius-field`, `--shadow-dialog`, `--space-2` `--space-3` padding, and the focus ring. It takes the field corner, not the 16px corner of other floating layers, because it is a one-line control that is not an action.
 - **States.** Hidden above the page at rest, and shown at the top left while it has focus.
@@ -395,7 +395,7 @@ Layer: Core. ui: the `fg-site-skip` class.
 
 ## Keyboard key
 
-Layer: Core. ui: none yet.
+Layer: Core.
 
 - **Anatomy.** A `<kbd>`: `--font-mono` `--text-xs` medium in `--color-muted`, on a `--color-surface` fill with a 1px `--color-border` edge and `--radius-inline` corners, 20px tall, at least 20px wide, with 5px inline padding and no shadow.
 - **States.** None: a key is static text.
@@ -407,7 +407,7 @@ Layer: Core. ui: none yet.
 
 ## Code block
 
-Layer: Core. ui: `UiCodeBlock`.
+Layer: Core.
 
 - **Anatomy.** A frame that holds an optional header and the source panel.
   - **Frame.** `--color-surface-raised`, a 1px `--color-border-subtle` border, `--radius-panel`, and `--shadow-surface`. Its padding is `0 var(--space-1) var(--space-1)` under a header, and `var(--space-1)` on every side without one.
@@ -426,8 +426,6 @@ Layer: Core. ui: `UiCodeBlock`.
 
 ### With a live example
 
-ui: `UiExample`.
-
 - **Anatomy.** One frame: a `<figure>` with a 1px `--color-border-subtle` edge, `--radius-panel`, no shadow, and its content clipped to the corners. The stage comes first and holds the live preview, centred, at least 8rem tall, with `--space-8` padding. The code block follows directly below the stage, after one `--color-border-subtle` hairline. There is no header row and no language label. An optional caption follows the frame, as a [figure](#figure) caption does.
 - **Tokens.** Frame edge `--color-border-subtle` and corners `--radius-panel`. Stage `--color-bg`. Hairline `--color-border-subtle`.
 - **Stage.** The stage sits on the page background, not in a well or a panel. This is a named exception to the container [depth](DESIGN.md#depth) tier: a preview shows each component on the surface it sits on in a page; see [decisions](decisions.md).
@@ -441,7 +439,7 @@ ui: `UiExample`.
 
 ## Command plate
 
-Layer: Identity. ui: `UiCodeBlock` with a shell language or the compact variant.
+Layer: Identity.
 
 - **Anatomy.** A code block for a shell command, drawn as a dark plate in both themes: the frame is `--color-command-bg` with a `--color-command-border` edge (transparent in light). The source panel is the plate darkened, `color-mix(in srgb, var(--color-command-bg) 55%, var(--color-terminal))`, set as the plate's `--color-code`, so it reads as a panel on the plate. Text, syntax, and the caption all use `--color-terminal-text` or `--color-terminal-caption-text`. Each line starts with a `$ ` prompt in `--color-project-dark`, drawn with `content: "$ " / ""` and `user-select: none`, so copied and spoken text omit it. The plate sets `--color-muted: var(--color-terminal-caption-text)`, so Copy at rest takes the caption colour, and `--color-focus: var(--color-project-dark)`, the dark-theme accent, so every ring on it, Copy's included, reads at 3:1 or more on the dark plate in both page themes.
 - **States.** As for the code block.
@@ -454,7 +452,7 @@ Layer: Identity. ui: `UiCodeBlock` with a shell language or the compact variant.
 
 ## Terminal capture
 
-Layer: Identity. ui: `UiCapture`.
+Layer: Identity.
 
 - **Anatomy.** A panel whose header holds mono tabs (one for each capture) and a Full size [quiet action](#quiet-action) at the end. The screen is the neutral `--color-terminal` plate, and a mono status-line caption sits below it on `--color-terminal-caption` with `--color-terminal-caption-text`. Full size opens the capture in a dialog.
 - **States.** Tabs take the tab states in the capture's palette, and Full size takes the quiet action states.
@@ -467,7 +465,7 @@ Layer: Identity. ui: `UiCapture`.
 
 ## Site header
 
-Layer: Identity. ui: `UiSiteHeader`, `UiSiteAppearancePicker`.
+Layer: Identity.
 
 - **Anatomy.** A static header at least 64px tall on `--color-bg` with a solid 1px `--color-text` rule below it. At the start is the project switcher: a `<details>` whose summary, a [quiet action](#quiet-action), shows the mono, semibold project name after a `~/` mark in `--color-project` (drawn by CSS, so it is not read), then a chevron. It keeps the quiet-action tint, but it opens a menu and does not act, so it takes the 10px field corner (`--radius-field`), as a select does. Its menu is a floating layer, with the dialog's tokens, listing the shared project registry in the order it defines, as navigation rows with concentric 12px corners (`calc(var(--radius-panel) - var(--space-1))`), with the current project marked `aria-current="page"`. At the end are the site links and the appearance picker: an icon-only segmented control at `lg`. The site links are a [navigation strip](#navigation-list) of rows 44px tall (`--control-lg`). A link to a page inside the site takes `aria-current="page"` on that page, with the current-page recipe.
 - **Position.** Every family site, this design system's site included, starts its header with the project switcher. It is the same on every page: never a breadcrumb or a page title, which go above the page's h1 as [breadcrumbs](#breadcrumbs), and the first breadcrumb is the way back to the site's home page. The links sit at the same x on every page, and the current link is as wide as it is on other pages (see the [horizontal strip](#navigation-list)). A header that puts its links right after the switcher, as this design system's site does, is a grid at `min-width: 801px` (`auto minmax(0, 1fr) auto`), so where the links start never depends on the page.
@@ -481,7 +479,7 @@ Layer: Identity. ui: `UiSiteHeader`, `UiSiteAppearancePicker`.
 
 ## Page type and helpers
 
-Layer: Identity. ui: `site.css` helpers.
+Layer: Identity.
 
 - **Anatomy.** Type and layout helpers for identity pages: headings, steps, definitions, facts, a command list, and the footer, each below.
 - **Headings.** Documentation, CLI tool, article, and product page titles (`--text-3xl`) use `--font-mono`; application titles use `--font-ui` at `--text-2xl` or smaller. On documentation, CLI tool, article, and product pages, a page-level section heading (h2) uses `--font-mono` at `--text-xl` (a product page may set it larger, up to `--text-3xl`), starts with a `## ` mark in `--color-accent`, drawn with `content: "## " / ""`, and has a `--color-border-subtle` rule above the section. Application and inline-visualization section headings use `--font-ui`, semibold, at `--text-xl` or smaller, with no mark and no rule; h3 and lower never take the mark. A product page or tool home may use a mono `--text-display` title (`--text-display-sm` on phones).

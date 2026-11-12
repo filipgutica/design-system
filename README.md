@@ -3,14 +3,14 @@
 Filip's design language for any framework: the spec, the tokens, the component catalogue, and the editor themes. It ships as the npm package `@filipgutica/design-system`.
 
 - **Agents** get `language/` at `~/design-language` through filip-stack host config, or by copying it from the package; the site's [Agents](https://filipgutica.github.io/design-system/#agents) section has both.
-- **Vue apps** use [`@filipgutica/ui`](https://github.com/filipgutica/ui), which implements this design language.
+- **Vue apps** can use [`@filipgutica/ui`](https://github.com/filipgutica/ui), a Vue component library built on this design system.
 - **Site:** <https://filipgutica.github.io/design-system/> has the Overview, Foundations, and Components pages, with `index.json` and `llms.txt` for agents.
 
 ## Contents
 
 | Path | What it holds |
 | --- | --- |
-| `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the catalogue (`components.html`), `implementations.json` (each component's Vue and React version), example pages, visualization helpers, and the Graphite Indigo editor theme |
+| `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
 | `tokens/core.json`, `tokens/themes/*.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file holds only its name, a note, its hue pair, and optional fonts |
 | `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css` and `dist/` |
 | `scripts/build-site.mjs` | The site build: writes `site/` for GitHub Pages from `components.html`, the tokens, and `package.json` |

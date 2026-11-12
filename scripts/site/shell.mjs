@@ -16,7 +16,7 @@ export const SITE_URL = 'https://filipgutica.github.io/design-system/'
 
 /**
  * The family's project list, which ui publishes and every family site's header reads. The build renders
- * it into the project menu, and each page loads it again after load, as ui's UiSiteHeader does.
+ * it into the project menu, and each page loads it again after load.
  */
 export const PROJECTS_URL = 'https://filipgutica.github.io/ui/projects.json'
 
