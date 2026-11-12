@@ -391,14 +391,18 @@ test.describe('tablet and phone', () => {
       test(`after a / open, a tap outside returns focus to the trigger without scrolling the page, with reduced motion ${reducedMotion}`, async ({ page }) => {
         await page.emulateMedia({ reducedMotion })
         await page.goto(`${url}#badge`)
+        // The deep link settles once the fonts load and the rail moves into the drawer; measure after that.
+        await expect(page.locator('#section-menu')).toHaveText(/: Badge$/)
+        await page.evaluate(() => document.fonts.ready)
         const before = await page.evaluate(() => scrollY)
         expect(before).toBeGreaterThan(0)
         await page.keyboard.press('/')
         await expect(page.locator('#find')).toBeFocused()
+        expect(await page.evaluate(() => scrollY), 'the open scrolled the page').toBe(before)
         await page.touchscreen.tap(370, 500)
         await expect(page.locator('#nav-drawer')).toBeHidden()
         await expect(page.locator('#section-menu')).toBeFocused()
-        expect(await page.evaluate(() => scrollY)).toBe(before)
+        expect(await page.evaluate(() => scrollY), 'the close scrolled the page').toBe(before)
       })
     }
 
