@@ -9,9 +9,13 @@
 //
 // The version is the latest ds-v* release tag, since package.json keeps 0.0.0-development and
 // semantic-release tags each release. The header's project menu lists the family's projects from ui's
-// published list (PROJECTS_URL), so the build needs the network.
+// published list (PROJECTS_URL), so the build needs the network. The site tests build from a fixture
+// instead, so they never reach it:
+//
+//   node scripts/build-site.mjs --projects tests/fixtures/projects.json
 import { execFileSync } from 'node:child_process'
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { parseArgs } from 'node:util'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { readRenameTable } from './rename-tokens.mjs'
 import { COMPONENTS_CSS, catalogueComponents, componentIndex, implementationProblems, llmsTxt, specGuidance, withImplementationLinks } from './site/components.mjs'
@@ -92,9 +96,18 @@ export const siteFiles = ({ version, projects }) => {
   ]
 }
 
+/** A project list from a local JSON file, held to the same rules as the published one. */
+export const readProjects = (path) => {
+  const projects = parseProjects(JSON.parse(readFileSync(path, 'utf8')))
+  if (!projects) throw new Error(`${path}: no valid project entries`)
+  return projects
+}
+
 const run = async () => {
   const out = `${root}site/`
-  const files = siteFiles({ version: releaseVersion(), projects: await fetchProjects() })
+  const { values } = parseArgs({ options: { projects: { type: 'string' } } })
+  const projects = values.projects ? readProjects(values.projects) : await fetchProjects()
+  const files = siteFiles({ version: releaseVersion(), projects })
   rmSync(out, { recursive: true, force: true })
   mkdirSync(out, { recursive: true })
   for (const name of COPIED) cpSync(`${root}language/${name}`, `${out}${name}`, { recursive: true })

@@ -2,7 +2,8 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { siteFiles } from '../scripts/build-site.mjs'
-import { PROJECTS } from './fixtures/projects.mjs'
+// A small, made-up project list. The real list is ui's published projects.json, which this repository does not copy.
+import PROJECTS from './fixtures/projects.json' with { type: 'json' }
 
 const dir = new URL('../language/', import.meta.url)
 const read = (file) => readFileSync(new URL(file, dir), 'utf8')

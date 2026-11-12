@@ -12,7 +12,8 @@ import { readRenameTable } from '../scripts/rename-tokens.mjs'
 import { readTokens } from '../scripts/build-tokens.mjs'
 import { fileURLToPath } from 'node:url'
 import { read } from './css.mjs'
-import { PROJECTS } from './fixtures/projects.mjs'
+// A small, made-up project list. The real list is ui's published projects.json, which this repository does not copy.
+import PROJECTS from './fixtures/projects.json' with { type: 'json' }
 import { createServer } from 'node:http'
 
 // The site pages share components.html's shell byte for byte, and the package copy of the
@@ -69,7 +70,7 @@ test('every site page starts its header with the project switcher, this site cur
     const page = files.get(file)
     assert.ok(page.includes(`<header class="page-head">\n  ${projectSwitcher(PROJECTS)}`), file)
   }
-  assert.equal(projectSwitcher(PROJECTS), '<details class="projects"><summary class="quiet-action" aria-label="Project: Design system"><span>Design system</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects"><a href="https://example.com/annoterm/">annoterm</a><a href="https://example.com/design-system/" aria-current="page">Design system</a><a href="https://example.com/ui/">UI</a></nav></details>')
+  assert.equal(projectSwitcher(PROJECTS), '<details class="projects"><summary class="quiet-action" aria-label="Project: Design system"><span>Design system</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects"><a href="https://example.com/annoterm/" data-project="annoterm">annoterm</a><a href="https://example.com/design-system/" data-project="design-system" aria-current="page">Design system</a><a href="https://example.com/ui/" data-project="ui">UI</a></nav></details>')
   assert.throws(() => projectSwitcher([project('annoterm')]), /no "design-system" entry/)
   // The package catalogue has no project list, so it keeps the site name as text.
   assert.ok(template.includes('<header class="page-head">\n  <p class="site-name">Design system</p>'))
