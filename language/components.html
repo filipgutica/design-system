@@ -1895,9 +1895,14 @@
 
   // A tap opens the drawer with focus on its body, so no ring shows and no keyboard opens. A keyboard
   // open moves focus to the current row, where the ring shows the reader's place. Find focuses the field.
+  // Every open, by the trigger or the / shortcut, focuses the trigger first, without scrolling, so the drawer
+  // returns focus to it on close. Safari does not focus a button on click, and the shortcut starts anywhere.
   drawerBody.tabIndex = -1;
   const openDrawer = ({ toFind = false, byPointer = false } = {}) => {
-    if (!drawer.open) drawer.showModal();
+    if (!drawer.open) {
+      trigger.focus({ preventScroll: true });
+      drawer.showModal();
+    }
     const current = rail.querySelector('[aria-current="location"]:not([hidden])');
     if (current) centre(drawerBody, current);
     if (toFind || !current) find.focus({ preventScroll: true });
@@ -2004,12 +2009,8 @@
     jumpTo(location.hash.slice(1));
   }
   update();
-  // detail is 0 for a click made with Enter or Space, and 1 or more for a tap or a mouse click. Safari does not
-  // focus a button on click, so the trigger takes focus first and the drawer returns focus to it on close.
-  trigger.addEventListener('click', (e) => {
-    trigger.focus({ preventScroll: true });
-    openDrawer({ byPointer: e.detail > 0 });
-  });
+  // detail is 0 for a click made with Enter or Space, and 1 or more for a tap or a mouse click.
+  trigger.addEventListener('click', (e) => openDrawer({ byPointer: e.detail > 0 }));
 
   // Copy link: writes the component's URL, announces the result, and shows a tick as Copy does.
   document.querySelectorAll('[data-copy-link]').forEach((button) => button.addEventListener('click', async () => {
