@@ -55,7 +55,7 @@ Each entry records a choice this language made, the options it rejected, and why
 | Live example code view | Core | The preview and its code show together. | Preview and Code tabs, as in Chakra UI: the reader never sees the element and its code together, the frame changes height with the tab, and reading the code takes an extra click. Storybook hides code by default, for the same cost. | No test yet |
 | Live example stage | Core | The stage sits on the page background (`--color-bg`), not in a well or a panel. It is the named exception to the container depth tier. | A raised or inset stage changes the surface under the preview, so raised controls do not look as they do on a page. | No test yet |
 | Live example source | Core | Inside the frame, the code block drops its own radius, border, and shadow, and spans the frame's width. The frame draws the one edge. | A rounded well with its own edge and shadow inside the frame is a frame inside a frame. | No test yet |
-| Token names | Core | One set of names, shared with `@filipgutica/ui`: `--color-*` for colours, `--shadow-*` for shadows, and ui's type, radius, and font names. See [Token names](#token-names). | Two sets, the [1.x short names](#token-names) here and `--color-*` names in ui: every site and agent translated between them through `ui:` comments, and the 1.x control radius used Tailwind's `-md` name for a 999px pill where Tailwind's is 0.375rem. Short names everywhere: about 920 references in 27 files across six repositories, a ui major release, and 18 new names. | no 1.x names: `tests/token-names.test.mjs` "no payload file uses a 1.x token name" |
+| Token names | Core | One set of names, the design system's own: `--color-*` for colours, `--shadow-*` for shadows, and `--text-*`, `--radius-*`, and `--font-*` for type sizes, radii, and fonts. See [Token names](#token-names). | Two sets, the [1.x short names](#token-names) here and `--color-*` names in ui: every site and agent translated between them through `ui:` comments, and the 1.x control radius used Tailwind's `-md` name for a 999px pill where Tailwind's is 0.375rem. Short names everywhere: about 920 references in 27 files across six repositories, a ui major release, and 18 new names. | no 1.x names: `tests/token-names.test.mjs` "no payload file uses a 1.x token name" |
 | Versioning | Core | Releases are 1.0.x patches while the system has no outside users, tagged `ds-v*` from the `ds-v1.0.0` seed. Every release, a breaking one included, is a patch; the release notes name a breaking change written as `!` or a `BREAKING CHANGE:` footer in the commit message. npm already holds 1.1.0 through 2.4.0 from the earlier `v*` series, so leaving 1.0.x means 2.5.0 or 3.0.0. | Semver majors and minors (2.x): the numbers signalled a maturity the system does not have yet. 0.0.x: npm already holds 1.0.0, and a `^0.0.1` range matches only 0.0.1. | patch cap: `tests/release.test.mjs` "the release analyzer caps feat, fix, and breaking changes, from a commit or a PR body, at a patch", "the release analyzer releases nothing for chore-only commits"; tag series: `tests/release.test.mjs` "the site version comes from the latest ds-v tag and ignores the earlier v tags" |
 
 ## Token names
@@ -66,10 +66,10 @@ To update a page or stylesheet that still uses the old names, run `node scripts/
 
 Name a new token by these rules:
 
-- Give it one name. `tokens.css`, the class flavour, and `@filipgutica/ui` all declare it under that name, with no alias.
+- Give it one name, with no alias.
 - Use Tailwind 4's theme namespaces where one fits: `--color-<role>` for a colour, `--shadow-<role>` for a shadow, `--radius-<role>` for a radius, `--font-<role>` for a font family, and `--text-<step>` for a type size. Other families keep their prefix, such as `--space-*`, `--control-*`, `--weight-*`, and `--duration-*`.
 - Name the role, not the value: `--color-error`, not `--color-red`.
-- A component role that always has the same value as a general token is a ui role in the token JSON's `library.roles`, listed after the general name in its `ui:` comment. It is not a new `tokens.css` line.
+- A component role that always has the same value as a general token is not a new token. The component uses the general token.
 - Do not reuse an old name from this table.
 
 <!-- rename-table:start -->

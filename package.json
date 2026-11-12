@@ -12,8 +12,6 @@
       "default": "./dist/tokens.js"
     },
     "./tokens.css": "./language/tokens.css",
-    "./class/base.css": "./dist/class/base.css",
-    "./class/themes/*.css": "./dist/class/themes/*.css",
     "./themes/*.css": "./dist/themes/*.css",
     "./tokens.json": "./dist/tokens.json",
     "./fonts.css": "./fonts/fonts.css",
