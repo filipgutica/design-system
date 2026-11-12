@@ -2,22 +2,24 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { posix } from 'node:path'
-import { COPIED, siteFiles } from '../scripts/build-site.mjs'
+import { COPIED, fetchProjects, siteFiles } from '../scripts/build-site.mjs'
 import { catalogueComponents, implementationProblems, specGuidance } from '../scripts/site/components.mjs'
 import { foundationsPage } from '../scripts/site/foundations.mjs'
 import { overviewPage } from '../scripts/site/overview.mjs'
 import { parseColour, themeChecks, themesPage } from '../scripts/site/themes.mjs'
-import { shellDrift, sitePage, spanOnce } from '../scripts/site/shell.mjs'
+import { parseProjects, projectSwitcher, shellDrift, sitePage, spanOnce } from '../scripts/site/shell.mjs'
 import { readRenameTable } from '../scripts/rename-tokens.mjs'
 import { readTokens } from '../scripts/build-tokens.mjs'
 import { fileURLToPath } from 'node:url'
 import { read } from './css.mjs'
+import { PROJECTS } from './fixtures/projects.mjs'
+import { createServer } from 'node:http'
 
 // The site pages share components.html's shell byte for byte, and the package copy of the
 // catalogue keeps its own header, whose links must resolve inside language/.
 const template = read('language/components.html')
 const pkg = JSON.parse(read('package.json'))
-const files = new Map(siteFiles({ version: '9.9.9' }))
+const files = new Map(siteFiles({ version: '9.9.9', projects: PROJECTS }))
 const pages = [['index.html', 'a section'], ['foundations.html', 'a token'], ['components.html', 'a component'], ['themes.html', 'a theme']]
 
 test('every site page shares the shell CSS, icons, script, and shell markup with components.html', () => {
@@ -29,14 +31,75 @@ test('the drift guard names the shared part that changed', () => {
   const edited = page
     .replace('.icon { width: 16px;', '.icon { width: 17px;')
     .replace('const reduced = matchMedia', 'const reduced  = matchMedia')
-    .replace('id="section-menu" aria-label="Menu"', 'id="section-menu" aria-label="Open menu"')
-  assert.deepEqual(shellDrift({ template, page: edited, noun: 'a token' }), ['style', 'script', 'section bar'])
+    .replace('id="section-menu" aria-haspopup="dialog"', 'id="section-menu" aria-haspopup="menu"')
+    .replace('aria-label="Close drawer"', 'aria-label="Close"')
+  assert.deepEqual(shellDrift({ template, page: edited, noun: 'a token' }), ['style', 'script', 'section trigger', 'menu drawer'])
+})
+
+test('each site page names its phone trigger and drawer after its rail', () => {
+  for (const [file, label] of [['index.html', 'Overview'], ['foundations.html', 'Foundations'], ['components.html', 'Components'], ['themes.html', 'Themes']]) {
+    const page = files.get(file)
+    assert.ok(page.includes(`aria-haspopup="dialog" hidden>${label}</button>`), file)
+    assert.ok(page.includes(`<h4 id="nav-drawer-title">${label}</h4>`), file)
+  }
+})
+
+// The project menu: the build renders the list, and the page's refresh validates a fetched one with the
+// same function, embedded by its source.
+const project = (id, extra = {}) => ({ id, label: id, href: `https://example.com/${id}/`, repository: `https://example.com/repo/${id}`, ...extra })
+
+test('the project list keeps entries with text ids and labels, https URLs, and unique ids, up to 20', () => {
+  assert.deepEqual(parseProjects([
+    project('a'),
+    project('b', { href: 'http://example.com/b/' }),
+    project('c', { repository: 'javascript:alert(1)' }),
+    project('d', { label: ' ' }),
+    project('', { label: 'Empty id' }),
+    project('a', { label: 'Second a' }),
+    null,
+    'e',
+    project('f', { extra: 'dropped' }),
+  ]), [project('a'), project('f')])
+  assert.equal(parseProjects(Array.from({ length: 25 }, (_, i) => project(`p${i}`))).length, 20)
+  for (const value of [undefined, null, {}, 'list', [], [project('x', { href: 'not a url' })]]) assert.equal(parseProjects(value), undefined)
+})
+
+test('every site page starts its header with the project switcher, this site current', () => {
+  for (const [file] of pages) {
+    const page = files.get(file)
+    assert.ok(page.includes(`<header class="page-head">\n  ${projectSwitcher(PROJECTS)}`), file)
+  }
+  assert.equal(projectSwitcher(PROJECTS), '<details class="projects"><summary class="quiet-action" aria-label="Project: Design system"><span>Design system</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects"><a href="https://example.com/annoterm/">annoterm</a><a href="https://example.com/design-system/" aria-current="page">Design system</a><a href="https://example.com/ui/">UI</a></nav></details>')
+  assert.throws(() => projectSwitcher([project('annoterm')]), /no "design-system" entry/)
+  // The package catalogue has no project list, so it keeps the site name as text.
+  assert.ok(template.includes('<header class="page-head">\n  <p class="site-name">Design system</p>'))
+})
+
+test('the build stops with the URL and the reason when the project list cannot load', async () => {
+  const responses = [[500, '[]'], [200, 'not json'], [200, JSON.stringify([project('x', { href: 'http://x/' })])]]
+  for (const [status, body] of responses) {
+    const server = createServer((request, response) => response.writeHead(status, { 'content-type': 'application/json' }).end(body))
+    await new Promise((done) => server.listen(0, '127.0.0.1', done))
+    const url = `http://127.0.0.1:${server.address().port}/projects.json`
+    try {
+      await assert.rejects(fetchProjects({ url, attempts: 2, delay: 0 }), new RegExp(`Could not load the project list from ${url} after 2 attempts: .+`))
+    } finally {
+      server.close()
+    }
+  }
+  const server = createServer((request, response) => response.writeHead(200).end(JSON.stringify([project('design-system'), project('b', { href: 'http://b/' })])))
+  await new Promise((done) => server.listen(0, '127.0.0.1', done))
+  try {
+    assert.deepEqual(await fetchProjects({ url: `http://127.0.0.1:${server.address().port}/`, attempts: 1 }), [project('design-system')])
+  } finally {
+    server.close()
+  }
 })
 
 test('a template change that removes a splice point stops the build', () => {
-  assert.throws(() => sitePage({ template: template.replace('<title>Component catalogue</title>', '<title>Catalogue</title>'), current: 'components', title: 'Components' }), /expected one "<title>Component catalogue<\/title>", found 0/)
+  assert.throws(() => sitePage({ template: template.replace('<title>Component catalogue</title>', '<title>Catalogue</title>'), projects: PROJECTS, current: 'components', title: 'Components' }), /expected one "<title>Component catalogue<\/title>", found 0/)
   // A <main> with another attribute, or a pager that no longer ends it, has no safe splice.
-  const page = { current: 'overview', title: 'Overview', main: '<p>Hi</p>' }
+  const page = { projects: PROJECTS, current: 'overview', title: 'Overview', main: '<p>Hi</p>' }
   assert.throws(() => sitePage({ ...page, template: template.replace('<main id="main">', '<main id="main" aria-label="Components">') }), /expected one "<main id=\\"main\\">", found 0/)
   assert.throws(() => sitePage({ ...page, template: template.replace('</nav>\n</main>', '</nav>\n  <p>Last</p>\n</main>') }), /expected one "<\/nav>\\n<\/main>", found 0/)
 })

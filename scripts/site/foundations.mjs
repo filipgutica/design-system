@@ -160,11 +160,6 @@ const FOUNDATIONS_CSS = `
   .height { flex: none; width: 0.5rem; border-radius: 2px; background: var(--color-accent); }
   .sample { flex: none; min-width: 1.5rem; line-height: 1; color: var(--color-text); }
   .find-summary { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
-  /* The phone bar's Clear names the query on one line, cut short with an ellipsis; the bar's icon buttons keep their size. */
-  .section-bar > .bar-clear { display: block; width: auto; max-width: 7.5rem; padding-inline: var(--space-2); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  /* The site name keeps its one line, so the bar may shrink below its content and Clear gives way; the icon buttons keep their size. */
-  .page-head > .section-bar { min-width: 0; }
-  .section-bar > .btn:not(.bar-clear) { flex: none; }
   @media (forced-colors: active) { .chip { forced-color-adjust: none; } }
 ${stackedTablesCss(STACK_BELOW)}`
 
@@ -177,12 +172,6 @@ const FOUNDATIONS_JS = `
   const groups = [...document.querySelectorAll('[data-group]')];
   const summary = document.getElementById('find-summary');
   const status = document.getElementById('copy-status');
-  // Phones: the drawer closes over a filtered page, so the sticky bar says so and can clear it.
-  const barClear = document.createElement('button');
-  barClear.type = 'button';
-  barClear.className = 'btn text bar-clear';
-  barClear.hidden = true;
-  document.getElementById('section-bar').prepend(barClear);
   window.findScope = {
     filter: (words) => {
       const query = find.value.trim();
@@ -191,16 +180,12 @@ const FOUNDATIONS_JS = `
       groups.forEach((group) => { group.hidden = !group.querySelector('tbody tr:not([hidden])'); });
       summary.hidden = !words.length;
       summary.querySelector('p').textContent = shown ? \`Showing \${shown} of \${rows.length} tokens for “\${query}”.\` : \`No token matches “\${query}”.\`;
-      barClear.hidden = !words.length;
-      barClear.textContent = \`Clear “\${query}”\`;
       return { count: shown, one: 'token', many: 'tokens' };
     },
     keeps: (link) => !document.getElementById(link.hash.slice(1)).hidden,
   };
   // Clearing sets the field and fires input, so the shell runs the filter.
-  const clear = () => { find.value = ''; find.dispatchEvent(new Event('input')); };
-  document.getElementById('find-summary-clear').addEventListener('click', () => { clear(); find.focus(); });
-  barClear.addEventListener('click', clear);
+  document.getElementById('find-summary-clear').addEventListener('click', () => { find.value = ''; find.dispatchEvent(new Event('input')); find.focus(); });
 
   // Copy needs the script, so it shows only once the script runs. It announces its result. A success swaps the
   // icon for a tick for 1.5s; a failure shows "Copy failed" in place of the icon for 4s. A repeat click restarts the wait.

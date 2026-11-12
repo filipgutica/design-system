@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { siteFiles } from '../scripts/build-site.mjs'
+import { PROJECTS } from './fixtures/projects.mjs'
 
 const dir = new URL('../language/', import.meta.url)
 const read = (file) => readFileSync(new URL(file, dir), 'utf8')
@@ -689,7 +690,7 @@ test('the sticky-hover guard catches a painting hover rule outside @media (hover
 })
 
 // The generated site pages: the language pages plus the CSS that scripts/site adds to them.
-const sitePages = () => siteFiles({ version: '9.9.9' }).filter(([file, text]) => file.endsWith('.html') && typeof text === 'string')
+const sitePages = () => siteFiles({ version: '9.9.9', projects: PROJECTS }).filter(([file, text]) => file.endsWith('.html') && typeof text === 'string')
 
 test('the sticky-hover guard reads the CSS that the site scripts add to a generated page', () => {
   const [file, html] = sitePages().find(([name]) => name === 'foundations.html')

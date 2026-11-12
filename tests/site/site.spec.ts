@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type BrowserContext, type Page } from '@playwright/test'
 import { tokens } from '@filipgutica/design-system'
 
 // The built site, served under /design-system/ as on GitHub Pages: each page's layout, accessibility,
@@ -11,6 +11,24 @@ const PAGES = [
   { path: 'themes.html', name: 'Themes', find: 'a theme' },
 ]
 const SITE_URL = 'https://filipgutica.github.io/design-system/'
+
+// The project list the build rendered into every page's menu, and that each page fetches again after load.
+// Each page's fetch is served the same list from here, so no test waits on the network after the build.
+const PROJECTS_URL = 'https://filipgutica.github.io/ui/projects.json'
+type Project = { id: string, label: string, href: string, repository: string }
+let published: Promise<Project[]> | undefined
+const publishedProjects = () => (published ??= fetch(PROJECTS_URL).then((response) => response.json() as Promise<Project[]>))
+const serveProjects = async (context: BrowserContext) => {
+  const body = JSON.stringify(await publishedProjects())
+  await context.route(PROJECTS_URL, (route) => route.fulfill({ status: 200, contentType: 'application/json', body }))
+}
+test.beforeEach(({ context }) => serveProjects(context))
+// The project menu's links, as [label, href], and its summary's name.
+const projectMenu = async (page: Page) => ({
+  summary: await page.locator('.page-head > .projects > summary').getAttribute('aria-label'),
+  links: await page.locator('.page-head > .projects nav a').evaluateAll((as) => as.map((a) => [a.textContent, a.getAttribute('href'), a.getAttribute('aria-current')])),
+})
+const menuOf = (projects: Project[], current = 'design-system') => projects.map(({ id, label, href }) => [label, href, id === current ? 'page' : null])
 
 const collectErrors = (page: Page) => {
   const errors: string[] = []
@@ -35,7 +53,8 @@ for (const { path, name, find } of PAGES) {
     for (const colorScheme of ['light', 'dark'] as const) {
       test(`axe finds no violations in ${colorScheme}`, async ({ browser }) => {
         const context = await browser.newContext({ colorScheme, viewport: { width: 1280, height: 900 }, baseURL: test.info().project.use.baseURL })
-        const page = await context.newPage()
+        await serveProjects(context)
+    const page = await context.newPage()
         await page.goto(path)
         const { violations } = await new AxeBuilder({ page }).analyze()
         expect(violations.map(({ id, nodes }) => `${id}: ${nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([])
@@ -86,12 +105,99 @@ for (const { path, name, find } of PAGES) {
         for (const link of await links.all()) await expect(link).toBeVisible()
         for (const link of await page.locator('.page-head .strip a').all()) await expect(link).toBeVisible()
         await expect(page.locator('#find')).toBeHidden()
-        await expect(page.locator('#section-bar')).toBeHidden()
+        await expect(page.locator('#section-menu')).toBeHidden()
         await expect(page.locator('.page-head [aria-label="Appearance"]')).toBeHidden()
       })
     }
+
+    test('the project menu opens and lists the published projects', async ({ page }) => {
+      await page.goto(path)
+      const menu = page.locator('.page-head > .projects')
+      await menu.locator('summary').click()
+      for (const link of await menu.locator('nav a').all()) await expect(link).toBeVisible()
+      expect(await projectMenu(page)).toEqual({ summary: 'Project: Design system', links: menuOf(await publishedProjects()) })
+    })
+  })
+
+  test.describe(`${name} project menu`, () => {
+    test('starts the header, with this site current, and lists the published projects', async ({ page }) => {
+      await page.goto(path)
+      expect(await page.locator('.page-head > *').first().evaluate((el) => el.matches('details.projects'))).toBe(true)
+      await expect(page.locator('.page-head > .projects nav a[aria-current="page"]')).toHaveText('Design system')
+      expect(await projectMenu(page)).toEqual({ summary: 'Project: Design system', links: menuOf(await publishedProjects()) })
+    })
+
+    test('keeps the built list when the fetch fails, and logs nothing of its own', async ({ page }) => {
+      const errors = collectErrors(page)
+      await page.route(PROJECTS_URL, (route) => route.abort())
+      const fetched = page.waitForEvent('requestfailed', (request) => request.url() === PROJECTS_URL)
+      await page.goto(path)
+      await fetched
+      await page.evaluate(() => new Promise((done) => setTimeout(done, 100)))
+      expect(await projectMenu(page)).toEqual({ summary: 'Project: Design system', links: menuOf(await publishedProjects()) })
+      // Chromium reports the failed request itself; the page's script adds nothing.
+      expect(errors.filter((error) => !error.startsWith('Failed to load resource'))).toEqual([])
+    })
   })
 }
+
+test('the project menu takes a published list that differs, keeping only valid entries', async ({ page }) => {
+  const built = await publishedProjects()
+  const project = (id: string, extra: Partial<Project> = {}) => ({ id, label: `${id} site`, href: `https://example.com/${id}/`, repository: `https://example.com/repo/${id}`, ...extra })
+  // An http link, a javascript: repository, an empty label, and a repeated id are dropped; the list stops at 20.
+  // This site is missing, so it keeps its built entry at its built place.
+  const remote = [
+    project('new'), project('plain', { href: 'http://example.com/plain/' }), project('script', { repository: 'javascript:alert(1)' }),
+    project('blank', { label: ' ' }), project('new', { label: 'Second new' }),
+    ...Array.from({ length: 25 }, (_, i) => project(`p${i}`)),
+  ]
+  await page.route(PROJECTS_URL, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(remote) }))
+  await page.goto('components.html')
+  const kept = [project('new'), ...Array.from({ length: 19 }, (_, i) => project(`p${i}`))]
+  const own = built.findIndex(({ id }) => id === 'design-system')
+  const expected = menuOf(kept)
+  expected.splice(own, 0, menuOf(built)[own])
+  await expect.poll(async () => (await projectMenu(page)).links).toEqual(expected)
+  expect((await projectMenu(page)).summary).toBe('Project: Design system')
+})
+
+test('the project menu follows a new label for this site, and ignores a list it cannot use', async ({ page }) => {
+  const built = await publishedProjects()
+  const renamed = built.map((p) => (p.id === 'design-system' ? { ...p, label: 'Design language' } : p))
+  await page.route(PROJECTS_URL, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(renamed) }))
+  await page.goto('')
+  await expect(page.locator('.page-head > .projects > summary')).toHaveAttribute('aria-label', 'Project: Design language')
+  await expect(page.locator('.page-head > .projects > summary > span')).toHaveText('Design language')
+  // A non-200 response and a list with no valid entry both keep the built menu.
+  for (const [status, body] of [[404, JSON.stringify(renamed)], [200, JSON.stringify([{ id: 'x', label: 'X', href: 'http://x/', repository: 'https://x/' }])]] as const) {
+    await page.unroute(PROJECTS_URL)
+    const served = page.waitForResponse(PROJECTS_URL)
+    await page.route(PROJECTS_URL, (route) => route.fulfill({ status, contentType: 'application/json', body }))
+    await page.goto('foundations.html')
+    await served
+    await page.evaluate(() => new Promise((done) => setTimeout(done, 100)))
+    expect(await projectMenu(page), `${status} ${body.slice(0, 40)}`).toEqual({ summary: 'Project: Design system', links: menuOf(built) })
+  }
+})
+
+test('Escape closes the project menu and returns focus to it; leaving it closes it too', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('themes.html')
+  const menu = page.locator('.page-head > .projects')
+  const summary = menu.locator('summary')
+  await summary.focus()
+  await page.keyboard.press('Enter')
+  await expect(menu).toHaveAttribute('open', '')
+  await page.keyboard.press('Tab')
+  await expect(menu.locator('nav a').first()).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(menu).not.toHaveAttribute('open')
+  await expect(summary).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(menu).toHaveAttribute('open', '')
+  await page.locator('.page-head .strip a').first().focus()
+  await expect(menu).not.toHaveAttribute('open')
+})
 
 test.describe('Foundations Find', () => {
   test.use({ viewport: { width: 1280, height: 900 } })
@@ -207,8 +313,8 @@ test.describe('Foundations table', () => {
   })
 })
 
-// Header option A: the site name, then the pages, at the same x on every page. Each link is current on
-// one page, so the same width on every page means becoming current changes no width.
+// The project switcher, then the pages, at the same x on every page. Each link is current on one page,
+// so the same width on every page means becoming current changes no width.
 // Forced colors draws the current link's border, which must not widen it either.
 for (const forcedColors of ['none', 'active'] as const) test(`the header links sit at the same x on every page, and the current link keeps its width, with forced colors ${forcedColors}`, async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 })
@@ -219,7 +325,7 @@ for (const forcedColors of ['none', 'active'] as const) test(`the header links s
     await page.evaluate(() => document.fonts.ready)
     const head = page.locator('.page-head')
     await expect(head.locator('.crumbs')).toHaveCount(0)
-    await expect(head.getByRole('link', { name: 'Design system', exact: true })).toHaveAttribute('href', 'index.html')
+    await expect(head.locator('> .projects > summary')).toHaveAttribute('aria-label', 'Project: Design system')
     const links = head.locator('.strip a')
     for (const { name } of PAGES) {
       // The hidden copy that reserves the width holds the label, and stays out of the link's name.
@@ -283,29 +389,68 @@ test('the breadcrumb lines up with Find, and shows both crumbs on phones', async
 })
 
 // 320px is the narrowest phone; headless Linux also takes a scrollbar gutter out of 390px.
-for (const width of [390, 320]) test(`on phones, the sticky bar offers Clear on one line while a filter is on, at ${width}px`, async ({ page }) => {
-  await page.setViewportSize({ width, height: 844 })
-  await page.goto('foundations.html')
-  await page.locator('#section-find').click()
-  await page.locator('#find').fill('surface-raised shadow')
-  await page.locator('#nav-drawer .close').click()
-  const clear = page.locator('#section-bar .bar-clear')
-  await expect(clear).toHaveText('Clear “surface-raised shadow”')
-  // The site name beside it stays a one-line touch target.
-  const name = await page.locator('.page-head .site-name').evaluate((a) => {
-    const range = document.createRange()
-    range.selectNodeContents(a)
-    return { height: a.getBoundingClientRect().height, lines: new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size }
+for (const width of [390, 320]) {
+  test.describe(`phone at ${width}px`, () => {
+    test.use({ viewport: { width, height: 844 } })
+
+    for (const { path, name } of PAGES) {
+      test(`${name}: the switcher and appearance share the first row, the pages the second, then the trigger`, async ({ page }) => {
+        await page.goto(path)
+        await page.evaluate(() => document.fonts.ready)
+        const box = async (selector: string) => (await page.locator(selector).boundingBox())!
+        const [frame, switcher, appearance, strip, trigger] = await Promise.all(['.frame', '.page-head > .projects > summary', '.page-head > [aria-label="Appearance"]', '.page-head > .strip', '#section-menu'].map(box))
+        const middle = (b: { y: number, height: number }) => b.y + b.height / 2
+        // Row 1: the switcher at the start, the appearance control at the end, on one line.
+        expect(switcher.x).toBeCloseTo(frame.x, 0)
+        expect(appearance.x + appearance.width).toBeCloseTo(frame.x + frame.width, 0)
+        expect(Math.abs(middle(switcher) - middle(appearance))).toBeLessThanOrEqual(1)
+        expect(switcher.height).toBeGreaterThanOrEqual(44)
+        // Row 2: the pages, below both.
+        expect(strip.y).toBeGreaterThanOrEqual(Math.max(switcher.y + switcher.height, appearance.y + appearance.height))
+        // Below the header, before the breadcrumb or title: the trigger, at the start.
+        expect(trigger.y).toBeGreaterThan(strip.y + strip.height)
+        expect(trigger.x).toBeCloseTo(frame.x, 0)
+        expect(trigger.y + trigger.height).toBeLessThan((await box('main h1')).y)
+        await expect(page.locator('#section-menu')).toHaveText(new RegExp(`^${name}: .+`))
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0)
+        // No icon-only Find or Menu button.
+        await expect(page.getByRole('button', { name: /^(Menu|Find .*)$/ })).toHaveCount(0)
+      })
+    }
+
+    test('the trigger opens the drawer from the left edge, titled with the rail and holding Find and the rail only', async ({ page }) => {
+      await page.goto('components.html')
+      await page.locator('#section-menu').click()
+      const drawer = page.locator('#nav-drawer')
+      await expect(drawer).toBeVisible()
+      await expect.poll(async () => (await drawer.boundingBox())!.x).toBe(0)
+      await expect(drawer.getByRole('heading', { name: 'Components', exact: true })).toBeVisible()
+      await expect(drawer.locator('#find')).toBeVisible()
+      await expect(drawer.locator('nav[aria-label="Pages"], [aria-label="Appearance"]')).toHaveCount(0)
+    })
+
+    test('the trigger label follows the current section as the page scrolls', async ({ page }) => {
+      await page.goto('foundations.html')
+      const trigger = page.locator('#section-menu')
+      await expect(trigger).toHaveText('Foundations: Identity inputs')
+      await page.goto('foundations.html#motion')
+      await expect(trigger).toHaveText(`Foundations: ${await page.locator('#rail a[href="#motion"]').textContent()}`)
+      await page.mouse.move(200, 500)
+      await page.mouse.wheel(0, -100000)
+      await expect(trigger).toHaveText('Foundations: Identity inputs')
+    })
+
+    test('a filter set in the drawer can be cleared from the page', async ({ page }) => {
+      await page.goto('foundations.html')
+      await page.locator('#section-menu').click()
+      await page.locator('#find').fill('surface-raised shadow')
+      await page.locator('#nav-drawer .close').click()
+      await expect(page.locator('#find-summary')).toBeVisible()
+      await page.locator('#find-summary-clear').click()
+      await expect(page.locator('.tokens tbody tr[hidden]')).toHaveCount(0)
+    })
   })
-  expect((await clear.boundingBox())!.height).toBeLessThanOrEqual(48)
-  expect(name.height).toBeGreaterThanOrEqual(44)
-  expect(name.height).toBeLessThanOrEqual(48)
-  expect(name.lines).toBe(1)
-  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0)
-  await clear.click()
-  await expect(clear).toBeHidden()
-  await expect(page.locator('.tokens tbody tr[hidden]')).toHaveCount(0)
-})
+}
 
 test('Copy writes var(--name) and says so', async ({ page }) => {
   await page.addInitScript(() => {
@@ -442,6 +587,7 @@ const labelInk = async (page: Page, selector: string) => {
 for (const colorScheme of ['light', 'dark'] as const) {
   test(`the header pill centres its label's ink in ${colorScheme}`, async ({ browser }) => {
     const context = await browser.newContext({ colorScheme, viewport: { width: 1280, height: 900 }, deviceScaleFactor: 4, baseURL: test.info().project.use.baseURL })
+    await serveProjects(context)
     const page = await context.newPage()
     await page.goto('')
     // "Overview" has no descenders, so a line box that keeps descender room shows as a larger gap below.
@@ -456,6 +602,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
   test(`a wrapped navigation row or crumb keeps its label inside the fill and focus ring in ${colorScheme}`, async ({ browser }) => {
     const context = await browser.newContext({ colorScheme, viewport: { width: 1280, height: 900 }, deviceScaleFactor: 4, baseURL: test.info().project.use.baseURL })
+    await serveProjects(context)
     const page = await context.newPage()
     await page.goto('components.html')
     // Rows wrap rather than truncate. Trimming the line to the cap height must keep the room a wrapped
@@ -483,6 +630,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
   test(`the breadcrumb centres its link's ink in ${colorScheme}`, async ({ browser }) => {
     const context = await browser.newContext({ colorScheme, viewport: { width: 1280, height: 900 }, deviceScaleFactor: 4, baseURL: test.info().project.use.baseURL })
+    await serveProjects(context)
     const page = await context.newPage()
     await page.goto('foundations.html')
     // The trim centres the cap height, so the label is set to one without descenders, whose ink is the cap
