@@ -4,6 +4,7 @@ import { esc, stackedTablesCss } from './shell.mjs'
 
 // A command plate (one shell line) and a source block with a header and Copy, in the catalogue's markup.
 const command = ({ id, label, line }) => `<div class="code command compact"><pre tabindex="0" role="region" aria-label="${esc(label)}"><code id="${id}"><span class="line"><span>${esc(line)}</span></span></code></pre><button class="quiet-action copy" type="button" data-copy="${id}" aria-label="Copy ${esc(label.toLowerCase())}"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div>`
+const commands = ({ id, head, label, lines }) => `<div class="code command"><div class="code-head"><b>${esc(head)}</b><button class="quiet-action copy" type="button" data-copy="${id}"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="${esc(label)}"><code id="${id}">${lines.map((line) => `<span class="line"><span>${esc(line)}</span></span>`).join('')}</code></pre></div>`
 const source = ({ id, file, text }) => `<div class="code"><div class="code-head"><b>${esc(file)}</b><button class="quiet-action copy" type="button" data-copy="${id}"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="${esc(file)}"><code id="${id}">${text.trim().split('\n').map((line) => `<span class="line"><span>${esc(line)}</span></span>`).join('')}</code></pre></div>`
 
 /** What each export is for, keyed by its exports path. A new export without an entry fails the build. */
@@ -30,6 +31,8 @@ const PATHS = [
 export const overviewPage = ({ pkg, version }) => {
   const unknown = Object.keys(pkg.exports).filter((path) => !(path in EXPORT_USES))
   if (unknown.length) throw new Error(`Overview: say what ${unknown.join(', ')} is for in EXPORT_USES`)
+  // npm pack names the tarball after the package: @scope/name@1.2.3 becomes scope-name-1.2.3.tgz.
+  const tarball = `${pkg.name.slice(1).replace('/', '-')}-${version}.tgz`
   const exportRows = Object.keys(pkg.exports).map((path) => `<tr><th scope="row"><code>${esc(path === '.' ? pkg.name : `${pkg.name}${path.slice(1)}`)}</code></th><td data-label="For"><div>${EXPORT_USES[path]}</div></td></tr>`).join('\n        ')
 
   const main = `  <section class="intro" aria-labelledby="title">
@@ -102,8 +105,19 @@ export const Panel = ({ children }: { children: React.ReactNode }) => (
 
   <section class="doc-section" id="agents" aria-labelledby="agents-title">
     <h2 id="agents-title">Agents</h2>
-    <p>Claude and Codex read the design system from <code>~/design-language</code>. filip-stack’s host config installs it there from a pinned package version.</p>
+    <p>Claude and Codex read the design system from <code>~/design-language</code>, the package’s <code>language/</code> folder.</p>
+    <h3>With filip-stack</h3>
+    <p><a href="https://filipgutica.github.io/filip-stack/#install">Install filip-stack</a>, then apply its host config. It installs the design system from a pinned package version and tells Claude and Codex to read it.</p>
     ${command({ id: 'cmd-agents', label: 'Apply command', line: 'filip-stack apply' })}
+    <h3>Without filip-stack</h3>
+    <p>Copy the package’s <code>language/</code> folder to <code>~/design-language</code>.</p>
+    ${commands({ id: 'cmd-agents-copy', head: 'Copy the design language', label: 'Copy commands', lines: [
+      `npm pack ${pkg.name}@${version}`,
+      `mkdir -p ~/design-language && tar -xzf ${tarball} -C ~/design-language --strip-components=2 package/language`,
+    ] })}
+    <p>Then tell your agent to read it. Add this line to <code>CLAUDE.md</code> or <code>AGENTS.md</code>:</p>
+    ${source({ id: 'src-agents', file: 'CLAUDE.md or AGENTS.md', text: 'For UX and visual work, read ~/design-language/DESIGN.md first and follow it.' })}
+    <p>This site also publishes the files for agents to read:</p>
     <dl class="defs">
       <dt><a href="DESIGN.md"><code>DESIGN.md</code></a></dt><dd>Selection rules and acceptance checks. Agents read it first.</dd>
       <dt><a href="components.md"><code>components.md</code></a></dt><dd>One spec per component: anatomy, states, Do and Don’t, keyboard, motion, and forced colors.</dd>
@@ -142,6 +156,7 @@ const OVERVIEW_CSS = `
   .doc-section { display: grid; gap: var(--space-4); padding-top: var(--space-6); border-top: 1px solid var(--color-border-subtle); }
   .doc-section > h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); }
   .doc-section > h2::before { content: "## " / ""; color: var(--color-accent); }
+  .doc-section > h3 { margin-top: var(--space-2); font-size: var(--text-lg); }
   .doc-section > p { max-width: var(--measure); font-size: var(--text-reading); line-height: var(--leading); }
   .paths { width: 100%; border-collapse: collapse; font-size: var(--text-md); }
   .paths th, .paths td { padding: var(--space-3); border-bottom: 1px solid var(--color-border-subtle); text-align: left; vertical-align: top; }

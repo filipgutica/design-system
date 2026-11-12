@@ -2,7 +2,7 @@
 
 Filip's design language for any framework: the spec, the tokens, the component catalogue, and the editor themes. It ships as the npm package `@filipgutica/design-system`.
 
-- **Agents** get `language/` at `~/design-language` through filip-stack host config.
+- **Agents** get `language/` at `~/design-language` through filip-stack host config, or by copying it from the package; the site's [Agents](https://filipgutica.github.io/design-system/#agents) section has both.
 - **Vue apps** use [`@filipgutica/ui`](https://github.com/filipgutica/ui), which implements this design language.
 - **Site:** <https://filipgutica.github.io/design-system/> has the Overview, Foundations, and Components pages, with `index.json` and `llms.txt` for agents.
 
