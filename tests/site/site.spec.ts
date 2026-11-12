@@ -373,6 +373,7 @@ for (const forcedColors of ['none', 'active'] as const) test(`the header links s
     const head = page.locator('.page-head')
     await expect(head.locator('.crumbs')).toHaveCount(0)
     await expect(head.locator('> .projects > summary')).toHaveAttribute('aria-label', 'Project: Design system')
+    expect(await head.evaluate((h) => { const style = getComputedStyle(h); return [style.borderBottomStyle, style.borderBottomWidth, style.borderBottomColor === style.color, h.getBoundingClientRect().height] })).toEqual(['solid', '1px', true, 65])
     const links = head.locator('.strip a')
     for (const { name } of PAGES) {
       // The hidden copy that reserves the width holds the label, and stays out of the link's name.
@@ -441,27 +442,58 @@ for (const width of [390, 320]) {
     test.use({ viewport: { width, height: 844 } })
 
     for (const { path, name } of PAGES) {
-      test(`${name}: the switcher and appearance share the first row, the pages the second, then the trigger`, async ({ page }) => {
+      const wraps = width === 320
+      test(`${name}: the switcher and appearance ${wraps ? 'take a row each' : 'share the first row'}, then the pages, then the trigger`, async ({ page }) => {
         await page.goto(path)
         await page.evaluate(() => document.fonts.ready)
         const box = async (selector: string) => (await page.locator(selector).boundingBox())!
-        const [frame, switcher, appearance, strip, trigger] = await Promise.all(['.frame', '.page-head > .projects > summary', '.page-head > [aria-label="Appearance"]', '.page-head > .strip', '#section-menu'].map(box))
+        const [frame, head, switcher, appearance, strip, trigger] = await Promise.all(['.frame', '.page-head', '.page-head > .projects > summary', '.page-head > [aria-label="Appearance"]', '.page-head > .strip', '#section-menu'].map(box))
         const middle = (b: { y: number, height: number }) => b.y + b.height / 2
-        // Row 1: the switcher at the start, the appearance control at the end, on one line.
+        // The switcher starts row 1 and shows the project's whole name.
         expect(switcher.x).toBeCloseTo(frame.x, 0)
-        expect(appearance.x + appearance.width).toBeCloseTo(frame.x + frame.width, 0)
-        expect(Math.abs(middle(switcher) - middle(appearance))).toBeLessThanOrEqual(1)
         expect(switcher.height).toBeGreaterThanOrEqual(44)
-        // Row 2: the pages, below both.
+        await expect(page.locator('.page-head > .projects > summary > span')).toHaveText('Design system')
+        expect(await page.locator('.page-head > .projects > summary > span').evaluate((span) => span.scrollWidth <= span.clientWidth)).toBe(true)
+        if (wraps) {
+          // 320px: the appearance control takes its own row, at the start.
+          expect(appearance.x).toBeCloseTo(frame.x, 0)
+          expect(appearance.y).toBeGreaterThanOrEqual(switcher.y + switcher.height)
+        } else {
+          // Wider phones: the appearance control ends row 1.
+          expect(appearance.x + appearance.width).toBeCloseTo(frame.x + frame.width, 0)
+          expect(Math.abs(middle(switcher) - middle(appearance))).toBeLessThanOrEqual(1)
+        }
+        // Then the pages, below both.
         expect(strip.y).toBeGreaterThanOrEqual(Math.max(switcher.y + switcher.height, appearance.y + appearance.height))
-        // Below the header, before the breadcrumb or title: the trigger, at the start.
-        expect(trigger.y).toBeGreaterThan(strip.y + strip.height)
+        // Below the header's rule, 8px down, before the breadcrumb or title: the trigger, at the start.
+        expect(trigger.y - (head.y + head.height)).toBeCloseTo(8, 0)
         expect(trigger.x).toBeCloseTo(frame.x, 0)
         expect(trigger.y + trigger.height).toBeLessThan((await box('main h1')).y)
         await expect(page.locator('#section-menu')).toHaveText(new RegExp(`^${name}: .+`))
         expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0)
         // No icon-only Find or Menu button.
         await expect(page.getByRole('button', { name: /^(Menu|Find .*)$/ })).toHaveCount(0)
+      })
+    }
+
+    if (width === 320) {
+      // A clipped strip link shows at least 16px under the 24px fade, so the clip reads as more links.
+      // Phones have overlay scrollbars, so the page is sized to 320px of content even where the browser
+      // takes a scrollbar gutter.
+      for (const { path, name } of PAGES) test(`${name}: every clipped strip link shows at least 16px`, async ({ page }) => {
+        await page.goto(path)
+        const gutter = await page.evaluate(() => innerWidth - document.documentElement.clientWidth)
+        await page.setViewportSize({ width: 320 + gutter, height: 844 })
+        await page.evaluate(() => document.fonts.ready)
+        const shown = await page.locator('.page-head > .strip').evaluate((strip) => {
+          const box = strip.getBoundingClientRect()
+          return [...strip.querySelectorAll('a')].map((a) => {
+            const r = a.getBoundingClientRect()
+            return { label: a.textContent, width: r.width, inside: Math.min(r.right, box.right) - Math.max(r.left, box.left) }
+          })
+        })
+        expect(shown.some(({ inside, width }) => inside < width - 0.5), 'a link is clipped at 320px').toBe(true)
+        for (const { label, inside, width } of shown) if (inside < width - 0.5) expect(inside, `${label} shows ${inside}px`).toBeGreaterThanOrEqual(16)
       })
     }
 

@@ -356,7 +356,7 @@
   .navlist a:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   /* Phone trigger: a secondary button with a three-line menu glyph, because it opens a side drawer. It shows the page’s
      contents and does not act, so it takes the field corner, as its no-JavaScript summary does. */
-  .menu-glyph { border-radius: var(--radius-field); }
+  .menu-glyph { gap: var(--space-3); border-radius: var(--radius-field); }
   .menu-glyph::before { content: ""; flex: none; width: 14px; height: 10px; border-block: 1.5px solid currentColor; background: linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat; }
   /* No-JavaScript fallback: the list opens in place. The summary is a secondary button with a chevron; only the chevron is local. */
   .rail-summary { list-style: none; width: max-content; max-width: 100%; border-radius: var(--radius-field); }
@@ -401,7 +401,7 @@
   :is(.rail, .rail-specimen) a[aria-current="location"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); }
   :is(.rail, .rail-specimen) a[aria-current="location"]::before { content: none; }
   /* Tablet and phone: the labelled trigger below the header. A long label wraps inside the button. */
-  .section-trigger { width: max-content; max-width: 100%; white-space: normal; text-align: start; }
+  .section-trigger { width: max-content; max-width: 100%; padding-block: var(--space-2); white-space: normal; text-align: start; }
 
   /* Find field: a search input with a leading icon and a trailing key hint. */
   .find { position: relative; display: block; width: 100%; max-width: 260px; }
@@ -679,7 +679,7 @@
   /* Header: the identity, the design system's pages as a navigation strip, and the appearance control.
      On the site the identity is the project switcher. This package copy has no project registry, so it
      shows the site name as text, in the switcher's type, with a ~/ mark one character wide before it. */
-  .page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3) var(--space-6); min-height: var(--space-16); border-bottom: 1px solid var(--color-border-subtle); }
+  .page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3) var(--space-6); min-height: calc(var(--space-16) + 1px); border-bottom: 1px solid var(--color-text); }
   .site-name { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-sm); margin: 0 auto 0 0; border-radius: var(--radius-inline); color: var(--color-text); font: var(--weight-semibold) var(--text-sm) / 1 var(--font-mono); text-decoration: none; }
   .site-name::before { content: "~/" / ""; color: var(--color-accent); }
   /* Desktop: the strip starts right after the identity, so its links sit at the same x on every page. */
@@ -728,7 +728,7 @@
   .state > :is(.field, .input, .select, .textarea, .search) { width: 220px; }
   .state .pager { padding-top: 0; border-top: 0; }
   .rail-specimen { display: grid; gap: var(--space-3); width: 240px; }
-  .phone-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); width: min(100%, 360px); padding-block: var(--space-3); border-bottom: 1px solid var(--color-border-subtle); }
+  .phone-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); width: min(100%, 360px); padding-block: var(--space-2); border-bottom: 1px solid var(--color-text); }
   .phone-head > .strip { flex-basis: 100%; margin-inline: -2px; }
 
   /* By purpose: each group with its components, in two balanced columns. */
@@ -762,18 +762,14 @@
 
   @media (max-width: 800px) {
     /* The header is static and takes two rows: the identity and the appearance control, then the pages.
-       Without the script the appearance control stays hidden, and the rail stays in place above the content. */
-    .page-head { column-gap: var(--space-3); padding-block: var(--space-3); }
+       Where both do not fit on the first row, as at 320px, the appearance control wraps to its own row at
+       the start, and the name stays whole. Without the script the appearance control stays hidden, and the
+       rail stays in place above the content. */
+    .page-head { gap: var(--space-2) var(--space-3); padding-block: var(--space-2); }
     .page-head > .site-name { min-height: var(--control-lg); white-space: nowrap; }
-    /* The switcher takes the room the appearance control leaves, so both share the first row down to 320px.
-       Where that is too narrow for the project name, the name ends in an ellipsis; the summary's
-       aria-label keeps it whole. */
-    .page-head > .projects { flex: 1 1 0; min-width: 0; }
-    .page-head > .projects > summary { max-width: 100%; }
-    .page-head > .projects > summary > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .page-head .strip { order: 3; flex-basis: 100%; margin-inline: -2px; }
-    /* With the script, the trigger sits below the header, before the breadcrumb; main's top padding follows it. */
-    .section-trigger { margin-top: var(--space-8); }
+    .page-head .strip { order: 3; flex-basis: 100%; margin-inline: -2px; container: pages / inline-size; }
+    /* With the script, the trigger sits just below the header, before the breadcrumb; main's top padding follows it. */
+    .section-trigger { margin-top: var(--space-2); }
     .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
     .layout > .rail { position: static; height: auto; padding-block: var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
     .layout > .rail .rail-list { overflow: visible; }
@@ -792,6 +788,11 @@
     .crumbs a, .group-toggle { min-height: var(--control-lg); }
     .intro > .crumbs > ol { margin-block: calc((1lh - var(--control-lg)) / 2) calc((var(--control-lg) - 1lh) / 2); }
     .folio-display { font-size: var(--text-display-sm); }
+  }
+  /* On the narrowest phones the strip clips a link. Tighter rows keep at least 16px of it in view under
+     the 24px fade, so the clip shows. The strip queries its own width, since only the strip changes. */
+  @container pages (max-width: 340px) {
+    .page-head .strip a { padding-inline: var(--space-2); }
   }
   @media (max-width: 640px) {
     /* Phones: a dialog becomes a bottom sheet with rounded top corners. */
