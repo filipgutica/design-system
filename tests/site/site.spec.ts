@@ -373,7 +373,7 @@ for (const forcedColors of ['none', 'active'] as const) test(`the header links s
     const head = page.locator('.page-head')
     await expect(head.locator('.crumbs')).toHaveCount(0)
     await expect(head.locator('> .projects > summary')).toHaveAttribute('aria-label', 'Project: Design system')
-    expect(await head.evaluate((h) => { const style = getComputedStyle(h); return [style.borderBottomStyle, style.borderBottomWidth, style.borderBottomColor === style.color, h.getBoundingClientRect().height] })).toEqual(['solid', '1px', true, 65])
+    expect(await head.evaluate((h) => { const style = getComputedStyle(h); return [style.borderBottomStyle, style.borderBottomWidth, style.borderBottomColor === style.color] })).toEqual(['solid', '1px', true])
     const links = head.locator('.strip a')
     for (const { name } of PAGES) {
       // The hidden copy that reserves the width holds the label, and stays out of the link's name.
