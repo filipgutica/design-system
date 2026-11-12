@@ -18,11 +18,10 @@ const RAIL = [
  * cannot drop off the page.
  */
 export const foundationGroups = ({ source, values }) => {
-  const standalone = source.groups.filter(({ standalone }) => standalone !== false)
   const placed = RAIL.flatMap(({ groups }) => groups)
-  const unplaced = standalone.map(({ id }) => id).filter((id) => !placed.includes(id))
+  const unplaced = source.groups.map(({ id }) => id).filter((id) => !placed.includes(id))
   if (unplaced.length) throw new Error(`Foundations: no rail group for ${unplaced.join(', ')}`)
-  const groups = placed.map((id) => standalone.find((group) => group.id === id))
+  const groups = placed.map((id) => source.groups.find((group) => group.id === id))
   const names = groups.flatMap(({ tokens }) => Object.keys(tokens))
   const missing = Object.keys(values.light).filter((name) => !names.includes(name))
   if (missing.length || names.length !== Object.keys(values.light).length) throw new Error(`Foundations: tokens.json and the source groups disagree (${missing.join(', ')})`)

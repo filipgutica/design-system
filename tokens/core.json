@@ -130,7 +130,7 @@
       "roles": {
         "color-accent": "Primary action fill, marks, current items, checked controls; 4.5:1 where it colors text",
         "color-accent-text": "Primary button label",
-        "color-accent-hover": "No core component reads it; it mirrors `--color-accent-hover` in `@filipgutica/ui`",
+        "color-accent-hover": "Accent hover; no core component reads it",
         "color-button-hover": "Primary button hover",
         "color-link": "Links",
         "color-focus": "The one focus ring on every role but fields: the accent",
@@ -449,126 +449,6 @@
         "duration": "180ms",
         "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
       }
-    },
-    {
-      "id": "library",
-      "title": "Library only",
-      "note": "@filipgutica/ui variables with no design-language token. `tokens.css` leaves them out.",
-      "comment": "Library only: @filipgutica/ui variables with no design-language token. tokens.css leaves them out.",
-      "standalone": false,
-      "roles": {
-        "color-shadow": "Shadow colour for @filipgutica/ui components that draw their own shadow",
-        "shadow-control": "Outer shadow on @filipgutica/ui controls: none, as idle controls take no lift"
-      },
-      "tokens": {
-        "color-shadow": [
-          "rgb(16 24 40 / 10%)",
-          "rgb(0 0 0 / 32%)"
-        ],
-        "shadow-control": "none"
-      }
     }
-  ],
-  "library": {
-    "roles": {
-      "--color-project": "color-project",
-      "--color-project-dark": "color-project-dark",
-      "--color-bg": "color-bg",
-      "--color-surface": "color-surface",
-      "--color-surface-raised": "color-surface-raised",
-      "--color-surface-muted": "color-surface-muted",
-      "--color-text": "color-text",
-      "--color-muted": "color-muted",
-      "--color-link": "color-link",
-      "--color-accent": "color-accent",
-      "--color-accent-text": "color-accent-text",
-      "--color-focus": "color-focus",
-      "--color-border": "color-border",
-      "--color-border-subtle": "color-border-subtle",
-      "--color-button-bg": "color-accent",
-      "--color-button-text": "color-accent-text",
-      "--color-button-hover": "color-button-hover",
-      "--color-input-bg": "color-surface-raised",
-      "--color-input-text": "color-text",
-      "--color-input-border": "color-border",
-      "--color-input-placeholder": "color-muted",
-      "--color-row-hover": "color-row-hover",
-      "--color-row-selected": "color-row-selected",
-      "--color-row-selected-text": "color-text",
-      "--color-code": "color-code",
-      "--color-code-text": "color-code-text",
-      "--color-syntax-comment": "color-syntax-comment",
-      "--color-syntax-keyword": "color-syntax-keyword",
-      "--color-syntax-string": "color-syntax-string",
-      "--color-syntax-number": "color-syntax-number",
-      "--color-syntax-function": "color-syntax-keyword",
-      "--color-syntax-type": "color-syntax-number",
-      "--color-syntax-variable": "color-code-text",
-      "--color-syntax-operator": "color-muted",
-      "--color-syntax-punctuation": "color-muted",
-      "--color-syntax-tag": "color-syntax-keyword",
-      "--color-syntax-attribute": "color-syntax-number",
-      "--color-error": "color-error",
-      "--color-warning": "color-warning",
-      "--color-success": "color-success",
-      "--color-info": "color-info",
-      "--color-progress": "color-accent",
-      "--color-error-surface": "color-error-surface",
-      "--color-warning-surface": "color-warning-surface",
-      "--color-success-surface": "color-success-surface",
-      "--color-info-surface": "color-info-surface",
-      "--shadow-dialog": "shadow-dialog",
-      "--color-status-text": "color-text",
-      "--color-terminal": "color-terminal",
-      "--color-terminal-text": "color-terminal-text",
-      "--color-terminal-border": "color-terminal-border",
-      "--color-terminal-caption": "color-terminal-caption",
-      "--color-terminal-caption-text": "color-terminal-caption-text",
-      "--color-accent-hover": "color-accent-hover",
-      "--color-command-bg": "color-command-bg",
-      "--color-command-border": "color-command-border"
-    },
-    "baseRoles": {
-      "--color-well": "color-well",
-      "--color-field-bg": "color-field-bg",
-      "--color-field-edge": "color-field-edge",
-      "--shadow-field": "shadow-field",
-      "--color-control-thumb": "color-control-thumb",
-      "--color-nav-current": "color-nav-current",
-      "--color-overlay": "color-overlay",
-      "--shadow-field-focus": "shadow-field-focus",
-      "--shadow-field-focus-invalid": "shadow-field-focus-invalid"
-    },
-    "aliases": {
-      "font-ui": "--font-ui",
-      "radius-inline": "--radius-inline",
-      "radius-control": "--radius-control",
-      "radius-field": "--radius-field",
-      "radius-panel": "--radius-panel",
-      "shadow-nav-current-dark": "--shadow-nav-current-dark"
-    },
-    "fallbacks": {
-      "color-nav-current-text": "--color-nav-current-text",
-      "color-segmented-current-text": "--color-segmented-current-text"
-    },
-    "lightOnly": [
-      "--color-focus",
-      "--color-field-edge",
-      "--shadow-control",
-      "--shadow-nav-current-dark",
-      "--shadow-field-focus",
-      "--shadow-field-focus-invalid"
-    ],
-    "extras": [
-      "text-3xl",
-      "text-reading",
-      "text-display",
-      "text-display-sm",
-      "tracking-tight",
-      "space-20",
-      "space-24",
-      "row",
-      "page-wide"
-    ]
-  }
+  ]
 }

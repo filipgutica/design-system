@@ -14,7 +14,7 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | `tokens/core.json`, `tokens/themes/*.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file holds only its name, a note, its hue pair, and optional fonts |
 | `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css` and `dist/` |
 | `scripts/build-site.mjs` | The site build: writes `site/` for GitHub Pages from `components.html`, the tokens, and `package.json` |
-| `dist/` | Generated token files for the class flavour, theme overrides, JSON, and JavaScript |
+| `dist/` | Generated theme files, JSON, and JavaScript |
 | `fonts/` | IBM Plex latin `woff2` files, `fonts.css`, and their OFL licences |
 | `tests/` | Guard tests for the payload, the tokens, and the site build, the React smoke test, and behaviour tests for the catalogue and the built site |
 
@@ -30,8 +30,7 @@ npm install @filipgutica/design-system
 
 | Import | What it is |
 | --- | --- |
-| `@filipgutica/design-system/tokens.css` | The tokens with their standalone names. Dark mode follows `prefers-color-scheme`; set `data-theme="light"` or `"dark"` on `<html>` to override it. |
-| `@filipgutica/design-system/class/base.css`, `class/themes/*.css` | The same values with `@filipgutica/ui`'s names, for apps that toggle a `.dark` class on `<html>`. Use one flavour per app. Import `class/base.css`, then one theme's roles: `class/themes/graphite-indigo.css` (the default), `mauve.css`, or `pine.css`. |
+| `@filipgutica/design-system/tokens.css` | The tokens. Dark mode follows `prefers-color-scheme`; set `data-theme="light"` or `"dark"` on `<html>` to override it. |
 | `@filipgutica/design-system/themes/*.css` | A theme's identity inputs (hue pair and fonts): `graphite-indigo` (the default, already in `tokens.css`), `mauve`, or `pine`. Load one after `tokens.css`, on `:root`. |
 | `@filipgutica/design-system/fonts.css` | IBM Plex Sans and Mono. |
 | `@filipgutica/design-system` | `tokens` (resolved values per theme and mode) and `cssVar(name)`, with types. |

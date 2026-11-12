@@ -11,8 +11,6 @@ const source = ({ id, file, text }) => `<div class="code"><div class="code-head"
 export const EXPORT_USES = {
   '.': 'Typed token data: <code>tokens</code> and <code>cssVar()</code>',
   './tokens.css': 'Every token, light and dark, with the base element styles',
-  './class/base.css': 'The same tokens for apps that switch dark mode with a <code>.dark</code> class',
-  './class/themes/*.css': 'A theme’s roles for the class flavour, to load after <code>class/base.css</code>',
   './themes/*.css': 'A theme’s identity inputs, to load after <code>tokens.css</code>; the Themes page lists them',
   './tokens.json': 'Every value per theme and mode, for tools and generators',
   './fonts.css': 'IBM Plex Sans and Mono, self-hosted',
@@ -79,7 +77,7 @@ export const Panel = ({ children }: { children: React.ReactNode }) => (
     {children}
   </section>
 )` })}
-    <p><code>cssVar()</code> only accepts names that exist, so a name from before the 2.0.0 token rename, such as <code>text</code>, fails the type check. Apps that switch dark mode with a <code>.dark</code> class import <code>class/base.css</code> instead of <code>tokens.css</code>.</p>
+    <p><code>cssVar()</code> only accepts names that exist, so a name from before the 2.0.0 token rename, such as <code>text</code>, fails the type check.</p>
   </section>
 
   <section class="doc-section" id="agents" aria-labelledby="agents-title">
