@@ -1,5 +1,5 @@
-// Components: the catalogue itself, read from language/components.html. The site page adds each
-// component's implementation links; index.json and llms.txt list the same components.
+// Components: the catalogue itself, read from language/components.html. index.json and llms.txt list
+// the same components.
 import { SITE_URL, between, esc } from './shell.mjs'
 
 /**
@@ -37,52 +37,8 @@ export const specGuidance = ({ markdown, components }) => {
   return guidance
 }
 
-/** The implementation of a component in each framework, from language/implementations.json, or null. */
-export const implementationsOf = ({ implementations, id }) => Object.fromEntries(
-  Object.entries(implementations).map(([framework, byId]) => [framework, byId[id] ?? null]),
-)
-
-const FRAMEWORK_NAMES = { vue: 'Vue', react: 'React' }
-
-// "Vue: UiButton" links to its docs; a framework without one says so.
-const implementationLinks = (byFramework) => `<span class="impl">${Object.entries(byFramework).map(([framework, impl]) => (impl
-  ? `<a href="${esc(impl.url)}">${FRAMEWORK_NAMES[framework]}: <code>${esc(impl.component)}</code></a>`
-  : `<span>${FRAMEWORK_NAMES[framework]}: none yet</span>`)).join('')}</span>`
-
-/** The catalogue with each component header ending in its implementation links. */
-export const withImplementationLinks = ({ html, implementations }) => {
-  let count = 0
-  const out = html.replace(/(<section class="component" id="([\w-]+)"[^>]*>\n {4}<header>.*?)(<\/header>)/g, (_, head, id, close) => {
-    count += 1
-    return `${head}${implementationLinks(implementationsOf({ implementations, id }))}${close}`
-  })
-  if (count !== html.split('<section class="component"').length - 1) throw new Error(`components.html: added implementation links to ${count} headers`)
-  return out
-}
-
-export const COMPONENTS_CSS = `
-  /* Implementations per framework, at the end of each component header. */
-  .impl { display: inline-flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-inline-start: auto; color: var(--color-muted); font-size: var(--text-sm); }
-  .impl code { font-size: var(--text-code); }
-`
-
-/** Unknown component ids, or entries without a component name and an https URL, in implementations.json. */
-export const implementationProblems = ({ implementations, components }) => {
-  const ids = new Set(components.map(({ id }) => id))
-  const problems = []
-  for (const framework of Object.keys(FRAMEWORK_NAMES)) if (!(framework in implementations)) problems.push(`no ${framework} map`)
-  for (const [framework, byId] of Object.entries(implementations)) {
-    if (!(framework in FRAMEWORK_NAMES)) problems.push(`unknown framework ${framework}`)
-    for (const [id, impl] of Object.entries(byId)) {
-      if (!ids.has(id)) problems.push(`${framework}: no component ${id}`)
-      if (!impl?.component || !/^https:\/\//.test(impl?.url ?? '')) problems.push(`${framework}.${id}: needs a component and an https url`)
-    }
-  }
-  return problems
-}
-
 /** site/index.json: one entry per component, for agents and tools. */
-export const componentIndex = ({ components, guidance, implementations, pkg, version }) => ({
+export const componentIndex = ({ components, guidance, pkg, version }) => ({
   name: pkg.name,
   version,
   site: SITE_URL,
@@ -96,16 +52,15 @@ export const componentIndex = ({ components, guidance, implementations, pkg, ver
     dont: guidance.get(id).dont,
     url: `${SITE_URL}components.html#${id}`,
     spec: `${SITE_URL}components.md#${id}`,
-    implementations: implementationsOf({ implementations, id }),
   })),
 })
 
 /** site/llms.txt: what the system is, how to install it, and where the specs and the index are. */
 export const llmsTxt = ({ components, pkg, version }) => `# ${pkg.name}
 
-> Filip's design language: tokens, component specs, and a component catalogue in plain CSS and HTML, for any framework. Version ${version}. @filipgutica/ui implements it in Vue; there is no React library yet.
+> Filip's design language: tokens, component specs, and a component catalogue in plain CSS and HTML, for any framework. Version ${version}.
 
-Install it with \`pnpm add ${pkg.name}\`, then import \`${pkg.name}/fonts.css\` and \`${pkg.name}/tokens.css\` before your own styles. A Vue app installs \`@filipgutica/ui\` instead, which carries the tokens. \`cssVar()\` from the package gives typed \`var()\` references.
+Install it with \`pnpm add ${pkg.name}\`, then import \`${pkg.name}/fonts.css\` and \`${pkg.name}/tokens.css\` before your own styles. \`cssVar()\` from the package gives typed \`var()\` references.
 
 Read DESIGN.md first: it holds the selection rules and acceptance checks. Copy component markup and styles from components.html, and follow each component's spec in components.md.
 
@@ -114,11 +69,11 @@ Read DESIGN.md first: it holds the selection rules and acceptance checks. Copy c
 - [DESIGN.md](${SITE_URL}DESIGN.md): the design language, selection rules, and acceptance checks
 - [components.md](${SITE_URL}components.md): one spec per component: anatomy, states, Do and Don't, keyboard, motion, and forced colors
 - [decisions.md](${SITE_URL}decisions.md): why each decision was made, and the 2.0.0 token rename table
-- [index.json](${SITE_URL}index.json): every component with its layer, purpose, Do and Don't lines, page, spec, and implementations
+- [index.json](${SITE_URL}index.json): every component with its layer, purpose, Do and Don't lines, page, and spec
 
 ## Pages
 
-- [Overview](${SITE_URL}): install paths for plain HTML, Vue, React, and agents, and the package exports
+- [Overview](${SITE_URL}): install paths for plain HTML, React, and agents, and the package exports
 - [Foundations](${SITE_URL}foundations.html): every token with its light and dark value and its role
 - [Components](${SITE_URL}components.html): every component in each state, with markup to copy
 - [tokens.css](${SITE_URL}tokens.css): every token as a CSS variable, light and dark

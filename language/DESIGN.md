@@ -48,14 +48,12 @@ Center the **container**, not every sentence. Align header, content, images, and
 - `product.html`: a restrained product-page hierarchy with illustrative product evidence.
 - `DESIGN.md`: selection rules and acceptance criteria. It names tokens rather than repeating their values.
 
-Personal sites import `@filipgutica/ui/themes/graphite-indigo.css` and the shared site helpers. The UI package owns the values and generation procedure.
-
-Token names depend on where the page runs. This file uses the `tokens.css` names, which `@filipgutica/ui` shares.
+Token names depend on where the page runs. This file uses the `tokens.css` names.
 
 | Context | Variable names to write |
 | --- | --- |
 | Standalone HTML | The `tokens.css` names. Import or inline `tokens.css`, and copy component styles from `components.html`. |
-| Site on `@filipgutica/ui` | The `tokens.css` names, which the library declares. The exceptions are `--color-nav-current-text` and `--color-segmented-current-text`: the library does not declare them, so write them with the fallback their `ui:` comment shows. Without it, `var()` falls back without an error. The library draws the base focus ring only inside `.fg-site-docs`; elsewhere, write it yourself, exactly `outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset)`. |
+| Site on a component library built on this design language | The `tokens.css` names that the library declares. The library's own documentation lists any it lacks and any helper behaviour. |
 | Other repository | That repository's own tokens and components, matched to these roles by meaning. |
 | Inline visual | The host's supplied CSS variables and font, with no separate page shell. |
 
@@ -104,9 +102,9 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | Tablet | `@media (max-width: 800px)` | Multi-column layouts become one content column. Touch controls use `--control-lg`. |
   | Phone | `@media (max-width: 640px)` | Side gutters drop from `--space-6` to `--space-4`, and section gaps take their phone step. |
 
-  Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. One documented exception: the tool-home hero (`.fg-site-hero` in `@filipgutica/ui`) splits at `@media (min-width: 1024px)`, with the title across the top, the lede on the left, and the install block and facts on the right. Below 1024px it stacks in source order. `@filipgutica/ui` also ships 680px rules for its own site header, prose title and definitions (`max-width: 680px`, with `min-width: 681px` for frame padding); they belong to the library, so pages add no viewport breakpoint beyond the table and the hero split. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.
+  Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. One documented exception: the tool-home hero splits at `@media (min-width: 1024px)`, with the title across the top, the lede on the left, and the install block and facts on the right. Below 1024px it stacks in source order. Pages add no viewport breakpoint beyond the table and the hero split. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.
 - Density: an application screen has one size for each place, not a range. Toolbar controls (buttons, segmented filters, and search fields) are `sm`, `--control-sm` tall. Rows in a table or list, such as the console's monitor list, and rail and navigation rows, are `--row` tall. Other controls keep the default `md` (`--control-md`). At tablet width every touch target grows to `--control-lg`. The console in `reference.html` uses these sizes.
-- [Navigation](#navigation) is a strip of 6 links or fewer, or a section rail that moves into a drawer at tablet width. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line; `UiSiteNav` does this. Keep wide code, tables, and charts scrolling inside their containers.
+- [Navigation](#navigation) is a strip of 6 links or fewer, or a section rail that moves into a drawer at tablet width. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line. Keep wide code, tables, and charts scrolling inside their containers.
 - Keep main headings, actions, and product evidence visible on load. Scrolling should reveal more content without being required to make existing content appear.
 
 ### Surfaces
@@ -234,7 +232,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 
 The personal sites are terminal tools that read Markdown and paths, so their identity comes from that world. A new project replaces this section with its own identity and keeps the core.
 
-- **Mono identity.** `--font-mono` (IBM Plex Mono) sets identity, the page titles and section headings of documentation, CLI tool, article, and product pages, navigation rails, metadata, captions, and the footer. `@filipgutica/ui` self-hosts IBM Plex; elsewhere the tokens fall back to the system stack.
+- **Mono identity.** `--font-mono` (IBM Plex Mono) sets identity, the page titles and section headings of documentation, CLI tool, article, and product pages, navigation rails, metadata, captions, and the footer. `fonts.css` self-hosts IBM Plex; without it, the tokens fall back to the system stack.
 - **Headings.** Documentation, CLI tool, article, and product page titles are mono; application titles are `--font-ui`. Page-level section headings (h2) on documentation, CLI tool, article, and product pages are mono, start with a `##` mark in `--color-accent` (decorative, so screen readers skip it), and have a `--color-border-subtle` rule above the section. Application and inline-visualization section headings, and every h3 or lower, are plain `--font-ui` with no mark. Product pages and tool homes may use a mono `--text-display` title, stepping down to `--text-display-sm` on phones; keep a short heading measure, place supporting copy and the primary action nearby, and let the first product image enter the initial desktop viewport.
 - **Hue marks.** The hue also draws the `~/` header mark, the `##` mark on documentation, CLI tool, article, and product section headings, step numbers, and the `$` prompt.
 - **Header.** Personal product sites share a compact static header: a mono `~/name` identity with the `~/` in `--color-accent`, a project switcher, useful page links, appearance controls, and a solid `--color-text` rule below. Use the shared project registry for names, order, and destinations; the design-system site's header starts with the same switcher. The identity is the same on every page, and the links sit at the same x on every page; the page's path goes in [breadcrumbs](components.md#breadcrumbs) above its title. Keep a gallery's existing application navigation structure.

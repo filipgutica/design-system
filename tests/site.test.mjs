@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { posix } from 'node:path'
 import { COPIED, fetchProjects, siteFiles } from '../scripts/build-site.mjs'
-import { catalogueComponents, implementationProblems, specGuidance } from '../scripts/site/components.mjs'
+import { catalogueComponents, specGuidance } from '../scripts/site/components.mjs'
 import { foundationsPage } from '../scripts/site/foundations.mjs'
 import { overviewPage } from '../scripts/site/overview.mjs'
 import { parseColour, themeChecks, themesPage } from '../scripts/site/themes.mjs'
@@ -184,16 +184,6 @@ test('the site link check catches a file the repository has but site/ does not',
     ['DESIGN.md', 'Read [visualizations](visualizations.md) and [the source](../scripts/build-site.mjs).'],
   ])
   assert.deepEqual(deadLinks({ files: planted, ...inSite }), ['docs.html: README.md', 'DESIGN.md: ../scripts/build-site.mjs'])
-})
-
-test('implementations.json names real components with a component and an https URL', () => {
-  const implementations = JSON.parse(read('language/implementations.json'))
-  const components = catalogueComponents(template)
-  assert.equal(components.length, template.split('<section class="component"').length - 1)
-  assert.deepEqual(implementationProblems({ implementations, components }), [])
-  assert.deepEqual(implementationProblems({ implementations: { vue: { buton: { component: 'UiButton', url: 'http://x' } } }, components }), [
-    'no react map', 'vue: no component buton', 'vue.buton: needs a component and an https url',
-  ])
 })
 
 // index.json carries each component's Do and Don't lines as components.md writes them. The test finds

@@ -18,7 +18,7 @@ import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { parseArgs } from 'node:util'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { readRenameTable } from './rename-tokens.mjs'
-import { COMPONENTS_CSS, catalogueComponents, componentIndex, implementationProblems, llmsTxt, specGuidance, withImplementationLinks } from './site/components.mjs'
+import { catalogueComponents, componentIndex, llmsTxt, specGuidance } from './site/components.mjs'
 import { foundationsPage } from './site/foundations.mjs'
 import { overviewPage } from './site/overview.mjs'
 import { PROJECTS_URL, parseProjects, sitePage } from './site/shell.mjs'
@@ -30,7 +30,7 @@ const read = (path) => readFileSync(`${root}${path}`, 'utf8')
 const readJson = (path) => JSON.parse(read(path))
 
 /** The language files and folders the site serves as they ship, beside the generated pages. */
-export const COPIED = ['tokens.css', 'reference.html', 'docs.html', 'product.html', 'DESIGN.md', 'components.md', 'decisions.md', 'visualizations.md', 'visualizations', 'implementations.json']
+export const COPIED = ['tokens.css', 'reference.html', 'docs.html', 'product.html', 'DESIGN.md', 'components.md', 'decisions.md', 'visualizations.md', 'visualizations']
 
 /**
  * The latest release, from the ds-v* tags; the v* tags are the earlier version series. A checkout
@@ -65,11 +65,8 @@ export const fetchProjects = async ({ url = PROJECTS_URL, attempts = 3, delay = 
 export const siteFiles = ({ version, projects }) => {
   const template = read('language/components.html')
   const pkg = readJson('package.json')
-  const implementations = readJson('language/implementations.json')
   const components = catalogueComponents(template)
   const guidance = specGuidance({ markdown: read('language/components.md'), components })
-  const problems = implementationProblems({ implementations, components })
-  if (problems.length) throw new Error(`language/implementations.json:\n  ${problems.join('\n  ')}`)
 
   const overview = overviewPage({ pkg, version })
   const foundations = foundationsPage({
@@ -79,7 +76,6 @@ export const siteFiles = ({ version, projects }) => {
     version,
     packageName: pkg.name,
   })
-  const catalogue = sitePage({ template, projects, current: 'components', title: 'Components · Design system', css: COMPONENTS_CSS })
   const themes = themesPage({
     themes: readTokens(root).themes.map(({ data, ...theme }) => theme),
     values: readJson('dist/tokens.json').themes,
@@ -89,9 +85,9 @@ export const siteFiles = ({ version, projects }) => {
   return [
     ['index.html', sitePage({ template, projects, current: 'overview', ...overview })],
     ['foundations.html', sitePage({ template, projects, current: 'foundations', ...foundations })],
-    ['components.html', withImplementationLinks({ html: catalogue, implementations })],
+    ['components.html', sitePage({ template, projects, current: 'components', title: 'Components · Design system' })],
     ['themes.html', sitePage({ template, projects, current: 'themes', ...themes })],
-    ['index.json', `${JSON.stringify(componentIndex({ components, guidance, implementations, pkg, version }), null, 2)}\n`],
+    ['index.json', `${JSON.stringify(componentIndex({ components, guidance, pkg, version }), null, 2)}\n`],
     ['llms.txt', llmsTxt({ components, pkg, version })],
   ]
 }

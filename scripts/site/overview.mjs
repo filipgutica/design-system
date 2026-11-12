@@ -23,7 +23,6 @@ export const EXPORT_USES = {
 
 const PATHS = [
   { id: 'html', name: 'Plain HTML', who: 'A static page, a prototype, or an explainer', pkg: '@filipgutica/design-system', start: '<code>tokens.css</code>' },
-  { id: 'vue', name: 'Vue', who: 'A Vue 3.5 app built with Tailwind CSS 4', pkg: '@filipgutica/ui', start: 'Its styles and components' },
   { id: 'react', name: 'React', who: 'A React app', pkg: '@filipgutica/design-system', start: '<code>tokens.css</code> and <code>cssVar()</code>' },
   { id: 'agents', name: 'Agents', who: 'Claude or Codex doing UI work for you', pkg: 'filip-stack host config', start: '<code>~/design-language/DESIGN.md</code>' },
 ]
@@ -37,7 +36,7 @@ export const overviewPage = ({ pkg, version }) => {
 
   const main = `  <section class="intro" aria-labelledby="title">
     <div class="title-row"><h1 id="title">Design system</h1><span class="badge">${esc(version)}</span></div>
-    <p>Tokens, component specs, and a component catalogue for Filip’s products, written in plain CSS and HTML. Any framework can use them: <code>@filipgutica/ui</code> implements them in Vue, and a React library is next.</p>
+    <p>Tokens, component specs, and a component catalogue for Filip’s products, written in plain CSS and HTML. Any framework can use them.</p>
   </section>
 
   <section class="doc-section" id="choose" aria-labelledby="choose-title">
@@ -61,26 +60,6 @@ export const overviewPage = ({ pkg, version }) => {
 .panel { background: var(--color-surface-raised); border-radius: var(--radius-panel); }` })}
     <p>Without a bundler, link <code>fonts/fonts.css</code> and <code>language/tokens.css</code> from the package folder. Pages follow the reader’s system theme; set <code>data-theme="light"</code> or <code>"dark"</code> on <code>&lt;html&gt;</code> to choose one.</p>
     <p>Copy component markup and styles from <a href="components.html">Components</a>.</p>
-  </section>
-
-  <section class="doc-section" id="vue" aria-labelledby="vue-title">
-    <h2 id="vue-title">Vue</h2>
-    <p><code>@filipgutica/ui</code> carries the tokens with its components, so a Vue app does not install the design system itself. It needs Vue 3.5 or later and a stylesheet that Tailwind CSS 4 builds.</p>
-    ${command({ id: 'cmd-vue', label: 'Install command for Vue', line: 'pnpm add @filipgutica/ui' })}
-    ${source({ id: 'src-vue-css', file: 'main.css', text: `
-@import "tailwindcss";
-@import "@filipgutica/ui/theme.css";
-@import "@filipgutica/ui/themes/graphite-indigo.css";
-@import "@filipgutica/ui/components.css";` })}
-    ${source({ id: 'src-vue', file: 'SaveButton.vue', text: `
-<script setup lang="ts">
-import { UiButton } from '@filipgutica/ui'
-</script>
-
-<template>
-  <UiButton variant="secondary" size="sm">Save changes</UiButton>
-</template>` })}
-    <p>The <a href="https://filipgutica.github.io/ui/">ui documentation</a> lists every component and its props. Each component in <a href="components.html">Components</a> links to its Vue version.</p>
   </section>
 
   <section class="doc-section" id="react" aria-labelledby="react-title">
@@ -122,7 +101,7 @@ export const Panel = ({ children }: { children: React.ReactNode }) => (
       <dt><a href="DESIGN.md"><code>DESIGN.md</code></a></dt><dd>Selection rules and acceptance checks. Agents read it first.</dd>
       <dt><a href="components.md"><code>components.md</code></a></dt><dd>One spec per component: anatomy, states, Do and Don’t, keyboard, motion, and forced colors.</dd>
       <dt><a href="components.html"><code>components.html</code></a></dt><dd>Markup and styles to copy, in every state.</dd>
-      <dt><a href="llms.txt"><code>llms.txt</code></a> and <a href="index.json"><code>index.json</code></a></dt><dd>A generated index of every component: its layer, purpose, Do and Don’t lines, spec, and implementations.</dd>
+      <dt><a href="llms.txt"><code>llms.txt</code></a> and <a href="index.json"><code>index.json</code></a></dt><dd>A generated index of every component: its layer, purpose, Do and Don’t lines, and spec.</dd>
     </dl>
   </section>
 

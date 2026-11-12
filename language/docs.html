@@ -34,7 +34,7 @@ h1 { font-size: var(--text-3xl); max-width: 24ch; }
 h2 { font-size: var(--text-xl); }
 /* The ## mark goes on page-level section headings only. It is decorative; the empty alternative text keeps it out of the accessible name. */
 main > section > h2::before { content: "## " / ""; color: var(--color-accent); }
-/* The main gap alone separates sections. The rule above each heading belongs to the heading, as in @filipgutica/ui. */
+/* The main gap alone separates sections. The rule above each heading belongs to the heading. */
 main > section > h2 { padding-top: var(--space-4); border-top: 1px solid var(--color-border-subtle); }
 p { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-reading); }
 /* Command plate: dark in both themes and tinted with the hue. Text takes the terminal colour and the focus ring the dark-theme accent, so both read on the dark plate. */

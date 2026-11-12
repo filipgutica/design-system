@@ -688,15 +688,6 @@ test('Copy still takes the hover tint where the pointer can hover', async ({ pag
   await expect(copy).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 })
 
-test('each component header links its implementations', async ({ page }) => {
-  await page.goto('components.html')
-  const button = page.locator('#button > header .impl')
-  await expect(button.getByRole('link', { name: 'Vue: UiButton' })).toHaveAttribute('href', 'https://filipgutica.github.io/ui/#/components/button')
-  await expect(button).toContainText('React: none yet')
-  await expect(page.locator('#quiet-action > header .impl')).toHaveText('Vue: none yetReact: none yet')
-  await expect(page.locator('section.component > header .impl')).toHaveCount(await page.locator('section.component').count())
-})
-
 test('index.json and llms.txt list every component, and their site links resolve', async ({ page, request }) => {
   await page.goto('components.html')
   const ids = await page.locator('section.component').evaluateAll((els) => els.map((el) => el.id))
