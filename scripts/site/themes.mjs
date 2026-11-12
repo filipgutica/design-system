@@ -146,6 +146,7 @@ const useSection = (packageName, example) => `  <section class="theme" id="use" 
     <p class="theme-note"><code>tokens.css</code> carries the default theme. To use another, load its theme file after <code>tokens.css</code>. It sets the identity inputs on <code>:root</code>, and light and dark both follow.</p>
     ${source({ id: 'src-use', file: 'styles.css', lines: [`@import "${packageName}/tokens.css";`, `@import "${packageName}/themes/${example.id}.css";`] })}
     <p class="theme-note">Load a theme on <code>:root</code> only. The tokens that follow the hue resolve there, so a theme scoped to an element below <code>:root</code> changes the hue there, but the accent, focus ring, and selection keep the default theme's colours.</p>
+    <p class="theme-note">The class flavour, for apps that toggle a <code>.dark</code> class, has a file per theme too: load <code>${packageName}/class/themes/${example.id}.css</code> after <code>class/base.css</code>.</p>
   </section>`
 
 const makeSection = (example) => `  <section class="theme" id="make" aria-labelledby="make-title">

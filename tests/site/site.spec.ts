@@ -575,6 +575,58 @@ for (const width of [390, 320]) {
   })
 }
 
+// The backdrop belongs to the dialog element, so a press on it is a press on the dialog outside the drawer's box.
+test.describe('phone drawer, outside it', { tag: '@webkit' }, () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true })
+
+  test('a tap or click outside closes the drawer and focuses the trigger, and a press that starts inside keeps it open', async ({ page }) => {
+    await page.goto('components.html')
+    const trigger = page.locator('#section-menu')
+    const drawer = page.locator('#nav-drawer')
+    const title = drawer.locator('.drawer-head h4')
+    // Read at once: a drawer that starts to close stays visible while it slides out.
+    const open = () => drawer.evaluate((dialog: HTMLDialogElement) => dialog.open && !('closing' in dialog.dataset))
+    await trigger.click()
+    await expect(drawer).toBeVisible()
+    await title.tap()
+    expect(await open()).toBe(true)
+    // A drag from inside the drawer that ends outside it.
+    const { x, y, width, height } = (await title.boundingBox())!
+    await page.mouse.move(x + width / 2, y + height / 2)
+    await page.mouse.down()
+    await page.mouse.move(370, 500)
+    await page.mouse.up()
+    expect(await open()).toBe(true)
+    await page.touchscreen.tap(370, 500)
+    await expect(drawer).toBeHidden()
+    await expect(trigger).toBeFocused()
+    await trigger.click()
+    await expect(drawer).toBeVisible()
+    await page.mouse.click(370, 500)
+    await expect(drawer).toBeHidden()
+    await expect(trigger).toBeFocused()
+  })
+
+  for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+    test(`after a / open, a tap outside returns focus to the trigger without scrolling the page, with reduced motion ${reducedMotion}`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion })
+      await page.goto('components.html')
+      // Scrolled by the reader, not by a deep link: WebKit on Linux scrolls back to a link's target when the
+      // drawer opens, whatever takes focus.
+      await page.evaluate(() => new Promise((done) => { scrollTo(0, 5000); requestAnimationFrame(() => requestAnimationFrame(done)) }))
+      const before = await page.evaluate(() => scrollY)
+      expect(before).toBe(5000)
+      await page.keyboard.press('/')
+      await expect(page.locator('#find')).toBeFocused()
+      expect(await page.evaluate(() => scrollY), 'the open scrolled the page').toBe(before)
+      await page.touchscreen.tap(370, 500)
+      await expect(page.locator('#nav-drawer')).toBeHidden()
+      await expect(page.locator('#section-menu')).toBeFocused()
+      expect(await page.evaluate(() => scrollY), 'the close scrolled the page').toBe(before)
+    })
+  }
+})
+
 test('Copy writes var(--name) and says so', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (text: string) => { (window as unknown as { copied: string }).copied = text } } })

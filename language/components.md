@@ -292,6 +292,7 @@ Layer: Core. ui: `UiDrawer`.
 - **Do.** Use a drawer for navigation or supporting detail that slides in from the side its trigger sits on, such as phone navigation, and open it from a named button.
 - **Don't.** The page's main task inside a drawer. The drawer holds navigation or detail; the task stays on the page.
 - **Keyboard and screen reader.** As for the dialog. Following an in-page link inside the drawer closes it and moves focus to the link's destination (given `tabindex="-1"` if it is not focusable), not back to the trigger. Modified clicks (a new tab or window) leave it open.
+- **Backdrop.** A tap or click on the backdrop, outside the drawer, closes it, the same way Escape does, and focus returns to the trigger. Only a press that starts outside counts: a drag that starts inside the drawer and ends outside leaves it open. Safari does not support `closedby="any"`, so a script closes it.
 - **Page behind.** While the drawer is open, until it has slid out, the page behind it does not scroll: the root takes `overflow: hidden`, which keeps the reader's position. The page reserves the scrollbar gutter all the time (`scrollbar-gutter: stable` on the root), so hiding a classic scrollbar does not reflow it.
 - **Motion.** It slides in over `--duration` and out over `--duration-fast`, with `--ease-out`, while the overlay fades. Reduced motion shows and hides it at once.
 - **Forced colors.** As for the dialog: the shadow drops and the edge draws in the system colour.

@@ -1733,8 +1733,12 @@
     showCopied(button, ok);
   }));
 
-  // Live dialog and drawer: native modal dialogs return focus to the trigger on close.
-  document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.open).showModal()));
+  // Live dialog and drawer: native modal dialogs return focus to the trigger on close. Safari does not focus a
+  // button on click, so the trigger takes focus first and the dialog has it to return to.
+  document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => {
+    button.focus();
+    document.getElementById(button.dataset.open).showModal();
+  }));
   // Following an in-page link closes the drawer, then focus moves to the destination instead of the trigger.
   // Every close path slides the drawer out first. Under reduced motion there is no animation, so it closes at once.
   // A slide that is cancelled, such as by turning on reduced motion mid-slide, still closes the drawer.
@@ -1755,6 +1759,17 @@
     };
     drawer.addEventListener('cancel', (e) => { e.preventDefault(); slideOut(); });
     drawer.querySelector('form[method="dialog"]')?.addEventListener('submit', (e) => { e.preventDefault(); slideOut(); });
+    // A tap or click on the backdrop, which belongs to the dialog element, lands outside the drawer's box and
+    // closes it. closedby="any" would do this, but Safari does not support it. Only a press that starts outside
+    // counts, so a drag out of the drawer keeps it open. It closes on the click, not the press: a drawer that
+    // closes at once, under reduced motion, would otherwise pass the release and its click to the page behind.
+    const outside = (e) => {
+      const box = drawer.getBoundingClientRect();
+      return e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
+    };
+    let pressedOutside = false;
+    drawer.addEventListener('pointerdown', (e) => { pressedOutside = outside(e); });
+    drawer.addEventListener('click', (e) => { if (pressedOutside && e.target === drawer && outside(e)) slideOut(); });
     drawer.addEventListener('click', (e) => {
       const link = e.target.closest('a[href^="#"]');
       if (!link || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
@@ -1880,9 +1895,14 @@
 
   // A tap opens the drawer with focus on its body, so no ring shows and no keyboard opens. A keyboard
   // open moves focus to the current row, where the ring shows the reader's place. Find focuses the field.
+  // Every open, by the trigger or the / shortcut, focuses the trigger first, without scrolling, so the drawer
+  // returns focus to it on close. Safari does not focus a button on click, and the shortcut starts anywhere.
   drawerBody.tabIndex = -1;
   const openDrawer = ({ toFind = false, byPointer = false } = {}) => {
-    if (!drawer.open) drawer.showModal();
+    if (!drawer.open) {
+      trigger.focus({ preventScroll: true });
+      drawer.showModal();
+    }
     const current = rail.querySelector('[aria-current="location"]:not([hidden])');
     if (current) centre(drawerBody, current);
     if (toFind || !current) find.focus({ preventScroll: true });

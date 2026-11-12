@@ -11,7 +11,7 @@ export const EXPORT_USES = {
   '.': 'Typed token data: <code>tokens</code> and <code>cssVar()</code>',
   './tokens.css': 'Every token, light and dark, with the base element styles',
   './class/base.css': 'The same tokens for apps that switch dark mode with a <code>.dark</code> class',
-  './class/themes/*.css': 'Graphite Indigo roles for the class flavour (the default theme only)',
+  './class/themes/*.css': 'A theme’s roles for the class flavour, to load after <code>class/base.css</code>',
   './themes/*.css': 'A theme’s identity inputs, to load after <code>tokens.css</code>; the Themes page lists them',
   './tokens.json': 'Every value per theme and mode, for tools and generators',
   './fonts.css': 'IBM Plex Sans and Mono, self-hosted',
