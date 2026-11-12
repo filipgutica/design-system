@@ -82,3 +82,17 @@ test('class/themes/graphite-indigo.css declares the same variables in each rule 
 test('class/base.css with class/themes/graphite-indigo.css has ui theme.css with themes/graphite-indigo.css values', () => {
   assert.deepEqual(classModes(classBase, classGraphiteIndigo), classModes(uiTheme, uiGraphiteIndigo))
 })
+
+// Every theme ships a class file. With class/base.css, it gives each variable the class flavour shares with
+// tokens.json that theme's value, so an app can switch theme by importing a different file.
+test('class/base.css with each class/themes/<id>.css has that theme\'s tokens.json values', () => {
+  const { themes } = JSON.parse(read('dist/tokens.json'))
+  for (const [id, values] of Object.entries(themes)) {
+    const modes = classModes(classBase, read(`dist/class/themes/${id}.css`))
+    for (const mode of ['light', 'dark']) {
+      const shared = Object.entries(values[mode]).filter(([name]) => `--${name}` in modes[mode])
+      assert.ok(shared.some(([name]) => name === 'color-project'), `${id} ${mode}: no --color-project`)
+      assert.deepEqual(Object.fromEntries(shared.map(([name]) => [name, modes[mode][`--${name}`]])), Object.fromEntries(shared), `${id} ${mode}`)
+    }
+  }
+})

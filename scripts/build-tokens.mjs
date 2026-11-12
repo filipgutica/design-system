@@ -10,8 +10,8 @@
 //   default theme; each dist/themes/<id>.css sets one theme's identity inputs, to load after it.
 //   Dark mode follows prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it.
 // - Class (dist/class/base.css, dist/class/themes/*.css): adds ui's component roles (--color-input-bg, ...).
-//   Dark mode is a .dark class on <html>.
-//   The class flavour carries the default theme only: its theme file is @filipgutica/ui's role mapping.
+//   Dark mode is a .dark class on <html>. base.css carries the default theme; each class/themes/<id>.css
+//   is @filipgutica/ui's role mapping with one theme's values, to import after base.css.
 // dist/tokens.json and dist/tokens.js carry the standalone values of every theme, resolved, for code.
 //
 // Each group also carries reader-facing text for the site's Foundations page, which no output
@@ -152,13 +152,13 @@ const classResolver = ({ tokens, variableOf }) => {
 const classDeclarations = ({ pairs, variableOf, resolve, mode }) => pairs.map(([variable, token]) =>
   [variable, variableOf.get(token) === variable ? resolve(token, mode) : `var(${variableOf.get(token)})`])
 
-const classHeader = (lines) => [
-  `/* Generated from ${SOURCE} by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
+const classHeader = ({ source, lines }) => [
+  `/* Generated from ${source} by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
   ...lines.map((line) => ` * ${line}`),
 ].join('\n').concat(' */')
 
-const classFile = ({ header, light, dark }) => [
-  classHeader(header),
+const classFile = ({ source = SOURCE, header, light, dark }) => [
+  classHeader({ source, lines: header }),
   '',
   ':root {',
   '  color-scheme: light;',
@@ -172,15 +172,16 @@ const classFile = ({ header, light, dark }) => [
   '',
 ].join('\n')
 
-export const renderLibraryTheme = (data) => {
+export const renderLibraryTheme = ({ id, name, data }) => {
   const tokens = flatTokens(data)
   const { roles, extras } = data.library
   const pairs = Object.entries(roles)
   const variableOf = canonicalVariables(pairs)
   const resolve = classResolver({ tokens, variableOf })
   return classFile({
+    source: `tokens/core.json and tokens/themes/${id}.json`,
     header: [
-      'Opt-in Graphite Indigo roles for the class flavour. Import after class/base.css (theme.css in @filipgutica/ui).',
+      `Opt-in ${name} roles for the class flavour. Import after class/base.css (theme.css in @filipgutica/ui).`,
       'Dark mode uses the same .dark class as the base. Keep exactly one :root.dark block:',
       'sites copy it into a <noscript> prefers-color-scheme rule.',
     ],
@@ -396,7 +397,7 @@ export const outputs = (themes) => {
     ['language/tokens.css', renderStandaloneTokens(defaultTheme.data)],
     ...themes.map((theme) => [`dist/themes/${theme.id}.css`, renderStandaloneTheme(theme)]),
     ['dist/class/base.css', renderClassBase(defaultTheme.data)],
-    [`dist/class/themes/${defaultTheme.id}.css`, renderLibraryTheme(defaultTheme.data)],
+    ...themes.map((theme) => [`dist/class/themes/${theme.id}.css`, renderLibraryTheme(theme)]),
     ['dist/tokens.json', `${JSON.stringify(resolvedTokens(themes), null, 2)}\n`],
     ['dist/tokens.js', renderTokensJs(themes)],
     ['dist/tokens.d.ts', renderTokensDts(defaultTheme, themes)],
