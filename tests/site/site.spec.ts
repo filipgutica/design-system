@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type BrowserContext, type Page } from '@playwright/test'
 import { tokens } from '@filipgutica/design-system'
+import FIXTURE_PROJECTS from '../fixtures/projects.json' with { type: 'json' }
 
 // The built site, served under /design-system/ as on GitHub Pages: each page's layout, accessibility,
 // script, and links, the header and pager order, and Foundations' Find and Copy.
@@ -12,17 +13,23 @@ const PAGES = [
 ]
 const SITE_URL = 'https://filipgutica.github.io/design-system/'
 
-// The project list the build rendered into every page's menu, and that each page fetches again after load.
-// Each page's fetch is served the same list from here, so no test waits on the network after the build.
+// The test build renders every page's project menu from the fixture (see test:site in package.json), and
+// each page's refresh is served the same fixture, so no test reaches ui's published list. Any other request
+// that leaves the local server is aborted and fails the test.
 const PROJECTS_URL = 'https://filipgutica.github.io/ui/projects.json'
 type Project = { id: string, label: string, href: string, repository: string }
-let published: Promise<Project[]> | undefined
-const publishedProjects = () => (published ??= fetch(PROJECTS_URL).then((response) => response.json() as Promise<Project[]>))
-const serveProjects = async (context: BrowserContext) => {
-  const body = JSON.stringify(await publishedProjects())
-  await context.route(PROJECTS_URL, (route) => route.fulfill({ status: 200, contentType: 'application/json', body }))
-}
-test.beforeEach(({ context }) => serveProjects(context))
+const PROJECTS: Project[] = FIXTURE_PROJECTS
+let external: string[] = []
+const serveProjects = (context: BrowserContext) => context.route((url) => url.hostname !== '127.0.0.1', (route) => {
+  if (route.request().url() === PROJECTS_URL) return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(PROJECTS) })
+  external.push(route.request().url())
+  return route.abort()
+})
+test.beforeEach(({ context }) => {
+  external = []
+  return serveProjects(context)
+})
+test.afterEach(() => expect(external, 'requests that left the local server').toEqual([]))
 // The project menu's links, as [label, href], and its summary's name.
 const projectMenu = async (page: Page) => ({
   summary: await page.locator('.page-head > .projects > summary').getAttribute('aria-label'),
@@ -115,7 +122,7 @@ for (const { path, name, find } of PAGES) {
       const menu = page.locator('.page-head > .projects')
       await menu.locator('summary').click()
       for (const link of await menu.locator('nav a').all()) await expect(link).toBeVisible()
-      expect(await projectMenu(page)).toEqual({ summary: 'Project: Design system', links: menuOf(await publishedProjects()) })
+      expect(await projectMenu(page)).toEqual({ summary: 'Project: Design system', links: menuOf(PROJECTS) })
     })
   })
 
@@ -124,7 +131,7 @@ for (const { path, name, find } of PAGES) {
       await page.goto(path)
       expect(await page.locator('.page-head > *').first().evaluate((el) => el.matches('details.projects'))).toBe(true)
       await expect(page.locator('.page-head > .projects nav a[aria-current="page"]')).toHaveText('Design system')
-      expect(await projectMenu(page)).toEqual({ summary: 'Project: Design system', links: menuOf(await publishedProjects()) })
+      expect(await projectMenu(page)).toEqual({ summary: 'Project: Design system', links: menuOf(PROJECTS) })
     })
 
     test('keeps the built list when the fetch fails, and logs nothing of its own', async ({ page }) => {
@@ -134,7 +141,7 @@ for (const { path, name, find } of PAGES) {
       await page.goto(path)
       await fetched
       await page.evaluate(() => new Promise((done) => setTimeout(done, 100)))
-      expect(await projectMenu(page)).toEqual({ summary: 'Project: Design system', links: menuOf(await publishedProjects()) })
+      expect(await projectMenu(page)).toEqual({ summary: 'Project: Design system', links: menuOf(PROJECTS) })
       // Chromium reports the failed request itself; the page's script adds nothing.
       expect(errors.filter((error) => !error.startsWith('Failed to load resource'))).toEqual([])
     })
@@ -142,7 +149,7 @@ for (const { path, name, find } of PAGES) {
 }
 
 test('the project menu takes a published list that differs, keeping only valid entries', async ({ page }) => {
-  const built = await publishedProjects()
+  const built = PROJECTS
   const project = (id: string, extra: Partial<Project> = {}) => ({ id, label: `${id} site`, href: `https://example.com/${id}/`, repository: `https://example.com/repo/${id}`, ...extra })
   // An http link, a javascript: repository, an empty label, and a repeated id are dropped; the list stops at 20.
   // This site is missing, so it keeps its built entry at its built place.
@@ -162,7 +169,7 @@ test('the project menu takes a published list that differs, keeping only valid e
 })
 
 test('the project menu follows a new label for this site, and ignores a list it cannot use', async ({ page }) => {
-  const built = await publishedProjects()
+  const built = PROJECTS
   const renamed = built.map((p) => (p.id === 'design-system' ? { ...p, label: 'Design language' } : p))
   await page.route(PROJECTS_URL, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(renamed) }))
   await page.goto('')
@@ -179,6 +186,46 @@ test('the project menu follows a new label for this site, and ignores a list it 
     expect(await projectMenu(page), `${status} ${body.slice(0, 40)}`).toEqual({ summary: 'Project: Design system', links: menuOf(built) })
   }
 })
+
+// A list that arrives while the reader is in the open menu updates it around the focused link, so the
+// menu stays open and focus stays put. A list without the focused link's project waits until the menu closes.
+const menuLinks = (page: Page) => page.locator('.page-head > .projects nav a').allTextContents()
+for (const { kind, remote, during, after } of [
+  { kind: 'the same list', remote: PROJECTS, during: ['annoterm', 'Design system', 'UI'], after: ['annoterm', 'Design system', 'UI'] },
+  {
+    kind: 'a changed list',
+    remote: [PROJECTS[1], { ...PROJECTS[0], id: 'zeta', label: 'zeta' }, { ...PROJECTS[2], label: 'UI kit' }, { ...PROJECTS[0], id: 'omega', label: 'omega' }],
+    during: ['Design system', 'zeta', 'UI kit', 'omega'],
+    after: ['Design system', 'zeta', 'UI kit', 'omega'],
+  },
+  { kind: 'a list without the focused project', remote: [PROJECTS[1], PROJECTS[0]], during: ['annoterm', 'Design system', 'UI'], after: ['Design system', 'annoterm'] },
+]) {
+  test(`a list that arrives while a project link has focus keeps the menu open and the focus: ${kind}`, async ({ page }) => {
+    let release = () => {}
+    const released = new Promise<void>((done) => { release = done })
+    await page.route(PROJECTS_URL, async (route) => {
+      await released
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(remote) })
+    })
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.goto('components.html')
+    const menu = page.locator('.page-head > .projects')
+    await menu.locator('summary').click()
+    const link = menu.locator('nav a[data-project="ui"]')
+    await link.focus()
+    const node = await link.elementHandle()
+    const served = page.waitForResponse(PROJECTS_URL)
+    release()
+    await served
+    await page.evaluate(() => new Promise((done) => setTimeout(done, 100)))
+    await expect(menu).toHaveAttribute('open', '')
+    expect(await node!.evaluate((a) => a === document.activeElement && a.isConnected)).toBe(true)
+    expect(await menuLinks(page)).toEqual(during)
+    await page.keyboard.press('Escape')
+    await expect(menu).not.toHaveAttribute('open')
+    await expect.poll(() => menuLinks(page)).toEqual(after)
+  })
+}
 
 test('Escape closes the project menu and returns focus to it; leaving it closes it too', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 })

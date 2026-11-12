@@ -110,39 +110,63 @@ export const projectSwitcher = (projects) => {
   const own = projects.find(({ id }) => id === OWN_PROJECT)
   if (!own) throw new Error(`The project list has no "${OWN_PROJECT}" entry, so the project menu cannot mark this site.`)
   return `<details class="projects"><summary class="quiet-action" aria-label="Project: ${esc(own.label)}"><span>${esc(own.label)}</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects">${
-    projects.map(({ id, label, href }) => `<a href="${esc(href)}"${id === OWN_PROJECT ? ' aria-current="page"' : ''}>${esc(label)}</a>`).join('')}</nav></details>`
+    projects.map(({ id, label, href }) => `<a href="${esc(href)}" data-project="${esc(id)}"${id === OWN_PROJECT ? ' aria-current="page"' : ''}>${esc(label)}</a>`).join('')}</nav></details>`
 }
 
 // After load the page fetches the list once, with a 3s timeout, and takes it only from a 200 response
 // with at least one valid entry. Any failure keeps the built list and logs nothing. A list without this
 // site keeps its built entry at its built place, and the summary follows this site's label.
+// The menu may be open with a link focused when the list arrives, so the update keeps each project's link
+// node, by its data-project id, and never moves or removes the focused one: the others move around it.
+// When the focused link's project is gone from the list, the update waits until the menu closes.
 const PROJECTS_JS = `
   const parseProjects = ${parseProjects};
+  const OWN = ${JSON.stringify(OWN_PROJECT)};
   const menu = document.querySelector('.page-head > .projects');
   const summary = menu.querySelector('summary');
   const nav = menu.querySelector('nav');
-  const ownLink = nav.querySelector('[aria-current="page"]');
+  const ownLink = nav.querySelector(\`[data-project="\${OWN}"]\`);
   const ownIndex = [...nav.children].indexOf(ownLink);
+  const apply = (projects) => {
+    const wanted = projects.some(({ id }) => id === OWN) ? projects
+      : [...projects.slice(0, ownIndex), { id: OWN, label: ownLink.textContent, href: ownLink.href }, ...projects.slice(ownIndex)];
+    const focused = nav.contains(document.activeElement) ? document.activeElement : null;
+    if (focused && !wanted.some(({ id }) => id === focused.dataset.project)) {
+      const later = () => { if (!menu.open) { menu.removeEventListener('toggle', later); apply(projects); } };
+      menu.addEventListener('toggle', later);
+      return;
+    }
+    const existing = new Map([...nav.children].map((a) => [a.dataset.project, a]));
+    const links = wanted.map(({ id, label, href }) => {
+      const a = existing.get(id) ?? Object.assign(document.createElement('a'), { href });
+      existing.delete(id);
+      a.dataset.project = id;
+      if (a.getAttribute('href') !== href) a.href = href;
+      if (a.textContent !== label) a.textContent = label;
+      if (id === OWN) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      return a;
+    });
+    existing.forEach((a) => a.remove());
+    // Links before the focused one go in front of it, and the rest after it, in order; with no focused
+    // link they are appended in order. Only the other links move.
+    const at = focused ? links.indexOf(focused) : links.length;
+    links.slice(0, at).forEach((a) => nav.insertBefore(a, focused));
+    let previous = focused;
+    links.slice(at + 1).forEach((a) => {
+      if (previous.nextElementSibling !== a) nav.insertBefore(a, previous.nextElementSibling);
+      previous = a;
+    });
+    const own = wanted.find(({ id }) => id === OWN);
+    summary.querySelector('span').textContent = own.label;
+    summary.setAttribute('aria-label', \`Project: \${own.label}\`);
+  };
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 3000);
   fetch(${JSON.stringify(PROJECTS_URL)}, { signal: controller.signal })
     .then((response) => (response.status === 200 ? response.json() : undefined))
     .then((value) => {
       const projects = parseProjects(value);
-      if (!projects) return;
-      const links = projects.map(({ id, label, href }) => {
-        const a = document.createElement('a');
-        a.href = href;
-        a.textContent = label;
-        if (id === ${JSON.stringify(OWN_PROJECT)}) a.setAttribute('aria-current', 'page');
-        return a;
-      });
-      const own = projects.find(({ id }) => id === ${JSON.stringify(OWN_PROJECT)});
-      if (own) {
-        summary.querySelector('span').textContent = own.label;
-        summary.setAttribute('aria-label', \`Project: \${own.label}\`);
-      } else links.splice(ownIndex, 0, ownLink);
-      nav.replaceChildren(...links);
+      if (projects) apply(projects);
     })
     .catch(() => { /* Offline, blocked, timed out, or not JSON: the built list stays. */ })
     .finally(() => clearTimeout(timer));
