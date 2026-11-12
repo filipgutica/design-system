@@ -279,6 +279,7 @@ Layer: Core. ui: `UiDialog`.
 - **Do.** Use a dialog for a short task the reader must finish or cancel before the page continues, such as confirming a deletion. Title it with that task.
 - **Don't.** A dialog that opens without the reader asking, such as on page load, or one that holds a long form. A long form gets its own page.
 - **Keyboard and screen reader.** `role="dialog"`, `aria-modal="true"`, named by its title. Focus moves in on open and is trapped. Escape closes it, and focus returns to the trigger. A native `<dialog>` opened with `showModal()` provides most of this.
+- **Backdrop.** A tap or click on the backdrop, outside the dialog, closes it, the same way Escape does, and focus returns to the trigger. Only a press that starts outside counts: a drag that starts inside the dialog and ends outside leaves it open. Safari does not support `closedby="any"`, so a script closes it.
 - **Motion.** None: it opens and closes at once. Only the drawer slides, because it enters from an edge.
 - **Forced colors.** The shadow drops and the transparent border draws as the system edge, so the dialog keeps its outline over the page.
 

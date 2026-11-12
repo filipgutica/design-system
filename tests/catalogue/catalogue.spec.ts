@@ -432,6 +432,70 @@ test.describe('tablet and phone', () => {
   })
 })
 
+// The backdrop belongs to the dialog element, so a press on it is a press on the dialog outside the dialog's box.
+// The dialogs are centred with a margin at both widths, so the top left corner is outside them.
+test.describe('outside a dialog', { tag: '@webkit' }, () => {
+  const outside = { x: 8, y: 8 }
+  const open = async (page: Page, { opener = '[data-open="live-dialog"]', id = 'live-dialog' } = {}) => {
+    await page.goto(url)
+    const button = page.locator(opener)
+    const dialog = page.locator(`#${id}`)
+    await button.click()
+    await expect(dialog).toBeVisible()
+    const box = (await dialog.boundingBox())!
+    expect(outside.x < box.x || outside.y < box.y, 'the outside point is inside the dialog').toBe(true)
+    return { button, dialog }
+  }
+
+  for (const { input, viewport } of [
+    { input: 'tap', viewport: { width: 390, height: 844 } },
+    { input: 'click', viewport: { width: 1280, height: 900 } },
+  ] as const) {
+    test.describe(`${input} at ${viewport.width}px`, () => {
+      test.use({ viewport, hasTouch: input === 'tap' })
+
+      test(`a ${input} outside closes the dialog and focuses its button, and a press that starts inside keeps it open`, async ({ page }) => {
+        const { button, dialog } = await open(page)
+        const title = dialog.locator('#live-dialog-title')
+        await (input === 'tap' ? title.tap() : title.click())
+        await expect(dialog).toBeVisible()
+        // A drag from inside the dialog that ends outside it.
+        const { x, y, width, height } = (await title.boundingBox())!
+        await page.mouse.move(x + width / 2, y + height / 2)
+        await page.mouse.down()
+        await page.mouse.move(outside.x, outside.y)
+        await page.mouse.up()
+        await expect(dialog).toBeVisible()
+        await (input === 'tap' ? page.touchscreen.tap(outside.x, outside.y) : page.mouse.click(outside.x, outside.y))
+        await expect(dialog).toBeHidden()
+        await expect(button).toBeFocused()
+      })
+
+      test(`a ${input} outside closes the full size capture and focuses its button`, async ({ page }) => {
+        const { button, dialog } = await open(page, { opener: '[data-full-size]', id: 'capture-viewer' })
+        await (input === 'tap' ? page.touchscreen.tap(outside.x, outside.y) : page.mouse.click(outside.x, outside.y))
+        await expect(dialog).toBeHidden()
+        await expect(button).toBeFocused()
+      })
+    })
+  }
+
+  test.describe('tap at 390px with reduced motion', () => {
+    test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, reducedMotion: 'reduce' })
+
+    test('a tap outside closes the dialog and does not reach the page behind it', async ({ page }) => {
+      const { dialog } = await open(page)
+      await page.evaluate(() => {
+        const reached: string[] = (window as unknown as { reached: string[] }).reached = []
+        document.addEventListener('click', (e) => { if (!(e.target as Element).closest('dialog')) reached.push((e.target as Element).tagName) }, true)
+      })
+      await page.touchscreen.tap(outside.x, outside.y)
+      await expect(dialog).toBeHidden()
+      expect(await page.evaluate(() => (window as unknown as { reached: string[] }).reached)).toEqual([])
+    })
+  })
+})
+
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
 
