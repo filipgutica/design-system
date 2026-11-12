@@ -610,12 +610,12 @@ test.describe('phone drawer, outside it', { tag: '@webkit' }, () => {
   for (const reducedMotion of ['no-preference', 'reduce'] as const) {
     test(`after a / open, a tap outside returns focus to the trigger without scrolling the page, with reduced motion ${reducedMotion}`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion })
-      await page.goto('components.html#badge')
-      // The deep link settles once the fonts load and the rail moves into the drawer; measure after that.
-      await expect(page.locator('#section-menu')).toHaveText(/: Badge$/)
-      await page.evaluate(() => document.fonts.ready)
+      await page.goto('components.html')
+      // Scrolled by the reader, not by a deep link: WebKit on Linux scrolls back to a link's target when the
+      // drawer opens, whatever takes focus.
+      await page.evaluate(() => new Promise((done) => { scrollTo(0, 5000); requestAnimationFrame(() => requestAnimationFrame(done)) }))
       const before = await page.evaluate(() => scrollY)
-      expect(before).toBeGreaterThan(0)
+      expect(before).toBe(5000)
       await page.keyboard.press('/')
       await expect(page.locator('#find')).toBeFocused()
       expect(await page.evaluate(() => scrollY), 'the open scrolled the page').toBe(before)
