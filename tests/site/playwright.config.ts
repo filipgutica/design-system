@@ -8,7 +8,11 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   reporter: 'list',
   use: { baseURL: `http://127.0.0.1:${port}/design-system/` },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // WebKit runs only the tests tagged @webkit, which check behaviour that differs in Safari.
+    { name: 'webkit', grep: /@webkit/, use: { ...devices['Desktop Safari'] } },
+  ],
   webServer: {
     command: `node tests/site/serve.mjs ${port}`,
     cwd: '../..',

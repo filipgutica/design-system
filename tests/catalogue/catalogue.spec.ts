@@ -353,6 +353,64 @@ test.describe('tablet and phone', () => {
     await expect(page.locator('#nav-drawer')).toBeVisible()
     expect(await page.evaluate(() => scrollY)).toBe(0)
   })
+
+  // The backdrop belongs to the dialog element, so a press on it is a press on the dialog outside the drawer's box.
+  test.describe('outside the drawer', { tag: '@webkit' }, () => {
+    test.use({ hasTouch: true })
+    const outside = { x: 370, y: 500 }
+
+    test('a tap or click outside closes the drawer and focuses the trigger, and a press that starts inside keeps it open', async ({ page }) => {
+      await page.goto(url)
+      const trigger = page.locator('#section-menu')
+      const drawer = page.locator('#nav-drawer')
+      const title = drawer.locator('.drawer-head h4')
+      // Read at once: a drawer that starts to close stays visible while it slides out.
+      const open = () => drawer.evaluate((dialog: HTMLDialogElement) => dialog.open && !('closing' in dialog.dataset))
+      await trigger.click()
+      await expect(drawer).toBeVisible()
+      await title.tap()
+      expect(await open()).toBe(true)
+      // A drag from inside the drawer that ends outside it.
+      const { x, y, width, height } = (await title.boundingBox())!
+      await page.mouse.move(x + width / 2, y + height / 2)
+      await page.mouse.down()
+      await page.mouse.move(outside.x, outside.y)
+      await page.mouse.up()
+      expect(await open()).toBe(true)
+      await page.touchscreen.tap(outside.x, outside.y)
+      await expect(drawer).toBeHidden()
+      await expect(trigger).toBeFocused()
+      await trigger.click()
+      await expect(drawer).toBeVisible()
+      await page.mouse.click(outside.x, outside.y)
+      await expect(drawer).toBeHidden()
+      await expect(trigger).toBeFocused()
+    })
+
+    test('the live drawer specimen closes on a click outside and focuses its button', async ({ page }) => {
+      await page.goto(url)
+      const button = page.locator('[data-open="live-drawer"]')
+      await button.click()
+      await expect(page.locator('#live-drawer')).toBeVisible()
+      await page.mouse.click(outside.x, outside.y)
+      await expect(page.locator('#live-drawer')).toBeHidden()
+      await expect(button).toBeFocused()
+    })
+
+    test('with reduced motion, a tap outside closes the drawer at once and does not reach the page behind it', async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await page.goto(url)
+      await page.locator('#section-menu').click()
+      await expect(page.locator('#nav-drawer')).toBeVisible()
+      await page.evaluate(() => {
+        const reached: string[] = (window as unknown as { reached: string[] }).reached = []
+        document.addEventListener('click', (e) => { if (!(e.target as Element).closest('dialog')) reached.push((e.target as Element).tagName) }, true)
+      })
+      await page.touchscreen.tap(outside.x, outside.y)
+      await expect(page.locator('#nav-drawer')).toBeHidden()
+      expect(await page.evaluate(() => (window as unknown as { reached: string[] }).reached)).toEqual([])
+    })
+  })
 })
 
 test.describe('without JavaScript', () => {

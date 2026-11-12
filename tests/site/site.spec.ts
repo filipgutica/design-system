@@ -575,6 +575,39 @@ for (const width of [390, 320]) {
   })
 }
 
+// The backdrop belongs to the dialog element, so a press on it is a press on the dialog outside the drawer's box.
+test.describe('phone drawer, outside it', { tag: '@webkit' }, () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true })
+
+  test('a tap or click outside closes the drawer and focuses the trigger, and a press that starts inside keeps it open', async ({ page }) => {
+    await page.goto('components.html')
+    const trigger = page.locator('#section-menu')
+    const drawer = page.locator('#nav-drawer')
+    const title = drawer.locator('.drawer-head h4')
+    // Read at once: a drawer that starts to close stays visible while it slides out.
+    const open = () => drawer.evaluate((dialog: HTMLDialogElement) => dialog.open && !('closing' in dialog.dataset))
+    await trigger.click()
+    await expect(drawer).toBeVisible()
+    await title.tap()
+    expect(await open()).toBe(true)
+    // A drag from inside the drawer that ends outside it.
+    const { x, y, width, height } = (await title.boundingBox())!
+    await page.mouse.move(x + width / 2, y + height / 2)
+    await page.mouse.down()
+    await page.mouse.move(370, 500)
+    await page.mouse.up()
+    expect(await open()).toBe(true)
+    await page.touchscreen.tap(370, 500)
+    await expect(drawer).toBeHidden()
+    await expect(trigger).toBeFocused()
+    await trigger.click()
+    await expect(drawer).toBeVisible()
+    await page.mouse.click(370, 500)
+    await expect(drawer).toBeHidden()
+    await expect(trigger).toBeFocused()
+  })
+})
+
 test('Copy writes var(--name) and says so', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (text: string) => { (window as unknown as { copied: string }).copied = text } } })

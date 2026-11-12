@@ -1733,8 +1733,12 @@
     showCopied(button, ok);
   }));
 
-  // Live dialog and drawer: native modal dialogs return focus to the trigger on close.
-  document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.open).showModal()));
+  // Live dialog and drawer: native modal dialogs return focus to the trigger on close. Safari does not focus a
+  // button on click, so the trigger takes focus first and the dialog has it to return to.
+  document.querySelectorAll('[data-open]').forEach((button) => button.addEventListener('click', () => {
+    button.focus();
+    document.getElementById(button.dataset.open).showModal();
+  }));
   // Following an in-page link closes the drawer, then focus moves to the destination instead of the trigger.
   // Every close path slides the drawer out first. Under reduced motion there is no animation, so it closes at once.
   // A slide that is cancelled, such as by turning on reduced motion mid-slide, still closes the drawer.
@@ -1755,6 +1759,17 @@
     };
     drawer.addEventListener('cancel', (e) => { e.preventDefault(); slideOut(); });
     drawer.querySelector('form[method="dialog"]')?.addEventListener('submit', (e) => { e.preventDefault(); slideOut(); });
+    // A tap or click on the backdrop, which belongs to the dialog element, lands outside the drawer's box and
+    // closes it. closedby="any" would do this, but Safari does not support it. Only a press that starts outside
+    // counts, so a drag out of the drawer keeps it open. It closes on the click, not the press: a drawer that
+    // closes at once, under reduced motion, would otherwise pass the release and its click to the page behind.
+    const outside = (e) => {
+      const box = drawer.getBoundingClientRect();
+      return e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
+    };
+    let pressedOutside = false;
+    drawer.addEventListener('pointerdown', (e) => { pressedOutside = outside(e); });
+    drawer.addEventListener('click', (e) => { if (pressedOutside && e.target === drawer && outside(e)) slideOut(); });
     drawer.addEventListener('click', (e) => {
       const link = e.target.closest('a[href^="#"]');
       if (!link || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
@@ -1989,8 +2004,12 @@
     jumpTo(location.hash.slice(1));
   }
   update();
-  // detail is 0 for a click made with Enter or Space, and 1 or more for a tap or a mouse click.
-  trigger.addEventListener('click', (e) => openDrawer({ byPointer: e.detail > 0 }));
+  // detail is 0 for a click made with Enter or Space, and 1 or more for a tap or a mouse click. Safari does not
+  // focus a button on click, so the trigger takes focus first and the drawer returns focus to it on close.
+  trigger.addEventListener('click', (e) => {
+    trigger.focus({ preventScroll: true });
+    openDrawer({ byPointer: e.detail > 0 });
+  });
 
   // Copy link: writes the component's URL, announces the result, and shows a tick as Copy does.
   document.querySelectorAll('[data-copy-link]').forEach((button) => button.addEventListener('click', async () => {
