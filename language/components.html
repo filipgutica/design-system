@@ -733,6 +733,19 @@
   .rail-specimen { display: grid; gap: var(--space-3); width: 240px; }
   .phone-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); width: min(100%, 360px); padding-block: var(--space-2); border-bottom: 1px solid var(--color-text); }
   .phone-head > .strip { flex-basis: 100%; margin-inline: -2px; }
+  /* At 640px and narrower, one or two links stay on the switcher's row as plain text links, 12px apart:
+     no row padding or hover fill, and the current page in the accent with no fill. The picker ends the row;
+     where all of it does not fit, as at 320px, only the picker wraps. */
+  .phone-head > .projects:has(~ .text-links) { margin-inline-end: auto; }
+  .navlist.text-links { display: flex; gap: var(--space-3); width: auto; }
+  .navlist.text-links a { min-height: var(--control-lg); padding-inline: 0; }
+  @media (hover: hover) { .navlist.text-links a:hover { background: none; } }
+  .navlist.text-links a[aria-current="page"] { background: none; box-shadow: none; color: var(--color-accent); }
+  .navlist.text-links a:is(:focus-visible, .is-focus) { outline-offset: var(--focus-offset); }
+  /* Forced colors: an underline marks the current page, as the system border would touch the text. */
+  @media (forced-colors: active) {
+    .navlist.text-links a[aria-current="page"] { border-inline-start: 0; padding-inline-start: 0; text-decoration: underline; }
+  }
 
   /* By purpose: each group with its components, in two balanced columns. */
   .index { display: grid; gap: var(--space-4); }
@@ -1320,6 +1333,7 @@
     </div></div>
     <div class="row"><h4>Phone header</h4><div class="states">
       <div class="state wide" inert><div class="phone-head"><details class="projects"><summary class="quiet-action" aria-label="Project: Design system, phone sample"><span>Design system</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary></details><div class="segmented" role="group" aria-label="Appearance, phone sample" data-size="lg" data-icon-only><button type="button" aria-pressed="true" aria-label="System" title="System"><svg class="icon" aria-hidden="true"><use href="#i-system"/></svg></button><button type="button" aria-pressed="false" aria-label="Light" title="Light"><svg class="icon" aria-hidden="true"><use href="#i-light"/></svg></button><button type="button" aria-pressed="false" aria-label="Dark" title="Dark"><svg class="icon" aria-hidden="true"><use href="#i-dark"/></svg></button></div><nav class="navlist strip" aria-label="Pages, phone sample"><a href="#section-rail" data-label="Overview">Overview</a><a href="#section-rail" data-label="Foundations">Foundations</a><a href="#section-rail" aria-current="page" data-label="Components">Components</a><a href="#section-rail" data-label="Themes">Themes</a></nav></div><button class="btn secondary menu-glyph" type="button" data-size="lg">Components: By purpose</button><span class="caption">Rest at tablet width: the switcher and appearance, then the pages, then the labelled trigger below the header</span></div>
+      <div class="state wide" inert><div class="phone-head"><details class="projects"><summary class="quiet-action" aria-label="Project: ui, phone sample with two links"><span>ui</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary></details><nav class="navlist text-links" aria-label="Site links, phone sample"><a href="#section-rail" aria-current="page">Docs</a><a href="#section-rail">GitHub</a></nav><div class="segmented" role="group" aria-label="Appearance, phone sample with two links" data-size="lg" data-icon-only><button type="button" aria-pressed="true" aria-label="System" title="System"><svg class="icon" aria-hidden="true"><use href="#i-system"/></svg></button><button type="button" aria-pressed="false" aria-label="Light" title="Light"><svg class="icon" aria-hidden="true"><use href="#i-light"/></svg></button><button type="button" aria-pressed="false" aria-label="Dark" title="Dark"><svg class="icon" aria-hidden="true"><use href="#i-dark"/></svg></button></div></div><span class="caption">Phone, two links: text links after the switcher, Docs current; where the row is full, only the picker wraps. A documentation page hides them, and its footer carries them</span></div>
     </div></div>
   </section>
 
