@@ -357,6 +357,9 @@
   /* Phone trigger: a secondary button with a three-line menu glyph, because it opens a side drawer. It shows the page’s
      contents and does not act, so it takes the field corner, as its no-JavaScript summary does. */
   .menu-glyph { gap: var(--space-3); border-radius: var(--radius-field); }
+  /* Block padding lets a label that wraps grow the trigger and stay clear of its edges. The selector matches the
+     sized button's padding shorthand in specificity and comes after it, so it wins. */
+  .btn.menu-glyph { padding-block: var(--space-2); }
   .menu-glyph::before { content: ""; flex: none; width: 14px; height: 10px; border-block: 1.5px solid currentColor; background: linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat; }
   /* No-JavaScript fallback: the list opens in place. The summary is a secondary button with a chevron; only the chevron is local. */
   .rail-summary { list-style: none; width: max-content; max-width: 100%; border-radius: var(--radius-field); }
@@ -401,7 +404,7 @@
   :is(.rail, .rail-specimen) a[aria-current="location"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); }
   :is(.rail, .rail-specimen) a[aria-current="location"]::before { content: none; }
   /* Tablet and phone: the labelled trigger below the header. A long label wraps inside the button. */
-  .section-trigger { width: max-content; max-width: 100%; padding-block: var(--space-2); white-space: normal; text-align: start; }
+  .section-trigger { width: max-content; max-width: 100%; white-space: normal; text-align: start; }
 
   /* Find field: a search input with a leading icon and a trailing key hint. */
   .find { position: relative; display: block; width: 100%; max-width: 260px; }
