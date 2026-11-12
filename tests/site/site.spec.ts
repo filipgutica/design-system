@@ -227,6 +227,31 @@ for (const { kind, remote, during, after } of [
   })
 }
 
+// A script may close the menu while a link that the new list drops still has focus. The deferred update
+// then applies on close, so the menu shows the new list when it opens again.
+test('a deferred list applies when a script closes the menu', async ({ page }) => {
+  let release = () => {}
+  const released = new Promise<void>((done) => { release = done })
+  await page.route(PROJECTS_URL, async (route) => {
+    await released
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([PROJECTS[1], PROJECTS[0]]) })
+  })
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('components.html')
+  const menu = page.locator('.page-head > .projects')
+  await menu.locator('summary').click()
+  await menu.locator('nav a[data-project="ui"]').focus()
+  const served = page.waitForResponse(PROJECTS_URL)
+  release()
+  await served
+  await page.evaluate(() => new Promise((done) => setTimeout(done, 100)))
+  expect(await menuLinks(page)).toEqual(['annoterm', 'Design system', 'UI'])
+  await menu.evaluate((details: HTMLDetailsElement) => { details.open = false })
+  await expect(menu).not.toHaveAttribute('open')
+  await menu.evaluate((details: HTMLDetailsElement) => { details.open = true })
+  await expect.poll(() => menuLinks(page)).toEqual(['Design system', 'annoterm'])
+})
+
 test('Escape closes the project menu and returns focus to it; leaving it closes it too', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto('themes.html')
@@ -496,6 +521,25 @@ for (const width of [390, 320]) {
         for (const { label, inside, width } of shown) if (inside < width - 0.5) expect(inside, `${label} shows ${inside}px`).toBeGreaterThanOrEqual(16)
       })
     }
+
+    test('a trigger label that wraps grows the button and keeps 8px above and below it', async ({ page }) => {
+      await page.goto('components.html')
+      const trigger = page.locator('#section-menu')
+      expect((await trigger.boundingBox())!.height).toBeCloseTo(44, 0)
+      // Measured in the same task as the change, before the location tracker writes the label again.
+      const wrapped = await trigger.evaluate((button) => {
+        button.textContent = 'Components: a section name long enough to wrap onto a second line'
+        const range = document.createRange()
+        range.selectNodeContents(button)
+        const box = button.getBoundingClientRect()
+        const text = range.getBoundingClientRect()
+        return { height: box.height, lines: new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size, above: text.top - box.top, below: box.bottom - text.bottom }
+      })
+      expect(wrapped.lines).toBeGreaterThan(1)
+      expect(wrapped.height).toBeGreaterThan(44)
+      expect(wrapped.above).toBeGreaterThanOrEqual(8)
+      expect(wrapped.below).toBeGreaterThanOrEqual(8)
+    })
 
     test('the trigger opens the drawer from the left edge, titled with the rail and holding Find and the rail only', async ({ page }) => {
       await page.goto('components.html')

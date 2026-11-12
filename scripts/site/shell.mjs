@@ -130,7 +130,8 @@ const PROJECTS_JS = `
   const apply = (projects) => {
     const wanted = projects.some(({ id }) => id === OWN) ? projects
       : [...projects.slice(0, ownIndex), { id: OWN, label: ownLink.textContent, href: ownLink.href }, ...projects.slice(ownIndex)];
-    const focused = nav.contains(document.activeElement) ? document.activeElement : null;
+    // A closed menu has no focused link to keep, even while a hidden link still holds focus during toggle.
+    const focused = menu.open && nav.contains(document.activeElement) ? document.activeElement : null;
     if (focused && !wanted.some(({ id }) => id === focused.dataset.project)) {
       const later = () => { if (!menu.open) { menu.removeEventListener('toggle', later); apply(projects); } };
       menu.addEventListener('toggle', later);
