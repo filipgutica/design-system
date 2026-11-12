@@ -356,7 +356,10 @@
   .navlist a:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   /* Phone trigger: a secondary button with a three-line menu glyph, because it opens a side drawer. It shows the page’s
      contents and does not act, so it takes the field corner, as its no-JavaScript summary does. */
-  .menu-glyph { border-radius: var(--radius-field); }
+  .menu-glyph { gap: var(--space-3); border-radius: var(--radius-field); }
+  /* Block padding lets a label that wraps grow the trigger and stay clear of its edges. The selector matches the
+     sized button's padding shorthand in specificity and comes after it, so it wins. */
+  .btn.menu-glyph { padding-block: var(--space-2); }
   .menu-glyph::before { content: ""; flex: none; width: 14px; height: 10px; border-block: 1.5px solid currentColor; background: linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat; }
   /* No-JavaScript fallback: the list opens in place. The summary is a secondary button with a chevron; only the chevron is local. */
   .rail-summary { list-style: none; width: max-content; max-width: 100%; border-radius: var(--radius-field); }
@@ -400,9 +403,8 @@
   /* In a rail the current section takes the current-page look, with no pip. Strips and contents lists keep the pip. */
   :is(.rail, .rail-specimen) a[aria-current="location"] { background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); color: var(--color-nav-current-text); }
   :is(.rail, .rail-specimen) a[aria-current="location"]::before { content: none; }
-  /* Tablet and phone: Find and Menu, icon-only and square, in the header row. */
-  .section-bar { display: flex; gap: var(--space-2); }
-  .section-bar .btn { width: var(--control-lg); padding: 0; }
+  /* Tablet and phone: the labelled trigger below the header. A long label wraps inside the button. */
+  .section-trigger { width: max-content; max-width: 100%; white-space: normal; text-align: start; }
 
   /* Find field: a search input with a leading icon and a trailing key hint. */
   .find { position: relative; display: block; width: 100%; max-width: 260px; }
@@ -677,21 +679,19 @@
   /* One scroll offset for every in-page jump; sections set no scroll-margin-top. The location tracker reads the same value. */
   html { scroll-padding-top: var(--space-4); }
   .frame { width: min(calc(var(--page-max) + var(--sidebar)), calc(100% - var(--space-12))); margin-inline: auto; }
-  /* Header: the site name, the design system's pages as a navigation strip, and the appearance control.
-     The site name is the same on every page, in the project-menu trigger's type, with a ~/ mark one
-     character wide before it. As a link it is a place, so it takes the 6px corner. */
-  .page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3) var(--space-6); min-height: var(--space-16); border-bottom: 1px solid var(--color-border-subtle); }
+  /* Header: the identity, the design system's pages as a navigation strip, and the appearance control.
+     On the site the identity is the project switcher. This package copy has no project registry, so it
+     shows the site name as text, in the switcher's type, with a ~/ mark one character wide before it. */
+  .page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3) var(--space-6); min-height: var(--space-16); border-bottom: 1px solid var(--color-text); }
   .site-name { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-sm); margin: 0 auto 0 0; border-radius: var(--radius-inline); color: var(--color-text); font: var(--weight-semibold) var(--text-sm) / 1 var(--font-mono); text-decoration: none; }
   .site-name::before { content: "~/" / ""; color: var(--color-accent); }
-  @media (hover: hover) { a.site-name:hover { text-decoration: underline; text-underline-offset: 0.2em; } }
-  /* Desktop: the strip starts right after the site name, so its links sit at the same x on every page. */
+  /* Desktop: the strip starts right after the identity, so its links sit at the same x on every page. */
   @media (min-width: 801px) {
     .page-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: var(--space-8); }
     .page-head > .strip { justify-self: start; }
   }
-  /* Header links are navigation rows at the site header's 44px. The strip's label shows only in the drawer. */
+  /* Header links are navigation rows at the site header's 44px. */
   .page-head .strip a { min-height: var(--control-lg); }
-  .navlist.strip > .group-label { display: none; }
   .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
   /* One column that may shrink below its content, so a long title or specimen cannot widen the page.
      A short page, such as one left by a find with no matches, keeps its rows at the top. */
@@ -731,7 +731,8 @@
   .state > :is(.field, .input, .select, .textarea, .search) { width: 220px; }
   .state .pager { padding-top: 0; border-top: 0; }
   .rail-specimen { display: grid; gap: var(--space-3); width: 240px; }
-  .phone-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: min(100%, 360px); padding-block: var(--space-3); border-bottom: 1px solid var(--color-border-subtle); }
+  .phone-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); width: min(100%, 360px); padding-block: var(--space-2); border-bottom: 1px solid var(--color-text); }
+  .phone-head > .strip { flex-basis: 100%; margin-inline: -2px; }
 
   /* By purpose: each group with its components, in two balanced columns. */
   .index { display: grid; gap: var(--space-4); }
@@ -753,37 +754,25 @@
   .coverage td { color: var(--color-accent); }
   .coverage .none { color: var(--color-muted); }
 
-  /* The menu drawer holds Find, the pages, the appearance control, and the rail's groups. */
+  /* The navigation drawer holds Find and the rail's groups. */
   .drawer .rail { position: static; height: auto; padding: 0; }
   .drawer .rail-list { overflow: visible; }
   .drawer .find { max-width: none; }
   /* The find field stays at the top of the drawer while the list scrolls under it. */
   .drawer .rail-find { position: sticky; top: calc(-1 * var(--space-4)); z-index: 1; margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) 0; padding: var(--space-4); background: var(--color-surface-raised); }
-  .drawer .navlist.strip { display: grid; overflow: visible; margin-bottom: var(--space-4); padding: 0; }
-  .drawer .navlist.strip > .group-label { display: block; }
-  /* A wrapped label and its hidden copy can wrap differently, and the drawer's rows need no reserved width. */
-  .drawer .navlist.strip a { white-space: normal; }
-  .drawer .navlist.strip a::after { content: none; }
-  .drawer-appearance { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
-  .drawer-appearance > .group-label { padding-inline: var(--space-3); color: var(--color-muted); font-size: var(--text-xs); font-weight: var(--weight-semibold); }
-  .drawer-appearance > .segmented { justify-self: start; max-width: 100%; }
   /* A tap opens the drawer with focus on its body, which draws no ring; the rows show their own. */
   #nav-drawer-body:focus { outline: none; }
 
   @media (max-width: 800px) {
-    /* With the script, the header is one sticky row with Find and Menu. --head-inset is its height, and
-       in-page jumps land below it. */
-    :root { --head-inset: calc(var(--control-lg) + 2 * var(--space-3) + 1px); }
-    html { scroll-padding-top: calc(var(--head-inset) + var(--space-4)); }
-    .page-head { padding-block: var(--space-3); }
-    .page-head:has(> .section-bar) { position: sticky; top: 0; z-index: 5; flex-wrap: nowrap; background: var(--color-bg); }
-    /* The site name is a touch target on one line; the bar's Clear gives way to it. */
+    /* The header is static and takes two rows: the identity and the appearance control, then the pages.
+       Where both do not fit on the first row, as at 320px, the appearance control wraps to its own row at
+       the start, and the name stays whole. Without the script the appearance control stays hidden, and the
+       rail stays in place above the content. */
+    .page-head { gap: var(--space-2) var(--space-3); padding-block: var(--space-2); }
     .page-head > .site-name { min-height: var(--control-lg); white-space: nowrap; }
-    .page-head:has(> .section-bar) > .site-name { flex: none; }
-    /* The buttons sit inside the scroll inset, so they cancel it; otherwise focusing one scrolls the page. */
-    .page-head > .section-bar > * { scroll-margin-top: calc(-1 * (var(--head-inset) + var(--space-4))); }
-    /* Without the script, the links take a second row and the rail stays in place above the content. */
-    .page-head .strip { order: 3; flex-basis: 100%; margin-inline: -2px; }
+    .page-head .strip { order: 3; flex-basis: 100%; margin-inline: -2px; container: pages / inline-size; }
+    /* With the script, the trigger sits just below the header, before the breadcrumb; main's top padding follows it. */
+    .section-trigger { margin-top: var(--space-2); }
     .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
     .layout > .rail { position: static; height: auto; padding-block: var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
     .layout > .rail .rail-list { overflow: visible; }
@@ -802,6 +791,11 @@
     .crumbs a, .group-toggle { min-height: var(--control-lg); }
     .intro > .crumbs > ol { margin-block: calc((1lh - var(--control-lg)) / 2) calc((var(--control-lg) - 1lh) / 2); }
     .folio-display { font-size: var(--text-display-sm); }
+  }
+  /* On the narrowest phones the strip clips a link. Rows with 6px side padding keep at least 16px of it in
+     view under the 24px fade, so the clip shows. The strip queries its own width, since only the strip changes. */
+  @container pages (max-width: 340px) {
+    .page-head .strip a { padding-inline: 0.375rem; }
   }
   @media (max-width: 640px) {
     /* Phones: a dialog becomes a bottom sheet with rounded top corners. */
@@ -845,6 +839,9 @@
   <symbol id="i-menu" viewBox="0 0 16 16"><path d="M1.5 3.5h13M1.5 8h13M1.5 12.5h13"/></symbol>
   <symbol id="i-arrow-left" viewBox="0 0 16 16"><path d="M12.5 8h-9M7 4.5 3.5 8 7 11.5"/></symbol>
   <symbol id="i-arrow-right" viewBox="0 0 16 16"><path d="M3.5 8h9M9 4.5l3.5 3.5L9 11.5"/></symbol>
+  <symbol id="i-system" viewBox="0 0 16 16"><rect x="2" y="2.5" width="12" height="8.5" rx="1.5"/><path d="M5.5 14h5M8 11v3"/></symbol>
+  <symbol id="i-light" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></symbol>
+  <symbol id="i-dark" viewBox="0 0 16 16"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/></symbol>
 </svg>
 
 <a class="skip" href="#main">Skip to content</a>
@@ -852,19 +849,16 @@
 <div class="frame">
 <header class="page-head">
   <p class="site-name">Design system</p>
-  <nav class="navlist strip" aria-label="Pages"><span class="group-label" aria-hidden="true">Pages</span><a href="reference.html#foundations" data-label="Foundations">Foundations</a><a href="components.html" aria-current="page" data-label="Components">Components</a><a href="reference.html" data-label="Application example">Application example</a><a href="docs.html" data-label="Documentation example">Documentation example</a><a href="product.html" data-label="Product page example">Product page example</a></nav>
-  <div class="segmented" role="group" aria-label="Appearance" data-live hidden>
-    <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
-    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
-    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+  <nav class="navlist strip" aria-label="Pages"><a href="reference.html#foundations" data-label="Foundations">Foundations</a><a href="components.html" aria-current="page" data-label="Components">Components</a><a href="reference.html" data-label="Application example">Application example</a><a href="docs.html" data-label="Documentation example">Documentation example</a><a href="product.html" data-label="Product page example">Product page example</a></nav>
+  <div class="segmented" role="group" aria-label="Appearance" data-size="lg" data-icon-only data-live hidden>
+    <button type="button" data-theme-choice="system" aria-pressed="true" aria-label="System" title="System"><svg class="icon" aria-hidden="true"><use href="#i-system"/></svg></button>
+    <button type="button" data-theme-choice="light" aria-pressed="false" aria-label="Light" title="Light"><svg class="icon" aria-hidden="true"><use href="#i-light"/></svg></button>
+    <button type="button" data-theme-choice="dark" aria-pressed="false" aria-label="Dark" title="Dark"><svg class="icon" aria-hidden="true"><use href="#i-dark"/></svg></button>
   </div>
 </header>
 
-<!-- Phones: the script moves this bar into the header row, and the rail into the menu drawer. -->
-<div class="section-bar" id="section-bar" hidden>
-  <button class="btn secondary" type="button" data-size="lg" id="section-find" aria-label="Find a component" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></button>
-  <button class="btn secondary" type="button" data-size="lg" id="section-menu" aria-label="Menu" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
-</div>
+<!-- Tablet and phone: the script moves the rail into the drawer and shows this trigger, which names the rail and its current section. -->
+<button class="btn secondary menu-glyph section-trigger" type="button" data-size="lg" id="section-menu" aria-haspopup="dialog" hidden>Components</button>
 
 <div class="layout">
 <aside class="rail" id="rail" aria-label="Contents">
@@ -1283,7 +1277,7 @@
   <section class="component" id="drawer" data-layer="Core" aria-labelledby="drawer-title">
     <header><h3 id="drawer-title">Drawer</h3><span class="badge">Core</span><a href="components.md#drawer">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="drawer" aria-label="Copy link to Drawer" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A side panel, such as phone navigation.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use a drawer for navigation or supporting detail that slides in from the side, such as the phone menu, and open it from a named button.</dd><dt>Don’t</dt><dd>The page’s main task inside a drawer. The drawer holds navigation or detail; the task stays on the page.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Use a drawer for navigation or supporting detail that slides in from the side its trigger sits on, such as phone navigation, and open it from a named button.</dd><dt>Don’t</dt><dd>The page’s main task inside a drawer. The drawer holds navigation or detail; the task stays on the page.</dd></dl>
     <div class="row"><h4>Live</h4><div class="states">
       <div class="state"><button class="btn secondary menu-glyph" type="button" data-size="lg" data-open="live-drawer">Contents</button><span class="caption">Rest, live: a page’s contents trigger opens a side drawer</span></div>
     </div></div>
@@ -1306,9 +1300,8 @@
       <div class="state" inert><nav class="navlist" aria-label="Sample routes, pinned"><a href="#navigation-list" class="is-hover">Hover</a><a href="components.html" aria-current="page" class="is-hover">Current page, hover</a><a href="#navigation-list" aria-current="location">Current location</a><a href="#navigation-list" class="is-focus">Focus visible</a></nav><span class="caption">Hover, current page with hover, current location, and focus visible</span></div>
     </div></div>
     <div class="row"><h4>Drawer triggers</h4><div class="states">
-      <div class="state" inert><div class="section-bar"><button class="btn secondary" type="button" data-size="lg" aria-label="Menu"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button></div><span class="caption">Rest: the site shell’s Menu button, in the header row; see Section rail</span></div>
-      <div class="state" inert><button class="btn secondary menu-glyph" type="button" data-size="lg">On this page</button><span class="caption">Rest: a page’s own contents drawer, such as a docs page’s On this page</span></div>
-      <div class="state" inert><button class="btn secondary menu-glyph is-active" type="button" data-size="lg">On this page</button><span class="caption">Pressed: the page’s contents trigger</span></div>
+      <div class="state" inert><button class="btn secondary menu-glyph" type="button" data-size="lg">Components: By purpose</button><span class="caption">Rest: the rail’s name and the current section; see Section rail</span></div>
+      <div class="state" inert><button class="btn secondary menu-glyph is-active" type="button" data-size="lg">On this page: Install</button><span class="caption">Pressed: a docs page’s On this page</span></div>
       <div class="state"><details class="rail-details"><summary class="btn secondary rail-summary" data-size="lg">On this page</summary><nav class="navlist" aria-label="On this page, no JavaScript"><a href="#navigation-list" aria-current="location">Rows</a><a href="#code-block">Next section</a></nav></details><span class="caption">Live: the contents trigger’s no-JavaScript fallback</span></div>
     </div></div>
     <div class="row"><h4>List selection</h4><div class="states">
@@ -1326,7 +1319,7 @@
       <div class="state" inert><div class="rail-specimen"><nav class="navlist" aria-label="Collapsible specimen"><button class="group-toggle" type="button" aria-expanded="true"><span>Inputs</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></button><a href="#section-rail">Select</a><a href="#section-rail">Slider</a><button class="group-toggle" type="button" aria-expanded="false"><span>Feedback</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></button></nav></div><span class="caption">Collapsible groups: Inputs open, Feedback closed</span></div>
     </div></div>
     <div class="row"><h4>Phone header</h4><div class="states">
-      <div class="state wide" inert><div class="phone-head"><p class="site-name">Design system</p><div class="section-bar"><button class="btn secondary" type="button" data-size="lg" aria-label="Find a component"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></button><button class="btn secondary" type="button" data-size="lg" aria-label="Menu"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button></div></div><span class="caption">Rest: the sticky header row at tablet width, with Find and Menu</span></div>
+      <div class="state wide" inert><div class="phone-head"><details class="projects"><summary class="quiet-action" aria-label="Project: Design system, phone sample"><span>Design system</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary></details><div class="segmented" role="group" aria-label="Appearance, phone sample" data-size="lg" data-icon-only><button type="button" aria-pressed="true" aria-label="System" title="System"><svg class="icon" aria-hidden="true"><use href="#i-system"/></svg></button><button type="button" aria-pressed="false" aria-label="Light" title="Light"><svg class="icon" aria-hidden="true"><use href="#i-light"/></svg></button><button type="button" aria-pressed="false" aria-label="Dark" title="Dark"><svg class="icon" aria-hidden="true"><use href="#i-dark"/></svg></button></div><nav class="navlist strip" aria-label="Pages, phone sample"><a href="#section-rail" data-label="Overview">Overview</a><a href="#section-rail" data-label="Foundations">Foundations</a><a href="#section-rail" aria-current="page" data-label="Components">Components</a><a href="#section-rail" data-label="Themes">Themes</a></nav></div><button class="btn secondary menu-glyph" type="button" data-size="lg">Components: By purpose</button><span class="caption">Rest at tablet width: the switcher and appearance, then the pages, then the labelled trigger below the header</span></div>
     </div></div>
   </section>
 
@@ -1345,7 +1338,7 @@
   <section class="component" id="breadcrumbs" data-layer="Core" aria-labelledby="breadcrumbs-title">
     <header><h3 id="breadcrumbs-title">Breadcrumbs</h3><span class="badge">Core</span><a href="components.md#breadcrumbs">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="breadcrumbs" aria-label="Copy link to Breadcrumbs" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">The path from the site to this page.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Put the trail above the page’s h1 on every page below the site’s home page, and keep the site name in the header.</dd><dt>Don’t</dt><dd>A trail in the site header in place of the site name: the header changes from page to page, and the path reads as the page title.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Put the trail above the page’s h1 on every page below the site’s home page, and keep the project switcher in the header.</dd><dt>Don’t</dt><dd>A trail in the site header in place of the project switcher: the header changes from page to page, and the path reads as the page title.</dd></dl>
     <div class="row"><h4>Trail</h4><div class="states">
       <div class="state"><nav class="crumbs" aria-label="Breadcrumb, specimen"><ol><li><a href="#breadcrumbs">Design system</a></li><li><a href="#breadcrumbs">Components</a></li><li><span aria-current="page">Navigation</span></li></ol></nav><span class="caption">Rest, live; the current page is text</span></div>
       <div class="state" inert><nav class="crumbs" aria-label="Breadcrumb, pinned"><ol><li><a href="#breadcrumbs" class="is-hover">Design system</a></li><li><a href="#breadcrumbs" class="is-focus">Components</a></li><li><span aria-current="page">Navigation</span></li></ol></nav><span class="caption">Hover on Design system, focus visible on Components</span></div>
@@ -1456,7 +1449,7 @@
       <div class="state wide"><div class="site-header">
         <details class="projects"><summary class="quiet-action" aria-label="Project: filip-stack"><span>filip-stack</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary><nav class="navlist" aria-label="Projects"><a href="#site-header">annoterm</a><a href="components.html" aria-current="page">filip-stack</a><a href="#site-header">ui</a></nav></details>
         <div class="site-end"><nav class="navlist strip site-links" aria-label="Site links"><a href="components.html" aria-current="page" data-label="Docs">Docs</a><a href="#site-header" data-label="GitHub">GitHub</a></nav>
-          <div class="segmented" role="group" aria-label="Color theme, sample" data-size="lg" data-icon-only><button type="button" aria-pressed="true" aria-label="System" title="System"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><rect x="2" y="2.5" width="12" height="8.5" rx="1.5"/><path d="M5.5 14h5M8 11v3"/></svg></button><button type="button" aria-pressed="false" aria-label="Light" title="Light"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg></button><button type="button" aria-pressed="false" aria-label="Dark" title="Dark"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/></svg></button></div>
+          <div class="segmented" role="group" aria-label="Color theme, sample" data-size="lg" data-icon-only><button type="button" aria-pressed="true" aria-label="System" title="System"><svg class="icon" aria-hidden="true"><use href="#i-system"/></svg></button><button type="button" aria-pressed="false" aria-label="Light" title="Light"><svg class="icon" aria-hidden="true"><use href="#i-light"/></svg></button><button type="button" aria-pressed="false" aria-label="Dark" title="Dark"><svg class="icon" aria-hidden="true"><use href="#i-dark"/></svg></button></div>
         </div>
       </div><span class="caption">Live: the project switcher opens, and Docs is the current page; the picker is a sample</span></div>
     </div></div>
@@ -1534,7 +1527,7 @@
   <div class="drawer-body"><nav class="navlist" aria-label="Contents"><a href="#button">Button</a><a href="#segmented-control">Segmented control</a><a href="#navigation-list" aria-current="location">Navigation list</a></nav></div>
 </dialog>
 <dialog class="drawer" id="nav-drawer" aria-labelledby="nav-drawer-title">
-  <div class="drawer-head"><h4 id="nav-drawer-title">Menu</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close menu"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
+  <div class="drawer-head"><h4 id="nav-drawer-title">Components</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close drawer"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
   <div class="drawer-body" id="nav-drawer-body"></div>
 </dialog>
 
@@ -1806,7 +1799,8 @@
   const find = document.getElementById('find');
   const findCount = document.getElementById('find-count');
   const empty = document.getElementById('find-empty');
-  const bar = document.getElementById('section-bar');
+  const trigger = document.getElementById('section-menu');
+  const railName = list.getAttribute('aria-label');
   const drawer = document.getElementById('nav-drawer');
   const drawerBody = document.getElementById('nav-drawer-body');
   const tablet = matchMedia('(max-width: 800px)');
@@ -1920,8 +1914,11 @@
     const row = a.getBoundingClientRect();
     if (row.top < box.top || row.bottom > box.bottom) centre(list, a);
   };
+  // The phone trigger names the rail and its current section, such as "Components: By purpose".
   const mark = (current) => {
     links.forEach((a) => { if (a === current) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); });
+    const label = current ? `${railName}: ${current.textContent}` : railName;
+    if (trigger.textContent !== label) trigger.textContent = label;
     keepInView(current);
   };
   const update = () => {
@@ -1971,28 +1968,16 @@
     if (href && href.length > 1) jumpTo(href.slice(1));
   });
 
-  // Tablet and phone: one sticky header row holds Find and Menu. The drawer holds Find, the pages, the
-  // appearance control, and the rail's groups, in that order. Desktop puts each piece back.
-  const pageHead = document.querySelector('.page-head');
-  const appearanceRow = document.createElement('div');
-  appearanceRow.className = 'drawer-appearance';
-  appearanceRow.innerHTML = '<span class="group-label" aria-hidden="true">Appearance</span>';
-  const barHome = [bar.parentElement, bar.nextSibling];
+  // Tablet and phone: the rail moves into the drawer, which slides in from the left, the side its trigger
+  // sits on. The pages and the appearance control stay in the header. Desktop puts the rail back.
   const place = () => {
     if (tablet.matches) {
-      pageHead.append(bar);
-      appearanceRow.append(themeGroup);
-      rail.insertBefore(strip, list);
-      rail.insertBefore(appearanceRow, list);
       drawerBody.append(rail);
-      bar.hidden = false;
+      trigger.hidden = false;
     } else {
       if (drawer.open) drawer.close();
-      pageHead.append(strip, themeGroup);
-      appearanceRow.remove();
-      barHome[0].insertBefore(bar, barHome[1]);
       railHome.prepend(rail);
-      bar.hidden = true;
+      trigger.hidden = true;
     }
   };
   tablet.addEventListener('change', () => { place(); rebase(); });
@@ -2005,8 +1990,7 @@
   }
   update();
   // detail is 0 for a click made with Enter or Space, and 1 or more for a tap or a mouse click.
-  document.getElementById('section-menu').addEventListener('click', (e) => openDrawer({ byPointer: e.detail > 0 }));
-  document.getElementById('section-find').addEventListener('click', () => openDrawer({ toFind: true }));
+  trigger.addEventListener('click', (e) => openDrawer({ byPointer: e.detail > 0 }));
 
   // Copy link: writes the component's URL, announces the result, and shows a tick as Copy does.
   document.querySelectorAll('[data-copy-link]').forEach((button) => button.addEventListener('click', async () => {

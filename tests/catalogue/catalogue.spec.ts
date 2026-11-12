@@ -151,18 +151,18 @@ test.describe('desktop', () => {
     await expect(railLink(page, 'By purpose')).toBeFocused()
   })
 
-  test('resizing moves the rail, the pages, and the appearance control between the page and the drawer', async ({ page }) => {
+  test('resizing moves the rail between the page and the drawer, and the pages and appearance stay in the header', async ({ page }) => {
     await page.goto(url)
     const where = () => page.evaluate(() => ({
       rail: document.getElementById('rail')!.parentElement!.id || document.getElementById('rail')!.parentElement!.className,
       pages: document.querySelector('nav[aria-label="Pages"]')!.parentElement!.className,
       appearance: document.querySelector('[aria-label="Appearance"]')!.parentElement!.className,
-      bar: document.getElementById('section-bar')!.hidden,
+      trigger: document.getElementById('section-menu')!.hidden,
     }))
-    const desktop = { rail: 'layout', pages: 'page-head', appearance: 'page-head', bar: true }
+    const desktop = { rail: 'layout', pages: 'page-head', appearance: 'page-head', trigger: true }
     expect(await where()).toEqual(desktop)
     await page.setViewportSize({ width: 390, height: 844 })
-    await expect.poll(where).toEqual({ rail: 'nav-drawer-body', pages: 'rail', appearance: 'drawer-appearance', bar: false })
+    await expect.poll(where).toEqual({ rail: 'nav-drawer-body', pages: 'page-head', appearance: 'page-head', trigger: false })
     await page.locator('#section-menu').click()
     await expect(page.locator('#nav-drawer')).toBeVisible()
     await page.setViewportSize({ width: 1280, height: 900 })
@@ -268,19 +268,22 @@ test.describe('reduced motion', () => {
 test.describe('tablet and phone', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 
-  test('Menu opens the drawer on the current row, and a link closes it and focuses the target', async ({ page }) => {
+  test('the trigger opens the drawer on the current row, and a link closes it and focuses the target', async ({ page }) => {
     await page.goto(`${url}#slider`)
     await expect(current(page)).toHaveText('Slider')
+    await expect(page.locator('#section-menu')).toHaveText('Components: Slider')
     const scrolled = await page.evaluate(() => scrollY)
-    await page.locator('#section-menu').focus()
+    // The trigger sits above the content, so it takes focus without scrolling, and Slider stays current.
+    await page.locator('#section-menu').evaluate((button) => button.focus({ preventScroll: true }))
     await page.keyboard.press('Enter')
     const drawer = page.locator('#nav-drawer')
     await expect(drawer).toBeVisible()
     await expect(current(page)).toBeFocused()
     await expect(current(page)).toBeInViewport()
     expect(await page.evaluate(() => scrollY)).toBe(scrolled)
-    // The drawer holds Find, the pages, the appearance control, then the rail's groups.
-    await expect(drawer.locator('.rail > *:visible')).toHaveCount(5)
+    // The drawer is named after the rail and holds Find, the rail's groups, and the shortcut switch.
+    await expect(drawer.getByRole('heading', { name: 'Components', exact: true })).toBeVisible()
+    await expect(drawer.locator('.rail > *:visible')).toHaveCount(3)
     await drawer.locator('a', { hasText: /^Dialog$/ }).click()
     await expect(drawer).toBeHidden()
     await expect(page.locator('#dialog')).toBeFocused()
@@ -303,7 +306,7 @@ test.describe('tablet and phone', () => {
     await page.goto(`${url}#slider`)
     await expect(current(page)).toHaveText('Slider')
     await page.setViewportSize({ width: 390, height: 844 })
-    await expect(page.locator('#section-bar')).toBeVisible()
+    await expect(page.locator('#section-menu')).toBeVisible()
     await page.mouse.move(200, 500)
     await page.mouse.wheel(0, 2000)
     await expect(current(page)).not.toHaveText('Slider')
@@ -313,7 +316,8 @@ test.describe('tablet and phone', () => {
     await page.goto(`${url}#badge`)
     await expect(current(page)).toHaveText('Badge')
     const before = await page.evaluate(() => scrollY)
-    await page.locator('#section-menu').click()
+    // The / shortcut opens the drawer where the reader is; the trigger itself sits at the top of the page.
+    await page.keyboard.press('/')
     await expect(page.locator('#nav-drawer')).toBeVisible()
     // Wheel over the backdrop, to the right of the drawer, and give the scroll two frames to land.
     await page.mouse.move(370, 500)
@@ -334,20 +338,20 @@ test.describe('tablet and phone', () => {
     await expect(page.locator('a.skip[href="#contents"]')).not.toBeFocused()
   })
 
-  test('opening the drawer or focusing a header button does not scroll the page', async ({ page }) => {
+  test('/ opens the drawer with Find focused, and neither it nor a tap on the trigger scrolls the page', async ({ page }) => {
     await page.goto(`${url}#badge`)
     const before = await page.evaluate(() => scrollY)
     expect(before).toBeGreaterThan(0)
-    await page.locator('#section-find').focus()
-    expect(await page.evaluate(() => scrollY)).toBe(before)
-    await page.locator('#section-find').click()
+    await page.keyboard.press('/')
     await expect(page.locator('#find')).toBeFocused()
     expect(await page.evaluate(() => scrollY)).toBe(before)
     await page.keyboard.press('Escape')
     await expect(page.locator('#nav-drawer')).toBeHidden()
+    expect(await page.evaluate(() => scrollY)).toBe(before)
+    await page.evaluate(() => scrollTo(0, 0))
     await page.locator('#section-menu').click()
     await expect(page.locator('#nav-drawer')).toBeVisible()
-    expect(await page.evaluate(() => scrollY)).toBe(before)
+    expect(await page.evaluate(() => scrollY)).toBe(0)
   })
 })
 
@@ -362,7 +366,7 @@ test.describe('without JavaScript', () => {
       expect(await links.count()).toBeGreaterThan(30)
       for (const link of await links.all()) await expect(link).toBeVisible()
       await expect(page.locator('#find')).toBeHidden()
-      await expect(page.locator('#section-bar')).toBeHidden()
+      await expect(page.locator('#section-menu')).toBeHidden()
       for (const link of await page.locator('.page-head .strip a').all()) await expect(link).toBeVisible()
     })
   }
