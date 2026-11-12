@@ -1739,6 +1739,20 @@
     button.focus();
     document.getElementById(button.dataset.open).showModal();
   }));
+  // A tap or click on the backdrop, which belongs to the dialog element, lands outside the dialog's box and
+  // closes it. closedby="any" would do this, but Safari does not support it. Only a press that starts outside
+  // counts, so a drag out of the dialog keeps it open. It closes on the click, not the press: a dialog that
+  // closes at once would otherwise pass the release and its click to the page behind.
+  const closeOnBackdrop = (dialog, close) => {
+    const outside = (e) => {
+      const box = dialog.getBoundingClientRect();
+      return e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
+    };
+    let pressedOutside = false;
+    dialog.addEventListener('pointerdown', (e) => { pressedOutside = outside(e); });
+    dialog.addEventListener('click', (e) => { if (pressedOutside && e.target === dialog && outside(e)) close(); });
+  };
+  document.querySelectorAll('dialog.dialog').forEach((dialog) => closeOnBackdrop(dialog, () => dialog.close()));
   // Following an in-page link closes the drawer, then focus moves to the destination instead of the trigger.
   // Every close path slides the drawer out first. Under reduced motion there is no animation, so it closes at once.
   // A slide that is cancelled, such as by turning on reduced motion mid-slide, still closes the drawer.
@@ -1759,17 +1773,7 @@
     };
     drawer.addEventListener('cancel', (e) => { e.preventDefault(); slideOut(); });
     drawer.querySelector('form[method="dialog"]')?.addEventListener('submit', (e) => { e.preventDefault(); slideOut(); });
-    // A tap or click on the backdrop, which belongs to the dialog element, lands outside the drawer's box and
-    // closes it. closedby="any" would do this, but Safari does not support it. Only a press that starts outside
-    // counts, so a drag out of the drawer keeps it open. It closes on the click, not the press: a drawer that
-    // closes at once, under reduced motion, would otherwise pass the release and its click to the page behind.
-    const outside = (e) => {
-      const box = drawer.getBoundingClientRect();
-      return e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom;
-    };
-    let pressedOutside = false;
-    drawer.addEventListener('pointerdown', (e) => { pressedOutside = outside(e); });
-    drawer.addEventListener('click', (e) => { if (pressedOutside && e.target === drawer && outside(e)) slideOut(); });
+    closeOnBackdrop(drawer, slideOut);
     drawer.addEventListener('click', (e) => {
       const link = e.target.closest('a[href^="#"]');
       if (!link || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
