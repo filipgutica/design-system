@@ -55,7 +55,7 @@ Layer: Core.
   | Primary | `--color-accent` fill, `--color-accent-text`, `--shadow-raise` | `--color-button-hover` | `--color-button-hover`, `--shadow-sink` |
   | Secondary | `--color-control-thumb` fill, `--color-text`, `--shadow-raise` | `--color-text` 8% into `--color-control-thumb` | `--color-well` fill, `--shadow-sink` |
   | Ghost | Transparent, `--color-muted`, no shadow | `--color-row-hover` fill, `--color-text` | `--color-well` fill, `--shadow-sink` |
-  | Danger | `--color-error-surface` fill, `--color-error` mixed 75% with `--color-text` (85% in dark), `--shadow-raise` | `--color-error` 10% into `--color-error-surface` | `--color-error` 16% into `--color-error-surface`, `--shadow-sink` |
+  | Danger | `--color-error-surface` fill, `--color-error` mixed 75% with `--color-status-ink` (85% in dark), `--shadow-raise` | `--color-error` 10% into `--color-error-surface` | `--color-error` 16% into `--color-error-surface`, `--shadow-sink` |
   | Text | Transparent, `--color-link`, underlined, 4px padding | No change | No change |
 
 - **States.** Rest, hover, pressed, focus-visible, disabled, and busy. Pressed also moves the button 1px down, for every variant but text, and applies to `aria-pressed="true"`. Busy sets `aria-busy="true"` and `disabled`, so the button takes no hover or press, with `cursor: wait`. It shows a 14px spinner before the label: a 2px `currentColor` ring with a transparent right edge, turning once every 700ms. Keep the label while busy.
@@ -223,7 +223,7 @@ Layer: Core.
 Layer: Core.
 
 - **Anatomy.** An inline pill: `--radius-pill`, about 3px by 9px padding, `--text-xs`, medium weight, and a transparent 1px border.
-- **Tokens.** Neutral: `--color-surface-muted` fill, `--color-muted`, no dot. Status tones (success, warning, danger, info): the tone at 22% over `--color-surface-raised`, text of the tone mixed 75% with `--color-text` in light and 85% in dark, and a leading 6px dot in `currentColor`.
+- **Tokens.** Neutral: `--color-surface-muted` fill, `--color-muted`, no dot. Status tones (success, warning, danger, info): the tone at 22% over `--color-surface-raised`, text of the tone mixed 75% with `--color-status-ink` in light and 85% in dark, and a leading 6px dot in `currentColor`.
 - **States.** None: a badge is static text. Its tone is a variant, not a state.
 - **Do.** A one- or two-word status or category on an item, such as "Healthy" or "Beta", with a status tone only when it is a status.
 - **Don't.** A badge that repeats the title, or one on every row with the same value. Badge the exceptions.

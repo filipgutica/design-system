@@ -1,0 +1,32 @@
+{
+  "name": "Catppuccin",
+  "note": "Catppuccin's open palette (@catppuccin/palette 1.8.0, MIT): Latte in light and Mocha in dark, with Mauve as the hue. Base is the raised surface in both modes; Latte has nothing lighter, so base is also its page. Muted text is Subtext 1 in Latte, where Subtext 0 misses 4.5:1.",
+  "hue": {
+    "light": "#8839ef",
+    "dark": "#cba6f7"
+  },
+  "neutrals": {
+    "light": {
+      "color-bg": "#eff1f5",
+      "color-surface": "#e6e9ef",
+      "color-surface-raised": "#eff1f5",
+      "color-surface-muted": "#dce0e8",
+      "color-row-hover": "#dce0e8",
+      "color-border-subtle": "#ccd0da",
+      "color-border": "#7c7f93",
+      "color-text": "#4c4f69",
+      "color-muted": "#5c5f77"
+    },
+    "dark": {
+      "color-bg": "#11111b",
+      "color-surface": "#181825",
+      "color-surface-raised": "#1e1e2e",
+      "color-surface-muted": "#313244",
+      "color-row-hover": "#313244",
+      "color-border-subtle": "#45475a",
+      "color-border": "#7f849c",
+      "color-text": "#cdd6f4",
+      "color-muted": "#a6adc8"
+    }
+  }
+}

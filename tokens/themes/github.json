@@ -1,0 +1,32 @@
+{
+  "name": "GitHub",
+  "note": "GitHub's open Primer palette (@primer/primitives 11.10.0, MIT), light and dark, with the accent foreground as the hue. In dark, the page, surface, and raised surface are Primer's inset, default, and muted backgrounds.",
+  "hue": {
+    "light": "#0969da",
+    "dark": "#4493f8"
+  },
+  "neutrals": {
+    "light": {
+      "color-bg": "#f6f8fa",
+      "color-surface": "#eff2f5",
+      "color-surface-raised": "#ffffff",
+      "color-surface-muted": "#eff2f5",
+      "color-row-hover": "#eff2f5",
+      "color-border-subtle": "#d1d9e0",
+      "color-border": "#818b98",
+      "color-text": "#1f2328",
+      "color-muted": "#59636e"
+    },
+    "dark": {
+      "color-bg": "#010409",
+      "color-surface": "#0d1117",
+      "color-surface-raised": "#151b23",
+      "color-surface-muted": "#212830",
+      "color-row-hover": "#262c36",
+      "color-border-subtle": "#3d444d",
+      "color-border": "#656c76",
+      "color-text": "#f0f6fc",
+      "color-muted": "#9198a1"
+    }
+  }
+}

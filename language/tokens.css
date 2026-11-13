@@ -80,6 +80,7 @@
   --color-warning-surface: #e7e2de;
   --color-error-surface: #efe4e4;
   --color-info-surface: #d9e3f2;
+  --color-status-ink: black;
 
   /* Identity layer, derived: terminal folio plates. Commands take the hue; captures stay neutral.
      A project without terminal plates leaves these unused. */
@@ -195,6 +196,7 @@
     --color-warning-surface: #2f281b;
     --color-error-surface: #312020;
     --color-info-surface: #202938;
+    --color-status-ink: var(--color-text);
     --color-command-bg: color-mix(in srgb, var(--color-project) 16%, black);
     --color-command-border: color-mix(in srgb, var(--color-project) 28%, black);
     --color-syntax-keyword: #d8c2a5;
@@ -236,6 +238,7 @@
   --color-warning-surface: #2f281b;
   --color-error-surface: #312020;
   --color-info-surface: #202938;
+  --color-status-ink: var(--color-text);
   --color-command-bg: color-mix(in srgb, var(--color-project) 16%, black);
   --color-command-border: color-mix(in srgb, var(--color-project) 28%, black);
   --color-syntax-keyword: #d8c2a5;

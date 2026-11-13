@@ -705,13 +705,14 @@ test('every painting hover rule on every page waits for a pointer that can hover
   assert.deepEqual(sitePages().flatMap(([file, html]) => stickyHover(`site/${file}`, html)), [])
 })
 
-// The selected fill must keep accent text readable. This reads the default hue pair, the surfaces, and
-// the --color-nav-current mix from each tokens.css theme block, composites the fill over every surface it can
-// sit on, and checks accent text at 4.5:1.
+// The selected fill must keep its text readable. This reads the hue pair, the surfaces, the
+// --color-nav-current mix, and the text the build chose from each tokens.css theme block, composites the
+// fill over every surface it can sit on, and checks the text at 4.5:1.
 const themeBlock = (css, start) => css.slice(css.indexOf(start)).match(/\{([\s\S]*?)\n\s*\}/)[1]
 const tokenValue = (block, name) => block.match(new RegExp(`^\\s*${name}:\\s*([^;]+);`, 'm'))?.[1].trim()
 // Reads #rgb or #rrggbb. Any other syntax throws, so the guard cannot pass on an unparsed colour.
 const rgb = (value) => {
+  if (value === 'black' || value === 'white') return value === 'black' ? [0, 0, 0] : [255, 255, 255]
   const hex = value.match(/^#([\da-f]{3}|[\da-f]{6})$/i)?.[1]
   if (!hex) throw new Error(`unsupported colour: ${value}`)
   const full = hex.length === 3 ? [...hex].map((digit) => digit + digit).join('') : hex
@@ -741,26 +742,37 @@ const accentThemes = (css) => {
 const navCurrentText = (css) => {
   const themes = accentThemes(css)
   const light = themes[0].block
-  assert.equal(tokenValue(light, '--color-nav-current-text'), 'var(--color-accent)')
   return themes.flatMap(({ name, block, accent }) => {
     const mix = tokenValue(block, '--color-nav-current').match(/^color-mix\(in srgb, var\(--color-accent\) ([\d.]+)%, (transparent|var\(--color-surface-raised\))\)$/)
     assert.ok(mix, `${name} --color-nav-current is an accent mix`)
-    const value = (token) => rgb(tokenValue(block, token) ?? tokenValue(light, token))
+    const raw = (token) => tokenValue(block, token) ?? tokenValue(light, token)
+    const value = (token) => rgb(raw(token))
     const base = mix[2] === 'transparent' ? undefined : value('--color-surface-raised')
+    const textToken = raw('--color-nav-current-text')
+    const text = textToken === 'var(--color-accent)' ? rgb(accent) : rgb(textToken.replace(/^var\((--[\w-]+)\)$/, (_, token) => raw(token)))
     return surfaces.map((surface) => ({
       theme: name,
       surface,
-      ratio: contrast(rgb(accent), fillOn({ accent: rgb(accent), share: Number(mix[1]) / 100, base, surface: value(surface) })),
+      ratio: contrast(text, fillOn({ accent: rgb(accent), share: Number(mix[1]) / 100, base, surface: value(surface) })),
     }))
   })
 }
 
-// tokens.css as a page sees it with one theme loaded after it on :root: the theme file's identity lines
-// replace the default ones in the light block, and the dark blocks keep following --color-project-dark.
+// tokens.css as a page sees it with a theme file loaded after it on :root: each of the theme's blocks
+// sets its lines in tokens.css's block with the same selector, replacing a line or adding one.
 const distFile = (path) => readFileSync(new URL(`../dist/${path}`, import.meta.url), 'utf8')
 const themeIds = Object.keys(JSON.parse(distFile('tokens.json')).themes)
-const withTheme = (id) => [...distFile(`themes/${id}.css`).matchAll(/^\s*(--[\w-]+):\s*([^;]+);/gm)]
-  .reduce((css, [, name, value]) => css.replace(new RegExp(`^(\\s*${name}:)[^;]+;`, 'm'), `$1 ${value};`), read('tokens.css'))
+const BLOCK_STARTS = [':root {', ':root:not([data-theme="light"])', ':root[data-theme="dark"] {']
+const mergeTheme = (themeCss) => BLOCK_STARTS.filter((start) => themeCss.includes(start)).reduce((css, start) => {
+  const at = css.indexOf(start)
+  const { index, 0: body } = css.slice(at).match(/\{[\s\S]*?\n\s*\}/)
+  const merged = [...themeBlock(themeCss, start).matchAll(/^\s*(--[\w-]+):\s*([^;]+);/gm)].reduce((block, [, name, value]) => {
+    const line = new RegExp(`^(\\s*${name}:)[^;]+;`, 'm')
+    return line.test(block) ? block.replace(line, `$1 ${value};`) : block.replace(/\n(\s*)\}$/, `\n  ${name}: ${value};\n$1}`)
+  }, body)
+  return css.slice(0, at + index) + merged + css.slice(at + index + body.length)
+}, read('tokens.css'))
+const withTheme = (id) => mergeTheme(distFile(`themes/${id}.css`))
 
 test('every theme in tokens.json has a theme file, and loading the default one changes nothing', () => {
   assert.ok(themeIds.length >= 3)
@@ -785,7 +797,7 @@ test('the nav-current contrast guard reads shorthand hex and fails a dark accent
 })
 
 for (const id of themeIds) {
-  test(`accent text on the selected fill reaches 4.5:1 on every surface in light and dark: ${id}`, () => {
+  test(`the selected fill's text reaches 4.5:1 on every surface in light and dark: ${id}`, () => {
     const results = navCurrentText(withTheme(id))
     assert.equal(results.length, 9)
     assert.deepEqual(belowContrast(results), [])
@@ -822,6 +834,28 @@ for (const id of themeIds) {
     const results = focusRingContrast(withTheme(id))
     assert.equal(results.length, 9)
     assert.deepEqual(belowContrast(results, 3), [])
+  })
+}
+
+// Text and muted text reach 4.5:1, and the control edge 3:1 (WCAG 1.4.11), on every surface, in both
+// modes. Core's neutrals pass; a theme that brings its own must pass too.
+const NEUTRAL_MINIMUMS = { '--color-text': 4.5, '--color-muted': 4.5, '--color-border': 3 }
+const neutralContrast = (css) => accentThemes(css).flatMap(({ name, block, light }) => {
+  const value = (token) => rgb(tokenValue(block, token) ?? tokenValue(light, token))
+  return Object.entries(NEUTRAL_MINIMUMS).flatMap(([ink, min]) => surfaces.map((surface) => ({ theme: name, ink, surface, min, ratio: contrast(value(ink), value(surface)) })))
+})
+const belowNeutralMinimum = (results) => results.filter(({ ratio, min }) => !(Number.isFinite(ratio) && ratio >= min))
+
+test('the neutral contrast guard reads a dark override from a theme file and fails a muted text that hides', () => {
+  const planted = mergeTheme([':root {', '}', '@media (prefers-color-scheme: dark) {', '  :root:not([data-theme="light"]) {', '    --color-muted: #20262b;', '  }', '}', ':root[data-theme="dark"] {', '  --color-muted: #20262b;', '}'].join('\n'))
+  assert.deepEqual([...new Set(belowNeutralMinimum(neutralContrast(planted)).map(({ theme, ink }) => `${theme} ${ink}`))], ['dark (prefers-color-scheme) --color-muted', 'dark (data-theme) --color-muted'])
+})
+
+for (const id of themeIds) {
+  test(`text and muted text reach 4.5:1, and the control edge 3:1, on every surface in light and dark: ${id}`, () => {
+    const results = neutralContrast(withTheme(id))
+    assert.equal(results.length, 27)
+    assert.deepEqual(belowNeutralMinimum(results), [])
   })
 }
 

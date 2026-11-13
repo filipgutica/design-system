@@ -1,12 +1,14 @@
 // Emits every token file from tokens/core.json and the theme files in tokens/themes/, the only places
-// token values live. A theme file holds only identity inputs: its name, a note for the Themes page, its
-// hue pair, and optionally its two font stacks. Every other token is core.
+// token values live. A theme file holds only its inputs: its name, a note for the Themes page, its hue
+// pair, and optionally its two font stacks and its neutrals (NEUTRALS, for light and dark). Every other
+// token is core. The text on the selected fills is the first candidate in TEXT_CANDIDATES that reaches
+// 4.5:1 in each mode, as their roles in core.json say.
 //
 //   node scripts/build-tokens.mjs           write every output
 //   node scripts/build-tokens.mjs --check   fail when an output is stale
 //
 // The CSS has one variable per token. language/tokens.css carries the default theme; each
-// dist/themes/<id>.css sets one theme's identity inputs, to load after it. Dark mode follows
+// dist/themes/<id>.css sets what one theme changes from it, to load after it. Dark mode follows
 // prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it.
 // dist/tokens.json and dist/tokens.js carry the values of every theme, resolved, for code.
 //
@@ -16,6 +18,7 @@
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { over, parseColour, ratio } from './colour.mjs'
 
 const LIGHT = 0
 const DARK = 1
@@ -27,8 +30,11 @@ const flatTokens = (data) => Object.fromEntries(data.groups.flatMap(({ tokens })
 
 const HEX = /^#[\da-f]{6}$/i
 
+// The core neutrals a theme may replace, as a set: a palette that brings its own neutrals sets all of them.
+export const NEUTRALS = ['color-bg', 'color-surface', 'color-surface-raised', 'color-surface-muted', 'color-row-hover', 'color-border-subtle', 'color-border', 'color-text', 'color-muted']
+
 // Problems with a theme file: a missing name, note, or hue, a hue that is not #rrggbb, a font that is not
-// a string, or a key a theme cannot set.
+// a string, neutrals that are not the whole set in #rrggbb for both modes, or a key a theme cannot set.
 export const themeProblems = (theme) => {
   const problems = []
   for (const field of ['name', 'note']) if (typeof theme[field] !== 'string' || !theme[field]) problems.push(`no ${field}`)
@@ -37,12 +43,20 @@ export const themeProblems = (theme) => {
     if (!['ui', 'mono'].includes(font)) problems.push(`fonts.${font} is not a theme input`)
     else if (typeof value !== 'string' || !value) problems.push(`fonts.${font} is not a font stack`)
   }
-  for (const key of Object.keys(theme)) if (!['name', 'note', 'hue', 'fonts'].includes(key)) problems.push(`${key} is not a theme input`)
+  for (const [mode, neutrals] of Object.entries(theme.neutrals ?? {})) {
+    if (!['light', 'dark'].includes(mode)) problems.push(`neutrals.${mode} is not a mode`)
+    else for (const name of new Set([...NEUTRALS, ...Object.keys(neutrals)])) {
+      if (!NEUTRALS.includes(name)) problems.push(`neutrals.${mode}.${name} is not a neutral`)
+      else if (!HEX.test(neutrals[name] ?? '')) problems.push(`neutrals.${mode}.${name} is not #rrggbb`)
+    }
+  }
+  if (theme.neutrals && !(theme.neutrals.light && theme.neutrals.dark)) problems.push('neutrals needs light and dark')
+  for (const key of Object.keys(theme)) if (!['name', 'note', 'hue', 'fonts', 'neutrals'].includes(key)) problems.push(`${key} is not a theme input`)
   return problems
 }
 
-// The core tokens with one theme's identity inputs filled in. Core leaves the hue pair empty; its font
-// stacks stay unless the theme names its own.
+// The core tokens with one theme's inputs filled in. Core leaves the hue pair empty; its font stacks and
+// neutrals stay unless the theme names its own. Then each selected-fill text token takes its readable value.
 export const applyTheme = (core, theme) => {
   const data = structuredClone(core)
   const identity = data.groups.find(({ identity: isIdentity }) => isIdentity).tokens
@@ -50,6 +64,34 @@ export const applyTheme = (core, theme) => {
   identity['color-project-dark'] = theme.hue.dark
   if (theme.fonts?.ui) identity['font-ui'] = theme.fonts.ui
   if (theme.fonts?.mono) identity['font-mono'] = theme.fonts.mono
+  if (theme.neutrals) for (const name of NEUTRALS) groupOf(data, name).tokens[name] = [theme.neutrals.light[name], theme.neutrals.dark[name]]
+  return withReadableText(data)
+}
+
+const groupOf = (data, name) => data.groups.find(({ tokens }) => name in tokens)
+
+// Each selected fill's text, with how its contrast is measured on resolved values: the lowest ratio
+// over every place the fill sits. The candidates come from the tokens' roles in core.json.
+const TEXT_ON_FILL = {
+  'color-nav-current-text': (ink, value) => Math.min(...['color-bg', 'color-surface', 'color-surface-raised']
+    .map((surface) => ratio(ink, over(value('color-nav-current'), value(surface))))),
+  'color-segmented-current-text': (ink, value) => ratio(ink, over(value('color-control-thumb'), value('color-well'))),
+}
+const TEXT_CANDIDATES = ['{color-accent}', '{color-text}', 'black', 'white']
+
+// Sets each TEXT_ON_FILL token to its first candidate that reaches 4.5:1, per mode. When none does, the
+// accent stays, so the contrast tests fail on it rather than on a silently chosen colour.
+const withReadableText = (data) => {
+  const values = resolveData(data)
+  for (const [name, measure] of Object.entries(TEXT_ON_FILL)) {
+    const pick = (mode) => {
+      const value = (token) => parseColour(values[mode][token])
+      const colour = (candidate) => parseColour(candidate.replace(reference, (_, target) => values[mode][target]))
+      return TEXT_CANDIDATES.find((candidate) => measure(colour(candidate), value) >= 4.5) ?? TEXT_CANDIDATES[0]
+    }
+    const [light, dark] = [pick('light'), pick('dark')]
+    groupOf(data, name).tokens[name] = light === dark ? light : [light, dark]
+  }
   return data
 }
 
@@ -159,6 +201,14 @@ body { background: var(--color-bg); color: var(--color-text); }
 }
 `
 
+// One theme's values in light and dark, with every reference substituted.
+function resolveData(data) {
+  const tokens = flatTokens(data)
+  const resolve = (name, mode) => valueFor(tokens, name, mode).replace(reference, (_, target) => resolve(target, mode))
+  const values = (mode) => Object.fromEntries(Object.keys(tokens).map((name) => [name, resolve(name, mode)]))
+  return { light: values(LIGHT), dark: values(DARK) }
+}
+
 const standaloneResolver = (data) => {
   const tokens = flatTokens(data)
   return (name, mode) => valueFor(tokens, name, mode).replace(reference, (_, target) => `var(--${target})`)
@@ -202,35 +252,46 @@ export const renderStandaloneTokens = (data) => {
   ].join('\n')
 }
 
-// One theme's identity inputs only, to load after tokens.css on :root. Its dark blocks already switch
-// --color-project to --color-project-dark, so a theme needs no dark rule.
-export const renderStandaloneTheme = ({ id, name, data }) => {
+// What one theme changes from tokens.css, to load after it on :root: its identity inputs, then every other
+// token whose light value differs. tokens.css's dark blocks outrank a bare :root, so the theme's dark
+// blocks, with the same selectors, set each token whose dark value would otherwise come out wrong.
+// A hue-only theme needs none: tokens.css's dark blocks already switch to --color-project-dark.
+export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
   const resolve = standaloneResolver(data)
+  const resolveDefault = standaloneResolver(defaultTheme.data)
+  const names = standaloneNames(data)
   const identity = data.groups.filter(({ identity: isIdentity }) => isIdentity).flatMap(({ tokens }) => Object.keys(tokens))
+  const root = [...identity, ...names.filter((token) => !identity.includes(token) && resolve(token, LIGHT) !== resolveDefault(token, LIGHT))]
+  const defaultDark = new Map(darkOverrides(names, resolveDefault))
+  const seenInDark = (token) => defaultDark.get(token) ?? (root.includes(token) ? resolve(token, LIGHT) : resolveDefault(token, LIGHT))
+  const dark = names.filter((token) => resolve(token, DARK) !== seenInDark(token)).map((token) => [`--${token}`, resolve(token, DARK)])
   return [
     `/* Generated from tokens/themes/${id}.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
-    ` * The ${name} identity inputs for tokens.css. Load after tokens.css, on :root only: the tokens that`,
-    ' * follow the hue resolve on :root, so a theme scoped to an element below it changes the hue there, but',
-    " * the accent, focus ring, and selection keep the default theme's colours. */",
+    ` * The ${name} theme for tokens.css. Load after tokens.css, on :root only: the tokens that follow the`,
+    ' * theme resolve on :root, so a theme scoped to an element below it changes its inputs there, but the',
+    " * accent, focus ring, and selection keep the default theme's colours. */",
     '',
     ':root {',
-    ...block('  ', identity.map((name) => [`--${name}`, resolve(name, LIGHT)])),
+    ...block('  ', root.map((token) => [`--${token}`, resolve(token, LIGHT)])),
     '}',
+    ...(dark.length === 0 ? [] : [
+      '',
+      '@media (prefers-color-scheme: dark) {',
+      '  :root:not([data-theme="light"]) {',
+      ...block('    ', dark),
+      '  }',
+      '}',
+      '',
+      ':root[data-theme="dark"] {',
+      ...block('  ', dark),
+      '}',
+    ]),
     '',
   ].join('\n')
 }
 
 // Standalone token values of every theme with every reference substituted, as getComputedStyle reports them.
-export const resolvedTokens = (themes) => {
-  const themeValues = ({ data }) => {
-    const tokens = flatTokens(data)
-    const resolve = (name, mode) => valueFor(tokens, name, mode).replace(reference, (_, target) => resolve(target, mode))
-    const names = standaloneNames(data)
-    const values = (mode) => Object.fromEntries(names.map((name) => [name, resolve(name, mode)]))
-    return { light: values(LIGHT), dark: values(DARK) }
-  }
-  return { themes: Object.fromEntries(themes.map((theme) => [theme.id, themeValues(theme)])) }
-}
+export const resolvedTokens = (themes) => ({ themes: Object.fromEntries(themes.map(({ id, data }) => [id, resolveData(data)])) })
 
 const generatedNote = 'Generated from tokens/core.json and tokens/themes/ by scripts/build-tokens.mjs. Do not edit.'
 const cssVarDoc = "/** The var() reference for a token, such as cssVar('color-text') for 'var(--color-text)'. */"
@@ -265,7 +326,7 @@ export const outputs = (themes) => {
   const [defaultTheme] = themes
   return [
     ['language/tokens.css', renderStandaloneTokens(defaultTheme.data)],
-    ...themes.map((theme) => [`dist/themes/${theme.id}.css`, renderStandaloneTheme(theme)]),
+    ...themes.map((theme) => [`dist/themes/${theme.id}.css`, renderStandaloneTheme(theme, defaultTheme)]),
     ['dist/tokens.json', `${JSON.stringify(resolvedTokens(themes), null, 2)}\n`],
     ['dist/tokens.js', renderTokensJs(themes)],
     ['dist/tokens.d.ts', renderTokensDts(defaultTheme, themes)],
