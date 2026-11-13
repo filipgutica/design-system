@@ -271,6 +271,34 @@ test('Escape closes the project menu and returns focus to it; leaving it closes 
   await expect(menu).not.toHaveAttribute('open')
 })
 
+// Safari does not focus a link on a click or a tap, so focus leaves the open menu for no element. The menu
+// must stay open until the link gets its click; a press outside it closes it.
+test.describe('project menu, by pointer', { tag: '@webkit' }, () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true })
+
+  test('a tap or a click on a project link opens that project', async ({ page }) => {
+    await page.route('https://example.com/ui/', (route) => route.fulfill({ contentType: 'text/html', body: '<title>UI</title>' }))
+    for (const press of ['tap', 'click'] as const) {
+      await page.goto('components.html')
+      const menu = page.locator('.page-head > .projects')
+      await menu.locator('summary')[press]()
+      await expect(menu).toHaveAttribute('open', '')
+      await menu.locator('nav a[data-project="ui"]')[press]()
+      await expect(page).toHaveURL('https://example.com/ui/')
+    }
+  })
+
+  test('a tap outside the open menu closes it', async ({ page }) => {
+    await page.goto('components.html')
+    const menu = page.locator('.page-head > .projects')
+    await menu.locator('summary').tap()
+    await expect(menu).toHaveAttribute('open', '')
+    // Below and to the right of the menu, on the page.
+    await page.touchscreen.tap(370, 700)
+    await expect(menu).not.toHaveAttribute('open')
+  })
+})
+
 test.describe('Foundations Find', () => {
   test.use({ viewport: { width: 1280, height: 900 } })
   const shownTokens = (page: Page) => page.locator('.tokens tbody tr:not([hidden]) th .token > code')

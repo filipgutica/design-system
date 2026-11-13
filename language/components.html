@@ -1805,10 +1805,13 @@
     });
   });
 
-  // Project switcher: Escape closes it and returns focus to the summary.
+  // Project switcher: Escape closes it and returns focus to the summary. Focus moving to an element outside it
+  // closes it, and so does a press outside it. Safari does not focus a link on a click or tap, so a press on a
+  // link moves focus to no element; closing then would hide the link before it gets its click.
   document.querySelectorAll('.projects:not(.is-open)').forEach((menu) => {
     menu.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); } });
-    menu.addEventListener('focusout', (e) => { if (!menu.contains(e.relatedTarget)) menu.open = false; });
+    menu.addEventListener('focusout', (e) => { if (e.relatedTarget && !menu.contains(e.relatedTarget)) menu.open = false; });
+    document.addEventListener('pointerdown', (e) => { if (menu.open && !menu.contains(e.target)) menu.open = false; });
   });
 
   // ---------- Catalogue shell: header strip, rail, Find, shortcuts, location, phone drawer ----------
