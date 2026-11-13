@@ -31,7 +31,7 @@ npm install @filipgutica/design-system
 | Import | What it is |
 | --- | --- |
 | `@filipgutica/design-system/tokens.css` | The tokens. Dark mode follows `prefers-color-scheme`; set `data-theme="light"` or `"dark"` on `<html>` to override it. |
-| `@filipgutica/design-system/themes/*.css` | A theme's identity inputs (hue pair and fonts): `graphite-indigo` (the default, already in `tokens.css`), `mauve`, or `pine`. Load one after `tokens.css`, on `:root`. |
+| `@filipgutica/design-system/themes/*.css` | A theme's identity inputs (hue pair and fonts): `graphite-indigo` (the default, already in `tokens.css`), or one of the family sites' hues: `annoterm`, `devps`, `filip-stack`, `workbench`, or `wtree`. Load one after `tokens.css`, on `:root`. |
 | `@filipgutica/design-system/fonts.css` | IBM Plex Sans and Mono. |
 | `@filipgutica/design-system` | `tokens` (resolved values per theme and mode) and `cssVar(name)`, with types. |
 | `@filipgutica/design-system/tokens.json` | The resolved values as JSON. |

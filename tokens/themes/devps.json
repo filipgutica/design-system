@@ -1,0 +1,8 @@
+{
+  "name": "devps",
+  "note": "The devps site's orange, a step darker in light so a selected row reads at 4.5:1: a burnt orange in light and a soft apricot in dark.",
+  "hue": {
+    "light": "#b04003",
+    "dark": "#f39a62"
+  }
+}

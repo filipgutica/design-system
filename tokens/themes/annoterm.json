@@ -1,0 +1,8 @@
+{
+  "name": "annoterm",
+  "note": "The annoterm site's teal, a step darker in light so a selected row reads at 4.5:1: a deep teal in light and a soft aqua in dark.",
+  "hue": {
+    "light": "#087266",
+    "dark": "#5cc8b8"
+  }
+}

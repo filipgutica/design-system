@@ -1,11 +1,11 @@
-/* Generated from tokens/themes/pine.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
- * The Pine identity inputs for tokens.css. Load after tokens.css, on :root only: the tokens that
+/* Generated from tokens/themes/annoterm.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
+ * The annoterm identity inputs for tokens.css. Load after tokens.css, on :root only: the tokens that
  * follow the hue resolve on :root, so a theme scoped to an element below it changes the hue there, but
  * the accent, focus ring, and selection keep the default theme's colours. */
 
 :root {
-  --color-project: #00543f;
-  --color-project-dark: #3fe0c0;
+  --color-project: #087266;
+  --color-project-dark: #5cc8b8;
   --font-ui: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 }

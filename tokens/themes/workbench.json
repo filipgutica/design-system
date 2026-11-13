@@ -1,0 +1,8 @@
+{
+  "name": "Workbench",
+  "note": "The Workbench site's blue: a cobalt in light and a periwinkle in dark.",
+  "hue": {
+    "light": "#2b59d6",
+    "dark": "#8aa8ff"
+  }
+}

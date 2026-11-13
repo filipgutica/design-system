@@ -106,7 +106,7 @@ export type TokenName =
   | 'duration'
   | 'ease-out'
 
-export type ThemeName = 'graphite-indigo' | 'mauve' | 'pine'
+export type ThemeName = 'graphite-indigo' | 'annoterm' | 'devps' | 'filip-stack' | 'workbench' | 'wtree'
 
 /** Resolved values, as getComputedStyle reports them on the root element. */
 export declare const tokens: {
