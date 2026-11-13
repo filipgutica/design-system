@@ -66,4 +66,4 @@ Commits follow Conventional Commits, and CI checks them with commitlint. Do not 
 
 ## License
 
-MIT. The IBM Plex fonts in `fonts/` are under the SIL Open Font License; see the `OFL-*.txt` files beside them. The editor theme in `language/editor-themes/graphite-indigo/` derives from Visual Studio Code's default themes; see its `LICENSE` and `THIRD_PARTY_NOTICES.md`.
+MIT. The IBM Plex fonts in `fonts/` are under the SIL Open Font License; see the `OFL-*.txt` files beside them. The editor theme in `language/editor-themes/graphite-indigo/` derives from Visual Studio Code's default themes; see its `LICENSE` and `THIRD_PARTY_NOTICES.md`. The Catppuccin and GitHub themes take their colours from those projects' MIT palettes; see `dist/themes/THIRD_PARTY_NOTICES.md` and the licenses beside it.

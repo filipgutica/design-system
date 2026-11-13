@@ -155,10 +155,12 @@ const standaloneHeader = `/*
  *
  * Two layers. The identity block at the top of :root is the theme's own: its hue
  * pair and fonts. This file carries the default theme. Another theme keeps this file
- * unchanged and loads its themes/<id>.css after it, on :root; a new project can set
- * those lines on :root in its own stylesheet the same way. The dark blocks switch
- * --color-project to --color-project-dark, so the override needs no dark rule. Check
- * --color-accent-text at 4.5:1 on the new hue and override it too when it falls short.
+ * unchanged and loads its themes/<id>.css after it, on :root; that file may also set
+ * the theme's neutrals. A new project can set the identity lines on :root in its own
+ * stylesheet the same way. The dark blocks switch --color-project to
+ * --color-project-dark, so the override needs no dark rule. Check --color-accent-text,
+ * --color-nav-current-text, and --color-segmented-current-text at 4.5:1 on the new hue
+ * and override them when they fall short; a theme file does this for you.
  * The terminal plate tokens also belong to the identity layer; every other line is core.
  *
  * Standalone HTML: import or inline this file.
