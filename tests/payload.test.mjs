@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// Host config installs language/ verbatim at ~/design-language and renders each file as text,
+// Host config installs language/ verbatim at ~/design-system and renders each file as text,
 // so every payload file must be UTF-8 text that names no machine's home directory.
 const root = fileURLToPath(new URL('../language/', import.meta.url))
 const payload = readdirSync(root, { recursive: true, withFileTypes: true })
@@ -25,9 +25,9 @@ const isText = (bytes) => {
 }
 
 test('the home-path guard catches a macOS or Linux home directory', () => {
-  assert.match('see /Users/filip/design-language', homePath)
-  assert.match('see /home/filip/design-language', homePath)
-  assert.doesNotMatch('see ~/design-language or {{HOME}}/design-language', homePath)
+  assert.match('see /Users/filip/design-system', homePath)
+  assert.match('see /home/filip/design-system', homePath)
+  assert.doesNotMatch('see ~/design-system or {{HOME}}/design-system', homePath)
 })
 
 test('no payload file names a home directory', () => {

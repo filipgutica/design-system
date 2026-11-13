@@ -125,7 +125,7 @@ function buildView({ snapshot, windowKey, region, percent, escape }) {
 export async function renderReport(snapshot, { mode = 'inline', tokens = '' } = {}) {
   validateSnapshot(snapshot)
   if (!['inline', 'standalone'].includes(mode)) fail('mode must be inline or standalone')
-  if (mode === 'standalone' && !tokens.trim()) fail('Standalone mode requires design-language CSS tokens')
+  if (mode === 'standalone' && !tokens.trim()) fail('Standalone mode requires design-system CSS tokens')
   const css = await readFile(new URL('./report.css', import.meta.url), 'utf8')
   const regions = [...new Set(snapshot.windows.flatMap((w) => w.rows.map((r) => r.region)))].sort()
   const view = buildView({ snapshot, windowKey: snapshot.defaultWindow, region: '', percent: formatPercent, escape: escapeHtml })

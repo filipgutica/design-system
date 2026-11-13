@@ -8,7 +8,7 @@ The renderer's `--mode inline` output has a transparent outer surface and host t
 
 ## Standalone / Claude attachment
 
-Use `--mode standalone --tokens ~/design-language/tokens.css` to inline the installed design-language tokens. This keeps the export readable without host CSS, a Vue runtime, an npm install, or network access. The same normalized snapshot and view function drive both modes.
+Use `--mode standalone --tokens ~/design-system/tokens.css` to inline the installed design system tokens. This keeps the export readable without host CSS, a Vue runtime, an npm install, or network access. The same normalized snapshot and view function drive both modes.
 
 The HTML file is an uploadable, self-contained snapshot: embed its dataset, styles and JavaScript; keep filters local. It must work without `window.openai`, a connector, a server or a fetch request. Open the actual standalone file without host-provided styles before calling it portable. Describe it as ready to attach to Claude, not as uploaded or proven compatible with a particular Claude deployment unless that was verified.
 
