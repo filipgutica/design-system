@@ -12,7 +12,7 @@ Proceed when the source and scope are explicit and the retrieved coverage suppor
 
 ## Build the view
 
-Follow the repository's design system, or `~/design-language/DESIGN.md` when present. Inline views inherit host fonts and theme; standalone exports use the same design language's tokens. Use semantic success/warning/error colors with text labels. Preserve readability when fitting overview and detail together; relax height before shrinking table text below 12px or hiding requested rows.
+Follow the repository's design system, or `~/design-system/DESIGN.md` when present. Inline views inherit host fonts and theme; standalone exports use the same design system's tokens. Use semantic success/warning/error colors with text labels. Preserve readability when fitting overview and detail together; relax height before shrinking table text below 12px or hiding requested rows.
 
 - For additive count breakdowns with a group filter and a time picker, use the bundled renderer and [snapshot contract](visualizations/count-snapshots.md). It derives totals and percentages from the same cells, rejects incomplete or inconsistent input, and uses one render function for initial and interactive states.
 - For latency, distributions, time series, or non-additive estimates, choose the appropriate chart and retain the same measurement and delivery checks. Do not force these into the count renderer or add percentile values together.
@@ -20,8 +20,8 @@ Follow the repository's design system, or `~/design-language/DESIGN.md` when pre
 The count renderer accepts a normalized JSON snapshot; it does not query a provider:
 
 ```sh
-node ~/design-language/visualizations/build-count-report.mjs snapshot.json report-inline.html --mode inline
-node ~/design-language/visualizations/build-count-report.mjs snapshot.json report.html --mode standalone --tokens ~/design-language/tokens.css
+node ~/design-system/visualizations/build-count-report.mjs snapshot.json report-inline.html --mode inline
+node ~/design-system/visualizations/build-count-report.mjs snapshot.json report.html --mode standalone --tokens ~/design-system/tokens.css
 ```
 
 Choose readable density for the actual number of items. Keep the overview and requested detail together without hiding important categories on narrow screens. The count-table layout and responsive behavior are described in the snapshot contract. Exact codes and category classes must have different labels.
