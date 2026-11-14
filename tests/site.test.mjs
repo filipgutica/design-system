@@ -6,7 +6,7 @@ import { COPIED, fetchProjects, siteFiles } from '../scripts/build-site.mjs'
 import { catalogueComponents, specGuidance } from '../scripts/site/components.mjs'
 import { foundationsPage } from '../scripts/site/foundations.mjs'
 import { overviewPage } from '../scripts/site/overview.mjs'
-import { parseColour, themeChecks } from '../theme-mapper/engine.js'
+import { parseColour, passes, themeChecks } from '../theme-mapper/engine.js'
 import { themesPage } from '../scripts/site/themes.mjs'
 import { parseProjects, projectSwitcher, shellDrift, sitePage, spanOnce } from '../scripts/site/shell.mjs'
 import { readRenameTable } from '../scripts/rename-tokens.mjs'
@@ -245,9 +245,17 @@ test('the theme contrast reader mixes as the browser does and refuses a colour i
   // Mixing with transparent keeps the colour and lowers its alpha.
   assert.deepEqual(parseColour('color-mix(in srgb, #3fe0c0 20%, transparent)').map((c) => Math.round(c * 100) / 100), [63, 224, 192, 0.2])
   assert.throws(() => parseColour('rgb(0 0 0)'), /unsupported colour/)
+  // A mix without its percentage, or with one out of range, is refused rather than read as NaN, which no ratio filter catches.
+  assert.throws(() => parseColour('color-mix(in srgb, #000000, #000000)'), /unsupported colour/)
+  assert.throws(() => parseColour('color-mix(in srgb, #000000 150%, #ffffff)'), /unsupported colour/)
   // A pale accent fails the focus and current-row checks in light mode.
   const values = JSON.parse(read('dist/tokens.json')).themes['graphite-indigo']
   const pale = Object.fromEntries(Object.entries(values.light).map(([name, value]) => [name, value.replaceAll('#4b45d1', '#c9c7f5')]))
-  const failing = themeChecks({ light: pale, dark: values.dark }).filter(({ light, min }) => light < min).map(({ id }) => id)
+  const failing = themeChecks({ light: pale, dark: values.dark }).filter(({ light, min }) => !passes(light, min)).map(({ id }) => id)
   assert.deepEqual(failing, ['focus', 'nav', 'thumb', 'primary'])
+  // A planted value the reader cannot read stops the checks instead of passing them.
+  const planted = { ...values.light, 'color-command-bg': 'color-mix(in srgb, #000000, #101010)' }
+  assert.throws(() => themeChecks({ light: planted, dark: values.dark }), /unsupported colour/)
+  // A ratio that is not a number fails.
+  assert.equal(passes(Number.NaN, 3), false)
 })

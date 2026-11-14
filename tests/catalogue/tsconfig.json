@@ -14,6 +14,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "catalogue.spec.ts"
+    "catalogue.spec.ts",
+    "theme-mapper.spec.ts"
   ]
 }

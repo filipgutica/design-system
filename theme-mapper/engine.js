@@ -66,6 +66,8 @@ export const parseColour = (value) => {
   if (mix) {
     const [first, second] = splitTop(mix[1])
     const share = Number(first.match(/ ([\d.]+)%$/)?.[1]) / 100
+    // A mix without its percentage, or with one outside 0 to 100, is not a colour the tokens resolve to.
+    if (!(share >= 0 && share <= 1)) throw new Error(`unsupported colour: ${value}`)
     const a = parseColour(first.replace(/ [\d.]+%$/, ''))
     const b = parseColour(second)
     // Premultiplied, as CSS mixes a colour with transparent.
@@ -200,45 +202,135 @@ export const applyTheme = (core, theme) => {
   return withReadableText(data)
 }
 
+// The contrast checks, as data: each pair is an ink and the fill below it, as language/components.html draws
+// them, including the hover, pressed, and focus states a reader only sees on interaction. A fill is its layers,
+// top first, over an opaque one. A paint is a colour with {token} references; an ink may differ per mode.
+/** @typedef {string | [string, string]} Paint */
+/** @typedef {{ ink: Paint, fill: string[] }} Pair */
 /**
  * @typedef {object} Check
  * @property {string} id
  * @property {string} label What the check measures, in plain text.
  * @property {number} min The lowest ratio that passes.
- * @property {(colour: (token: string) => Colour, mode: Mode) => number} measure The lowest ratio over every place it
- *   measures, in one mode.
+ * @property {'theme' | 'core'} kind Follows the ink: `theme` when it is a theme input or derives from one,
+ *   `core` when it is a core colour, which a theme cannot change.
+ * @property {Pair[]} pairs Every place the check measures.
  */
+
+/**
+ * Every ink on every fill.
+ * @param {Paint[]} inks
+ * @param {(string | string[])[]} fills A fill's layers, top first, or one opaque paint.
+ * @returns {Pair[]}
+ */
+const on = (inks, fills) => inks.flatMap((ink) => fills.map((fill) => ({ ink, fill: typeof fill === 'string' ? [fill] : fill })))
+/**
+ * @param {string} paint
+ * @param {number} share
+ * @param {string} below
+ */
+const mix = (paint, share, below) => `color-mix(in srgb, ${paint} ${share}%, ${below})`
+const ON_SURFACES = SURFACES.map((name) => `{${name}}`)
+// A quiet action with a text label sits on the page, as the project switcher, or on a raised code header.
+const QUIET_ACTION_SURFACES = ['{color-bg}', '{color-surface-raised}']
+const STATUS = ['color-success', 'color-warning', 'color-error', 'color-info']
+/**
+ * A status colour as text: the tone mixed into the status ink, 75% in light and 85% in dark.
+ * @param {string} tone
+ * @returns {Paint}
+ */
+const statusInk = (tone) => [mix(`{${tone}}`, 75, '{color-status-ink}'), mix(`{${tone}}`, 85, '{color-status-ink}')]
+
 /**
  * The contrast checks each theme must pass, in both modes.
  * @type {Check[]}
  */
 export const CHECKS = [
-  { id: 'focus', label: 'Focus ring on the page, a surface, and a raised surface', min: 3,
-    measure: (c) => Math.min(...SURFACES.map((s) => ratio(c('color-focus'), c(s)))) },
-  { id: 'nav', label: 'Current row text on its fill, on each surface', min: 4.5,
-    measure: (c) => Math.min(...SURFACES.map((s) => ratio(c('color-nav-current-text'), over(c('color-nav-current'), c(s))))) },
-  { id: 'thumb', label: 'Selected segmented label on its thumb', min: 4.5,
-    measure: (c) => ratio(c('color-segmented-current-text'), over(c('color-control-thumb'), c('color-well'))) },
-  { id: 'primary', label: 'Primary label on its fill, at rest and on hover', min: 4.5,
-    measure: (c) => Math.min(ratio(c('color-accent-text'), c('color-accent')), ratio(c('color-accent-text'), c('color-button-hover'))) },
-  { id: 'prompt', label: 'The $ prompt on the command plate', min: 3,
-    measure: (c) => ratio(c('color-project-dark'), c('color-command-bg')) },
-  // A muted surface carries text too: neutral badges, and radio card hover.
-  { id: 'text', label: 'Text and muted text on the page, a surface, a raised surface, and a muted surface', min: 4.5,
-    measure: (c) => Math.min(...['color-text', 'color-muted'].flatMap((ink) => [...SURFACES, 'color-surface-muted'].map((s) => ratio(c(ink), c(s))))) },
-  { id: 'edge', label: 'Control edge on the page, a surface, and a raised surface', min: 3,
-    measure: (c) => Math.min(...SURFACES.map((s) => ratio(c('color-border'), c(s)))) },
+  { id: 'focus', label: 'Focus ring on the page, a surface, and a raised surface', min: 3, kind: 'theme',
+    pairs: on(['{color-focus}'], ON_SURFACES) },
+  // Selected tabs, rows, and options draw the same fill. A phone header's current link is the accent alone, on the page.
+  { id: 'nav', label: 'Current row text on its fill, on each surface, and a current link on the page', min: 4.5, kind: 'theme',
+    pairs: [
+      ...on(['{color-nav-current-text}'], ON_SURFACES.map((surface) => ['{color-nav-current}', surface])),
+      ...on(['{color-accent}'], ['{color-bg}']),
+    ] },
+  { id: 'thumb', label: 'Selected segmented label on its thumb', min: 4.5, kind: 'theme',
+    pairs: on(['{color-segmented-current-text}'], [['{color-control-thumb}', '{color-well}']]) },
+  { id: 'primary', label: 'Primary label on its fill, at rest and on hover', min: 4.5, kind: 'theme',
+    pairs: on(['{color-accent-text}'], ['{color-accent}', '{color-button-hover}']) },
+  { id: 'prompt', label: 'The $ prompt on the command plate', min: 3, kind: 'theme',
+    pairs: on(['{color-project-dark}'], ['{color-command-bg}']) },
+  { id: 'text', label: 'Text and muted text on every fill that carries them, at rest, on hover, and pressed', min: 4.5, kind: 'theme',
+    pairs: [
+      // Surfaces, neutral badges, pressed and disabled-looking wells, fields, hovered rows, radio cards, and pressed toggles.
+      ...on(['{color-text}', '{color-muted}'], [
+        ...ON_SURFACES, '{color-surface-muted}', '{color-well}', '{color-field-bg}', '{color-row-hover}',
+        mix('{color-surface-muted}', 45, '{color-surface-raised}'), mix('{color-accent}', 8, '{color-surface-raised}'),
+      ]),
+      // Secondary buttons at rest and on hover, status alerts, a hovered segment, and a pressed quiet action.
+      ...on(['{color-text}'], [
+        '{color-control-thumb}', mix('{color-text}', 8, '{color-control-thumb}'),
+        ...STATUS.map((tone) => `{${tone}-surface}`),
+        [mix('{color-control-thumb}', 45, 'transparent'), '{color-well}'],
+        ...QUIET_ACTION_SURFACES.map((surface) => [mix('{color-text}', 12, 'transparent'), surface]),
+      ]),
+      // A quiet action pressed without the pointer over it keeps its muted colour, on a tint of that colour.
+      ...on(['{color-muted}'], QUIET_ACTION_SURFACES.map((surface) => [mix('{color-muted}', 12, 'transparent'), surface])),
+    ] },
+  { id: 'edge', label: 'Control edge on the page, a surface, and a raised surface', min: 3, kind: 'theme',
+    pairs: on(['{color-border}'], ON_SURFACES) },
+  // A terminal capture's highlight and its current tab, in the dark hue on the terminal.
+  { id: 'terminal', label: 'Highlighted text in a terminal capture, and its current tab', min: 4.5, kind: 'theme',
+    pairs: on(['{color-project-dark}'], ['{color-terminal}', [mix('{color-project-dark}', 20, 'transparent'), '{color-terminal}']]) },
+  { id: 'link', label: 'Link text on the page, a surface, and a raised surface', min: 4.5, kind: 'core',
+    pairs: on(['{color-link}'], ON_SURFACES) },
+  { id: 'status', label: 'Status text on the page, a surface, and a raised surface, on its badge, and on a danger button', min: 4.5, kind: 'core',
+    pairs: [
+      ...on(STATUS.map((tone) => `{${tone}}`), ON_SURFACES),
+      ...STATUS.flatMap((tone) => on([statusInk(tone)], [mix(`{${tone}}`, 22, '{color-surface-raised}')])),
+      ...on([statusInk('color-error')], ['{color-error-surface}', ...[10, 16].map((share) => mix('{color-error}', share, '{color-error-surface}'))]),
+    ] },
+  { id: 'syntax', label: 'Syntax colours on a code block', min: 4.5, kind: 'core',
+    pairs: on(['keyword', 'string', 'number', 'comment'].map((role) => `{color-syntax-${role}}`), ['{color-code}']) },
+  { id: 'command', label: 'Text and captions on the command plate', min: 4.5, kind: 'core',
+    pairs: on(['{color-terminal-text}', '{color-terminal-caption-text}'], ['{color-command-bg}', mix('{color-command-bg}', 55, '{color-terminal}')]) },
 ]
 
-/** @typedef {{ id: string, label: string, min: number, light: number, dark: number }} CheckResult */
+/** @typedef {{ ink: string, fill: string, ratio: number }} PairResult */
 /**
- * Every check for one theme's resolved values, with each mode's ratio.
+ * Each pair's ratio in one mode, with the ink and the fill as resolved paints.
+ * @param {Record<string, string>} values One mode's resolved values.
+ * @param {Pair[]} pairs
+ * @param {Mode} mode
+ * @returns {PairResult[]}
+ */
+export const measurePairs = (values, pairs, mode) => {
+  /** @param {string} paint */
+  const read = (paint) => parseColour(paint.replace(reference, (_, name) => values[name] ?? `unknown token ${name}`))
+  return pairs.map(({ ink, fill }) => {
+    const inkPaint = Array.isArray(ink) ? ink[mode === 'light' ? LIGHT : DARK] : ink
+    const layers = fill.map(read)
+    if (layers.at(-1)?.[3] !== 1) throw new Error(`The fill ${fill.join(' over ')} does not end on an opaque colour`)
+    const below = layers.reduceRight((under, layer) => over(layer, under))
+    return { ink: inkPaint, fill: fill.join(' over '), ratio: ratio(read(inkPaint), below) }
+  })
+}
+/**
+ * Whether a ratio passes. A ratio that is not a number fails, so a check cannot pass on an unread colour.
+ * @param {number} value
+ * @param {number} min
+ */
+export const passes = (value, min) => Number.isFinite(value) && value >= min
+
+/** @typedef {{ id: string, label: string, min: number, kind: 'theme' | 'core', light: number, dark: number }} CheckResult */
+/**
+ * Every check for one theme's resolved values, with each mode's lowest ratio.
  * @param {ResolvedValues} values
- * @param {Check[]} [checks] The checks to run; the theme checks unless given.
+ * @param {Check[]} [checks] The checks to run; every check unless given.
  * @returns {CheckResult[]}
  */
-export const themeChecks = (values, checks = CHECKS) => checks.map(({ measure, ...check }) => ({
+export const themeChecks = (values, checks = CHECKS) => checks.map(({ pairs, ...check }) => ({
   ...check,
-  light: measure((name) => parseColour(values.light[name]), 'light'),
-  dark: measure((name) => parseColour(values.dark[name]), 'dark'),
+  light: Math.min(...measurePairs(values.light, pairs, 'light').map((pair) => pair.ratio)),
+  dark: Math.min(...measurePairs(values.dark, pairs, 'dark').map((pair) => pair.ratio)),
 }))

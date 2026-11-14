@@ -75,10 +75,11 @@ test('a theme that fails after selection keeps its colours and lists each failur
   const mapped = mapVsCodeTheme(theme)
   // No hue key passes, so the first present one stays, unchanged.
   assert.equal(mapped.hue, theme.colors['button.background'])
-  assert.deepEqual(failing(mapped), ['theme focus', 'theme primary', 'theme prompt', 'core status'])
+  assert.deepEqual(failing(mapped), ['theme focus', 'theme nav', 'theme primary', 'theme prompt', 'theme terminal', 'core status'])
   for (const problem of mapped.problems) {
     assert.equal(problem.mode, 'dark')
-    assert.ok(problem.ratio < problem.min)
+    assert.ok(!(problem.ratio >= problem.min))
+    assert.ok(problem.pairs.length > 0 && problem.pairs.every(({ ratio }) => !(ratio >= problem.min)))
   }
 })
 
@@ -134,4 +135,32 @@ test('a theme whose editor text is under 4.5:1 takes its input text instead', ()
   // As in Solarized Light: #657b83 on #fdf6e3 is about 4.1:1, and its input text #586e75 reaches 5:1.
   const mapped = mapVsCodeTheme({ type: 'light', colors: { 'editor.background': '#fdf6e3', 'editor.foreground': '#657b83', 'input.foreground': '#586e75' } })
   assert.equal(mapped.neutrals['color-text'], '#586e75')
+  // It still reads at about 4.2:1 on the core status alerts, so that is reported.
+  assert.deepEqual(failing(mapped), ['theme text'])
+  assert.deepEqual(mapped.problems[0].pairs.map(({ fill }) => fill).filter((fill) => fill.endsWith('-surface}')), ['{color-success-surface}', '{color-warning-surface}', '{color-error-surface}', '{color-info-surface}'])
+})
+
+test('soft text that reads on the page but not on a secondary button or a status alert is a theme problem', () => {
+  // The one text candidate reads on the page, so it stays, and each fill it fails on is reported.
+  const mapped = mapVsCodeTheme({ type: 'dark', colors: { 'editor.background': '#000000', 'editor.foreground': '#777777', 'button.background': '#a99ce2' } })
+  assert.equal(mapped.neutrals['color-text'], '#777777')
+  const text = mapped.problems.find(({ check }) => check === 'text')
+  assert.equal(text.kind, 'theme')
+  const fills = text.pairs.filter(({ ink }) => ink === '{color-text}').map(({ fill }) => fill)
+  for (const fill of ['{color-control-thumb}', '{color-success-surface}', '{color-warning-surface}', '{color-error-surface}', '{color-info-surface}']) assert.ok(fills.includes(fill), fill)
+})
+
+test('the text takes the first candidate that reads on every fill, not only on the page', () => {
+  // #777777 reads on black, but not on the status alerts; #dddddd reads on all of them.
+  const mapped = mapVsCodeTheme({ type: 'dark', colors: { 'editor.background': '#000000', 'editor.foreground': '#777777', foreground: '#dddddd' } })
+  assert.equal(mapped.neutrals['color-text'], '#dddddd')
+  assert.deepEqual(mapped.problems, [])
+})
+
+test('muted text must read on a hovered row too, or the text stands in', () => {
+  // The description colour reads on black at 4.7:1 but on the hover fill at 2.2:1, where a pager's direction sits.
+  const mapped = mapVsCodeTheme({ type: 'dark', colors: { 'editor.background': '#000000', 'editor.foreground': '#ffffff', descriptionForeground: '#777777', 'list.hoverBackground': '#444444' } })
+  assert.equal(mapped.neutrals['color-row-hover'], '#444444')
+  assert.equal(mapped.neutrals['color-muted'], '#ffffff')
+  assert.deepEqual(mapped.problems, [])
 })

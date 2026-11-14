@@ -43,18 +43,12 @@ export const SURFACES: string[];
 export const TEXT_ON_FILL_TOKENS: string[];
 export function applyTheme<Data extends TokenSource>(core: Data, theme: ThemeInputs): Data;
 /**
- * @typedef {object} Check
- * @property {string} id
- * @property {string} label What the check measures, in plain text.
- * @property {number} min The lowest ratio that passes.
- * @property {(colour: (token: string) => Colour, mode: Mode) => number} measure The lowest ratio over every place it
- *   measures, in one mode.
- */
-/**
  * The contrast checks each theme must pass, in both modes.
  * @type {Check[]}
  */
 export const CHECKS: Check[];
+export function measurePairs(values: Record<string, string>, pairs: Pair[], mode: Mode): PairResult[];
+export function passes(value: number, min: number): boolean;
 export function themeChecks(values: ResolvedValues, checks?: Check[]): CheckResult[];
 /**
  * A token's value: one value for both modes, a [light, dark] pair, or null for an input core leaves empty.
@@ -108,6 +102,11 @@ export type ResolvedValues = {
  */
 export type Colour = number[];
 export type Mode = "light" | "dark";
+export type Paint = string | [string, string];
+export type Pair = {
+    ink: Paint;
+    fill: string[];
+};
 export type Check = {
     id: string;
     /**
@@ -119,15 +118,25 @@ export type Check = {
      */
     min: number;
     /**
-     * The lowest ratio over every place it
-     * measures, in one mode.
+     * Follows the ink: `theme` when it is a theme input or derives from one,
+     * `core` when it is a core colour, which a theme cannot change.
      */
-    measure: (colour: (token: string) => Colour, mode: Mode) => number;
+    kind: "theme" | "core";
+    /**
+     * Every place the check measures.
+     */
+    pairs: Pair[];
+};
+export type PairResult = {
+    ink: string;
+    fill: string;
+    ratio: number;
 };
 export type CheckResult = {
     id: string;
     label: string;
     min: number;
+    kind: "theme" | "core";
     light: number;
     dark: number;
 };

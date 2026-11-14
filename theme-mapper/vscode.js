@@ -2,11 +2,11 @@
 // each input takes the first key in its row whose colour passes the row's gate, and no colour is changed.
 // What still fails once every input is chosen goes to `problems`.
 import { core } from './core.js'
-import { NEUTRALS, SURFACES, TEXT_ON_FILL_TOKENS, applyTheme, over, parseColour, ratio, resolveData, themeChecks } from './engine.js'
+import { CHECKS, NEUTRALS, TEXT_ON_FILL_TOKENS, applyTheme, measurePairs, over, parseColour, passes, ratio, resolveData } from './engine.js'
 
 /** @typedef {import('./engine.js').Colour} Colour */
 /** @typedef {import('./engine.js').Mode} Mode */
-/** @typedef {import('./engine.js').Check} Check */
+/** @typedef {import('./engine.js').PairResult} PairResult */
 /** @typedef {import('./engine.js').ThemeInputs} ThemeInputs */
 
 /**
@@ -19,14 +19,16 @@ import { NEUTRALS, SURFACES, TEXT_ON_FILL_TOKENS, applyTheme, over, parseColour,
  * @property {Record<string, unknown>} [colors] Workbench colours by key, as #rgb, #rgba, #rrggbb, or #rrggbbaa.
  */
 /**
- * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours.
- * A `core` problem is a core colour, a link or status colour, on the theme's surfaces: the theme cannot fix it.
+ * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours, or a
+ * colour that follows them. A `core` problem is a core colour, such as a link, status, or syntax colour, on the
+ * theme's fills: the theme cannot fix it.
  * @typedef {object} Problem
  * @property {'theme' | 'core'} kind
  * @property {string} check The check's id.
  * @property {Mode} mode
  * @property {number} ratio The lowest ratio the check measured.
  * @property {number} min The lowest ratio that passes.
+ * @property {PairResult[]} pairs Each ink on each fill that fails, as the engine resolves them.
  */
 /**
  * One VS Code theme as design-system theme inputs, for its one mode. Colours are lowercase #rrggbb.
@@ -90,34 +92,25 @@ const contrast = (ink, surfaces) => Math.min(...surfaces.map((surface) => ratio(
 export const themeInputs = ({ hue, hueOnDark, neutrals }) => ({ hue: { light: hue, dark: hueOnDark }, neutrals: { light: neutrals, dark: neutrals } })
 
 /**
- * @param {Colour} colour
- * @param {number} alpha
- * @returns {Colour}
- */
-const withAlpha = ([r, g, b], alpha) => [r, g, b, alpha]
-
-// Core colours on the imported surfaces. A theme cannot change them, so a failure is information.
-const STATUS = ['color-success', 'color-warning', 'color-error', 'color-info']
-/** @type {Check[]} */
-const CORE_CHECKS = [
-  { id: 'link', label: 'Link text on the page, a surface, and a raised surface', min: 4.5,
-    measure: (c) => Math.min(...SURFACES.map((s) => ratio(c('color-link'), c(s)))) },
-  // A status badge's text is its tone mixed into the status ink (75% in light, 85% in dark), on a 22% tint of
-  // the tone over a raised surface, as components.html draws it.
-  { id: 'status', label: 'Status text on the page, a surface, and a raised surface, and on its badge', min: 4.5,
-    measure: (c, mode) => Math.min(...STATUS.flatMap((ink) => [
-      ...SURFACES.map((s) => ratio(c(ink), c(s))),
-      ratio(over(withAlpha(c(ink), mode === 'light' ? 0.75 : 0.85), c('color-status-ink')), over(withAlpha(c(ink), 0.22), c('color-surface-raised'))),
-    ])) },
-]
-
-/**
- * Each check the theme fails in its mode.
+ * Each check that fails in the theme's mode, with the pairs that fail it.
  * @param {ThemeColours} theme
- * @param {Check[]} [checks]
+ * @returns {Problem[]}
  */
-const failures = (theme, checks) => themeChecks(resolveData(applyTheme(core, themeInputs(theme))), checks)
-  .filter((check) => check[theme.appearance] < check.min)
+const failures = (theme) => {
+  const mode = theme.appearance
+  const values = resolveData(applyTheme(core, themeInputs(theme)))[mode]
+  return CHECKS.flatMap(({ id, kind, min, pairs }) => {
+    const measured = measurePairs(values, pairs, mode)
+    const failing = measured.filter((pair) => !passes(pair.ratio, min))
+    return failing.length === 0 ? [] : [{ kind, check: id, mode, ratio: Math.min(...measured.map((pair) => pair.ratio)), min, pairs: failing }]
+  })
+}
+/**
+ * Whether an ink fails anywhere it sits in a theme check.
+ * @param {ThemeColours} theme
+ * @param {string} ink
+ */
+const failsInk = (theme, ink) => failures(theme).some(({ kind, pairs }) => kind === 'theme' && pairs.some((pair) => pair.ink === ink))
 
 /**
  * Maps one resolved VS Code colour theme onto design-system theme inputs for its one mode. Experimental.
@@ -146,60 +139,87 @@ export const mapVsCodeTheme = (theme) => {
   /**
    * The first key whose colour passes the gate.
    * @param {string[]} keys
-   * @param {(value: string) => boolean} passes
+   * @param {(value: string) => boolean} gate
    */
-  const select = (keys, passes) => keys.map(colour).find((value) => value !== undefined && passes(value))
+  const select = (keys, gate) => keys.map(colour).find((value) => value !== undefined && gate(value))
 
-  // A theme whose editor text is soft, such as Solarized Light at about 4.1:1, has a stronger text colour for inputs.
-  const text = select(['editor.foreground', 'foreground', 'input.foreground'], (value) => contrast(value, [bg]) >= 4.5)
-  if (!text) throw new ThemeValidationError('No text colour in the theme reaches 4.5:1 on editor.background')
-  /** @param {string} surface */
-  const readable = (surface) => contrast(text, [surface]) >= 4.5
-  const surface = select(['sideBar.background', 'panel.background'], readable) ?? bg
-  const raised = select(['editorWidget.background', 'panel.background'], readable) ?? surface
-  const surfaceMuted = select(['list.inactiveSelectionBackground', 'editorWidget.background'], readable) ?? surface
-  const rowHover = select(['list.hoverBackground'], readable) ?? surfaceMuted
-  const surfaces = [bg, surface, raised]
-  // Muted text also sits on the muted surface, in neutral badges.
-  const muted = select(['descriptionForeground', 'editorLineNumber.foreground'], (value) => contrast(value, [...surfaces, surfaceMuted]) >= 4.5) ?? text
-  const border = select(['input.border', 'dropdown.border', 'checkbox.border', 'contrastBorder', 'editorLineNumber.foreground'], (value) => contrast(value, surfaces) >= 3) ?? muted
-  // Hairlines carry no minimum.
-  const borderSubtle = select(['panel.border', 'sideBar.border', 'editorGroup.border'], () => true) ?? border
-  const neutrals = {
-    'color-bg': bg, 'color-surface': surface, 'color-surface-raised': raised, 'color-surface-muted': surfaceMuted,
-    'color-row-hover': rowHover, 'color-border-subtle': borderSubtle, 'color-border': border, 'color-text': text, 'color-muted': muted,
+  /**
+   * The first candidate whose finished theme draws the ink readably everywhere it sits, the fills that follow
+   * from later rows included.
+   * @param {(string | undefined)[]} candidates
+   * @param {string} ink The ink's paint in the checks, such as `{color-text}`.
+   * @param {(value: string) => ThemeColours} finish The rest of the mapping with this candidate.
+   * @returns {ThemeColours | undefined}
+   */
+  const readableEverywhere = (candidates, ink, finish) => {
+    for (const value of candidates) {
+      const finished = value === undefined ? undefined : finish(value)
+      if (finished && !failsInk(finished, ink)) return finished
+    }
+    return undefined
   }
 
   /**
-   * Whether a hue pair passes the named checks in the theme's mode.
-   * @param {string} hue
-   * @param {string} hueOnDark
-   * @param {string[]} ids
+   * Every input once the text is chosen. Each row takes the first key that passes its gate.
+   * @param {string} text
+   * @returns {ThemeColours}
    */
-  const passes = (hue, hueOnDark, ids) => !failures({ appearance, hue, hueOnDark, neutrals }).some(({ id }) => ids.includes(id))
-  // When no hue key passes, the first present one stays and its failures are reported; without any, the text.
-  const hue = select(HUE_KEYS, (value) => passes(value, value, ['focus', 'nav', 'thumb', 'primary']))
-    ?? HUE_KEYS.map(colour).find((value) => value !== undefined) ?? text
-  // The command plate is dark in both modes; a dark theme's hue already reads on it.
-  const hueOnDark = appearance === 'dark' ? hue
-    : select([...HUE_KEYS, 'button.foreground'], (value) => passes(hue, value, ['prompt'])) ?? bg
+  const withText = (text) => {
+    /** @param {string} surface */
+    const readable = (surface) => contrast(text, [surface]) >= 4.5
+    const surface = select(['sideBar.background', 'panel.background'], readable) ?? bg
+    const raised = select(['editorWidget.background', 'panel.background'], readable) ?? surface
+    const surfaceMuted = select(['list.inactiveSelectionBackground', 'editorWidget.background'], readable) ?? surface
+    const rowHover = select(['list.hoverBackground'], readable) ?? surfaceMuted
+    const surfaces = [bg, surface, raised]
 
-  const colours = { appearance, hue, hueOnDark, neutrals }
-  /**
-   * @param {'theme' | 'core'} kind
-   * @param {Check[]} [checks]
-   * @returns {Problem[]}
-   */
-  const problems = (kind, checks) => failures(colours, checks)
-    .map(({ id, min, ...measured }) => ({ kind, check: id, mode: appearance, ratio: measured[appearance], min }))
+    /**
+     * Every input once the muted text is chosen too.
+     * @param {string} muted
+     * @returns {ThemeColours}
+     */
+    const withMuted = (muted) => {
+      const border = select(['input.border', 'dropdown.border', 'checkbox.border', 'contrastBorder', 'editorLineNumber.foreground'], (value) => contrast(value, surfaces) >= 3) ?? muted
+      // Hairlines carry no minimum.
+      const borderSubtle = select(['panel.border', 'sideBar.border', 'editorGroup.border'], () => true) ?? border
+      const neutrals = {
+        'color-bg': bg, 'color-surface': surface, 'color-surface-raised': raised, 'color-surface-muted': surfaceMuted,
+        'color-row-hover': rowHover, 'color-border-subtle': borderSubtle, 'color-border': border, 'color-text': text, 'color-muted': muted,
+      }
+      /**
+       * Whether a hue pair passes the named checks in the theme's mode.
+       * @param {string} hue
+       * @param {string} hueOnDark
+       * @param {string[]} ids
+       */
+      const huePasses = (hue, hueOnDark, ids) => !failures({ appearance, hue, hueOnDark, neutrals }).some(({ check }) => ids.includes(check))
+      // When no hue key passes, the first present one stays and its failures are reported; without any, the text.
+      const hue = select(HUE_KEYS, (value) => huePasses(value, value, ['focus', 'nav', 'thumb', 'primary']))
+        ?? HUE_KEYS.map(colour).find((value) => value !== undefined) ?? text
+      // The command plate and a terminal capture are dark in both modes; a dark theme's hue already reads on them.
+      const hueOnDark = appearance === 'dark' ? hue
+        : select([...HUE_KEYS, 'button.foreground'], (value) => huePasses(hue, value, ['prompt', 'terminal'])) ?? bg
+      return { appearance, hue, hueOnDark, neutrals }
+    }
+    // Muted text sits on more fills than the surfaces, such as a hovered row; the text stands in when no key reads on all of them.
+    return readableEverywhere(['descriptionForeground', 'editorLineNumber.foreground'].map(colour), '{color-muted}', withMuted) ?? withMuted(text)
+  }
+
+  // A theme whose editor text is soft, such as Solarized Light at about 4.1:1, has a stronger text colour for inputs.
+  const texts = ['editor.foreground', 'foreground', 'input.foreground'].map(colour)
+    .filter(/** @returns {value is string} */ (value) => value !== undefined && contrast(value, [bg]) >= 4.5)
+  if (texts.length === 0) throw new ThemeValidationError('No text colour in the theme reaches 4.5:1 on editor.background')
+  // Text also sits on core fills, such as status alerts. When no candidate reads on every fill, the first that reads
+  // on the page stays and its failures are reported.
+  const colours = readableEverywhere(texts, '{color-text}', withText) ?? withText(texts[0])
   return {
     name: typeof theme.name === 'string' ? theme.name : '',
     appearance,
     highContrast,
-    hue,
-    hueOnDark,
-    neutrals,
-    problems: [...problems('theme'), ...problems('core', CORE_CHECKS)],
+    hue: colours.hue,
+    hueOnDark: colours.hueOnDark,
+    neutrals: colours.neutrals,
+    problems: failures(colours),
   }
 }
 

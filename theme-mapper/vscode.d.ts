@@ -1,6 +1,6 @@
 /** @typedef {import('./engine.js').Colour} Colour */
 /** @typedef {import('./engine.js').Mode} Mode */
-/** @typedef {import('./engine.js').Check} Check */
+/** @typedef {import('./engine.js').PairResult} PairResult */
 /** @typedef {import('./engine.js').ThemeInputs} ThemeInputs */
 /**
  * A VS Code colour theme, parsed, with any `include` already merged in by the caller.
@@ -12,14 +12,16 @@
  * @property {Record<string, unknown>} [colors] Workbench colours by key, as #rgb, #rgba, #rrggbb, or #rrggbbaa.
  */
 /**
- * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours.
- * A `core` problem is a core colour, a link or status colour, on the theme's surfaces: the theme cannot fix it.
+ * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours, or a
+ * colour that follows them. A `core` problem is a core colour, such as a link, status, or syntax colour, on the
+ * theme's fills: the theme cannot fix it.
  * @typedef {object} Problem
  * @property {'theme' | 'core'} kind
  * @property {string} check The check's id.
  * @property {Mode} mode
  * @property {number} ratio The lowest ratio the check measured.
  * @property {number} min The lowest ratio that passes.
+ * @property {PairResult[]} pairs Each ink on each fill that fails, as the engine resolves them.
  */
 /**
  * One VS Code theme as design-system theme inputs, for its one mode. Colours are lowercase #rrggbb.
@@ -43,7 +45,7 @@ export function mapVsCodeTheme(theme: VsCodeTheme): MappedTheme;
 export function themeVariables(theme: ThemeColours): Record<string, string>;
 export type Colour = import("./engine.js").Colour;
 export type Mode = import("./engine.js").Mode;
-export type Check = import("./engine.js").Check;
+export type PairResult = import("./engine.js").PairResult;
 export type ThemeInputs = import("./engine.js").ThemeInputs;
 /**
  * A VS Code colour theme, parsed, with any `include` already merged in by the caller.
@@ -65,8 +67,9 @@ export type VsCodeTheme = {
     colors?: Record<string, unknown> | undefined;
 };
 /**
- * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours.
- * A `core` problem is a core colour, a link or status colour, on the theme's surfaces: the theme cannot fix it.
+ * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours, or a
+ * colour that follows them. A `core` problem is a core colour, such as a link, status, or syntax colour, on the
+ * theme's fills: the theme cannot fix it.
  */
 export type Problem = {
     kind: "theme" | "core";
@@ -83,6 +86,10 @@ export type Problem = {
      * The lowest ratio that passes.
      */
     min: number;
+    /**
+     * Each ink on each fill that fails, as the engine resolves them.
+     */
+    pairs: PairResult[];
 };
 /**
  * One VS Code theme as design-system theme inputs, for its one mode. Colours are lowercase #rrggbb.
