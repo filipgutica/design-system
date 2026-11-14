@@ -138,7 +138,8 @@ export const resolveData = (data) => {
   return { light: values(LIGHT), dark: values(DARK) }
 }
 
-const SURFACES = ['color-bg', 'color-surface', 'color-surface-raised']
+/** The surfaces text and edges sit on: the page, a surface, and a raised surface. */
+export const SURFACES = ['color-bg', 'color-surface', 'color-surface-raised']
 
 // Each selected fill's text, with how its contrast is measured on resolved values: the lowest ratio
 // over every place the fill sits. The candidates come from the tokens' roles in core.json.

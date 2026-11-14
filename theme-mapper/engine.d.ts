@@ -37,6 +37,8 @@ export function flatTokens(data: TokenSource): {
 };
 export function valueFor(tokens: Record<string, TokenValue>, name: string, mode: number): string;
 export function resolveData(data: TokenSource): ResolvedValues;
+/** The surfaces text and edges sit on: the page, a surface, and a raised surface. */
+export const SURFACES: string[];
 /** The selected-fill text tokens, which take their readable value from the theme. */
 export const TEXT_ON_FILL_TOKENS: string[];
 export function applyTheme<Data extends TokenSource>(core: Data, theme: ThemeInputs): Data;

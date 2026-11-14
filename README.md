@@ -12,7 +12,8 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | --- | --- |
 | `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
 | `tokens/core.json`, `tokens/themes/*.tokens.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file is a W3C Design Tokens file (2025.10) that holds only its name, a note, its hue pair, and optional fonts and neutrals |
-| `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css` and `dist/` |
+| `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css`, `dist/`, and the theme mapper's `core.js` and `.d.ts` files, typechecking its JSDoc |
+| `theme-mapper/` | The theme engine the token build shares, and the experimental theme mapper built on it |
 | `scripts/build-site.mjs` | The site build: writes `site/` for GitHub Pages from `components.html`, the tokens, and `package.json` |
 | `dist/` | Generated theme files, JSON, and JavaScript |
 | `fonts/` | IBM Plex latin `woff2` files, `fonts.css`, and their OFL licences |
@@ -37,6 +38,7 @@ npm install @filipgutica/design-system
 | `@filipgutica/design-system` | `tokens` (resolved values per theme and mode) and `cssVar(name)`, with types. |
 | `@filipgutica/design-system/tokens.json` | The resolved values as JSON. |
 | `@filipgutica/design-system/language/*` | The spec, catalogue, and example pages. |
+| `@filipgutica/design-system/theme-mapper` | Experimental: the API may change until a component library uses it. `mapVsCodeTheme(theme)` maps a VS Code colour theme onto theme inputs for its one mode, by selecting the theme's own colours, and lists each check it still fails as a `theme` or `core` problem. `themeVariables(mapped)` returns the CSS custom properties to set inline on `<html>`, with `data-theme` forced to the theme's mode. Typed, with no framework and no runtime dependencies. |
 
 In a React app, import `tokens.css` and `fonts.css` once in the entry and write `var(--color-text)` in styles, or `cssVar('color-text')` in TypeScript. `tests/react-smoke/` is a working example.
 
