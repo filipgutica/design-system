@@ -19,7 +19,7 @@ The language has a reusable core and a replaceable identity layer.
 | Core | Tokens, depth, controls and their states, focus, motion, accessibility, and forced colors | Adopts it as is |
 | Identity | The terminal folio look of the personal sites: the `~/name` header, the project registry, mono display headings, `##` section marks, and terminal plates | Replaces it with its own |
 
-A new project keeps `tokens.css` unchanged and sets the identity inputs (`--color-project`, `--color-project-dark`, `--font-ui`, `--font-mono`, and `--color-accent-text` when the hue needs it) on `:root` in its own stylesheet. [Component specs](components.md) mark each component Core or Identity, and [decisions](decisions.md) record why each choice was made and which options were rejected. Read both before you build or change a component.
+A new project keeps `tokens.css` unchanged and sets the identity inputs (`--color-project`, `--color-project-dark`, `--font-ui`, `--font-mono`, and `--color-accent-text`, `--color-nav-current-text`, and `--color-segmented-current-text` when the hue cannot carry them at 4.5:1) on `:root` in its own stylesheet, or loads a theme file. A theme file sets the last two for it; its hue must carry `--color-accent-text` itself, which the contrast tests check for every shipped theme. [Component specs](components.md) mark each component Core or Identity, and [decisions](decisions.md) record why each choice was made and which options were rejected. Read both before you build or change a component.
 
 ## Apply the right format
 
@@ -39,7 +39,7 @@ Center the **container**, not every sentence. Align header, content, images, and
 
 ## Files and examples
 
-- `tokens.css`: the values of the default theme, Graphite Indigo, generated from the token source (`tokens/core.json` and `tokens/themes/graphite-indigo.json`) in `@filipgutica/design-system`. Other themes ship as `themes/<id>.css`, which set only the identity inputs; load one after `tokens.css`, on `:root`. To change a value, edit the JSON there and run `pnpm tokens:build`; do not edit `tokens.css` by hand. The identity inputs sit in one block at the top.
+- `tokens.css`: the values of the default theme, Graphite Indigo, generated from the token source (`tokens/core.json` and `tokens/themes/graphite-indigo.tokens.json`) in `@filipgutica/design-system`. Other themes ship as `themes/<id>.css`, which set only a theme's inputs: its hue pair, and any fonts or neutrals it brings; load one after `tokens.css`, on `:root`. To change a value, edit the JSON there and run `pnpm tokens:build`; do not edit `tokens.css` by hand. The identity inputs sit in one block at the top.
 - `components.md`: one spec for each component, with anatomy, states, Do and Don't lines, keyboard and screen-reader behavior, motion, and forced colors. Read it for any component work.
 - `components.html`: every component in each of its states, in plain HTML and CSS on `tokens.css`. Copy component markup and styles from there.
 - `decisions.md`: the choices behind the components, and the options they replaced.

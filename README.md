@@ -11,7 +11,7 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | Path | What it holds |
 | --- | --- |
 | `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
-| `tokens/core.json`, `tokens/themes/*.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file holds only its name, a note, its hue pair, and optional fonts |
+| `tokens/core.json`, `tokens/themes/*.tokens.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file is a W3C Design Tokens file (2025.10) that holds only its name, a note, its hue pair, and optional fonts and neutrals |
 | `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css` and `dist/` |
 | `scripts/build-site.mjs` | The site build: writes `site/` for GitHub Pages from `components.html`, the tokens, and `package.json` |
 | `dist/` | Generated theme files, JSON, and JavaScript |
@@ -31,7 +31,8 @@ npm install @filipgutica/design-system
 | Import | What it is |
 | --- | --- |
 | `@filipgutica/design-system/tokens.css` | The tokens. Dark mode follows `prefers-color-scheme`; set `data-theme="light"` or `"dark"` on `<html>` to override it. |
-| `@filipgutica/design-system/themes/*.css` | A theme's identity inputs (hue pair and fonts): `graphite-indigo` (the default, already in `tokens.css`), `mauve`, or `pine`. Load one after `tokens.css`, on `:root`. |
+| `@filipgutica/design-system/themes/*.css` | A theme's inputs (hue pair, and any fonts or neutrals): `graphite-indigo` (the default, already in `tokens.css`); the family sites' hues `lagoon` (annoterm), `copper` (devps), `iris` (filip-stack), `lapis` (Workbench), and `fern` (wtree); or the open palettes `catppuccin` and `github`. Load one after `tokens.css`, on `:root`. |
+| `@filipgutica/design-system/themes/*.tokens.json` | Each theme's source as a W3C Design Tokens file (2025.10), for design-token tools such as Style Dictionary and Tokens Studio. |
 | `@filipgutica/design-system/fonts.css` | IBM Plex Sans and Mono. |
 | `@filipgutica/design-system` | `tokens` (resolved values per theme and mode) and `cssVar(name)`, with types. |
 | `@filipgutica/design-system/tokens.json` | The resolved values as JSON. |
@@ -66,4 +67,4 @@ Commits follow Conventional Commits, and CI checks them with commitlint. Do not 
 
 ## License
 
-MIT. The IBM Plex fonts in `fonts/` are under the SIL Open Font License; see the `OFL-*.txt` files beside them. The editor theme in `language/editor-themes/graphite-indigo/` derives from Visual Studio Code's default themes; see its `LICENSE` and `THIRD_PARTY_NOTICES.md`.
+MIT. The IBM Plex fonts in `fonts/` are under the SIL Open Font License; see the `OFL-*.txt` files beside them. The editor theme in `language/editor-themes/graphite-indigo/` derives from Visual Studio Code's default themes; see its `LICENSE` and `THIRD_PARTY_NOTICES.md`. The Catppuccin and GitHub themes take their colours from those projects' MIT palettes; see `dist/themes/THIRD_PARTY_NOTICES.md` and the licenses beside it.

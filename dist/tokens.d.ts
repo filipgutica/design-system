@@ -40,6 +40,7 @@ export type TokenName =
   | 'color-warning-surface'
   | 'color-error-surface'
   | 'color-info-surface'
+  | 'color-status-ink'
   | 'color-command-bg'
   | 'color-command-border'
   | 'color-terminal'
@@ -106,7 +107,7 @@ export type TokenName =
   | 'duration'
   | 'ease-out'
 
-export type ThemeName = 'graphite-indigo' | 'mauve' | 'pine'
+export type ThemeName = 'graphite-indigo' | 'catppuccin' | 'copper' | 'fern' | 'github' | 'iris' | 'lagoon' | 'lapis'
 
 /** Resolved values, as getComputedStyle reports them on the root element. */
 export declare const tokens: {

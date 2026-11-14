@@ -1,48 +1,135 @@
 // Emits every token file from tokens/core.json and the theme files in tokens/themes/, the only places
-// token values live. A theme file holds only identity inputs: its name, a note for the Themes page, its
-// hue pair, and optionally its two font stacks. Every other token is core.
+// token values live. A theme file is a W3C Design Tokens file holding only its inputs: its name, a note
+// for the Themes page, its hue pair, and optionally its two font stacks and its neutrals (NEUTRALS, for
+// light and dark); parseTheme reads it. Every other token is core. The text on the selected fills is the first candidate in TEXT_CANDIDATES that reaches
+// 4.5:1 in each mode, as their roles in core.json say.
 //
 //   node scripts/build-tokens.mjs           write every output
 //   node scripts/build-tokens.mjs --check   fail when an output is stale
 //
 // The CSS has one variable per token. language/tokens.css carries the default theme; each
-// dist/themes/<id>.css sets one theme's identity inputs, to load after it. Dark mode follows
+// dist/themes/<id>.css sets what one theme changes from it, to load after it. Dark mode follows
 // prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it.
-// dist/tokens.json and dist/tokens.js carry the values of every theme, resolved, for code.
+// dist/tokens.json and dist/tokens.js carry the values of every theme, resolved, for code, and
+// dist/themes/<id>.tokens.json is each theme file as written, for design-token tools.
 //
 // Each group also carries reader-facing text for the site's Foundations page, which no output
 // above includes: an id, a title, a note, and roles (what each token is for, one entry per token,
 // with `backticks` for code).
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { over, parseColour, ratio } from './colour.mjs'
 
 const LIGHT = 0
 const DARK = 1
 const reference = /\{([\w-]+)\}/g
 export const DEFAULT_THEME = 'graphite-indigo'
-const SOURCE = `tokens/core.json and tokens/themes/${DEFAULT_THEME}.json`
+export const THEME_FILE = '.tokens.json'
+const SOURCE = `tokens/core.json and tokens/themes/${DEFAULT_THEME}${THEME_FILE}`
 
 const flatTokens = (data) => Object.fromEntries(data.groups.flatMap(({ tokens }) => Object.entries(tokens)))
 
-const HEX = /^#[\da-f]{6}$/i
+// The core neutrals a theme may replace, as a set: a palette that brings its own neutrals sets all of them.
+export const NEUTRALS = ['color-bg', 'color-surface', 'color-surface-raised', 'color-surface-muted', 'color-row-hover', 'color-border-subtle', 'color-border', 'color-text', 'color-muted']
 
-// Problems with a theme file: a missing name, note, or hue, a hue that is not #rrggbb, a font that is not
-// a string, or a key a theme cannot set.
-export const themeProblems = (theme) => {
-  const problems = []
-  for (const field of ['name', 'note']) if (typeof theme[field] !== 'string' || !theme[field]) problems.push(`no ${field}`)
-  for (const mode of ['light', 'dark']) if (!HEX.test(theme.hue?.[mode] ?? '')) problems.push(`hue.${mode} is not #rrggbb`)
-  for (const [font, value] of Object.entries(theme.fonts ?? {})) {
-    if (!['ui', 'mono'].includes(font)) problems.push(`fonts.${font} is not a theme input`)
-    else if (typeof value !== 'string' || !value) problems.push(`fonts.${font} is not a font stack`)
+// A theme file is a W3C Design Tokens file (Format and Color modules 2025.10) holding only the theme's
+// inputs: a group per mode with the hue (`color-project`) and optionally the whole set of neutrals, and
+// optionally the two font stacks. The file's $description is the note for the Themes page; its name is in
+// $extensions under this namespace.
+export const THEME_EXTENSION = 'io.github.filipgutica.design-system'
+const MODES = ['light', 'dark']
+const FONTS = { 'font-ui': 'ui', 'font-mono': 'mono' }
+
+// A colour token's value as #rrggbb, or the problem with it: the build takes opaque sRGB only, and a hex
+// fallback, when given, must agree with the components.
+const srgbHex = (value) => {
+  if (value?.colorSpace !== 'srgb') return [undefined, 'is not an srgb colour']
+  const { components, alpha = 1, hex } = value
+  if (!Array.isArray(components) || components.length !== 3 || !components.every((c) => typeof c === 'number' && c >= 0 && c <= 1)) {
+    return [undefined, 'needs three components from 0 to 1']
   }
-  for (const key of Object.keys(theme)) if (!['name', 'note', 'hue', 'fonts'].includes(key)) problems.push(`${key} is not a theme input`)
-  return problems
+  if (alpha !== 1) return [undefined, 'is not opaque']
+  const derived = `#${components.map((c) => Math.round(c * 255).toString(16).padStart(2, '0')).join('')}`
+  if (hex !== undefined && String(hex).toLowerCase() !== derived) return [undefined, `has hex ${hex}, but its components are ${derived}`]
+  return [derived]
 }
 
-// The core tokens with one theme's identity inputs filled in. Core leaves the hue pair empty; its font
-// stacks stay unless the theme names its own.
+// A fontFamily value as a CSS font stack. A name that is a CSS identifier stays bare, so generic families
+// and keywords such as sans-serif and -apple-system keep their meaning; any other name, such as one with
+// a space or one that starts with a digit, is a quoted string with its quotes and backslashes escaped.
+const fontStack = (value) => [value].flat()
+  .map((name) => (/^-?[A-Za-z_][\w-]*$/.test(name) ? name : `"${name.replace(/[\\"]/g, '\\$&')}"`)).join(', ')
+const isFontFamily = (value) => [value].flat().length > 0
+  && [value].flat().every((name) => typeof name === 'string' && name && !/[\u0000-\u001f]/.test(name))
+
+const isObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value)
+// Properties the build ignores: they describe a token or group and change no value. Any other $ property,
+// such as $value on a group, $extends, or $ref, is a problem rather than silently skipped.
+const METADATA = ['$description', '$extensions', '$deprecated']
+const typeOf = (...layers) => layers.find((layer) => '$type' in layer)?.$type
+
+// A theme file's inputs, in the shape the build uses ({ name, note, hue, fonts?, neutrals? }), and its
+// problems: no name or note, a key a theme cannot set, a token of the wrong type, a colour the build
+// cannot take, a missing hue, or neutrals that are not the whole set in both modes. A token's $type is its
+// own, else its group's, else the file's.
+export const parseTheme = (file) => {
+  if (!isObject(file)) return { problems: ['is not a JSON object'], inputs: {} }
+  const problems = []
+  const name = file.$extensions?.[THEME_EXTENSION]?.name
+  if (typeof name !== 'string' || !name) problems.push(`no $extensions["${THEME_EXTENSION}"].name`)
+  if (typeof file.$description !== 'string' || !file.$description) problems.push('no $description')
+  for (const key of Object.keys(file)) if (![...METADATA, '$type', ...MODES, ...Object.keys(FONTS)].includes(key)) problems.push(`${key} is not a theme input`)
+
+  const groups = Object.fromEntries(MODES.map((mode) => [mode, isObject(file[mode]) ? file[mode] : {}]))
+  const colours = Object.fromEntries(MODES.map((mode) => {
+    const group = groups[mode]
+    const values = {}
+    if (mode in file && !isObject(file[mode])) problems.push(`${mode} is not a group`)
+    for (const [token, entry] of Object.entries(group)) {
+      if (token.startsWith('$')) {
+        if (![...METADATA, '$type'].includes(token)) problems.push(`${mode}.${token} is not supported in a theme file`)
+        continue
+      }
+      if (![...NEUTRALS, 'color-project'].includes(token)) { problems.push(`${mode}.${token} is not a theme input`); continue }
+      if (!isObject(entry) || !('$value' in entry)) { problems.push(`${mode}.${token} is not a token`); continue }
+      const unsupported = Object.keys(entry).filter((key) => ![...METADATA, '$type', '$value'].includes(key))
+      if (unsupported.length > 0) { problems.push(`${mode}.${token} has ${unsupported.join(', ')}, which a theme file does not support`); continue }
+      const [hex, problem] = srgbHex(entry.$value)
+      if (typeOf(entry, group, file) !== 'color') problems.push(`${mode}.${token} is not a color token`)
+      else if (problem) problems.push(`${mode}.${token} ${problem}`)
+      else values[token] = hex
+    }
+    if (!('color-project' in group)) problems.push(`no ${mode}.color-project`)
+    return [mode, values]
+  }))
+  const hasNeutrals = MODES.some((mode) => NEUTRALS.some((token) => token in groups[mode]))
+  if (hasNeutrals) {
+    for (const mode of MODES) for (const token of NEUTRALS) if (!(token in groups[mode])) problems.push(`no ${mode}.${token}: neutrals are a whole set in both modes`)
+  }
+
+  const fonts = {}
+  for (const [token, font] of Object.entries(FONTS)) {
+    if (!(token in file)) continue
+    if (!isObject(file[token]) || !('$value' in file[token])) problems.push(`${token} is not a token`)
+    else if (typeOf(file[token], file) !== 'fontFamily') problems.push(`${token} is not a fontFamily token`)
+    else if (!isFontFamily(file[token].$value)) problems.push(`${token} is not a font name or a list of them`)
+    else fonts[font] = fontStack(file[token].$value)
+  }
+
+  const pick = (token) => Object.fromEntries(MODES.map((mode) => [mode, colours[mode][token]]))
+  const inputs = {
+    name,
+    note: file.$description,
+    hue: pick('color-project'),
+    ...(Object.keys(fonts).length > 0 && { fonts }),
+    ...(hasNeutrals && { neutrals: Object.fromEntries(MODES.map((mode) => [mode, Object.fromEntries(NEUTRALS.map((token) => [token, colours[mode][token]]))])) }),
+  }
+  return { problems, inputs }
+}
+
+// The core tokens with one theme's inputs filled in. Core leaves the hue pair empty; its font stacks and
+// neutrals stay unless the theme names its own. Then each selected-fill text token takes its readable value.
 export const applyTheme = (core, theme) => {
   const data = structuredClone(core)
   const identity = data.groups.find(({ identity: isIdentity }) => isIdentity).tokens
@@ -50,21 +137,51 @@ export const applyTheme = (core, theme) => {
   identity['color-project-dark'] = theme.hue.dark
   if (theme.fonts?.ui) identity['font-ui'] = theme.fonts.ui
   if (theme.fonts?.mono) identity['font-mono'] = theme.fonts.mono
+  if (theme.neutrals) for (const name of NEUTRALS) groupOf(data, name).tokens[name] = [theme.neutrals.light[name], theme.neutrals.dark[name]]
+  return withReadableText(data)
+}
+
+const groupOf = (data, name) => data.groups.find(({ tokens }) => name in tokens)
+
+// Each selected fill's text, with how its contrast is measured on resolved values: the lowest ratio
+// over every place the fill sits. The candidates come from the tokens' roles in core.json.
+const TEXT_ON_FILL = {
+  'color-nav-current-text': (ink, value) => Math.min(...['color-bg', 'color-surface', 'color-surface-raised']
+    .map((surface) => ratio(ink, over(value('color-nav-current'), value(surface))))),
+  'color-segmented-current-text': (ink, value) => ratio(ink, over(value('color-control-thumb'), value('color-well'))),
+}
+const TEXT_CANDIDATES = ['{color-accent}', '{color-text}', 'black', 'white']
+
+// Sets each TEXT_ON_FILL token to its first candidate that reaches 4.5:1, per mode. When none does, the
+// accent stays, so the contrast tests fail on it rather than on a silently chosen colour.
+const withReadableText = (data) => {
+  const values = resolveData(data)
+  for (const [name, measure] of Object.entries(TEXT_ON_FILL)) {
+    const pick = (mode) => {
+      const value = (token) => parseColour(values[mode][token])
+      const colour = (candidate) => parseColour(candidate.replace(reference, (_, target) => values[mode][target]))
+      return TEXT_CANDIDATES.find((candidate) => measure(colour(candidate), value) >= 4.5) ?? TEXT_CANDIDATES[0]
+    }
+    const [light, dark] = [pick('light'), pick('dark')]
+    groupOf(data, name).tokens[name] = light === dark ? light : [light, dark]
+  }
   return data
 }
 
 // The token source: tokens/core.json and every theme in tokens/themes/, the default first, then by name.
-// Each theme carries its source data with its inputs applied. A theme file with a problem stops the build.
+// Each theme carries its source data with its inputs applied, and its file's text to ship. A theme file
+// with a problem stops the build.
 export const readTokens = (root) => {
   const core = JSON.parse(readFileSync(`${root}tokens/core.json`, 'utf8'))
-  const themes = readdirSync(`${root}tokens/themes`).filter((file) => file.endsWith('.json'))
+  const themes = readdirSync(`${root}tokens/themes`).filter((file) => file.endsWith(THEME_FILE))
     .map((file) => {
-      const inputs = JSON.parse(readFileSync(`${root}tokens/themes/${file}`, 'utf8'))
-      return { id: file.slice(0, -'.json'.length), problems: themeProblems(inputs), ...inputs }
+      const source = readFileSync(`${root}tokens/themes/${file}`, 'utf8')
+      const { problems, inputs } = parseTheme(JSON.parse(source))
+      return { id: file.slice(0, -THEME_FILE.length), problems, ...inputs, source }
     })
-    .toSorted((a, b) => Number(b.id === DEFAULT_THEME) - Number(a.id === DEFAULT_THEME) || a.name.localeCompare(b.name))
-  if (themes[0]?.id !== DEFAULT_THEME) throw new Error(`tokens/themes/${DEFAULT_THEME}.json is missing`)
-  const problems = themes.flatMap(({ id, problems: found }) => found.map((problem) => `tokens/themes/${id}.json: ${problem}`))
+    .toSorted((a, b) => Number(b.id === DEFAULT_THEME) - Number(a.id === DEFAULT_THEME) || String(a.name).localeCompare(b.name))
+  if (themes[0]?.id !== DEFAULT_THEME) throw new Error(`tokens/themes/${DEFAULT_THEME}${THEME_FILE} is missing`)
+  const problems = themes.flatMap(({ id, problems: found }) => found.map((problem) => `tokens/themes/${id}${THEME_FILE}: ${problem}`))
   if (problems.length > 0) throw new Error(`Theme files with problems:\n  ${problems.join('\n  ')}`)
   return { core, themes: themes.map(({ problems: _, ...theme }) => ({ ...theme, data: applyTheme(core, theme) })) }
 }
@@ -113,10 +230,13 @@ const standaloneHeader = `/*
  *
  * Two layers. The identity block at the top of :root is the theme's own: its hue
  * pair and fonts. This file carries the default theme. Another theme keeps this file
- * unchanged and loads its themes/<id>.css after it, on :root; a new project can set
- * those lines on :root in its own stylesheet the same way. The dark blocks switch
- * --color-project to --color-project-dark, so the override needs no dark rule. Check
- * --color-accent-text at 4.5:1 on the new hue and override it too when it falls short.
+ * unchanged and loads its themes/<id>.css after it, on :root; that file may also set
+ * the theme's neutrals. A new project can set the identity lines on :root in its own
+ * stylesheet the same way. The dark blocks switch --color-project to
+ * --color-project-dark, so the override needs no dark rule. Check --color-accent-text,
+ * --color-nav-current-text, and --color-segmented-current-text at 4.5:1 on the new hue
+ * and override them when they fall short. A theme file sets the last two for you; its
+ * hue must carry --color-accent-text itself, which the contrast tests check.
  * The terminal plate tokens also belong to the identity layer; every other line is core.
  *
  * Standalone HTML: import or inline this file.
@@ -158,6 +278,14 @@ body { background: var(--color-bg); color: var(--color-text); }
   }
 }
 `
+
+// One theme's values in light and dark, with every reference substituted.
+function resolveData(data) {
+  const tokens = flatTokens(data)
+  const resolve = (name, mode) => valueFor(tokens, name, mode).replace(reference, (_, target) => resolve(target, mode))
+  const values = (mode) => Object.fromEntries(Object.keys(tokens).map((name) => [name, resolve(name, mode)]))
+  return { light: values(LIGHT), dark: values(DARK) }
+}
 
 const standaloneResolver = (data) => {
   const tokens = flatTokens(data)
@@ -202,35 +330,46 @@ export const renderStandaloneTokens = (data) => {
   ].join('\n')
 }
 
-// One theme's identity inputs only, to load after tokens.css on :root. Its dark blocks already switch
-// --color-project to --color-project-dark, so a theme needs no dark rule.
-export const renderStandaloneTheme = ({ id, name, data }) => {
+// What one theme changes from tokens.css, to load after it on :root: its identity inputs, then every other
+// token whose light value differs. tokens.css's dark blocks outrank a bare :root, so the theme's dark
+// blocks, with the same selectors, set each token whose dark value would otherwise come out wrong.
+// A hue-only theme needs none: tokens.css's dark blocks already switch to --color-project-dark.
+export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
   const resolve = standaloneResolver(data)
+  const resolveDefault = standaloneResolver(defaultTheme.data)
+  const names = standaloneNames(data)
   const identity = data.groups.filter(({ identity: isIdentity }) => isIdentity).flatMap(({ tokens }) => Object.keys(tokens))
+  const root = [...identity, ...names.filter((token) => !identity.includes(token) && resolve(token, LIGHT) !== resolveDefault(token, LIGHT))]
+  const defaultDark = new Map(darkOverrides(names, resolveDefault))
+  const seenInDark = (token) => defaultDark.get(token) ?? (root.includes(token) ? resolve(token, LIGHT) : resolveDefault(token, LIGHT))
+  const dark = names.filter((token) => resolve(token, DARK) !== seenInDark(token)).map((token) => [`--${token}`, resolve(token, DARK)])
   return [
-    `/* Generated from tokens/themes/${id}.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
-    ` * The ${name} identity inputs for tokens.css. Load after tokens.css, on :root only: the tokens that`,
-    ' * follow the hue resolve on :root, so a theme scoped to an element below it changes the hue there, but',
-    " * the accent, focus ring, and selection keep the default theme's colours. */",
+    `/* Generated from tokens/themes/${id}${THEME_FILE} by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
+    ` * The ${name} theme for tokens.css. Load after tokens.css, on :root only: the tokens that follow the`,
+    ' * theme resolve on :root, so a theme scoped to an element below it changes its inputs there, but the',
+    " * accent, focus ring, and selection keep the default theme's colours. */",
     '',
     ':root {',
-    ...block('  ', identity.map((name) => [`--${name}`, resolve(name, LIGHT)])),
+    ...block('  ', root.map((token) => [`--${token}`, resolve(token, LIGHT)])),
     '}',
+    ...(dark.length === 0 ? [] : [
+      '',
+      '@media (prefers-color-scheme: dark) {',
+      '  :root:not([data-theme="light"]) {',
+      ...block('    ', dark),
+      '  }',
+      '}',
+      '',
+      ':root[data-theme="dark"] {',
+      ...block('  ', dark),
+      '}',
+    ]),
     '',
   ].join('\n')
 }
 
 // Standalone token values of every theme with every reference substituted, as getComputedStyle reports them.
-export const resolvedTokens = (themes) => {
-  const themeValues = ({ data }) => {
-    const tokens = flatTokens(data)
-    const resolve = (name, mode) => valueFor(tokens, name, mode).replace(reference, (_, target) => resolve(target, mode))
-    const names = standaloneNames(data)
-    const values = (mode) => Object.fromEntries(names.map((name) => [name, resolve(name, mode)]))
-    return { light: values(LIGHT), dark: values(DARK) }
-  }
-  return { themes: Object.fromEntries(themes.map((theme) => [theme.id, themeValues(theme)])) }
-}
+export const resolvedTokens = (themes) => ({ themes: Object.fromEntries(themes.map(({ id, data }) => [id, resolveData(data)])) })
 
 const generatedNote = 'Generated from tokens/core.json and tokens/themes/ by scripts/build-tokens.mjs. Do not edit.'
 const cssVarDoc = "/** The var() reference for a token, such as cssVar('color-text') for 'var(--color-text)'. */"
@@ -265,7 +404,10 @@ export const outputs = (themes) => {
   const [defaultTheme] = themes
   return [
     ['language/tokens.css', renderStandaloneTokens(defaultTheme.data)],
-    ...themes.map((theme) => [`dist/themes/${theme.id}.css`, renderStandaloneTheme(theme)]),
+    ...themes.flatMap((theme) => [
+      [`dist/themes/${theme.id}.css`, renderStandaloneTheme(theme, defaultTheme)],
+      [`dist/themes/${theme.id}${THEME_FILE}`, theme.source],
+    ]),
     ['dist/tokens.json', `${JSON.stringify(resolvedTokens(themes), null, 2)}\n`],
     ['dist/tokens.js', renderTokensJs(themes)],
     ['dist/tokens.d.ts', renderTokensDts(defaultTheme, themes)],
@@ -285,7 +427,16 @@ const run = () => {
   }
 
   const stale = []
-  for (const [path, content] of outputs(themes)) {
+  const files = outputs(themes)
+  // A theme that was renamed or removed leaves its generated files behind; they are stale too.
+  // Only theme outputs are candidates: the licences and notices beside them stay. A missing folder has none.
+  const leftover = (existsSync(`${root}dist/themes`) ? readdirSync(`${root}dist/themes`) : []).map((file) => `dist/themes/${file}`)
+    .filter((path) => (path.endsWith('.css') || path.endsWith(THEME_FILE)) && !files.some(([output]) => output === path))
+  for (const path of leftover) {
+    if (check) stale.push(path)
+    else rmSync(`${root}${path}`)
+  }
+  for (const [path, content] of files) {
     if (!check) {
       mkdirSync(dirname(`${root}${path}`), { recursive: true })
       writeFileSync(`${root}${path}`, content)

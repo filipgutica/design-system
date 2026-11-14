@@ -5,7 +5,7 @@
 // - index.html (Overview), foundations.html, components.html, and themes.html share one shell, taken from
 //   language/components.html (scripts/site/shell.mjs says how).
 // - index.json and llms.txt index the components for agents and tools.
-// - The language pages and files the site links to, and the fonts, are copied as they ship.
+// - The language pages and files the site links to, the fonts, and the theme files are copied as they ship.
 //
 // The version is the latest ds-v* release tag, since package.json keeps 0.0.0-development and
 // semantic-release tags each release. The header's project menu lists the family's projects from ui's
@@ -108,8 +108,9 @@ const run = async () => {
   mkdirSync(out, { recursive: true })
   for (const name of COPIED) cpSync(`${root}language/${name}`, `${out}${name}`, { recursive: true })
   cpSync(`${root}fonts`, `${out}fonts`, { recursive: true })
+  cpSync(`${root}dist/themes`, `${out}themes`, { recursive: true })
   for (const [path, content] of files) writeFileSync(`${out}${path}`, content)
-  console.log(`site/: ${files.map(([path]) => path).join(', ')}, ${COPIED.join(', ')}, and fonts/`)
+  console.log(`site/: ${files.map(([path]) => path).join(', ')}, ${COPIED.join(', ')}, fonts/, and themes/`)
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await run()

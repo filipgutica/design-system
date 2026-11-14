@@ -12,6 +12,7 @@ export const EXPORT_USES = {
   '.': 'Typed token data: <code>tokens</code> and <code>cssVar()</code>',
   './tokens.css': 'Every token, light and dark, with the base element styles',
   './themes/*.css': 'A theme’s identity inputs, to load after <code>tokens.css</code>; the Themes page lists them',
+  './themes/*.tokens.json': 'Each theme’s source as a W3C Design Tokens file, for design-token tools',
   './tokens.json': 'Every value per theme and mode, for tools and generators',
   './fonts.css': 'IBM Plex Sans and Mono, self-hosted',
   './fonts/*': 'The font files',
