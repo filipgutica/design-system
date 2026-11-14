@@ -23,7 +23,7 @@ const themes = {
 for (const [name, theme] of Object.entries(themes)) {
   test(`axe finds a contrast failure only where the mapper reports a problem: ${name}`, async ({ browser }) => {
     const mapped = mapVsCodeTheme(theme)
-    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } })
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' })
     const page = await context.newPage()
     await page.goto(url)
     await page.evaluate(({ appearance, variables }) => {
@@ -31,6 +31,8 @@ for (const [name, theme] of Object.entries(themes)) {
       root.dataset.theme = appearance
       for (const [property, value] of Object.entries(variables)) root.style.setProperty(property, value)
     }, { appearance: mapped.appearance, variables: themeVariables(mapped) })
+    // Two frames, so axe reads the theme's colours rather than a transition toward them.
+    await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))))
     const { violations } = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze()
     const found = violations.flatMap(({ nodes }) => nodes.map((node) => `${node.target.join(' ')} ${node.any[0]?.data?.contrastRatio}:1`))
     expect(found.length === 0 || mapped.problems.length > 0, `axe found ${found.join(', ')}, but problems is empty`).toBe(true)
