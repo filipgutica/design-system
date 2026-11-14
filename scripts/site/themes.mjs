@@ -1,53 +1,10 @@
-// Themes: each theme's identity inputs, a labelled preview in light and in dark, and its contrast checks.
+// Themes: each theme's inputs, a labelled preview in light and in dark, and its contrast checks. A select
+// loads a theme's own file after tokens.css, as an app would, to show the whole page in it.
 // Every value comes from the theme files and dist/tokens.json. Each preview carries all of its theme's
 // resolved tokens: the tokens that follow the hue resolve on :root, so setting the hue on an element
 // alone would leave the default theme's accent below it.
+import { over, parseColour, ratio } from '../colour.mjs'
 import { esc, stackedTablesCss } from './shell.mjs'
-
-// The colour syntax tokens.json resolves to: #rrggbb, white, black, transparent, and
-// color-mix(in srgb, A p%, B), nested. Anything else throws, so a check cannot pass on an unread colour.
-const NAMED = { white: [255, 255, 255, 1], black: [0, 0, 0, 1], transparent: [0, 0, 0, 0] }
-const splitTop = (text) => {
-  const parts = []
-  let depth = 0
-  let start = 0
-  for (let i = 0; i < text.length; i += 1) {
-    if (text[i] === '(') depth += 1
-    if (text[i] === ')') depth -= 1
-    if (text[i] === ',' && depth === 0) {
-      parts.push(text.slice(start, i).trim())
-      start = i + 1
-    }
-  }
-  return [...parts, text.slice(start).trim()]
-}
-/** A resolved token colour as [r, g, b, alpha], channels 0 to 255, mixed as the browser mixes it. */
-export const parseColour = (value) => {
-  const text = value.trim()
-  if (NAMED[text]) return NAMED[text]
-  const hex = text.match(/^#([\da-f]{6})$/i)?.[1]
-  if (hex) return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)).concat(1)
-  const mix = text.match(/^color-mix\(in srgb, (.*)\)$/)
-  if (mix) {
-    const [first, second] = splitTop(mix[1])
-    const share = Number(first.match(/ ([\d.]+)%$/)[1]) / 100
-    const a = parseColour(first.replace(/ [\d.]+%$/, ''))
-    const b = parseColour(second)
-    // Premultiplied, as CSS mixes a colour with transparent.
-    const alpha = a[3] * share + b[3] * (1 - share)
-    const channel = (i) => (alpha === 0 ? 0 : (a[i] * a[3] * share + b[i] * b[3] * (1 - share)) / alpha)
-    return [channel(0), channel(1), channel(2), alpha]
-  }
-  throw new Error(`unsupported colour: ${value}`)
-}
-const over = (top, below) => [0, 1, 2].map((i) => top[i] * top[3] + below[i] * (1 - top[3])).concat(1)
-const luminance = (colour) => colour.slice(0, 3)
-  .map((c) => (c / 255 <= 0.04045 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4))
-  .reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0)
-const ratio = (ink, below) => {
-  const [hi, lo] = [luminance(over(ink, below)), luminance(below)].sort((a, b) => b - a)
-  return (hi + 0.05) / (lo + 0.05)
-}
 
 const SURFACES = ['color-bg', 'color-surface', 'color-surface-raised']
 
@@ -63,6 +20,10 @@ export const CHECKS = [
     measure: (c) => Math.min(ratio(c('color-accent-text'), c('color-accent')), ratio(c('color-accent-text'), c('color-button-hover'))) },
   { id: 'prompt', label: 'The <code>$</code> prompt on the command plate', min: 3,
     measure: (c) => ratio(c('color-project-dark'), c('color-command-bg')) },
+  { id: 'text', label: 'Text and muted text on the page, a surface, and a raised surface', min: 4.5,
+    measure: (c) => Math.min(...['color-text', 'color-muted'].flatMap((ink) => SURFACES.map((s) => ratio(c(ink), c(s))))) },
+  { id: 'edge', label: 'Control edge on the page, a surface, and a raised surface', min: 3,
+    measure: (c) => Math.min(...SURFACES.map((s) => ratio(c('color-border'), c(s)))) },
 ]
 
 /** Every check for one theme's resolved values: [{ id, label, min, light, dark }], each mode's ratio. */
@@ -114,7 +75,11 @@ const checkTable = ({ id, name }, checks) => `<table class="checks stack" aria-l
 const same = (defaultTheme) => `<span class="muted">Same as ${esc(defaultTheme.name)}</span>`
 const fontName = (stack) => stack.match(/^"([^"]+)"/)?.[1] ?? stack.split(',')[0]
 
-// The default theme names its fonts; another theme names them only when it brings its own.
+// A theme's own neutrals, as swatches for each mode: the page, the raised surface, the edge, and the text.
+const SWATCHES = ['color-bg', 'color-surface-raised', 'color-border', 'color-text']
+const neutrals = (theme) => MODES.map(([mode, label]) => `<span class="hue"><span class="swatches">${SWATCHES.map((name) => `<i class="chip" aria-hidden="true"><i style="background:${theme.neutrals[mode][name]}"></i></i>`).join('')}</span>${label}</span>`).join('')
+
+// The default theme names its fonts; another theme names them only when it brings its own. Neutrals likewise.
 const inputs = (theme, defaultTheme, values) => {
   const fonts = theme.id === defaultTheme.id || theme.fonts
     ? ['ui', 'mono'].map((font) => `<span style="font-family:var(--font-${font})">${esc(fontName(values.light[`font-${font}`]))} for ${font === 'ui' ? 'text' : 'code'}</span>`).join('')
@@ -122,6 +87,8 @@ const inputs = (theme, defaultTheme, values) => {
   return `<dl class="inputs">
       <dt>Hue</dt>
       <dd>${MODES.map(([mode, label]) => `<span class="hue"><i class="chip" aria-hidden="true"><i data-theme-id="${theme.id}" data-mode="${mode}"></i></i>${label} <code>${theme.hue[mode]}</code></span>`).join('')}</dd>
+      <dt>Neutrals</dt>
+      <dd>${theme.neutrals ? neutrals(theme) : theme.id === defaultTheme.id ? '<span class="muted">Core</span>' : same(defaultTheme)}</dd>
       <dt>Fonts</dt>
       <dd>${fonts}</dd>
     </dl>`
@@ -143,15 +110,16 @@ const source = ({ id, file, lines }) => `<div class="code"><div class="code-head
 
 const useSection = (packageName, example) => `  <section class="theme" id="use" aria-labelledby="use-title">
     <header class="layer-head"><h2 id="use-title">Use a theme</h2></header>
-    <p class="theme-note"><code>tokens.css</code> carries the default theme. To use another, load its theme file after <code>tokens.css</code>. It sets the identity inputs on <code>:root</code>, and light and dark both follow.</p>
+    <p class="theme-note"><code>tokens.css</code> carries the default theme. To use another, load its theme file after <code>tokens.css</code>. It sets the theme's inputs on <code>:root</code>, with dark blocks for the values that differ in dark, so light and dark both follow.</p>
     ${source({ id: 'src-use', file: 'styles.css', lines: [`@import "${packageName}/tokens.css";`, `@import "${packageName}/themes/${example.id}.css";`] })}
     <p class="theme-note">Load a theme on <code>:root</code> only. The tokens that follow the hue resolve there, so a theme scoped to an element below <code>:root</code> changes the hue there, but the accent, focus ring, and selection keep the default theme's colours.</p>
+    <p class="theme-note">Each theme's source also ships as <code>themes/&lt;id&gt;.tokens.json</code>, a W3C Design Tokens file, for design-token tools such as Style Dictionary and Tokens Studio.</p>
   </section>`
 
 const makeSection = (example) => `  <section class="theme" id="make" aria-labelledby="make-title">
     <header class="layer-head"><h2 id="make-title">Make a theme</h2></header>
-    <p class="theme-note">Add a file to <code>tokens/themes/</code> with only the inputs, then build. A theme sets a hue for light and dark, and may name its own font stacks; everything else is core. The tests check every theme against the contrast checks above, in both modes.</p>
-    ${source({ id: 'src-theme', file: `tokens/themes/${example.id}.json`, lines: JSON.stringify({ name: example.name, note: example.note, hue: example.hue }, null, 2).split('\n') })}
+    <p class="theme-note">Add a <code>.tokens.json</code> file to <code>tokens/themes/</code> with only the inputs, then build. A theme file uses the W3C Design Tokens format (2025.10): a <code>light</code> and a <code>dark</code> group of sRGB colour tokens, a <code>$description</code> for its note, and its name under <code>$extensions</code>. A theme sets a hue for light and dark, and may name its own font stacks and its own neutrals: the page, surfaces, hover, edges, and text, for both modes. That is how an open palette, such as Catppuccin or GitHub's Primer, becomes a theme. Everything else is core. Where the hue cannot carry the text on a selected fill, the build takes the theme's text colour, then black or white. The tests check every theme against the contrast checks above, in both modes.</p>
+    ${source({ id: 'src-theme', file: `tokens/themes/${example.id}.tokens.json`, lines: example.source.trimEnd().split('\n') })}
     ${command({ id: 'cmd-build', label: 'Build command', line: 'pnpm tokens:build' })}
   </section>`
 
@@ -173,6 +141,9 @@ const CSS = `
   /* The fill takes the theme's hue; the outline stays the page's, so both chips draw the same edge. */
   .chip { display: grid; flex: none; width: 1.5rem; height: 1.5rem; overflow: hidden; border-radius: var(--radius-inline); }
   .chip > i { grid-area: 1 / 1; background: var(--color-project); }
+  .swatches { display: inline-flex; }
+  .swatches .chip:not(:first-child) { margin-inline-start: -0.375rem; }
+  .theme-pick { max-width: 20rem; }
   .chip::after { content: ""; grid-area: 1 / 1; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--color-border-subtle); }
   .frames { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--space-4); }
   .theme-frame { display: grid; gap: var(--space-4); align-content: start; margin: 0; padding: var(--space-4); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-panel); background: var(--color-bg); color: var(--color-text); font-family: var(--font-ui); }
@@ -204,9 +175,22 @@ const CSS = `
 ${stackedTablesCss('640px')}
 `
 
+// Without a script the select cannot load a file, so it stays hidden. The default theme is tokens.css itself.
+const THEMES_JS = `
+  const pick = document.getElementById('page-theme');
+  const showTheme = () => {
+    document.getElementById('page-theme-file')?.remove();
+    if (pick.selectedIndex === 0) return;
+    document.head.append(Object.assign(document.createElement('link'), { id: 'page-theme-file', rel: 'stylesheet', href: \`themes/\${pick.value}.css\` }));
+  };
+  pick.closest('.field').hidden = false;
+  pick.addEventListener('change', showTheme);
+  showTheme();
+`
+
 /**
  * The Themes page. `themes` are the theme files in page order, the default first ({ id, name, note, hue,
- * fonts? }); `values` is tokens.json's themes map. A theme without values, or values without a theme
+ * fonts?, neutrals?, source }, source being the theme file's text); `values` is tokens.json's themes map. A theme without values, or values without a theme
  * file, stops the build.
  */
 export const themesPage = ({ themes, values, packageName }) => {
@@ -216,8 +200,9 @@ export const themesPage = ({ themes, values, packageName }) => {
   const example = themes.at(-1)
   const main = `  <section class="intro" aria-labelledby="title">
     <h1 id="title">Themes</h1>
-    <p>A theme sets only its identity inputs: a hue for light and for dark, and the two fonts. Every other token is core and follows from them, so every theme keeps the same shapes, spacing, states, and status colours. The tests measure each theme's contrast in both modes.</p>
-    <p>Each preview renders in one theme and one mode, and its label says which. The page around the previews is ${esc(defaultTheme.name)}.</p>
+    <p>A theme sets only its inputs: a hue for light and for dark, and optionally its two fonts and its neutrals. Every other token is core and follows from them, so every theme keeps the same shapes, spacing, states, and status colours. The family's sites each have a theme in their own hue, and open palettes such as Catppuccin and GitHub's Primer map onto the same inputs. The tests measure each theme's contrast in both modes.</p>
+    <p>Each preview renders in one theme and one mode, and its label says which. The page around the previews is ${esc(defaultTheme.name)} unless you choose another theme below, which loads that theme's file after <code>tokens.css</code>, as an app would.</p>
+    <div class="field theme-pick" hidden><label class="field-label" for="page-theme">Show this page in</label><select class="select" id="page-theme">${themes.map(({ id, name }) => `<option value="${id}">${esc(name)}</option>`).join('')}</select></div>
   </section>
 
 ${themes.map((theme) => themeSection(theme, defaultTheme, values[theme.id])).join('\n\n')}
@@ -237,5 +222,5 @@ ${makeSection(example)}`
       ] },
     ],
   }
-  return { title: 'Themes · Design system', rail, main, css: `${CSS}${previewCss(themes, values)}\n` }
+  return { title: 'Themes · Design system', rail, main, css: `${CSS}${previewCss(themes, values)}\n`, js: THEMES_JS }
 }

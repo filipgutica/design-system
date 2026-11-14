@@ -1,0 +1,28 @@
+{
+  "$description": "The default: an indigo hue on graphite neutrals.",
+  "$extensions": {
+    "io.github.filipgutica.design-system": {
+      "name": "Graphite Indigo"
+    }
+  },
+  "light": {
+    "$type": "color",
+    "color-project": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.2941, 0.2706, 0.8196],
+        "hex": "#4b45d1"
+      }
+    }
+  },
+  "dark": {
+    "$type": "color",
+    "color-project": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.6471, 0.6314, 1],
+        "hex": "#a5a1ff"
+      }
+    }
+  }
+}

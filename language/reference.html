@@ -230,7 +230,7 @@
 
   /* Badge: components.html#badge, unchanged. The same tone supplies a 22% tint, readable text, and a 6px dot. */
   .badge { display: inline-flex; align-items: center; gap: 0.375rem; width: fit-content; padding: 0.1875rem 0.5625rem; border: 1px solid transparent; border-radius: var(--radius-pill); background: var(--color-surface-muted); color: var(--color-muted); font: var(--weight-medium) var(--text-xs) / 1.25 var(--font-ui); white-space: nowrap; }
-  .badge:is(.success, .warning, .danger, .info) { background: color-mix(in srgb, var(--tone) 22%, var(--color-surface-raised)); color: light-dark(color-mix(in srgb, var(--tone) 75%, var(--color-text)), color-mix(in srgb, var(--tone) 85%, var(--color-text))); }
+  .badge:is(.success, .warning, .danger, .info) { background: color-mix(in srgb, var(--tone) 22%, var(--color-surface-raised)); color: light-dark(color-mix(in srgb, var(--tone) 75%, var(--color-status-ink)), color-mix(in srgb, var(--tone) 85%, var(--color-status-ink))); }
   .badge:is(.success, .warning, .danger, .info)::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .badge.success { --tone: var(--color-success); }
   .badge.warning { --tone: var(--color-warning); }
@@ -622,7 +622,7 @@
           </ul>
 
           <h4>Status</h4>
-          <p class="note">Status colors mean state and go on icons beside a text label. Alerts use the soft-tint tokens. Badges mix 22% tone over the raised surface and 75% tone with text in light, 85% in dark.</p>
+          <p class="note">Status colors mean state and go on icons beside a text label. Alerts use the soft-tint tokens. Badges mix 22% tone over the raised surface and 75% tone with <code>--color-status-ink</code> in light, 85% in dark.</p>
           <div class="cluster"><span class="badge success">Healthy</span><span class="badge warning">Warning</span><span class="badge danger">Alerting</span><span class="badge info">Running</span><span class="badge">No data</span></div>
           <ul class="swatches">
             <li class="swatch" data-token="--color-success" data-on="--color-bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--color-success</code><span class="value"></span><span class="ratio"></span></li>
@@ -633,6 +633,7 @@
             <li class="swatch" data-token="--color-error-surface" data-fg="var(--color-text)" data-on="--color-error-surface" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--color-error-surface</code><span class="value"></span><span class="ratio"></span><span class="use">Alert text on its tint</span></li>
             <li class="swatch" data-token="--color-info" data-on="--color-bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--color-info</code><span class="value"></span><span class="ratio"></span></li>
             <li class="swatch" data-token="--color-info-surface" data-fg="var(--color-text)" data-on="--color-info-surface" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--color-info-surface</code><span class="value"></span><span class="ratio"></span><span class="use">Alert text on its tint</span></li>
+            <li class="swatch" data-token="--color-status-ink"><i class="chip" aria-hidden="true"></i><code>--color-status-ink</code><span class="value"></span><span class="use">What a status label mixes with: black in light, so it keeps its contrast whatever a theme's text, and <code>--color-text</code> in dark</span></li>
           </ul>
 
           <h4>Code and terminal</h4>

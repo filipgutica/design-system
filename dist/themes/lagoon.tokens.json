@@ -1,0 +1,28 @@
+{
+  "$description": "The annoterm site's teal, a step darker in light so a selected row reads at 4.5:1: a deep teal in light and a soft aqua in dark.",
+  "$extensions": {
+    "io.github.filipgutica.design-system": {
+      "name": "Lagoon"
+    }
+  },
+  "light": {
+    "$type": "color",
+    "color-project": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.0314, 0.4471, 0.4],
+        "hex": "#087266"
+      }
+    }
+  },
+  "dark": {
+    "$type": "color",
+    "color-project": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.3608, 0.7843, 0.7216],
+        "hex": "#5cc8b8"
+      }
+    }
+  }
+}

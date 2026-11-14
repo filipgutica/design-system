@@ -1,0 +1,49 @@
+/* Generated from tokens/themes/catppuccin.tokens.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
+ * The Catppuccin theme for tokens.css. Load after tokens.css, on :root only: the tokens that follow the
+ * theme resolve on :root, so a theme scoped to an element below it changes its inputs there, but the
+ * accent, focus ring, and selection keep the default theme's colours. */
+
+:root {
+  --color-project: #8839ef;
+  --color-project-dark: #cba6f7;
+  --font-ui: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --color-bg: #eff1f5;
+  --color-surface: #e6e9ef;
+  --color-surface-raised: #eff1f5;
+  --color-surface-muted: #dce0e8;
+  --color-nav-current-text: var(--color-text);
+  --color-row-hover: #dce0e8;
+  --color-border-subtle: #ccd0da;
+  --color-border: #7c7f93;
+  --color-text: #4c4f69;
+  --color-muted: #5c5f77;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #11111b;
+    --color-surface: #181825;
+    --color-surface-raised: #1e1e2e;
+    --color-surface-muted: #313244;
+    --color-nav-current-text: var(--color-accent);
+    --color-row-hover: #313244;
+    --color-border-subtle: #45475a;
+    --color-border: #7f849c;
+    --color-text: #cdd6f4;
+    --color-muted: #a6adc8;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #11111b;
+  --color-surface: #181825;
+  --color-surface-raised: #1e1e2e;
+  --color-surface-muted: #313244;
+  --color-nav-current-text: var(--color-accent);
+  --color-row-hover: #313244;
+  --color-border-subtle: #45475a;
+  --color-border: #7f849c;
+  --color-text: #cdd6f4;
+  --color-muted: #a6adc8;
+}

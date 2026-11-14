@@ -40,7 +40,7 @@
   .btn.ghost.is-hover:not(:disabled) { background: var(--color-row-hover); color: var(--color-text); }
   @media (hover: hover) { .btn.ghost:hover:not(:disabled) { background: var(--color-row-hover); color: var(--color-text); } }
   /* Danger rises like the other filled variants; its text mixes the hue toward --color-text, as status badges do. */
-  .btn.danger { background: var(--color-error-surface); color: light-dark(color-mix(in srgb, var(--color-error) 75%, var(--color-text)), color-mix(in srgb, var(--color-error) 85%, var(--color-text))); }
+  .btn.danger { background: var(--color-error-surface); color: light-dark(color-mix(in srgb, var(--color-error) 75%, var(--color-status-ink)), color-mix(in srgb, var(--color-error) 85%, var(--color-status-ink))); }
   .btn.danger.is-hover:not(:disabled) { background: color-mix(in srgb, var(--color-error) 10%, var(--color-error-surface)); }
   @media (hover: hover) { .btn.danger:hover:not(:disabled) { background: color-mix(in srgb, var(--color-error) 10%, var(--color-error-surface)); } }
   .btn.text { --depth: none; min-height: auto; padding: var(--space-1); background: transparent; color: var(--color-link); text-decoration: underline; text-underline-offset: 0.2em; }
@@ -267,7 +267,7 @@
 
   /* Badge */
   .badge { display: inline-flex; align-items: center; gap: 0.375rem; width: fit-content; padding: 0.1875rem 0.5625rem; border: 1px solid transparent; border-radius: var(--radius-pill); background: var(--color-surface-muted); color: var(--color-muted); font: var(--weight-medium) var(--text-xs) / 1.25 var(--font-ui); white-space: nowrap; }
-  .badge:is(.success, .warning, .danger, .info) { background: color-mix(in srgb, var(--tone) 22%, var(--color-surface-raised)); color: light-dark(color-mix(in srgb, var(--tone) 75%, var(--color-text)), color-mix(in srgb, var(--tone) 85%, var(--color-text))); }
+  .badge:is(.success, .warning, .danger, .info) { background: color-mix(in srgb, var(--tone) 22%, var(--color-surface-raised)); color: light-dark(color-mix(in srgb, var(--tone) 75%, var(--color-status-ink)), color-mix(in srgb, var(--tone) 85%, var(--color-status-ink))); }
   .badge:is(.success, .warning, .danger, .info)::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .badge.success { --tone: var(--color-success); }
   .badge.warning { --tone: var(--color-warning); }

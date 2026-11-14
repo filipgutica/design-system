@@ -13,6 +13,7 @@
     },
     "./tokens.css": "./language/tokens.css",
     "./themes/*.css": "./dist/themes/*.css",
+    "./themes/*.tokens.json": "./dist/themes/*.tokens.json",
     "./tokens.json": "./dist/tokens.json",
     "./fonts.css": "./fonts/fonts.css",
     "./fonts/*": "./fonts/*",
