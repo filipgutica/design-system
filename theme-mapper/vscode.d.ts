@@ -5,10 +5,10 @@
 /**
  * A VS Code colour theme, parsed, with any `include` already merged in by the caller.
  * @typedef {object} VsCodeTheme
- * @property {string} [name]
- * @property {string} [type] `light`, `dark`, `hc`, or `hcLight`; inferred from the background when missing. Many
- *   theme files leave it to the extension manifest's `uiTheme` (`vs`, `vs-dark`, `hc-black`, `hc-light`), so pass it
- *   from there.
+ * @property {string} [name] Many theme files have none; the extension manifest's `label` names the theme.
+ * @property {string} [type] `light`, `dark`, `hc`, or `hcLight`; inferred from the background when missing, and a
+ *   theme then never counts as high contrast. Many theme files leave the type to the extension manifest's `uiTheme`;
+ *   translate it: `vs` is `light`, `vs-dark` is `dark`, `hc-black` is `hc`, and `hc-light` is `hcLight`.
  * @property {Record<string, unknown>} [colors] Workbench colours by key, as #rgb, #rgba, #rrggbb, or #rrggbbaa.
  */
 /**
@@ -49,11 +49,14 @@ export type ThemeInputs = import("./engine.js").ThemeInputs;
  * A VS Code colour theme, parsed, with any `include` already merged in by the caller.
  */
 export type VsCodeTheme = {
+    /**
+     * Many theme files have none; the extension manifest's `label` names the theme.
+     */
     name?: string | undefined;
     /**
-     * `light`, `dark`, `hc`, or `hcLight`; inferred from the background when missing. Many
-     * theme files leave it to the extension manifest's `uiTheme` (`vs`, `vs-dark`, `hc-black`, `hc-light`), so pass it
-     * from there.
+     * `light`, `dark`, `hc`, or `hcLight`; inferred from the background when missing, and a
+     * theme then never counts as high contrast. Many theme files leave the type to the extension manifest's `uiTheme`;
+     * translate it: `vs` is `light`, `vs-dark` is `dark`, `hc-black` is `hc`, and `hc-light` is `hcLight`.
      */
     type?: string | undefined;
     /**
