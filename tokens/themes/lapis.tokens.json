@@ -1,8 +1,8 @@
 {
-  "$description": "The filip-stack site's violet: a saturated violet in light and a lilac in dark.",
+  "$description": "The Workbench site's blue: a cobalt in light and a periwinkle in dark.",
   "$extensions": {
     "io.github.filipgutica.design-system": {
-      "name": "filip-stack"
+      "name": "Lapis"
     }
   },
   "light": {
@@ -10,8 +10,8 @@
     "color-project": {
       "$value": {
         "colorSpace": "srgb",
-        "components": [0.4275, 0.2471, 0.8392],
-        "hex": "#6d3fd6"
+        "components": [0.1686, 0.349, 0.8392],
+        "hex": "#2b59d6"
       }
     }
   },
@@ -20,8 +20,8 @@
     "color-project": {
       "$value": {
         "colorSpace": "srgb",
-        "components": [0.7059, 0.6118, 1],
-        "hex": "#b49cff"
+        "components": [0.5412, 0.6588, 1],
+        "hex": "#8aa8ff"
       }
     }
   }

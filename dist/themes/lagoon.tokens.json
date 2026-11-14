@@ -1,8 +1,8 @@
 {
-  "$description": "The Workbench site's blue: a cobalt in light and a periwinkle in dark.",
+  "$description": "The annoterm site's teal, a step darker in light so a selected row reads at 4.5:1: a deep teal in light and a soft aqua in dark.",
   "$extensions": {
     "io.github.filipgutica.design-system": {
-      "name": "Workbench"
+      "name": "Lagoon"
     }
   },
   "light": {
@@ -10,8 +10,8 @@
     "color-project": {
       "$value": {
         "colorSpace": "srgb",
-        "components": [0.1686, 0.349, 0.8392],
-        "hex": "#2b59d6"
+        "components": [0.0314, 0.4471, 0.4],
+        "hex": "#087266"
       }
     }
   },
@@ -20,8 +20,8 @@
     "color-project": {
       "$value": {
         "colorSpace": "srgb",
-        "components": [0.5412, 0.6588, 1],
-        "hex": "#8aa8ff"
+        "components": [0.3608, 0.7843, 0.7216],
+        "hex": "#5cc8b8"
       }
     }
   }

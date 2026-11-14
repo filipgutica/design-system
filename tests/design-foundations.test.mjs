@@ -777,7 +777,7 @@ const withTheme = (id) => mergeTheme(distFile(`themes/${id}.css`))
 test('every theme in tokens.json has a theme file, and loading the default one changes nothing', () => {
   assert.ok(themeIds.length >= 3)
   assert.equal(withTheme('graphite-indigo'), read('tokens.css'))
-  assert.match(withTheme('workbench'), /^\s*--color-project: #2b59d6;/m)
+  assert.match(withTheme('lapis'), /^\s*--color-project: #2b59d6;/m)
 })
 
 // A ratio that is not a finite number at or above the minimum (4.5:1 for text by default) fails.

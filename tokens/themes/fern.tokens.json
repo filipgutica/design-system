@@ -1,8 +1,8 @@
 {
-  "$description": "The devps site's orange, a step darker in light so a selected row reads at 4.5:1: a burnt orange in light and a soft apricot in dark.",
+  "$description": "The wtree site's green, a step darker in light so a selected row reads at 4.5:1: a leaf green in light and a pale green in dark.",
   "$extensions": {
     "io.github.filipgutica.design-system": {
-      "name": "devps"
+      "name": "Fern"
     }
   },
   "light": {
@@ -10,8 +10,8 @@
     "color-project": {
       "$value": {
         "colorSpace": "srgb",
-        "components": [0.6902, 0.251, 0.0118],
-        "hex": "#b04003"
+        "components": [0.1529, 0.4588, 0.1647],
+        "hex": "#27752a"
       }
     }
   },
@@ -20,8 +20,8 @@
     "color-project": {
       "$value": {
         "colorSpace": "srgb",
-        "components": [0.9529, 0.6039, 0.3843],
-        "hex": "#f39a62"
+        "components": [0.498, 0.8157, 0.5137],
+        "hex": "#7fd083"
       }
     }
   }

@@ -1,8 +1,8 @@
 {
-  "$description": "The wtree site's green, a step darker in light so a selected row reads at 4.5:1: a leaf green in light and a pale green in dark.",
+  "$description": "The filip-stack site's violet: a saturated violet in light and a lilac in dark.",
   "$extensions": {
     "io.github.filipgutica.design-system": {
-      "name": "wtree"
+      "name": "Iris"
     }
   },
   "light": {
@@ -10,8 +10,8 @@
     "color-project": {
       "$value": {
         "colorSpace": "srgb",
-        "components": [0.1529, 0.4588, 0.1647],
-        "hex": "#27752a"
+        "components": [0.4275, 0.2471, 0.8392],
+        "hex": "#6d3fd6"
       }
     }
   },
@@ -20,8 +20,8 @@
     "color-project": {
       "$value": {
         "colorSpace": "srgb",
-        "components": [0.498, 0.8157, 0.5137],
-        "hex": "#7fd083"
+        "components": [0.7059, 0.6118, 1],
+        "hex": "#b49cff"
       }
     }
   }
