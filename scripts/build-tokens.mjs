@@ -1,7 +1,7 @@
 // Emits every token file from tokens/core.json and the theme files in tokens/themes/, the only places
-// token values live. A theme file holds only its inputs: its name, a note for the Themes page, its hue
-// pair, and optionally its two font stacks and its neutrals (NEUTRALS, for light and dark). Every other
-// token is core. The text on the selected fills is the first candidate in TEXT_CANDIDATES that reaches
+// token values live. A theme file is a W3C Design Tokens file holding only its inputs: its name, a note
+// for the Themes page, its hue pair, and optionally its two font stacks and its neutrals (NEUTRALS, for
+// light and dark); parseTheme reads it. Every other token is core. The text on the selected fills is the first candidate in TEXT_CANDIDATES that reaches
 // 4.5:1 in each mode, as their roles in core.json say.
 //
 //   node scripts/build-tokens.mjs           write every output
@@ -10,12 +10,13 @@
 // The CSS has one variable per token. language/tokens.css carries the default theme; each
 // dist/themes/<id>.css sets what one theme changes from it, to load after it. Dark mode follows
 // prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it.
-// dist/tokens.json and dist/tokens.js carry the values of every theme, resolved, for code.
+// dist/tokens.json and dist/tokens.js carry the values of every theme, resolved, for code, and
+// dist/themes/<id>.tokens.json is each theme file as written, for design-token tools.
 //
 // Each group also carries reader-facing text for the site's Foundations page, which no output
 // above includes: an id, a title, a note, and roles (what each token is for, one entry per token,
 // with `backticks` for code).
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { over, parseColour, ratio } from './colour.mjs'
@@ -24,35 +25,87 @@ const LIGHT = 0
 const DARK = 1
 const reference = /\{([\w-]+)\}/g
 export const DEFAULT_THEME = 'graphite-indigo'
-const SOURCE = `tokens/core.json and tokens/themes/${DEFAULT_THEME}.json`
+export const THEME_FILE = '.tokens.json'
+const SOURCE = `tokens/core.json and tokens/themes/${DEFAULT_THEME}${THEME_FILE}`
 
 const flatTokens = (data) => Object.fromEntries(data.groups.flatMap(({ tokens }) => Object.entries(tokens)))
-
-const HEX = /^#[\da-f]{6}$/i
 
 // The core neutrals a theme may replace, as a set: a palette that brings its own neutrals sets all of them.
 export const NEUTRALS = ['color-bg', 'color-surface', 'color-surface-raised', 'color-surface-muted', 'color-row-hover', 'color-border-subtle', 'color-border', 'color-text', 'color-muted']
 
-// Problems with a theme file: a missing name, note, or hue, a hue that is not #rrggbb, a font that is not
-// a string, neutrals that are not the whole set in #rrggbb for both modes, or a key a theme cannot set.
-export const themeProblems = (theme) => {
+// A theme file is a W3C Design Tokens file (Format and Color modules 2025.10) holding only the theme's
+// inputs: a group per mode with the hue (`color-project`) and optionally the whole set of neutrals, and
+// optionally the two font stacks. The file's $description is the note for the Themes page; its name is in
+// $extensions under this namespace.
+export const THEME_EXTENSION = 'io.github.filipgutica.design-system'
+const MODES = ['light', 'dark']
+const FONTS = { 'font-ui': 'ui', 'font-mono': 'mono' }
+
+// A colour token's value as #rrggbb, or the problem with it: the build takes opaque sRGB only, and a hex
+// fallback, when given, must agree with the components.
+const srgbHex = (value) => {
+  if (value?.colorSpace !== 'srgb') return [undefined, 'is not an srgb colour']
+  const { components, alpha = 1, hex } = value
+  if (!Array.isArray(components) || components.length !== 3 || !components.every((c) => typeof c === 'number' && c >= 0 && c <= 1)) {
+    return [undefined, 'needs three components from 0 to 1']
+  }
+  if (alpha !== 1) return [undefined, 'is not opaque']
+  const derived = `#${components.map((c) => Math.round(c * 255).toString(16).padStart(2, '0')).join('')}`
+  if (hex !== undefined && String(hex).toLowerCase() !== derived) return [undefined, `has hex ${hex}, but its components are ${derived}`]
+  return [derived]
+}
+
+// A fontFamily value as a CSS font stack: a name that is not a plain identifier, such as one with a space,
+// is quoted, so generic families and keywords such as sans-serif and -apple-system stay unquoted.
+const fontStack = (value) => [value].flat().map((name) => (/^[\w-]+$/.test(name) ? name : `"${name}"`)).join(', ')
+const isFontFamily = (value) => [value].flat().every((name) => typeof name === 'string' && name) && [value].flat().length > 0
+
+// A theme file's inputs, in the shape the build uses ({ name, note, hue, fonts?, neutrals? }), and its
+// problems: no name or note, a key a theme cannot set, a token of the wrong type, a colour the build
+// cannot take, a missing hue, or neutrals that are not the whole set in both modes.
+export const parseTheme = (file) => {
   const problems = []
-  for (const field of ['name', 'note']) if (typeof theme[field] !== 'string' || !theme[field]) problems.push(`no ${field}`)
-  for (const mode of ['light', 'dark']) if (!HEX.test(theme.hue?.[mode] ?? '')) problems.push(`hue.${mode} is not #rrggbb`)
-  for (const [font, value] of Object.entries(theme.fonts ?? {})) {
-    if (!['ui', 'mono'].includes(font)) problems.push(`fonts.${font} is not a theme input`)
-    else if (typeof value !== 'string' || !value) problems.push(`fonts.${font} is not a font stack`)
-  }
-  for (const [mode, neutrals] of Object.entries(theme.neutrals ?? {})) {
-    if (!['light', 'dark'].includes(mode)) problems.push(`neutrals.${mode} is not a mode`)
-    else for (const name of new Set([...NEUTRALS, ...Object.keys(neutrals)])) {
-      if (!NEUTRALS.includes(name)) problems.push(`neutrals.${mode}.${name} is not a neutral`)
-      else if (!HEX.test(neutrals[name] ?? '')) problems.push(`neutrals.${mode}.${name} is not #rrggbb`)
+  const name = file.$extensions?.[THEME_EXTENSION]?.name
+  if (typeof name !== 'string' || !name) problems.push(`no $extensions["${THEME_EXTENSION}"].name`)
+  if (typeof file.$description !== 'string' || !file.$description) problems.push('no $description')
+  for (const key of Object.keys(file)) if (!['$description', '$extensions', ...MODES, ...Object.keys(FONTS)].includes(key)) problems.push(`${key} is not a theme input`)
+
+  const colours = Object.fromEntries(MODES.map((mode) => {
+    const group = file[mode] ?? {}
+    const values = {}
+    for (const [token, entry] of Object.entries(group)) {
+      if (token.startsWith('$')) continue
+      const [hex, problem] = srgbHex(entry?.$value)
+      if (![...NEUTRALS, 'color-project'].includes(token)) problems.push(`${mode}.${token} is not a theme input`)
+      else if ((entry.$type ?? group.$type) !== 'color') problems.push(`${mode}.${token} is not a color token`)
+      else if (problem) problems.push(`${mode}.${token} ${problem}`)
+      else values[token] = hex
     }
+    if (!('color-project' in group)) problems.push(`no ${mode}.color-project`)
+    return [mode, values]
+  }))
+  const hasNeutrals = MODES.some((mode) => NEUTRALS.some((token) => token in (file[mode] ?? {})))
+  if (hasNeutrals) {
+    for (const mode of MODES) for (const token of NEUTRALS) if (!(token in (file[mode] ?? {}))) problems.push(`no ${mode}.${token}: neutrals are a whole set in both modes`)
   }
-  if (theme.neutrals && !(theme.neutrals.light && theme.neutrals.dark)) problems.push('neutrals needs light and dark')
-  for (const key of Object.keys(theme)) if (!['name', 'note', 'hue', 'fonts', 'neutrals'].includes(key)) problems.push(`${key} is not a theme input`)
-  return problems
+
+  const fonts = {}
+  for (const [token, font] of Object.entries(FONTS)) {
+    if (!(token in file)) continue
+    if (file[token]?.$type !== 'fontFamily') problems.push(`${token} is not a fontFamily token`)
+    else if (!isFontFamily(file[token].$value)) problems.push(`${token} is not a font name or a list of them`)
+    else fonts[font] = fontStack(file[token].$value)
+  }
+
+  const pick = (token) => Object.fromEntries(MODES.map((mode) => [mode, colours[mode][token]]))
+  const inputs = {
+    name,
+    note: file.$description,
+    hue: pick('color-project'),
+    ...(Object.keys(fonts).length > 0 && { fonts }),
+    ...(hasNeutrals && { neutrals: Object.fromEntries(MODES.map((mode) => [mode, Object.fromEntries(NEUTRALS.map((token) => [token, colours[mode][token]]))])) }),
+  }
+  return { problems, inputs }
 }
 
 // The core tokens with one theme's inputs filled in. Core leaves the hue pair empty; its font stacks and
@@ -96,17 +149,19 @@ const withReadableText = (data) => {
 }
 
 // The token source: tokens/core.json and every theme in tokens/themes/, the default first, then by name.
-// Each theme carries its source data with its inputs applied. A theme file with a problem stops the build.
+// Each theme carries its source data with its inputs applied, and its file's text to ship. A theme file
+// with a problem stops the build.
 export const readTokens = (root) => {
   const core = JSON.parse(readFileSync(`${root}tokens/core.json`, 'utf8'))
-  const themes = readdirSync(`${root}tokens/themes`).filter((file) => file.endsWith('.json'))
+  const themes = readdirSync(`${root}tokens/themes`).filter((file) => file.endsWith(THEME_FILE))
     .map((file) => {
-      const inputs = JSON.parse(readFileSync(`${root}tokens/themes/${file}`, 'utf8'))
-      return { id: file.slice(0, -'.json'.length), problems: themeProblems(inputs), ...inputs }
+      const source = readFileSync(`${root}tokens/themes/${file}`, 'utf8')
+      const { problems, inputs } = parseTheme(JSON.parse(source))
+      return { id: file.slice(0, -THEME_FILE.length), problems, ...inputs, source }
     })
-    .toSorted((a, b) => Number(b.id === DEFAULT_THEME) - Number(a.id === DEFAULT_THEME) || a.name.localeCompare(b.name))
-  if (themes[0]?.id !== DEFAULT_THEME) throw new Error(`tokens/themes/${DEFAULT_THEME}.json is missing`)
-  const problems = themes.flatMap(({ id, problems: found }) => found.map((problem) => `tokens/themes/${id}.json: ${problem}`))
+    .toSorted((a, b) => Number(b.id === DEFAULT_THEME) - Number(a.id === DEFAULT_THEME) || String(a.name).localeCompare(b.name))
+  if (themes[0]?.id !== DEFAULT_THEME) throw new Error(`tokens/themes/${DEFAULT_THEME}${THEME_FILE} is missing`)
+  const problems = themes.flatMap(({ id, problems: found }) => found.map((problem) => `tokens/themes/${id}${THEME_FILE}: ${problem}`))
   if (problems.length > 0) throw new Error(`Theme files with problems:\n  ${problems.join('\n  ')}`)
   return { core, themes: themes.map(({ problems: _, ...theme }) => ({ ...theme, data: applyTheme(core, theme) })) }
 }
@@ -268,7 +323,7 @@ export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
   const seenInDark = (token) => defaultDark.get(token) ?? (root.includes(token) ? resolve(token, LIGHT) : resolveDefault(token, LIGHT))
   const dark = names.filter((token) => resolve(token, DARK) !== seenInDark(token)).map((token) => [`--${token}`, resolve(token, DARK)])
   return [
-    `/* Generated from tokens/themes/${id}.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
+    `/* Generated from tokens/themes/${id}${THEME_FILE} by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
     ` * The ${name} theme for tokens.css. Load after tokens.css, on :root only: the tokens that follow the`,
     ' * theme resolve on :root, so a theme scoped to an element below it changes its inputs there, but the',
     " * accent, focus ring, and selection keep the default theme's colours. */",
@@ -328,7 +383,10 @@ export const outputs = (themes) => {
   const [defaultTheme] = themes
   return [
     ['language/tokens.css', renderStandaloneTokens(defaultTheme.data)],
-    ...themes.map((theme) => [`dist/themes/${theme.id}.css`, renderStandaloneTheme(theme, defaultTheme)]),
+    ...themes.flatMap((theme) => [
+      [`dist/themes/${theme.id}.css`, renderStandaloneTheme(theme, defaultTheme)],
+      [`dist/themes/${theme.id}${THEME_FILE}`, theme.source],
+    ]),
     ['dist/tokens.json', `${JSON.stringify(resolvedTokens(themes), null, 2)}\n`],
     ['dist/tokens.js', renderTokensJs(themes)],
     ['dist/tokens.d.ts', renderTokensDts(defaultTheme, themes)],
@@ -348,7 +406,15 @@ const run = () => {
   }
 
   const stale = []
-  for (const [path, content] of outputs(themes)) {
+  const files = outputs(themes)
+  // A theme that was renamed or removed leaves its generated files behind; they are stale too.
+  const leftover = readdirSync(`${root}dist/themes`).map((file) => `dist/themes/${file}`)
+    .filter((path) => (path.endsWith('.css') || path.endsWith(THEME_FILE)) && !files.some(([output]) => output === path))
+  for (const path of leftover) {
+    if (check) stale.push(path)
+    else rmSync(`${root}${path}`)
+  }
+  for (const [path, content] of files) {
     if (!check) {
       mkdirSync(dirname(`${root}${path}`), { recursive: true })
       writeFileSync(`${root}${path}`, content)

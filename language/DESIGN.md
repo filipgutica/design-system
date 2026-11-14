@@ -39,7 +39,7 @@ Center the **container**, not every sentence. Align header, content, images, and
 
 ## Files and examples
 
-- `tokens.css`: the values of the default theme, Graphite Indigo, generated from the token source (`tokens/core.json` and `tokens/themes/graphite-indigo.json`) in `@filipgutica/design-system`. Other themes ship as `themes/<id>.css`, which set only a theme's inputs: its hue pair, and any fonts or neutrals it brings; load one after `tokens.css`, on `:root`. To change a value, edit the JSON there and run `pnpm tokens:build`; do not edit `tokens.css` by hand. The identity inputs sit in one block at the top.
+- `tokens.css`: the values of the default theme, Graphite Indigo, generated from the token source (`tokens/core.json` and `tokens/themes/graphite-indigo.tokens.json`) in `@filipgutica/design-system`. Other themes ship as `themes/<id>.css`, which set only a theme's inputs: its hue pair, and any fonts or neutrals it brings; load one after `tokens.css`, on `:root`. To change a value, edit the JSON there and run `pnpm tokens:build`; do not edit `tokens.css` by hand. The identity inputs sit in one block at the top.
 - `components.md`: one spec for each component, with anatomy, states, Do and Don't lines, keyboard and screen-reader behavior, motion, and forced colors. Read it for any component work.
 - `components.html`: every component in each of its states, in plain HTML and CSS on `tokens.css`. Copy component markup and styles from there.
 - `decisions.md`: the choices behind the components, and the options they replaced.

@@ -113,12 +113,13 @@ const useSection = (packageName, example) => `  <section class="theme" id="use" 
     <p class="theme-note"><code>tokens.css</code> carries the default theme. To use another, load its theme file after <code>tokens.css</code>. It sets the theme's inputs on <code>:root</code>, with dark blocks for the values that differ in dark, so light and dark both follow.</p>
     ${source({ id: 'src-use', file: 'styles.css', lines: [`@import "${packageName}/tokens.css";`, `@import "${packageName}/themes/${example.id}.css";`] })}
     <p class="theme-note">Load a theme on <code>:root</code> only. The tokens that follow the hue resolve there, so a theme scoped to an element below <code>:root</code> changes the hue there, but the accent, focus ring, and selection keep the default theme's colours.</p>
+    <p class="theme-note">Each theme's source also ships as <code>themes/&lt;id&gt;.tokens.json</code>, a W3C Design Tokens file, for design-token tools such as Style Dictionary and Tokens Studio.</p>
   </section>`
 
 const makeSection = (example) => `  <section class="theme" id="make" aria-labelledby="make-title">
     <header class="layer-head"><h2 id="make-title">Make a theme</h2></header>
-    <p class="theme-note">Add a file to <code>tokens/themes/</code> with only the inputs, then build. A theme sets a hue for light and dark, and may name its own font stacks and its own neutrals: the page, surfaces, hover, edges, and text, for both modes. That is how an open palette, such as Catppuccin or GitHub's Primer, becomes a theme. Everything else is core. Where the hue cannot carry the text on a selected fill, the build takes the theme's text colour, then black or white. The tests check every theme against the contrast checks above, in both modes.</p>
-    ${source({ id: 'src-theme', file: `tokens/themes/${example.id}.json`, lines: JSON.stringify({ name: example.name, note: example.note, hue: example.hue }, null, 2).split('\n') })}
+    <p class="theme-note">Add a <code>.tokens.json</code> file to <code>tokens/themes/</code> with only the inputs, then build. A theme file uses the W3C Design Tokens format (2025.10): a <code>light</code> and a <code>dark</code> group of sRGB colour tokens, a <code>$description</code> for its note, and its name under <code>$extensions</code>. A theme sets a hue for light and dark, and may name its own font stacks and its own neutrals: the page, surfaces, hover, edges, and text, for both modes. That is how an open palette, such as Catppuccin or GitHub's Primer, becomes a theme. Everything else is core. Where the hue cannot carry the text on a selected fill, the build takes the theme's text colour, then black or white. The tests check every theme against the contrast checks above, in both modes.</p>
+    ${source({ id: 'src-theme', file: `tokens/themes/${example.id}.tokens.json`, lines: example.source.trimEnd().split('\n') })}
     ${command({ id: 'cmd-build', label: 'Build command', line: 'pnpm tokens:build' })}
   </section>`
 
@@ -189,7 +190,7 @@ const THEMES_JS = `
 
 /**
  * The Themes page. `themes` are the theme files in page order, the default first ({ id, name, note, hue,
- * fonts? }); `values` is tokens.json's themes map. A theme without values, or values without a theme
+ * fonts?, neutrals?, source }, source being the theme file's text); `values` is tokens.json's themes map. A theme without values, or values without a theme
  * file, stops the build.
  */
 export const themesPage = ({ themes, values, packageName }) => {

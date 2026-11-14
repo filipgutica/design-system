@@ -1,8 +1,0 @@
-{
-  "name": "wtree",
-  "note": "The wtree site's green, a step darker in light so a selected row reads at 4.5:1: a leaf green in light and a pale green in dark.",
-  "hue": {
-    "light": "#27752a",
-    "dark": "#7fd083"
-  }
-}

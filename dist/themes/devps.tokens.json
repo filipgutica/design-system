@@ -1,0 +1,28 @@
+{
+  "$description": "The devps site's orange, a step darker in light so a selected row reads at 4.5:1: a burnt orange in light and a soft apricot in dark.",
+  "$extensions": {
+    "io.github.filipgutica.design-system": {
+      "name": "devps"
+    }
+  },
+  "light": {
+    "$type": "color",
+    "color-project": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.6902, 0.251, 0.0118],
+        "hex": "#b04003"
+      }
+    }
+  },
+  "dark": {
+    "$type": "color",
+    "color-project": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.9529, 0.6039, 0.3843],
+        "hex": "#f39a62"
+      }
+    }
+  }
+}

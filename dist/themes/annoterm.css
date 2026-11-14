@@ -1,4 +1,4 @@
-/* Generated from tokens/themes/annoterm.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
+/* Generated from tokens/themes/annoterm.tokens.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
  * The annoterm theme for tokens.css. Load after tokens.css, on :root only: the tokens that follow the
  * theme resolve on :root, so a theme scoped to an element below it changes its inputs there, but the
  * accent, focus ring, and selection keep the default theme's colours. */
