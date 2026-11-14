@@ -14,6 +14,7 @@ export const EXPORT_USES = {
   './themes/*.css': 'A theme’s identity inputs, to load after <code>tokens.css</code>; the Themes page lists them',
   './themes/*.tokens.json': 'Each theme’s source as a W3C Design Tokens file, for design-token tools',
   './tokens.json': 'Every value per theme and mode, for tools and generators',
+  './theme-mapper': 'Experimental. <code>mapVsCodeTheme()</code> and <code>themeVariables()</code>: a VS Code colour theme as theme inputs, for a theme picker',
   './fonts.css': 'IBM Plex Sans and Mono, self-hosted',
   './fonts/*': 'The font files',
   './language/*': 'The spec, decisions, catalogue, and templates',

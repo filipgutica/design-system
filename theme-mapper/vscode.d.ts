@@ -1,0 +1,124 @@
+/** @typedef {import('./engine.js').Colour} Colour */
+/** @typedef {import('./engine.js').Mode} Mode */
+/** @typedef {import('./engine.js').PairResult} PairResult */
+/** @typedef {import('./engine.js').ThemeInputs} ThemeInputs */
+/**
+ * A VS Code colour theme, parsed, with any `include` already merged in by the caller.
+ * @typedef {object} VsCodeTheme
+ * @property {string} [name] Many theme files have none; the extension manifest's `label` names the theme.
+ * @property {string} [type] `light`, `dark`, `hc`, or `hcLight`; inferred from the background when missing, and a
+ *   theme then never counts as high contrast. Many theme files leave the type to the extension manifest's `uiTheme`;
+ *   translate it: `vs` is `light`, `vs-dark` is `dark`, `hc-black` is `hc`, and `hc-light` is `hcLight`.
+ * @property {Record<string, unknown>} [colors] Workbench colours by key, as #rgb, #rgba, #rrggbb, or #rrggbbaa.
+ */
+/**
+ * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours, or a
+ * colour that follows them. A `core` problem is a core colour, such as a link, status, or syntax colour, on the
+ * theme's fills: the theme cannot fix it.
+ * @typedef {object} Problem
+ * @property {'theme' | 'core'} kind
+ * @property {string} check The check's id.
+ * @property {Mode} mode
+ * @property {number} ratio The lowest ratio the check measured.
+ * @property {number} min The lowest ratio that passes.
+ * @property {PairResult[]} pairs Each ink on each fill that fails, as the engine resolves them.
+ */
+/**
+ * One VS Code theme as design-system theme inputs, for its one mode. Colours are lowercase #rrggbb.
+ * @typedef {object} MappedTheme
+ * @property {string} name
+ * @property {Mode} appearance The mode the theme is for; a page shows it in that mode only.
+ * @property {boolean} highContrast Whether VS Code marks it high contrast (`hc` or `hcLight`).
+ * @property {string} hue `--color-project`.
+ * @property {string} hueOnDark `--color-project-dark`: the prompt on the command plate, which is dark in both modes.
+ * @property {Record<string, string>} neutrals Every neutral token, by name, such as `color-bg`.
+ * @property {Problem[]} problems Every check the theme fails after selection.
+ */
+/** @typedef {Pick<MappedTheme, 'appearance' | 'hue' | 'hueOnDark' | 'neutrals'>} ThemeColours */
+/** A theme that cannot be mapped, or mapped values that are not safe to set. */
+export class ThemeValidationError extends Error {
+    /** @param {string} message */
+    constructor(message: string);
+}
+export function themeInputs({ hue, hueOnDark, neutrals }: ThemeColours): ThemeInputs;
+export function mapVsCodeTheme(theme: VsCodeTheme): MappedTheme;
+export function themeVariables(theme: ThemeColours): Record<string, string>;
+export type Colour = import("./engine.js").Colour;
+export type Mode = import("./engine.js").Mode;
+export type PairResult = import("./engine.js").PairResult;
+export type ThemeInputs = import("./engine.js").ThemeInputs;
+/**
+ * A VS Code colour theme, parsed, with any `include` already merged in by the caller.
+ */
+export type VsCodeTheme = {
+    /**
+     * Many theme files have none; the extension manifest's `label` names the theme.
+     */
+    name?: string | undefined;
+    /**
+     * `light`, `dark`, `hc`, or `hcLight`; inferred from the background when missing, and a
+     * theme then never counts as high contrast. Many theme files leave the type to the extension manifest's `uiTheme`;
+     * translate it: `vs` is `light`, `vs-dark` is `dark`, `hc-black` is `hc`, and `hc-light` is `hcLight`.
+     */
+    type?: string | undefined;
+    /**
+     * Workbench colours by key, as #rgb, #rgba, #rrggbb, or #rrggbbaa.
+     */
+    colors?: Record<string, unknown> | undefined;
+};
+/**
+ * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours, or a
+ * colour that follows them. A `core` problem is a core colour, such as a link, status, or syntax colour, on the
+ * theme's fills: the theme cannot fix it.
+ */
+export type Problem = {
+    kind: "theme" | "core";
+    /**
+     * The check's id.
+     */
+    check: string;
+    mode: Mode;
+    /**
+     * The lowest ratio the check measured.
+     */
+    ratio: number;
+    /**
+     * The lowest ratio that passes.
+     */
+    min: number;
+    /**
+     * Each ink on each fill that fails, as the engine resolves them.
+     */
+    pairs: PairResult[];
+};
+/**
+ * One VS Code theme as design-system theme inputs, for its one mode. Colours are lowercase #rrggbb.
+ */
+export type MappedTheme = {
+    name: string;
+    /**
+     * The mode the theme is for; a page shows it in that mode only.
+     */
+    appearance: Mode;
+    /**
+     * Whether VS Code marks it high contrast (`hc` or `hcLight`).
+     */
+    highContrast: boolean;
+    /**
+     * `--color-project`.
+     */
+    hue: string;
+    /**
+     * `--color-project-dark`: the prompt on the command plate, which is dark in both modes.
+     */
+    hueOnDark: string;
+    /**
+     * Every neutral token, by name, such as `color-bg`.
+     */
+    neutrals: Record<string, string>;
+    /**
+     * Every check the theme fails after selection.
+     */
+    problems: Problem[];
+};
+export type ThemeColours = Pick<MappedTheme, "appearance" | "hue" | "hueOnDark" | "neutrals">;

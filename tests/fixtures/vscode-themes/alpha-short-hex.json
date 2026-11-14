@@ -1,0 +1,12 @@
+{
+  "name": "Alpha and short hex",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#222",
+    "editor.foreground": "#EEEEEEFF",
+    "sideBar.background": "#ffffff10",
+    "editorWidget.background": "#0000",
+    "list.hoverBackground": "not-a-colour",
+    "focusBorder": "#7af"
+  }
+}

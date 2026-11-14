@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type BrowserContext, type Page } from '@playwright/test'
 import { tokens } from '@filipgutica/design-system'
 import FIXTURE_PROJECTS from '../fixtures/projects.json' with { type: 'json' }
+import { CHECKS } from '../../theme-mapper/engine.js'
 
 // The built site, served under /design-system/ as on GitHub Pages: each page's layout, accessibility,
 // script, and links, the header and pager order, and Foundations' Find and Copy.
@@ -900,7 +901,7 @@ test('Themes: every contrast check passes, and the table needs no script', async
   const page = await context.newPage()
   await page.goto('themes.html')
   const results = page.locator('table.checks .result')
-  expect(await results.count()).toBe(Object.keys(tokens.themes).length * 7 * 2)
+  expect(await results.count()).toBe(Object.keys(tokens.themes).length * CHECKS.length * 2)
   await expect(page.locator('table.checks .result.fail')).toHaveCount(0)
   await expect(page.getByLabel('Show this page in')).toBeHidden()
   await context.close()

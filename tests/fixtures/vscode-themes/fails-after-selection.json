@@ -1,0 +1,9 @@
+{
+  "name": "Fails after selection",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#3a3a3a",
+    "editor.foreground": "#ffffff",
+    "button.background": "#4a4a8a"
+  }
+}

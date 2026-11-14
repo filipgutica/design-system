@@ -1,0 +1,9 @@
+{
+  "name": "Non-opaque background",
+  "type": "light",
+  "colors": {
+    "editor.background": "#20406080",
+    "editor.foreground": "#000000",
+    "button.background": "#1f3a5c"
+  }
+}

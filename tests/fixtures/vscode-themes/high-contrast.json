@@ -1,0 +1,10 @@
+{
+  "name": "High contrast",
+  "type": "hc",
+  "colors": {
+    "editor.background": "#000000",
+    "editor.foreground": "#ffffff",
+    "contrastBorder": "#6fc3df",
+    "focusBorder": "#f38518"
+  }
+}

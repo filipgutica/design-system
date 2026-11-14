@@ -3,34 +3,11 @@
 // Every value comes from the theme files and dist/tokens.json. Each preview carries all of its theme's
 // resolved tokens: the tokens that follow the hue resolve on :root, so setting the hue on an element
 // alone would leave the default theme's accent below it.
-import { over, parseColour, ratio } from '../colour.mjs'
+import { themeChecks } from '../../theme-mapper/engine.js'
 import { esc, stackedTablesCss } from './shell.mjs'
 
-const SURFACES = ['color-bg', 'color-surface', 'color-surface-raised']
-
-/** The contrast checks each theme must pass, in both modes. Each measure returns its lowest ratio. */
-export const CHECKS = [
-  { id: 'focus', label: 'Focus ring on the page, a surface, and a raised surface', min: 3,
-    measure: (c) => Math.min(...SURFACES.map((s) => ratio(c('color-focus'), c(s)))) },
-  { id: 'nav', label: 'Current row text on its fill, on each surface', min: 4.5,
-    measure: (c) => Math.min(...SURFACES.map((s) => ratio(c('color-nav-current-text'), over(c('color-nav-current'), c(s))))) },
-  { id: 'thumb', label: 'Selected segmented label on its thumb', min: 4.5,
-    measure: (c) => ratio(c('color-segmented-current-text'), over(c('color-control-thumb'), c('color-well'))) },
-  { id: 'primary', label: 'Primary label on its fill, at rest and on hover', min: 4.5,
-    measure: (c) => Math.min(ratio(c('color-accent-text'), c('color-accent')), ratio(c('color-accent-text'), c('color-button-hover'))) },
-  { id: 'prompt', label: 'The <code>$</code> prompt on the command plate', min: 3,
-    measure: (c) => ratio(c('color-project-dark'), c('color-command-bg')) },
-  { id: 'text', label: 'Text and muted text on the page, a surface, and a raised surface', min: 4.5,
-    measure: (c) => Math.min(...['color-text', 'color-muted'].flatMap((ink) => SURFACES.map((s) => ratio(c(ink), c(s))))) },
-  { id: 'edge', label: 'Control edge on the page, a surface, and a raised surface', min: 3,
-    measure: (c) => Math.min(...SURFACES.map((s) => ratio(c('color-border'), c(s)))) },
-]
-
-/** Every check for one theme's resolved values: [{ id, label, min, light, dark }], each mode's ratio. */
-export const themeChecks = (values) => CHECKS.map(({ measure, ...check }) => ({
-  ...check,
-  ...Object.fromEntries(['light', 'dark'].map((mode) => [mode, measure((name) => parseColour(values[mode][name]))])),
-}))
+// The engine's check labels are plain text; the page marks up the ones that name code.
+const LABELS = { prompt: 'The <code>$</code> prompt on the command plate' }
 
 const icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`
 const MODES = [['light', 'Light'], ['dark', 'Dark']]
@@ -68,7 +45,7 @@ const checkTable = ({ id, name }, checks) => `<table class="checks stack" aria-l
       <colgroup><col><col class="c-mode"><col class="c-mode"></colgroup>
       <thead><tr><th scope="col">Check</th><th scope="col">Light</th><th scope="col">Dark</th></tr></thead>
       <tbody>
-      ${checks.map(({ id: check, label, min, light, dark }) => `<tr data-check="${check}"><th scope="row">${label}<small>Needs ${min}:1</small></th><td data-label="Light">${result(light, min)}</td><td data-label="Dark">${result(dark, min)}</td></tr>`).join('\n      ')}
+      ${checks.map(({ id: check, label, min, light, dark }) => `<tr data-check="${check}"><th scope="row">${LABELS[check] ?? esc(label)}<small>Needs ${min}:1</small></th><td data-label="Light">${result(light, min)}</td><td data-label="Dark">${result(dark, min)}</td></tr>`).join('\n      ')}
       </tbody>
     </table>`
 
@@ -114,6 +91,17 @@ const useSection = (packageName, example) => `  <section class="theme" id="use" 
     ${source({ id: 'src-use', file: 'styles.css', lines: [`@import "${packageName}/tokens.css";`, `@import "${packageName}/themes/${example.id}.css";`] })}
     <p class="theme-note">Load a theme on <code>:root</code> only. The tokens that follow the hue resolve there, so a theme scoped to an element below <code>:root</code> changes the hue there, but the accent, focus ring, and selection keep the default theme's colours.</p>
     <p class="theme-note">Each theme's source also ships as <code>themes/&lt;id&gt;.tokens.json</code>, a W3C Design Tokens file, for design-token tools such as Style Dictionary and Tokens Studio.</p>
+    <h3>Import a VS Code theme</h3>
+    <p class="theme-note"><code>${packageName}/theme-mapper</code> is experimental. <code>mapVsCodeTheme</code> maps a parsed VS Code colour theme, with its <code>include</code> already merged, onto theme inputs. It selects the theme's own colours and never alters one. <code>problems</code> lists each check that still fails: a <code>theme</code> problem is in the theme's colours, and a <code>core</code> problem is a core colour, such as a link, status, or syntax colour, on the theme's fills, which the theme cannot fix. Each problem lists the inks and fills that fail.</p>
+    <p class="theme-note">A VS Code theme has one mode, so lock the page to it: set the variables from <code>themeVariables</code> inline on <code>&lt;html&gt;</code>, set <code>data-theme</code> to the theme's <code>appearance</code>, and lock the mode toggle while the theme is on. A <code>:root</code> rule would lose to the dark blocks in <code>tokens.css</code>.</p>
+    ${source({ id: 'src-mapper', file: 'theme.js', lines: [
+      `import { mapVsCodeTheme, themeVariables } from "${packageName}/theme-mapper";`,
+      '',
+      'const mapped = mapVsCodeTheme(vsCodeTheme);',
+      'const root = document.documentElement;',
+      'root.dataset.theme = mapped.appearance;',
+      'for (const [name, value] of Object.entries(themeVariables(mapped))) root.style.setProperty(name, value);',
+    ] })}
   </section>`
 
 const makeSection = (example) => `  <section class="theme" id="make" aria-labelledby="make-title">

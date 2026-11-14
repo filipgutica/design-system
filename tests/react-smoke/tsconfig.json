@@ -12,10 +12,12 @@
     "types": [],
     "strict": true,
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
   "include": [
     "main.tsx",
-    "smoke.spec.ts"
+    "smoke.spec.ts",
+    "theme-mapper.spec.ts"
   ]
 }
