@@ -159,6 +159,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 [`components.md`](components.md) specifies each component and [`components.html`](components.html) shows its states. These composition rules apply across them:
 
 - Build each control from the owning library's component or class, and style a link that acts as a button with the button's classes. A page adds layout only: size, spacing, and position. A local copy of a control drifts from the library, even when it uses the same tokens.
+- A page's own element rules, such as its heading, paragraph, and image type, go in `@layer base`, so a component's rules outrank them. An unlayered `h2` rule outranks every layered rule and restyles the title of a dialog, drawer, or viewer as a page heading.
 - One clearly primary action per visible decision group, filled with the hue. Other actions are secondary, ghost, or text buttons.
 - Use a segmented control for two to five short options that apply at once, a select for longer lists, and radio cards for options that need descriptions.
 - Callouts carry a real caveat, not decorative emphasis.
