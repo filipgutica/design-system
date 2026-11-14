@@ -205,7 +205,8 @@ export const applyTheme = (core, theme) => {
  * @property {string} id
  * @property {string} label What the check measures, in plain text.
  * @property {number} min The lowest ratio that passes.
- * @property {(colour: (token: string) => Colour) => number} measure The lowest ratio over every place it measures.
+ * @property {(colour: (token: string) => Colour, mode: Mode) => number} measure The lowest ratio over every place it
+ *   measures, in one mode.
  */
 /**
  * The contrast checks each theme must pass, in both modes.
@@ -222,8 +223,9 @@ export const CHECKS = [
     measure: (c) => Math.min(ratio(c('color-accent-text'), c('color-accent')), ratio(c('color-accent-text'), c('color-button-hover'))) },
   { id: 'prompt', label: 'The $ prompt on the command plate', min: 3,
     measure: (c) => ratio(c('color-project-dark'), c('color-command-bg')) },
-  { id: 'text', label: 'Text and muted text on the page, a surface, and a raised surface', min: 4.5,
-    measure: (c) => Math.min(...['color-text', 'color-muted'].flatMap((ink) => SURFACES.map((s) => ratio(c(ink), c(s))))) },
+  // A muted surface carries text too: neutral badges, and radio card hover.
+  { id: 'text', label: 'Text and muted text on the page, a surface, a raised surface, and a muted surface', min: 4.5,
+    measure: (c) => Math.min(...['color-text', 'color-muted'].flatMap((ink) => [...SURFACES, 'color-surface-muted'].map((s) => ratio(c(ink), c(s))))) },
   { id: 'edge', label: 'Control edge on the page, a surface, and a raised surface', min: 3,
     measure: (c) => Math.min(...SURFACES.map((s) => ratio(c('color-border'), c(s)))) },
 ]
@@ -237,6 +239,6 @@ export const CHECKS = [
  */
 export const themeChecks = (values, checks = CHECKS) => checks.map(({ measure, ...check }) => ({
   ...check,
-  light: measure((name) => parseColour(values.light[name])),
-  dark: measure((name) => parseColour(values.dark[name])),
+  light: measure((name) => parseColour(values.light[name]), 'light'),
+  dark: measure((name) => parseColour(values.dark[name]), 'dark'),
 }))

@@ -47,7 +47,8 @@ export function applyTheme<Data extends TokenSource>(core: Data, theme: ThemeInp
  * @property {string} id
  * @property {string} label What the check measures, in plain text.
  * @property {number} min The lowest ratio that passes.
- * @property {(colour: (token: string) => Colour) => number} measure The lowest ratio over every place it measures.
+ * @property {(colour: (token: string) => Colour, mode: Mode) => number} measure The lowest ratio over every place it
+ *   measures, in one mode.
  */
 /**
  * The contrast checks each theme must pass, in both modes.
@@ -118,9 +119,10 @@ export type Check = {
      */
     min: number;
     /**
-     * The lowest ratio over every place it measures.
+     * The lowest ratio over every place it
+     * measures, in one mode.
      */
-    measure: (colour: (token: string) => Colour) => number;
+    measure: (colour: (token: string) => Colour, mode: Mode) => number;
 };
 export type CheckResult = {
     id: string;

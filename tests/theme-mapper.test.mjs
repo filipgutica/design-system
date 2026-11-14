@@ -113,3 +113,25 @@ test('themeVariables refuses a value that is not #rrggbb, so persisted input can
     { ...mapped, appearance: 'dim' },
   ]) assert.throws(() => themeVariables(bad), ThemeValidationError)
 })
+
+test('muted text must also read on the muted surface, where neutral badges sit', () => {
+  // As in Monokai: the description colour reads on the page but not on the muted surface, so the line numbers take it.
+  const mapped = mapVsCodeTheme({ type: 'dark', colors: {
+    'editor.background': '#272822', 'editor.foreground': '#f8f8f2', 'list.inactiveSelectionBackground': '#414339',
+    descriptionForeground: '#90908a', 'editorLineNumber.foreground': '#c2c2bf',
+  } })
+  assert.equal(mapped.neutrals['color-muted'], '#c2c2bf')
+  assert.ok(!failing(mapped).includes('theme text'))
+})
+
+test('a status badge that a theme surface leaves under 4.5:1 is a core problem', () => {
+  // As in VS Code's Dark Modern: the danger badge's text, mixed into the theme's #cccccc, reads at about 4.4:1 on its tint.
+  const mapped = mapVsCodeTheme({ type: 'dark', colors: { 'editor.background': '#1f1f1f', 'editor.foreground': '#cccccc', 'editorWidget.background': '#202020' } })
+  assert.deepEqual(failing(mapped), ['core status'])
+})
+
+test('a theme whose editor text is under 4.5:1 takes its input text instead', () => {
+  // As in Solarized Light: #657b83 on #fdf6e3 is about 4.1:1, and its input text #586e75 reaches 5:1.
+  const mapped = mapVsCodeTheme({ type: 'light', colors: { 'editor.background': '#fdf6e3', 'editor.foreground': '#657b83', 'input.foreground': '#586e75' } })
+  assert.equal(mapped.neutrals['color-text'], '#586e75')
+})

@@ -89,14 +89,26 @@ const contrast = (ink, surfaces) => Math.min(...surfaces.map((surface) => ratio(
  */
 export const themeInputs = ({ hue, hueOnDark, neutrals }) => ({ hue: { light: hue, dark: hueOnDark }, neutrals: { light: neutrals, dark: neutrals } })
 
+/**
+ * @param {Colour} colour
+ * @param {number} alpha
+ * @returns {Colour}
+ */
+const withAlpha = ([r, g, b], alpha) => [r, g, b, alpha]
+
 // Core colours on the imported surfaces. A theme cannot change them, so a failure is information.
 const STATUS = ['color-success', 'color-warning', 'color-error', 'color-info']
 /** @type {Check[]} */
 const CORE_CHECKS = [
   { id: 'link', label: 'Link text on the page, a surface, and a raised surface', min: 4.5,
     measure: (c) => Math.min(...SURFACES.map((s) => ratio(c('color-link'), c(s)))) },
-  { id: 'status', label: 'Status text on the page, a surface, and a raised surface', min: 4.5,
-    measure: (c) => Math.min(...STATUS.flatMap((ink) => SURFACES.map((s) => ratio(c(ink), c(s))))) },
+  // A status badge's text is its tone mixed into the status ink (75% in light, 85% in dark), on a 22% tint of
+  // the tone over a raised surface, as components.html draws it.
+  { id: 'status', label: 'Status text on the page, a surface, and a raised surface, and on its badge', min: 4.5,
+    measure: (c, mode) => Math.min(...STATUS.flatMap((ink) => [
+      ...SURFACES.map((s) => ratio(c(ink), c(s))),
+      ratio(over(withAlpha(c(ink), mode === 'light' ? 0.75 : 0.85), c('color-status-ink')), over(withAlpha(c(ink), 0.22), c('color-surface-raised'))),
+    ])) },
 ]
 
 /**
@@ -138,7 +150,8 @@ export const mapVsCodeTheme = (theme) => {
    */
   const select = (keys, passes) => keys.map(colour).find((value) => value !== undefined && passes(value))
 
-  const text = select(['editor.foreground', 'foreground'], (value) => contrast(value, [bg]) >= 4.5)
+  // A theme whose editor text is soft, such as Solarized Light at about 4.1:1, has a stronger text colour for inputs.
+  const text = select(['editor.foreground', 'foreground', 'input.foreground'], (value) => contrast(value, [bg]) >= 4.5)
   if (!text) throw new ThemeValidationError('No text colour in the theme reaches 4.5:1 on editor.background')
   /** @param {string} surface */
   const readable = (surface) => contrast(text, [surface]) >= 4.5
@@ -147,7 +160,8 @@ export const mapVsCodeTheme = (theme) => {
   const surfaceMuted = select(['list.inactiveSelectionBackground', 'editorWidget.background'], readable) ?? surface
   const rowHover = select(['list.hoverBackground'], readable) ?? surfaceMuted
   const surfaces = [bg, surface, raised]
-  const muted = select(['descriptionForeground', 'editorLineNumber.foreground'], (value) => contrast(value, surfaces) >= 4.5) ?? text
+  // Muted text also sits on the muted surface, in neutral badges.
+  const muted = select(['descriptionForeground', 'editorLineNumber.foreground'], (value) => contrast(value, [...surfaces, surfaceMuted]) >= 4.5) ?? text
   const border = select(['input.border', 'dropdown.border', 'checkbox.border', 'contrastBorder', 'editorLineNumber.foreground'], (value) => contrast(value, surfaces) >= 3) ?? muted
   // Hairlines carry no minimum.
   const borderSubtle = select(['panel.border', 'sideBar.border', 'editorGroup.border'], () => true) ?? border
