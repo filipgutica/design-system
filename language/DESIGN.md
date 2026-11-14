@@ -19,7 +19,7 @@ The language has a reusable core and a replaceable identity layer.
 | Core | Tokens, depth, controls and their states, focus, motion, accessibility, and forced colors | Adopts it as is |
 | Identity | The terminal folio look of the personal sites: the `~/name` header, the project registry, mono display headings, `##` section marks, and terminal plates | Replaces it with its own |
 
-A new project keeps `tokens.css` unchanged and sets the identity inputs (`--color-project`, `--color-project-dark`, `--font-ui`, `--font-mono`, and `--color-accent-text`, `--color-nav-current-text`, and `--color-segmented-current-text` when the hue cannot carry them at 4.5:1) on `:root` in its own stylesheet, or loads a theme file, which sets those for it. [Component specs](components.md) mark each component Core or Identity, and [decisions](decisions.md) record why each choice was made and which options were rejected. Read both before you build or change a component.
+A new project keeps `tokens.css` unchanged and sets the identity inputs (`--color-project`, `--color-project-dark`, `--font-ui`, `--font-mono`, and `--color-accent-text`, `--color-nav-current-text`, and `--color-segmented-current-text` when the hue cannot carry them at 4.5:1) on `:root` in its own stylesheet, or loads a theme file. A theme file sets the last two for it; its hue must carry `--color-accent-text` itself, which the contrast tests check for every shipped theme. [Component specs](components.md) mark each component Core or Identity, and [decisions](decisions.md) record why each choice was made and which options were rejected. Read both before you build or change a component.
 
 ## Apply the right format
 

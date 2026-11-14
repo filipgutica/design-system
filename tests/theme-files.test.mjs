@@ -21,6 +21,15 @@ test('a theme file gives its name, note, hue, font stacks, and neutrals', () => 
   assert.equal(inputs.fonts.ui, '"Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Backtick Fix", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"')
   assert.equal(inputs.fonts.mono, 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace')
   assert.equal(inputs.neutrals.dark['color-bg'], '#0d1117')
+  // Any other name is a quoted CSS string, escaped, including one that starts with a digit.
+  const named = hueOnly()
+  named['font-ui'] = { $type: 'fontFamily', $value: ['ACME "Display"', 'back\\slash', '123', 'sans-serif'] }
+  assert.equal(parseTheme(named).inputs.fonts.ui, '"ACME \\"Display\\"", "back\\\\slash", "123", sans-serif')
+  // A $type on the file reaches every group and token below it, as in the Design Tokens format.
+  const rootTyped = hueOnly()
+  rootTyped.$type = 'color'
+  for (const mode of ['light', 'dark']) delete rootTyped[mode].$type
+  assert.deepEqual(parseTheme(rootTyped).problems, [])
 })
 
 test('a theme file the build cannot take stops with its problem', () => {
@@ -38,6 +47,15 @@ test('a theme file the build cannot take stops with its problem', () => {
   assert.deepEqual(problemsWith((file) => { file.light['color-link'] = { $value: colour('#000000') } }), ['light.color-link is not a theme input'])
   assert.deepEqual(problemsWith((file) => { delete file.$extensions }), [`no $extensions["${THEME_EXTENSION}"].name`])
   assert.deepEqual(problemsWith((file) => { file['font-ui'] = { $type: 'fontFamily', $value: [] } }), ['font-ui is not a font name or a list of them'])
+  assert.deepEqual(problemsWith((file) => { file['font-ui'] = { $type: 'fontFamily', $value: 'Bad\nName' } }), ['font-ui is not a font name or a list of them'])
+  // Structure the build does not resolve is a problem, not silently skipped.
+  assert.deepEqual(problemsWith((file) => { file.light.$value = colour('#000000') }), ['light.$value is not supported in a theme file'])
+  assert.deepEqual(problemsWith((file) => { file.light.$extends = '{dark}' }), ['light.$extends is not supported in a theme file'])
+  assert.deepEqual(problemsWith((file) => { file.light['color-project'].$ref = '#/dark/color-project' }), ['light.color-project has $ref, which a theme file does not support'])
+  assert.deepEqual(problemsWith((file) => { file.light['color-project'].$type = null }), ['light.color-project is not a color token'])
+  assert.deepEqual(problemsWith((file) => { file.light['color-project'] = null }), ['light.color-project is not a token'])
+  assert.deepEqual(problemsWith((file) => { file.light = 'blue' }), ['light is not a group', 'no light.color-project'])
+  assert.deepEqual(parseTheme([]).problems, ['is not a JSON object'])
   // Neutrals are a whole set in both modes.
   const partial = problemsWith((file) => { file.light['color-bg'] = { $value: colour('#ffffff') } })
   assert.equal(partial.length, 17)

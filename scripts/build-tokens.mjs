@@ -16,7 +16,7 @@
 // Each group also carries reader-facing text for the site's Foundations page, which no output
 // above includes: an id, a title, a note, and roles (what each token is for, one entry per token,
 // with `backticks` for code).
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { over, parseColour, ratio } from './colour.mjs'
@@ -55,44 +55,64 @@ const srgbHex = (value) => {
   return [derived]
 }
 
-// A fontFamily value as a CSS font stack: a name that is not a plain identifier, such as one with a space,
-// is quoted, so generic families and keywords such as sans-serif and -apple-system stay unquoted.
-const fontStack = (value) => [value].flat().map((name) => (/^[\w-]+$/.test(name) ? name : `"${name}"`)).join(', ')
-const isFontFamily = (value) => [value].flat().every((name) => typeof name === 'string' && name) && [value].flat().length > 0
+// A fontFamily value as a CSS font stack. A name that is a CSS identifier stays bare, so generic families
+// and keywords such as sans-serif and -apple-system keep their meaning; any other name, such as one with
+// a space or one that starts with a digit, is a quoted string with its quotes and backslashes escaped.
+const fontStack = (value) => [value].flat()
+  .map((name) => (/^-?[A-Za-z_][\w-]*$/.test(name) ? name : `"${name.replace(/[\\"]/g, '\\$&')}"`)).join(', ')
+const isFontFamily = (value) => [value].flat().length > 0
+  && [value].flat().every((name) => typeof name === 'string' && name && !/[\u0000-\u001f]/.test(name))
+
+const isObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value)
+// Properties the build ignores: they describe a token or group and change no value. Any other $ property,
+// such as $value on a group, $extends, or $ref, is a problem rather than silently skipped.
+const METADATA = ['$description', '$extensions', '$deprecated']
+const typeOf = (...layers) => layers.find((layer) => '$type' in layer)?.$type
 
 // A theme file's inputs, in the shape the build uses ({ name, note, hue, fonts?, neutrals? }), and its
 // problems: no name or note, a key a theme cannot set, a token of the wrong type, a colour the build
-// cannot take, a missing hue, or neutrals that are not the whole set in both modes.
+// cannot take, a missing hue, or neutrals that are not the whole set in both modes. A token's $type is its
+// own, else its group's, else the file's.
 export const parseTheme = (file) => {
+  if (!isObject(file)) return { problems: ['is not a JSON object'], inputs: {} }
   const problems = []
   const name = file.$extensions?.[THEME_EXTENSION]?.name
   if (typeof name !== 'string' || !name) problems.push(`no $extensions["${THEME_EXTENSION}"].name`)
   if (typeof file.$description !== 'string' || !file.$description) problems.push('no $description')
-  for (const key of Object.keys(file)) if (!['$description', '$extensions', ...MODES, ...Object.keys(FONTS)].includes(key)) problems.push(`${key} is not a theme input`)
+  for (const key of Object.keys(file)) if (![...METADATA, '$type', ...MODES, ...Object.keys(FONTS)].includes(key)) problems.push(`${key} is not a theme input`)
 
+  const groups = Object.fromEntries(MODES.map((mode) => [mode, isObject(file[mode]) ? file[mode] : {}]))
   const colours = Object.fromEntries(MODES.map((mode) => {
-    const group = file[mode] ?? {}
+    const group = groups[mode]
     const values = {}
+    if (mode in file && !isObject(file[mode])) problems.push(`${mode} is not a group`)
     for (const [token, entry] of Object.entries(group)) {
-      if (token.startsWith('$')) continue
-      const [hex, problem] = srgbHex(entry?.$value)
-      if (![...NEUTRALS, 'color-project'].includes(token)) problems.push(`${mode}.${token} is not a theme input`)
-      else if ((entry.$type ?? group.$type) !== 'color') problems.push(`${mode}.${token} is not a color token`)
+      if (token.startsWith('$')) {
+        if (![...METADATA, '$type'].includes(token)) problems.push(`${mode}.${token} is not supported in a theme file`)
+        continue
+      }
+      if (![...NEUTRALS, 'color-project'].includes(token)) { problems.push(`${mode}.${token} is not a theme input`); continue }
+      if (!isObject(entry) || !('$value' in entry)) { problems.push(`${mode}.${token} is not a token`); continue }
+      const unsupported = Object.keys(entry).filter((key) => ![...METADATA, '$type', '$value'].includes(key))
+      if (unsupported.length > 0) { problems.push(`${mode}.${token} has ${unsupported.join(', ')}, which a theme file does not support`); continue }
+      const [hex, problem] = srgbHex(entry.$value)
+      if (typeOf(entry, group, file) !== 'color') problems.push(`${mode}.${token} is not a color token`)
       else if (problem) problems.push(`${mode}.${token} ${problem}`)
       else values[token] = hex
     }
     if (!('color-project' in group)) problems.push(`no ${mode}.color-project`)
     return [mode, values]
   }))
-  const hasNeutrals = MODES.some((mode) => NEUTRALS.some((token) => token in (file[mode] ?? {})))
+  const hasNeutrals = MODES.some((mode) => NEUTRALS.some((token) => token in groups[mode]))
   if (hasNeutrals) {
-    for (const mode of MODES) for (const token of NEUTRALS) if (!(token in (file[mode] ?? {}))) problems.push(`no ${mode}.${token}: neutrals are a whole set in both modes`)
+    for (const mode of MODES) for (const token of NEUTRALS) if (!(token in groups[mode])) problems.push(`no ${mode}.${token}: neutrals are a whole set in both modes`)
   }
 
   const fonts = {}
   for (const [token, font] of Object.entries(FONTS)) {
     if (!(token in file)) continue
-    if (file[token]?.$type !== 'fontFamily') problems.push(`${token} is not a fontFamily token`)
+    if (!isObject(file[token]) || !('$value' in file[token])) problems.push(`${token} is not a token`)
+    else if (typeOf(file[token], file) !== 'fontFamily') problems.push(`${token} is not a fontFamily token`)
     else if (!isFontFamily(file[token].$value)) problems.push(`${token} is not a font name or a list of them`)
     else fonts[font] = fontStack(file[token].$value)
   }
@@ -215,7 +235,8 @@ const standaloneHeader = `/*
  * stylesheet the same way. The dark blocks switch --color-project to
  * --color-project-dark, so the override needs no dark rule. Check --color-accent-text,
  * --color-nav-current-text, and --color-segmented-current-text at 4.5:1 on the new hue
- * and override them when they fall short; a theme file does this for you.
+ * and override them when they fall short. A theme file sets the last two for you; its
+ * hue must carry --color-accent-text itself, which the contrast tests check.
  * The terminal plate tokens also belong to the identity layer; every other line is core.
  *
  * Standalone HTML: import or inline this file.
@@ -408,7 +429,8 @@ const run = () => {
   const stale = []
   const files = outputs(themes)
   // A theme that was renamed or removed leaves its generated files behind; they are stale too.
-  const leftover = readdirSync(`${root}dist/themes`).map((file) => `dist/themes/${file}`)
+  // Only theme outputs are candidates: the licences and notices beside them stay. A missing folder has none.
+  const leftover = (existsSync(`${root}dist/themes`) ? readdirSync(`${root}dist/themes`) : []).map((file) => `dist/themes/${file}`)
     .filter((path) => (path.endsWith('.css') || path.endsWith(THEME_FILE)) && !files.some(([output]) => output === path))
   for (const path of leftover) {
     if (check) stale.push(path)

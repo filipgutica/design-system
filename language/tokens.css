@@ -11,7 +11,8 @@
  * stylesheet the same way. The dark blocks switch --color-project to
  * --color-project-dark, so the override needs no dark rule. Check --color-accent-text,
  * --color-nav-current-text, and --color-segmented-current-text at 4.5:1 on the new hue
- * and override them when they fall short; a theme file does this for you.
+ * and override them when they fall short. A theme file sets the last two for you; its
+ * hue must carry --color-accent-text itself, which the contrast tests check.
  * The terminal plate tokens also belong to the identity layer; every other line is core.
  *
  * Standalone HTML: import or inline this file.
