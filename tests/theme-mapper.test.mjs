@@ -164,3 +164,11 @@ test('muted text must read on a hovered row too, or the text stands in', () => {
   assert.equal(mapped.neutrals['color-muted'], '#ffffff')
   assert.deepEqual(mapped.problems, [])
 })
+
+test('a focus ring drawn inside a hovered row must reach 3:1 on the row fill', () => {
+  // The hue reads on the black page, but the row and option rings sit inside the hover fill at about 1.85:1.
+  const mapped = mapVsCodeTheme({ type: 'dark', colors: {
+    'editor.background': '#000000', 'editor.foreground': '#ffffff', 'button.background': '#a99ce2', 'list.hoverBackground': '#767676',
+  } })
+  assert.deepEqual(failing(mapped), ['theme focus'])
+})

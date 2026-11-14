@@ -246,8 +246,12 @@ const statusInk = (tone) => [mix(`{${tone}}`, 75, '{color-status-ink}'), mix(`{$
  * @type {Check[]}
  */
 export const CHECKS = [
-  { id: 'focus', label: 'Focus ring on the page, a surface, and a raised surface', min: 3, kind: 'theme',
-    pairs: on(['{color-focus}'], ON_SURFACES) },
+  // Rows, tabs, segmented buttons, and code blocks draw their ring inside, over their own fill.
+  { id: 'focus', label: 'Focus ring on the page, a surface, a raised surface, and the fills an inset ring sits on', min: 3, kind: 'theme',
+    pairs: on(['{color-focus}'], [
+      ...ON_SURFACES, '{color-row-hover}', '{color-well}', ['{color-control-thumb}', '{color-well}'], '{color-code}',
+      ...ON_SURFACES.map((surface) => ['{color-nav-current}', surface]),
+    ]) },
   // Selected tabs, rows, and options draw the same fill. A phone header's current link is the accent alone, on the page.
   { id: 'nav', label: 'Current row text on its fill, on each surface, and a current link on the page', min: 4.5, kind: 'theme',
     pairs: [
