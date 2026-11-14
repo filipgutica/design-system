@@ -471,8 +471,16 @@ test.describe('outside a dialog', { tag: '@webkit' }, () => {
         await expect(button).toBeFocused()
       })
 
-      test(`a ${input} outside closes the full size capture and focuses its button`, async ({ page }) => {
+      test(`the viewer names the capture, fits the viewport, and a ${input} outside closes it and focuses its button`, async ({ page }) => {
         const { button, dialog } = await open(page, { opener: '[data-full-size]', id: 'capture-viewer' })
+        await expect(dialog).toHaveAccessibleName('status capture')
+        // The body is the one scroll region, named by the title; a viewer has no footer.
+        await expect(dialog.getByRole('region', { name: 'status capture' })).toHaveAttribute('tabindex', '0')
+        await expect(dialog.locator('.dialog-foot')).toHaveCount(0)
+        const box = (await dialog.boundingBox())!
+        expect(box.x).toBeGreaterThanOrEqual(0)
+        expect(box.x + box.width).toBeLessThanOrEqual(viewport.width)
+        expect(box.y + box.height).toBeLessThanOrEqual(viewport.height)
         await (input === 'tap' ? page.touchscreen.tap(outside.x, outside.y) : page.mouse.click(outside.x, outside.y))
         await expect(dialog).toBeHidden()
         await expect(button).toBeFocused()

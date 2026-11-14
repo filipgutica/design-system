@@ -166,7 +166,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 - Figures: number them when the prose refers to any of them, and then number them all. Place a figure beside the paragraph that explains it, once the terms it uses have been introduced.
 - Source code sits in a theme-matched panel with syntax colours, inset in the code block's frame; multiline samples may have a small descriptive header and Copy action. Put useful setup context above a command; omit repeated language labels.
 - Examples: show a live component on a stage above its code, in one frame, with Copy in the code's corner. The stage sits on the page background. See [code block with a live example](components.md#with-a-live-example).
-- A screenshot opens at full size when clicked; use a native accessible trigger and restore its focus on close.
+- A screenshot opens at full size in a [viewer](components.md#viewer) when clicked; use a native accessible trigger and restore its focus on close.
 
 ### Navigation
 

@@ -545,9 +545,13 @@
   /* Without JavaScript each capture keeps its heading, and panels after the first take a rule. */
   .capture .tabs-heading { margin: 0; padding: var(--space-3) var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); }
   .capture:not([data-enhanced]) .tabpanel + .tabpanel { border-top: 1px solid var(--color-border-subtle); }
-  dialog.capture-viewer { width: min(960px, calc(100% - var(--space-8))); }
-  .capture-viewer .dialog-head h4 { font-family: var(--font-mono); }
-  .capture-viewer .dialog-body { padding: 0; }
+  /* A viewer is as wide and tall as its content allows, and its body scrolls both ways. */
+  dialog.viewer { width: fit-content; max-width: calc(100% - var(--space-8)); max-height: calc(100dvh - var(--space-8)); }
+  .viewer .dialog-head { align-items: center; }
+  .viewer .dialog-body { overscroll-behavior: contain; }
+  /* Inset: the dialog clips the body's edges. */
+  .viewer .dialog-body:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
+  .viewer .screen { overflow: visible; }
   /* The full-size viewer clones the screen outside .capture, so it carries its own plate focus. */
   .screen { --color-focus: var(--color-project-dark); margin: 0; padding: var(--space-4); overflow-x: auto; background: var(--color-terminal); color: var(--color-terminal-text); font-size: var(--text-code); line-height: 1.5; }
   /* Inset: the capture and the viewer body clip the screen's edges. */
@@ -809,6 +813,7 @@
   @media (max-width: 640px) {
     /* Phones: a dialog becomes a bottom sheet with rounded top corners. */
     dialog.dialog { width: 100%; max-width: none; margin: auto 0 0; border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
+    dialog.viewer { max-height: calc(100dvh - var(--space-4)); }
     /* A trail of three or more crumbs shows only the parent, as a back link; a two-crumb trail fits in full. */
     .crumbs ol:has(> li:nth-child(3)) > li:not(:nth-last-child(2)) { display: none; }
     .crumbs ol:has(> li:nth-child(3)) > li::before { content: none; }
@@ -1528,9 +1533,9 @@
   <div class="dialog-body">API p95 latency stops alerting at once. Escape closes this dialog and returns focus to its trigger.</div>
   <form class="dialog-foot" method="dialog"><button class="btn secondary" type="submit">Cancel</button><button class="btn danger" type="submit">Delete</button></form>
 </dialog>
-<dialog class="dialog capture-viewer" id="capture-viewer" aria-labelledby="capture-viewer-title">
+<dialog class="dialog viewer" id="capture-viewer" aria-labelledby="capture-viewer-title">
   <div class="dialog-head"><h4 id="capture-viewer-title">Capture</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close full size capture"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
-  <div class="dialog-body" id="capture-viewer-body"></div>
+  <div class="dialog-body" id="capture-viewer-body" tabindex="0" role="region" aria-labelledby="capture-viewer-title"></div>
 </dialog>
 <dialog class="drawer" id="live-drawer" aria-labelledby="live-drawer-title">
   <div class="drawer-head"><h4 id="live-drawer-title">Contents</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close drawer"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
@@ -1708,9 +1713,10 @@
   document.querySelectorAll('[data-full-size]').forEach((button) => button.addEventListener('click', () => {
     const panel = button.closest('.capture').querySelector('.tabpanel:not([hidden])');
     const name = panel.querySelector('.tabs-heading').textContent;
-    document.getElementById('capture-viewer-title').textContent = `${name} capture, full size`;
+    document.getElementById('capture-viewer-title').textContent = `${name} capture`;
+    // The viewer's body is the scroll region, so the copy drops the screen's own.
     const screen = panel.querySelector('.screen').cloneNode(true);
-    screen.setAttribute('aria-label', `${name} capture, full size`);
+    ['tabindex', 'role', 'aria-label'].forEach((name) => screen.removeAttribute(name));
     document.getElementById('capture-viewer-body').replaceChildren(screen, panel.querySelector('.capture-caption').cloneNode(true));
     button.focus({ preventScroll: true });
     viewer.showModal();

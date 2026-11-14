@@ -283,6 +283,17 @@ Layer: Core.
 - **Motion.** None: it opens and closes at once. Only the drawer slides, because it enters from an edge.
 - **Forced colors.** The shadow drops and the transparent border draws as the system edge, so the dialog keeps its outline over the page.
 
+### Viewer
+
+- **Anatomy.** A dialog that shows one screenshot, terminal capture, or figure at full size. It is a named exception to the dialog's task rule: the reader opened it to look, so it has no footer, and its header's close button, Escape, and the backdrop close it. The header holds only the title, in the dialog's 18px semibold `--font-ui` type, centred on the close button. The body is one scroll region with `--space-4` padding. The viewer is as wide as its content, up to the viewport minus `--space-8`, and as tall, up to the dynamic viewport height (`dvh`) minus `--space-8`.
+- **Size.** Full size is the content's own CSS size, such as a 2x screenshot at half its pixel width. The content scales down to fit the body's width only while it keeps at least 70% of that size; below 70% its text is too small to read, so it stays at full size and the body scrolls in both directions. A terminal capture follows the same 70% rule in its panel.
+- **Title.** The short name of what it shows, such as "Ticket screenshot" or "Build capture", not the image's alt text. The alt text stays on the image.
+- **Do.** Open every screenshot, capture, or figure that the page shows smaller than its full size in a viewer, from a native button or link, so all of them open the same way.
+- **Don't.** A footer with a Close button, a long alt text as the title, or a phone viewer that shrinks a screenshot to the screen's width so that its text cannot be read.
+- **Keyboard and screen reader.** As for the dialog. The scroll region is focusable and named by the title, so the arrow keys scroll it; its focus ring is inset, because the body clips it. Focus returns to the trigger on close.
+- **Phones.** At `max-width: 640px` it is the dialog's bottom sheet at full width, up to the dynamic viewport height minus `--space-4`. The scroll region contains its overscroll, so a pan that reaches the edge does not scroll the page behind.
+- **Motion.** None: as for the dialog.
+
 ## Drawer
 
 Layer: Core.
@@ -454,11 +465,11 @@ Layer: Identity.
 
 Layer: Identity.
 
-- **Anatomy.** A panel whose header holds mono tabs (one for each capture) and a Full size [quiet action](#quiet-action) at the end. The screen is the neutral `--color-terminal` plate, and a mono status-line caption sits below it on `--color-terminal-caption` with `--color-terminal-caption-text`. Full size opens the capture in a dialog.
+- **Anatomy.** A panel whose header holds mono tabs (one for each capture) and a Full size [quiet action](#quiet-action) at the end. The screen is the neutral `--color-terminal` plate, and a mono status-line caption sits below it on `--color-terminal-caption` with `--color-terminal-caption-text`. Full size opens the capture in a [viewer](#viewer).
 - **States.** Tabs take the tab states in the capture's palette, and Full size takes the quiet action states.
 - **Do.** Use it to show what a command prints, one tab per capture, with the path and branch in the status line.
 - **Don't.** A capture for a screenshot of a graphical app. Use a figure.
-- **Keyboard and screen reader.** Tabs follow the tabs spec. Full size opens the selected capture in a modal dialog named after it, and focus returns to the button when the dialog closes. Without JavaScript the button is hidden. Focus rings are inset, because the panel clips its content. Without JavaScript, every capture is listed under its own heading.
+- **Keyboard and screen reader.** Tabs follow the tabs spec. Full size opens the selected capture in a [viewer](#viewer) named after it, and focus returns to the button when the viewer closes. Without JavaScript the button is hidden. Focus rings are inset, because the panel clips its content. Without JavaScript, every capture is listed under its own heading.
 - **Header.** The whole panel, header included, is the `--color-terminal` plate in both page appearances, with a 1px `--color-terminal-border` edge. It scopes its own palette so the tabs read on it: current fill `--color-project-dark` at 20% over transparent, with a `--shadow-nav-current-dark` lift, hover `--color-terminal-text` at 4%, selected text, accent, and focus `--color-project-dark`, text `--color-terminal-text`, muted text `--color-terminal-caption-text`, and dividers `--color-terminal-border`. The tab list keeps its 4px block padding, and the Full size control stays centred on the tab row.
 - **Motion.** Tabs glide as in the tabs spec; the panel has no motion of its own.
 - **Forced colors.** The plate and the caption drop to the system background and text, the edge draws in the system colour, and the tabs follow the tabs rule.
