@@ -12,26 +12,21 @@
 // prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it.
 // dist/tokens.json and dist/tokens.js carry the values of every theme, resolved, for code, and
 // dist/themes/<id>.tokens.json is each theme file as written, for design-token tools.
+// theme-mapper/core.js carries the core tokens for the theme engine, and theme-mapper/*.d.ts its types,
+// generated from the JSDoc in theme-mapper/*.js, which the same step typechecks.
 //
 // Each group also carries reader-facing text for the site's Foundations page, which no output
 // above includes: an id, a title, a note, and roles (what each token is for, one entry per token,
 // with `backticks` for code).
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { basename, dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { over, parseColour, ratio } from './colour.mjs'
+import { DARK, LIGHT, NEUTRALS, applyTheme, flatTokens, reference, resolveData, valueFor } from '../theme-mapper/engine.js'
 
-const LIGHT = 0
-const DARK = 1
-const reference = /\{([\w-]+)\}/g
 export const DEFAULT_THEME = 'graphite-indigo'
 export const THEME_FILE = '.tokens.json'
 const SOURCE = `tokens/core.json and tokens/themes/${DEFAULT_THEME}${THEME_FILE}`
-
-const flatTokens = (data) => Object.fromEntries(data.groups.flatMap(({ tokens }) => Object.entries(tokens)))
-
-// The core neutrals a theme may replace, as a set: a palette that brings its own neutrals sets all of them.
-export const NEUTRALS = ['color-bg', 'color-surface', 'color-surface-raised', 'color-surface-muted', 'color-row-hover', 'color-border-subtle', 'color-border', 'color-text', 'color-muted']
 
 // A theme file is a W3C Design Tokens file (Format and Color modules 2025.10) holding only the theme's
 // inputs: a group per mode with the hue (`color-project`) and optionally the whole set of neutrals, and
@@ -128,46 +123,6 @@ export const parseTheme = (file) => {
   return { problems, inputs }
 }
 
-// The core tokens with one theme's inputs filled in. Core leaves the hue pair empty; its font stacks and
-// neutrals stay unless the theme names its own. Then each selected-fill text token takes its readable value.
-export const applyTheme = (core, theme) => {
-  const data = structuredClone(core)
-  const identity = data.groups.find(({ identity: isIdentity }) => isIdentity).tokens
-  identity['color-project'] = [theme.hue.light, '{color-project-dark}']
-  identity['color-project-dark'] = theme.hue.dark
-  if (theme.fonts?.ui) identity['font-ui'] = theme.fonts.ui
-  if (theme.fonts?.mono) identity['font-mono'] = theme.fonts.mono
-  if (theme.neutrals) for (const name of NEUTRALS) groupOf(data, name).tokens[name] = [theme.neutrals.light[name], theme.neutrals.dark[name]]
-  return withReadableText(data)
-}
-
-const groupOf = (data, name) => data.groups.find(({ tokens }) => name in tokens)
-
-// Each selected fill's text, with how its contrast is measured on resolved values: the lowest ratio
-// over every place the fill sits. The candidates come from the tokens' roles in core.json.
-const TEXT_ON_FILL = {
-  'color-nav-current-text': (ink, value) => Math.min(...['color-bg', 'color-surface', 'color-surface-raised']
-    .map((surface) => ratio(ink, over(value('color-nav-current'), value(surface))))),
-  'color-segmented-current-text': (ink, value) => ratio(ink, over(value('color-control-thumb'), value('color-well'))),
-}
-const TEXT_CANDIDATES = ['{color-accent}', '{color-text}', 'black', 'white']
-
-// Sets each TEXT_ON_FILL token to its first candidate that reaches 4.5:1, per mode. When none does, the
-// accent stays, so the contrast tests fail on it rather than on a silently chosen colour.
-const withReadableText = (data) => {
-  const values = resolveData(data)
-  for (const [name, measure] of Object.entries(TEXT_ON_FILL)) {
-    const pick = (mode) => {
-      const value = (token) => parseColour(values[mode][token])
-      const colour = (candidate) => parseColour(candidate.replace(reference, (_, target) => values[mode][target]))
-      return TEXT_CANDIDATES.find((candidate) => measure(colour(candidate), value) >= 4.5) ?? TEXT_CANDIDATES[0]
-    }
-    const [light, dark] = [pick('light'), pick('dark')]
-    groupOf(data, name).tokens[name] = light === dark ? light : [light, dark]
-  }
-  return data
-}
-
 // The token source: tokens/core.json and every theme in tokens/themes/, the default first, then by name.
 // Each theme carries its source data with its inputs applied, and its file's text to ship. A theme file
 // with a problem stops the build.
@@ -203,12 +158,6 @@ export const docProblems = (data) => {
     }
   })
   return problems
-}
-
-const valueFor = (tokens, name, mode) => {
-  const value = tokens[name]
-  if (value === undefined) throw new Error(`Unknown token "${name}"`)
-  return Array.isArray(value) ? value[mode] : value
 }
 
 const block = (indent, declarations) => declarations.map(([name, value]) => `${indent}${name}: ${value};`)
@@ -278,14 +227,6 @@ body { background: var(--color-bg); color: var(--color-text); }
   }
 }
 `
-
-// One theme's values in light and dark, with every reference substituted.
-function resolveData(data) {
-  const tokens = flatTokens(data)
-  const resolve = (name, mode) => valueFor(tokens, name, mode).replace(reference, (_, target) => resolve(target, mode))
-  const values = (mode) => Object.fromEntries(Object.keys(tokens).map((name) => [name, resolve(name, mode)]))
-  return { light: values(LIGHT), dark: values(DARK) }
-}
 
 const standaloneResolver = (data) => {
   const tokens = flatTokens(data)
@@ -400,6 +341,43 @@ export const renderTokensDts = ({ data }, themes) => [
   '',
 ].join('\n')
 
+// The core tokens for the theme engine, without the site's reader-facing text.
+export const renderCoreJs = (core) => [
+  '// Generated from tokens/core.json by scripts/build-tokens.mjs. Do not edit.',
+  "/** The core tokens: every theme's base. @type {import('./engine.js').TokenSource} */",
+  `export const core = ${JSON.stringify({ groups: core.groups.map(({ identity, tokens }) => ({ ...(identity && { identity }), tokens })) }, null, 2)}`,
+  '',
+].join('\n')
+
+// The theme mapper's .d.ts files, from the JSDoc in theme-mapper/*.js, and its typecheck: any diagnostic
+// stops the build. tsc reads a .d.ts beside a .js in place of the .js, so the tracked declarations would
+// type the sources as the last build left them. It compiles a copy of the sources, with this build's
+// core.js, in a temporary folder instead. The lib is ES2022 alone, so the mapper cannot use a DOM or
+// Node API and runs in both.
+const renderDeclarations = async (root, coreJs) => {
+  const { default: ts } = await import('typescript')
+  const dir = mkdtempSync(join(tmpdir(), 'theme-mapper-'))
+  try {
+    const sources = readdirSync(`${root}theme-mapper`).filter((file) => file.endsWith('.js') && file !== 'core.js')
+    for (const file of sources) copyFileSync(`${root}theme-mapper/${file}`, join(dir, file))
+    writeFileSync(join(dir, 'core.js'), coreJs)
+    const program = ts.createProgram([...sources, 'core.js'].map((file) => join(dir, file)), {
+      allowJs: true, checkJs: true, declaration: true, emitDeclarationOnly: true, strict: true, types: [],
+      target: ts.ScriptTarget.ES2022, lib: ['lib.es2022.d.ts'], module: ts.ModuleKind.ES2022,
+      moduleResolution: ts.ModuleResolutionKind.Bundler, outDir: join(dir, 'out'),
+    })
+    const files = []
+    const { diagnostics } = program.emit(undefined, (file, text) => files.push([`theme-mapper/${basename(file)}`, text]))
+    const problems = [...ts.getPreEmitDiagnostics(program), ...diagnostics]
+    if (problems.length > 0) {
+      throw new Error(ts.formatDiagnostics(problems, { getCanonicalFileName: (file) => file, getCurrentDirectory: () => dir, getNewLine: () => '\n' }))
+    }
+    return files.toSorted(([a], [b]) => a.localeCompare(b))
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+}
+
 export const outputs = (themes) => {
   const [defaultTheme] = themes
   return [
@@ -414,7 +392,7 @@ export const outputs = (themes) => {
   ]
 }
 
-const run = () => {
+const run = async () => {
   const root = fileURLToPath(new URL('..', import.meta.url))
   const check = process.argv.slice(2).includes('--check')
   const { core, themes } = readTokens(root)
@@ -427,7 +405,8 @@ const run = () => {
   }
 
   const stale = []
-  const files = outputs(themes)
+  const coreJs = renderCoreJs(core)
+  const files = [...outputs(themes), ['theme-mapper/core.js', coreJs], ...await renderDeclarations(root, coreJs)]
   // A theme that was renamed or removed leaves its generated files behind; they are stale too.
   // Only theme outputs are candidates: the licences and notices beside them stay. A missing folder has none.
   const leftover = (existsSync(`${root}dist/themes`) ? readdirSync(`${root}dist/themes`) : []).map((file) => `dist/themes/${file}`)
@@ -456,4 +435,4 @@ const run = () => {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) run()
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await run()
