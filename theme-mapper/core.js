@@ -136,14 +136,8 @@ export const core = {
     },
     {
       "tokens": {
-        "color-command-bg": [
-          "color-mix(in srgb, {color-project} 25%, #101010)",
-          "color-mix(in srgb, {color-project} 16%, black)"
-        ],
-        "color-command-border": [
-          "transparent",
-          "color-mix(in srgb, {color-project} 28%, black)"
-        ],
+        "color-command-bg": "{color-code}",
+        "color-command-border": "{color-border-subtle}",
         "color-terminal": "#0a0c0e",
         "color-terminal-text": "#e6e9eb",
         "color-terminal-border": "#2a3036",

@@ -33,7 +33,7 @@
  * @property {Mode} appearance The mode the theme is for; a page shows it in that mode only.
  * @property {boolean} highContrast Whether VS Code marks it high contrast (`hc` or `hcLight`).
  * @property {string} hue `--color-project`.
- * @property {string} hueOnDark `--color-project-dark`: the prompt on the command plate, which is dark in both modes.
+ * @property {string} hueOnDark `--color-project-dark`: the terminal capture accent, on its dark plate in both modes.
  * @property {Record<string, string>} neutrals Every neutral token, by name, such as `color-bg`.
  * @property {Record<string, string>} syntax The syntax colours the theme sets, by role, such as `comment`. A role
  *   it leaves out stays core.
@@ -120,7 +120,7 @@ export type MappedTheme = {
      */
     hue: string;
     /**
-     * `--color-project-dark`: the prompt on the command plate, which is dark in both modes.
+     * `--color-project-dark`: the terminal capture accent, on its dark plate in both modes.
      */
     hueOnDark: string;
     /**

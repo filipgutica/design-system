@@ -516,14 +516,9 @@
 
   /* ================= Identity: terminal folio ================= */
 
-  /* Command plate: dark in both themes and tinted with the project hue. Its source panel is the plate darkened, so it reads as a panel on it. */
-  /* The plate is dark in both themes, so its focus ring takes the dark-theme accent, which reaches 3:1 on it,
-     and muted text, such as Copy at rest, takes the caption colour. */
-  .code.command { --color-code: color-mix(in srgb, var(--color-command-bg) 55%, var(--color-terminal)); --color-code-text: var(--color-terminal-text); --color-muted: var(--color-terminal-caption-text); --color-focus: var(--color-project-dark); border-color: var(--color-command-border); background: var(--color-command-bg); color: var(--color-terminal-text); }
-  .code.command .code-head { color: var(--color-terminal-caption-text); }
-  .code.command .code-head .lang { color: var(--color-terminal-caption-text); }
+  /* Command plate: the normal code block with a CSS-drawn accent prompt. */
   /* The prompt is drawn by CSS, so copied and spoken text omit it. */
-  .code.command .line::before { content: "$ " / ""; flex: none; white-space: pre; color: var(--color-project-dark); user-select: none; }
+  .code.command .line::before { content: "$ " / ""; flex: none; white-space: pre; color: var(--color-accent); user-select: none; }
 
   /* Terminal capture: neutral plate with a mono status line. The header stays terminal-dark in
      both page appearances, so the capture scopes its own tab, text, and focus colours. */
@@ -915,7 +910,7 @@
     </div>
     <div class="navlist" role="group" aria-labelledby="rail-identity">
       <span class="group-label" id="rail-identity">Identity</span>
-      <a href="#command-plate" data-terms="command plate identity a shell command on a hue-tinted plate. install shell terminal">Command plate</a><a href="#terminal-capture" data-terms="terminal capture identity a recorded terminal screen with a status line. screenshot tui">Terminal capture</a><a href="#site-header" data-terms="site header identity the ~/name header with project switcher and appearance. header project switcher appearance">Site header</a><a href="#page-type-and-helpers" data-terms="page type and helpers identity mono headings, steps, definitions, facts, and the footer. headings steps footer definitions">Page type and helpers</a>
+      <a href="#command-plate" data-terms="command plate identity a shell command in the code well. install shell terminal">Command plate</a><a href="#terminal-capture" data-terms="terminal capture identity a recorded terminal screen with a status line. screenshot tui">Terminal capture</a><a href="#site-header" data-terms="site header identity the ~/name header with project switcher and appearance. header project switcher appearance">Site header</a><a href="#page-type-and-helpers" data-terms="page type and helpers identity mono headings, steps, definitions, facts, and the footer. headings steps footer definitions">Page type and helpers</a>
     </div>
     <div class="navlist" role="group" aria-labelledby="rail-reference">
       <span class="group-label" id="rail-reference">Reference</span>
@@ -945,7 +940,7 @@
       <div><h3><a href="#group-containers">Containers and overlays</a></h3><ul><li><a href="#surface-and-card">Surface and card</a><span>Panels and cards for parallel, comparable content.</span></li><li><a href="#figure">Figure</a><span>An image or diagram with a caption.</span></li><li><a href="#dialog">Dialog</a><span>A modal task that needs an answer before the page continues.</span></li><li><a href="#drawer">Drawer</a><span>A side panel, such as phone navigation.</span></li></ul></div>
       <div><h3><a href="#group-navigation">Navigation</a></h3><ul><li><a href="#navigation-list">Navigation list</a><span>Rows of links with current page and current location.</span></li><li><a href="#section-rail">Section rail</a><span>A sticky list of sections that moves into a drawer on phones.</span></li><li><a href="#find-field">Find field</a><span>Filter a navigation list as you type.</span></li><li><a href="#breadcrumbs">Breadcrumbs</a><span>The path from the site to this page.</span></li><li><a href="#pager">Pager</a><span>Previous and next pages in a sequence.</span></li><li><a href="#tabs">Tabs</a><span>Switch panels about one object, without leaving the page.</span></li><li><a href="#skip-link">Skip link</a><span>Jump past the header to the content.</span></li><li><a href="#keyboard-key">Keyboard key</a><span>Show a key or shortcut in text.</span></li></ul></div>
       <div><h3><a href="#group-code">Code and examples</a></h3><ul><li><a href="#code-block">Code block</a><span>Source code with an optional header and Copy, and a live example above it.</span></li></ul></div>
-      <div><h3><a href="#group-identity">Identity: terminal folio</a></h3><ul><li><a href="#command-plate">Command plate</a><span>A shell command on a hue-tinted plate.</span></li><li><a href="#terminal-capture">Terminal capture</a><span>A recorded terminal screen with a status line.</span></li><li><a href="#site-header">Site header</a><span>The ~/name header with project switcher and appearance.</span></li><li><a href="#page-type-and-helpers">Page type and helpers</a><span>Mono headings, steps, definitions, facts, and the footer.</span></li></ul></div>
+      <div><h3><a href="#group-identity">Identity: terminal folio</a></h3><ul><li><a href="#command-plate">Command plate</a><span>A shell command in the code well.</span></li><li><a href="#terminal-capture">Terminal capture</a><span>A recorded terminal screen with a status line.</span></li><li><a href="#site-header">Site header</a><span>The ~/name header with project switcher and appearance.</span></li><li><a href="#page-type-and-helpers">Page type and helpers</a><span>Mono headings, steps, definitions, facts, and the footer.</span></li></ul></div>
     </div>
   </section>
 
@@ -1434,12 +1429,12 @@
 
   <section class="component" id="command-plate" data-layer="Identity" aria-labelledby="cmd-title">
     <header><h3 id="cmd-title">Command plate</h3><span class="badge">Identity</span><a href="components.md#command-plate">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="command-plate" aria-label="Copy link to Command plate" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
-    <p class="purpose">A shell command on a hue-tinted plate.</p>
+    <p class="purpose">A shell command in the code well.</p>
     <dl class="guidance"><dt>Do</dt><dd>Use it for a shell command the reader runs, one command per line.</dd><dt>Don’t</dt><dd>A <code>$</code> typed into the command. CSS draws the prompt; a typed one is copied with the command.</dd></dl>
     <div class="row"><h4>Commands</h4><div class="states">
       <div class="state wide"><div class="code command compact"><pre tabindex="0" role="region" aria-label="Install command"><code id="cmd-install"><span class="line"><span>brew install filipgutica/tap/filip-stack</span></span></code></pre><button class="quiet-action copy" type="button" data-copy="cmd-install" aria-label="Copy install command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Compact, live; the <code>$</code> is drawn by CSS</span></div>
       <div class="state wide"><div class="code command"><div class="code-head"><b>Set up</b><button class="quiet-action copy" type="button" data-copy="cmd-setup"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="Set up commands"><code id="cmd-setup"><span class="line"><span>pnpm install --frozen-lockfile</span></span><span class="line"><span>pnpm check</span></span></code></pre></div><span class="caption">With a header, two lines</span></div>
-      <div class="state wide" inert><div class="code command compact"><pre><code><span class="line"><span>filip-stack apply</span></span></code></pre><button class="quiet-action copy is-focus" type="button" aria-label="Copy apply command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Focus visible on Copy, in <code>--color-project-dark</code></span></div>
+      <div class="state wide" inert><div class="code command compact"><pre><code><span class="line"><span>filip-stack apply</span></span></code></pre><button class="quiet-action copy is-focus" type="button" aria-label="Copy apply command"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div><span class="caption">Focus visible on Copy, in <code>--color-focus</code></span></div>
     </div></div>
   </section>
 

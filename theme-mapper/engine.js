@@ -262,6 +262,7 @@ const statusInk = (tone) => [mix(`{${tone}}`, 75, '{color-status-ink}'), mix(`{$
  */
 export const CHECKS = [
   // Rows, tabs, segmented buttons, and code blocks draw their ring inside, over their own fill.
+  // Accent on code also measures the shell prompt: color-focus follows color-accent.
   { id: 'focus', label: 'Focus ring on the page, a surface, a raised surface, and the fills an inset ring sits on', min: 3, kind: 'theme',
     pairs: on(['{color-focus}'], [
       ...ON_SURFACES, '{color-row-hover}', '{color-well}', ['{color-control-thumb}', '{color-well}'], '{color-code}',
@@ -277,10 +278,9 @@ export const CHECKS = [
     pairs: on(['{color-segmented-current-text}'], [['{color-control-thumb}', '{color-well}']]) },
   { id: 'primary', label: 'Primary label on its fill, at rest and on hover', min: 4.5, kind: 'theme',
     pairs: on(['{color-accent-text}'], ['{color-accent}', '{color-button-hover}']) },
-  { id: 'prompt', label: 'The $ prompt on the command plate', min: 3, kind: 'theme',
-    pairs: on(['{color-project-dark}'], ['{color-command-bg}']) },
   { id: 'text', label: 'Text and muted text on every fill that carries them, at rest, on hover, and pressed', min: 4.5, kind: 'theme',
     pairs: [
+      // Code and command text are included: color-code follows color-surface, and color-code-text follows color-text.
       // Surfaces, neutral badges, pressed and disabled-looking wells, fields, hovered rows, radio cards, and pressed toggles.
       ...on(['{color-text}', '{color-muted}'], [
         ...ON_SURFACES, '{color-surface-muted}', '{color-well}', '{color-field-bg}', '{color-row-hover}',
@@ -313,8 +313,6 @@ export const CHECKS = [
   // those pairs as the theme's.
   { id: 'syntax', label: 'Syntax colours on a code block', min: 4.5, kind: 'core',
     pairs: on(SYNTAX_ROLES.map((role) => `{color-syntax-${role}}`), ['{color-code}']) },
-  { id: 'command', label: 'Text and captions on the command plate', min: 4.5, kind: 'core',
-    pairs: on(['{color-terminal-text}', '{color-terminal-caption-text}'], ['{color-command-bg}', mix('{color-command-bg}', 55, '{color-terminal}')]) },
 ]
 
 /** @typedef {{ ink: string, fill: string, ratio: number }} PairResult */

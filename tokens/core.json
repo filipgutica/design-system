@@ -4,11 +4,11 @@
       "id": "identity-inputs",
       "title": "Identity inputs",
       "note": "The four lines a theme sets on `:root`: the hue for light and dark, from its file in `tokens/themes/`, and the two font stacks. Every other token follows from them.",
-      "comment": "Identity layer: a project swaps these four lines. --color-project is the light-theme hue;\n--color-project-dark is the dark-theme hue, also used on dark plates in both themes.",
+      "comment": "Identity layer: a project swaps these four lines. --color-project is the light-theme hue;\n--color-project-dark is the dark-theme hue, also used on terminal captures in both themes.",
       "identity": true,
       "roles": {
         "color-project": "The project hue; `--color-accent` follows it",
-        "color-project-dark": "The `$` prompt on the command plate",
+        "color-project-dark": "The dark-theme hue and the terminal capture accent",
         "font-ui": "Prose, h3 and below, application section headings, labels, and controls",
         "font-mono": "Identity, documentation and product page titles and section headings, navigation rails, metadata, captions, code, identifiers, and keys"
       },
@@ -206,30 +206,24 @@
     {
       "id": "terminal-plates",
       "title": "Terminal plates",
-      "note": "Derived from the hue: the tinted command plate and the neutral terminal capture of the terminal folio identity. A project without plates leaves them unused.",
-      "comment": "Identity layer, derived: terminal folio plates. Commands take the hue; captures stay neutral.\nA project without terminal plates leaves these unused.",
+      "note": "Terminal captures of the terminal folio identity, plus command tokens kept for compatibility with the code well.",
+      "comment": "Identity layer: neutral terminal captures in both appearances.\nCommand tokens stay as compatibility aliases for the code well and its edge.",
       "notes": {
         "shadow-nav-current-dark": "The terminal capture's header stays dark in both appearances, so its selected tab keeps the dark lift."
       },
       "roles": {
-        "color-command-bg": "Command plate, tinted with the hue, in both themes",
-        "color-command-border": "Command plate edge; transparent in light",
+        "color-command-bg": "Kept for compatibility: equals the code well (`--color-code`) in both appearances",
+        "color-command-border": "Kept for compatibility: equals the code well edge (`--color-border-subtle`) in both appearances",
         "color-terminal": "Terminal capture plate, in both themes",
-        "color-terminal-text": "Command text",
+        "color-terminal-text": "Terminal capture text",
         "color-terminal-border": "Terminal plate edge",
         "color-terminal-caption": "Status-line caption under a terminal capture",
         "color-terminal-caption-text": "The status-line caption under a terminal capture",
         "shadow-nav-current-dark": "The selected tab's lift in a terminal capture header, which stays dark in both appearances"
       },
       "tokens": {
-        "color-command-bg": [
-          "color-mix(in srgb, {color-project} 25%, #101010)",
-          "color-mix(in srgb, {color-project} 16%, black)"
-        ],
-        "color-command-border": [
-          "transparent",
-          "color-mix(in srgb, {color-project} 28%, black)"
-        ],
+        "color-command-bg": "{color-code}",
+        "color-command-border": "{color-border-subtle}",
         "color-terminal": "#0a0c0e",
         "color-terminal-text": "#e6e9eb",
         "color-terminal-border": "#2a3036",

@@ -22,12 +22,12 @@ test('Graphite Indigo Dark maps its own colours, with no problems', () => {
   assert.deepEqual(mapped.problems, [])
 })
 
-test('Graphite Indigo Light maps its own colours, and takes the button text for the prompt on the dark plate', () => {
+test('Graphite Indigo Light maps its own colours, and takes the button text for the terminal capture accent', () => {
   const mapped = mapVsCodeTheme(graphiteIndigo('light'))
   assert.equal(mapped.appearance, 'light')
   assert.deepEqual(mapped.neutrals, neutrals(['#f8f9fb', '#e7e8ec', '#ffffff', '#ffffff', '#dfe1e7', '#d8dbe2', '#5d626c', '#222326', '#5d626c']))
   assert.equal(mapped.hue, '#6359a7')
-  // Every hue key is too dark for the command plate, so the next candidate is the button's text.
+  // Every hue key is too dark for the terminal capture, so the next candidate is the button's text.
   assert.equal(mapped.hueOnDark, '#ffffff')
   // Its syntax colours are VS Code's Light+, four of them a step darker so they read on the surface a code well takes.
   assert.equal(mapped.syntax.keyword, '#0000ff')
@@ -77,7 +77,7 @@ test('a theme that fails after selection keeps its colours and lists each failur
   const mapped = mapVsCodeTheme(theme)
   // No hue key passes, so the first present one stays, unchanged.
   assert.equal(mapped.hue, theme.colors['button.background'])
-  assert.deepEqual(failing(mapped), ['theme focus', 'theme nav', 'theme primary', 'theme prompt', 'theme terminal', 'core status'])
+  assert.deepEqual(failing(mapped), ['theme focus', 'theme nav', 'theme primary', 'theme terminal', 'core status'])
   for (const problem of mapped.problems) {
     assert.equal(problem.mode, 'dark')
     assert.ok(!(problem.ratio >= problem.min))

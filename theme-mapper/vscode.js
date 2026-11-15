@@ -40,7 +40,7 @@ import { CHECKS, LIGHT, NEUTRALS, SYNTAX_ROLES, TEXT_ON_FILL_TOKENS, applyTheme,
  * @property {Mode} appearance The mode the theme is for; a page shows it in that mode only.
  * @property {boolean} highContrast Whether VS Code marks it high contrast (`hc` or `hcLight`).
  * @property {string} hue `--color-project`.
- * @property {string} hueOnDark `--color-project-dark`: the prompt on the command plate, which is dark in both modes.
+ * @property {string} hueOnDark `--color-project-dark`: the terminal capture accent, on its dark plate in both modes.
  * @property {Record<string, string>} neutrals Every neutral token, by name, such as `color-bg`.
  * @property {Record<string, string>} syntax The syntax colours the theme sets, by role, such as `comment`. A role
  *   it leaves out stays core.
@@ -290,9 +290,9 @@ export const mapVsCodeTheme = (theme) => {
       // When no hue key passes, the first present one stays and its failures are reported; without any, the text.
       const hue = select(HUE_KEYS, (value) => huePasses(value, value, ['focus', 'nav', 'thumb', 'primary']))
         ?? HUE_KEYS.map(colour).find((value) => value !== undefined) ?? text
-      // The command plate and a terminal capture are dark in both modes; a dark theme's hue already reads on them.
+      // A terminal capture is dark in both modes; a dark theme's hue already reads on it.
       const hueOnDark = appearance === 'dark' ? hue
-        : select([...HUE_KEYS, 'button.foreground'], (value) => huePasses(hue, value, ['prompt', 'terminal'])) ?? bg
+        : select([...HUE_KEYS, 'button.foreground'], (value) => huePasses(hue, value, ['terminal'])) ?? bg
       return { appearance, hue, hueOnDark, neutrals }
     }
     // Muted text sits on more fills than the surfaces, such as a hovered row; the text stands in when no key reads on all of them.
