@@ -5,6 +5,7 @@ import light from '../../language/editor-themes/graphite-indigo/themes/graphite-
 import { core } from '../../theme-mapper/core.js'
 import { applyTheme, resolveData } from '../../theme-mapper/engine.js'
 import { themeInputs } from '../../theme-mapper/vscode.js'
+import { parseVsCodeTheme } from '@filipgutica/design-system/open-vsx'
 
 // An imported theme in the mode opposite to the reader's system: the inline variables and the forced
 // data-theme must win over tokens.css's own blocks for that mode, so every token computes to the engine's value.
@@ -38,3 +39,10 @@ for (const { theme, colorScheme } of cases) {
     })
   })
 }
+
+// A theme file read through ./open-vsx goes straight into the mapper, with no cast, and maps as the parsed JSON does.
+test('a theme parsed by ./open-vsx maps without a cast', () => {
+  const parsed = parseVsCodeTheme({ source: JSON.stringify(light), fileName: 'graphite-indigo-light-color-theme.json' })
+  const mapped: MappedTheme = mapVsCodeTheme(parsed)
+  expect(mapped.syntax).toEqual(mapVsCodeTheme(light).syntax)
+})
