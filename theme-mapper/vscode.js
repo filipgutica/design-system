@@ -17,7 +17,8 @@ import { CHECKS, LIGHT, NEUTRALS, SYNTAX_ROLES, TEXT_ON_FILL_TOKENS, applyTheme,
  *   theme then never counts as high contrast. Many theme files leave the type to the extension manifest's `uiTheme`;
  *   translate it: `vs` is `light`, `vs-dark` is `dark`, `hc-black` is `hc`, and `hc-light` is `hcLight`.
  * @property {Record<string, unknown>} [colors] Workbench colours by key, as #rgb, #rgba, #rrggbb, or #rrggbbaa.
- * @property {unknown[]} [tokenColors] TextMate rules, `{ scope, settings: { foreground } }`. Merge an `include`'s
+ * @property {unknown} [tokenColors] TextMate rules, `{ scope, settings: { foreground } }`, as the file supplies them;
+ *   anything but an array of rules is ignored, so `./open-vsx` output passes as is. Merge an `include`'s
  *   rules first, so the including file's rules come later and win.
  */
 /**
