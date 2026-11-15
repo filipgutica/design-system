@@ -171,7 +171,14 @@ export const core = {
         "color-syntax-comment": [
           "#626772",
           "#a0a6b1"
-        ]
+        ],
+        "color-syntax-function": "{color-syntax-keyword}",
+        "color-syntax-type": "{color-syntax-number}",
+        "color-syntax-variable": "{color-code-text}",
+        "color-syntax-operator": "{color-muted}",
+        "color-syntax-punctuation": "{color-muted}",
+        "color-syntax-tag": "{color-syntax-keyword}",
+        "color-syntax-attribute": "{color-syntax-number}"
       }
     },
     {

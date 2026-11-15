@@ -249,7 +249,14 @@
         "color-syntax-keyword": "Keywords in source code",
         "color-syntax-string": "Strings in source code",
         "color-syntax-number": "Numbers in source code",
-        "color-syntax-comment": "Comments in source code"
+        "color-syntax-comment": "Comments in source code",
+        "color-syntax-function": "Function names in source code; follows keywords unless a theme sets it",
+        "color-syntax-type": "Type and class names in source code; follows numbers unless a theme sets it",
+        "color-syntax-variable": "Variables in source code; follows the code text unless a theme sets it",
+        "color-syntax-operator": "Operators in source code; follows the muted text unless a theme sets it",
+        "color-syntax-punctuation": "Punctuation in source code; follows the muted text unless a theme sets it",
+        "color-syntax-tag": "Markup tag names in source code; follows keywords unless a theme sets it",
+        "color-syntax-attribute": "Markup attribute names in source code; follows numbers unless a theme sets it"
       },
       "tokens": {
         "color-code": "{color-surface}",
@@ -269,7 +276,14 @@
         "color-syntax-comment": [
           "#626772",
           "#a0a6b1"
-        ]
+        ],
+        "color-syntax-function": "{color-syntax-keyword}",
+        "color-syntax-type": "{color-syntax-number}",
+        "color-syntax-variable": "{color-code-text}",
+        "color-syntax-operator": "{color-muted}",
+        "color-syntax-punctuation": "{color-muted}",
+        "color-syntax-tag": "{color-syntax-keyword}",
+        "color-syntax-attribute": "{color-syntax-number}"
       }
     },
     {

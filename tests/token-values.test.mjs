@@ -25,7 +25,10 @@ const standaloneModes = (css) => {
 }
 
 // Tokens added after DS-1, each with its own tests. The parity checks leave out only these.
-const ADDED_SINCE_DS1 = ['--color-status-ink']
+const ADDED_SINCE_DS1 = [
+  '--color-status-ink',
+  ...['function', 'type', 'variable', 'operator', 'punctuation', 'tag', 'attribute'].map((role) => `--color-syntax-${role}`),
+]
 const withoutAdded = (css) => css.replace(new RegExp(`^\\s*(?:${ADDED_SINCE_DS1.join('|')}):[^;]+;\\n`, 'gm'), '')
 
 const handTokens = renameTokens({ text: read('tests/fixtures/ds-1-tokens.css'), table: readRenameTable(read('language/decisions.md')) })
