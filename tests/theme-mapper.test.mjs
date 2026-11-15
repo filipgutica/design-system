@@ -3,7 +3,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { ThemeValidationError, mapVsCodeTheme, themeVariables } from '@filipgutica/design-system/theme-mapper'
-import { NEUTRALS } from '../theme-mapper/engine.js'
+import { NEUTRALS, SYNTAX_ROLES } from '../theme-mapper/engine.js'
 
 const json = (path) => JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8'))
 const fixture = (name) => json(`fixtures/vscode-themes/${name}.json`)
@@ -101,7 +101,7 @@ test('themeVariables sets the hue pair, the neutrals, and the selected-fill text
   const variables = themeVariables(mapped)
   assert.deepEqual(Object.keys(variables), [
     '--color-project', '--color-project-dark', ...NEUTRALS.map((name) => `--${name}`), '--color-nav-current-text', '--color-segmented-current-text',
-    ...Object.keys(mapped.syntax).map((role) => `--color-syntax-${role}`),
+    ...SYNTAX_ROLES.map((role) => `--color-syntax-${role}`),
   ])
   assert.equal(variables['--color-project'], '#6359a7')
   assert.equal(variables['--color-project-dark'], '#ffffff')
@@ -144,10 +144,16 @@ test('an imported theme keeps its own syntax colours, and a failing one is the t
   assert.deepEqual(syntax.map(({ kind, pairs }) => [kind, pairs.map(({ ink }) => ink)]), [
     ['theme', ['{color-syntax-comment}', '{color-syntax-punctuation}']],
   ])
-  // The variables set the roles the theme set, and leave the others to follow their core tokens.
+  // The variables set the theme's roles, and the core colour for each role it leaves out, so applying another
+  // theme replaces every one of them.
   const variables = themeVariables(mapped)
   assert.equal(variables['--color-syntax-comment'], '#6272a4')
-  assert.equal('--color-syntax-number' in variables, false)
+  assert.equal(variables['--color-syntax-number'], '#d5b98c')
+  // Tag follows keyword, which the theme sets.
+  assert.equal(variables['--color-syntax-tag'], '#ff79c6')
+  const plain = themeVariables(mapVsCodeTheme({ ...DRACULA_LIKE, tokenColors: undefined }))
+  assert.deepEqual(Object.keys(plain), Object.keys(variables))
+  assert.equal(plain['--color-syntax-comment'], '#a0a6b1')
 })
 
 test('a role the theme leaves out stays core, so a core syntax colour that fails is core\'s problem', () => {
@@ -172,11 +178,14 @@ test('each role takes the rule nearest its scope family, a later rule winning a 
     // A selector with context counts as its last scope.
     { scope: 'meta.embedded string', settings: { foreground: '#444444' } },
     { scope: 'string', settings: { foreground: '#555555' } },
-    // Not readable rules are skipped.
+    // Not readable rules are skipped, and one that cannot be read does not displace one that can.
     { scope: 'comment', settings: {} },
+    { scope: 'variable', settings: { foreground: '#777777' } },
+    { scope: 'variable', settings: { foreground: 'not-a-colour' } },
+    { scope: 'variable', settings: { foreground: null } },
     { settings: { foreground: '#666666' } },
     null,
-  ]), { keyword: '#111111', operator: '#333333', string: '#555555' })
+  ]), { keyword: '#111111', operator: '#333333', string: '#555555', variable: '#777777' })
   assert.deepEqual(syntaxOf('not rules'), {})
 })
 

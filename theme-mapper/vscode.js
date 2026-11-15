@@ -108,7 +108,8 @@ const syntaxColours = (rules) => {
   for (const rule of Array.isArray(rules) ? rules : []) {
     const foreground = rule?.settings?.foreground
     const scopes = typeof rule?.scope === 'string' ? [rule.scope] : rule?.scope
-    if (foreground === undefined || !Array.isArray(scopes)) continue
+    // A colour that cannot be read is skipped before it can displace a readable rule.
+    if (readColour(foreground) === undefined || !Array.isArray(scopes)) continue
     for (const selector of scopes.filter((scope) => typeof scope === 'string').flatMap((scope) => scope.split(','))) {
       for (const { role, extra } of rolesForScope(selector.trim().split(/\s+/).at(-1) ?? '')) {
         if (!(extra > (found[role]?.extra ?? Infinity))) found[role] = { extra, foreground }
@@ -327,8 +328,9 @@ const HEX = /^#[\da-f]{6}$/i
 
 /**
  * The CSS custom properties a mapped theme sets, by name with their dashes: the hue pair, the neutrals,
- * the text on the selected fills, as the engine resolves them in the theme's mode, and the syntax colours the
- * theme sets. A syntax role it leaves out is not set, so it keeps following its core token. Set them as inline
+ * the text on the selected fills, and every syntax colour, as the engine resolves them in the theme's mode. Each
+ * theme sets the same properties, so applying one replaces the last; a syntax role the theme leaves out takes
+ * its core colour. Set them as inline
  * properties on the root element, with `data-theme` forced to the theme's appearance. Experimental.
  * @param {ThemeColours} theme
  * @returns {Record<string, string>}
@@ -352,6 +354,6 @@ export const themeVariables = (theme) => {
   }
   const values = resolveData(applyTheme(core, themeInputs(theme)))[appearance]
   return Object.fromEntries([
-    'color-project', 'color-project-dark', ...NEUTRALS, ...TEXT_ON_FILL_TOKENS, ...Object.keys(syntax).map((role) => `color-syntax-${role}`),
+    'color-project', 'color-project-dark', ...NEUTRALS, ...TEXT_ON_FILL_TOKENS, ...SYNTAX_ROLES.map((role) => `color-syntax-${role}`),
   ].map((name) => [`--${name}`, values[name]]))
 }
