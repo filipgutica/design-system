@@ -14,12 +14,12 @@
 // dist/themes/<id>.tokens.json is each theme file as written, for design-token tools.
 // theme-mapper/core.js carries the core tokens for the theme engine, and theme-mapper/*.d.ts its types,
 // generated from the JSDoc in theme-mapper/*.js, which the same step typechecks.
+// open-vsx/*.d.ts is generated and checked separately, with the web APIs its client needs.
 //
 // Each group also carries reader-facing text for the site's Foundations page, which no output
 // above includes: an id, a title, a note, and roles (what each token is for, one entry per token,
 // with `backticks` for code).
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { DARK, LIGHT, NEUTRALS, applyTheme, flatTokens, reference, resolveData, valueFor } from '../theme-mapper/engine.js'
@@ -353,21 +353,25 @@ export const renderCoreJs = (core) => [
 // stops the build. tsc reads a .d.ts beside a .js in place of the .js, so the tracked declarations would
 // type the sources as the last build left them. It compiles a copy of the sources, with this build's
 // core.js, in a temporary folder instead. The lib is ES2022 alone, so the mapper cannot use a DOM or
-// Node API and runs in both.
-const renderDeclarations = async (root, coreJs) => {
+// Node API and runs in both. Open VSX compiles separately with DOM types for fetch and Web Crypto.
+// A temporary folder under node_modules lets its third-party imports resolve without reading stale declarations.
+const renderDeclarations = async ({ root, directory, coreJs, lib }) => {
   const { default: ts } = await import('typescript')
-  const dir = mkdtempSync(join(tmpdir(), 'theme-mapper-'))
+  const dir = mkdtempSync(join(root, 'node_modules', `${directory}-`))
   try {
-    const sources = readdirSync(`${root}theme-mapper`).filter((file) => file.endsWith('.js') && file !== 'core.js')
-    for (const file of sources) copyFileSync(`${root}theme-mapper/${file}`, join(dir, file))
-    writeFileSync(join(dir, 'core.js'), coreJs)
-    const program = ts.createProgram([...sources, 'core.js'].map((file) => join(dir, file)), {
+    const sources = readdirSync(`${root}${directory}`).filter((file) => file.endsWith('.js') && file !== 'core.js')
+    for (const file of sources) copyFileSync(`${root}${directory}/${file}`, join(dir, file))
+    if (coreJs !== undefined) {
+      writeFileSync(join(dir, 'core.js'), coreJs)
+      sources.push('core.js')
+    }
+    const program = ts.createProgram(sources.map((file) => join(dir, file)), {
       allowJs: true, checkJs: true, declaration: true, emitDeclarationOnly: true, strict: true, types: [],
-      target: ts.ScriptTarget.ES2022, lib: ['lib.es2022.d.ts'], module: ts.ModuleKind.ES2022,
+      target: ts.ScriptTarget.ES2022, lib, module: ts.ModuleKind.ES2022,
       moduleResolution: ts.ModuleResolutionKind.Bundler, outDir: join(dir, 'out'),
     })
     const files = []
-    const { diagnostics } = program.emit(undefined, (file, text) => files.push([`theme-mapper/${basename(file)}`, text]))
+    const { diagnostics } = program.emit(undefined, (file, text) => files.push([`${directory}/${basename(file)}`, text]))
     const problems = [...ts.getPreEmitDiagnostics(program), ...diagnostics]
     if (problems.length > 0) {
       throw new Error(ts.formatDiagnostics(problems, { getCanonicalFileName: (file) => file, getCurrentDirectory: () => dir, getNewLine: () => '\n' }))
@@ -406,7 +410,12 @@ const run = async () => {
 
   const stale = []
   const coreJs = renderCoreJs(core)
-  const files = [...outputs(themes), ['theme-mapper/core.js', coreJs], ...await renderDeclarations(root, coreJs)]
+  const files = [
+    ...outputs(themes),
+    ['theme-mapper/core.js', coreJs],
+    ...await renderDeclarations({ root, directory: 'theme-mapper', coreJs, lib: ['lib.es2022.d.ts'] }),
+    ...await renderDeclarations({ root, directory: 'open-vsx', lib: ['lib.es2022.d.ts', 'lib.dom.d.ts', 'lib.dom.iterable.d.ts'] }),
+  ]
   // A theme that was renamed or removed leaves its generated files behind; they are stale too.
   // Only theme outputs are candidates: the licences and notices beside them stay. A missing folder has none.
   const leftover = (existsSync(`${root}dist/themes`) ? readdirSync(`${root}dist/themes`) : []).map((file) => `dist/themes/${file}`)

@@ -12,7 +12,8 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | --- | --- |
 | `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
 | `tokens/core.json`, `tokens/themes/*.tokens.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file is a W3C Design Tokens file (2025.10) that holds only its name, a note, its hue pair, and optional fonts and neutrals |
-| `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css`, `dist/`, and the theme mapper's `core.js` and `.d.ts` files, typechecking its JSDoc |
+| `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css`, `dist/`, and the theme mapper's `core.js`; generates and checks declarations from JSDoc for `theme-mapper/` and `open-vsx/` |
+| `open-vsx/` | Experimental JSONC theme-file parser and Open VSX client, with resolved includes and unaltered colours and syntax rules |
 | `theme-mapper/` | The theme engine the token build shares, and the experimental theme mapper built on it |
 | `scripts/build-site.mjs` | The site build: writes `site/` for GitHub Pages from `components.html`, the tokens, and `package.json` |
 | `dist/` | Generated theme files, JSON, and JavaScript |
@@ -39,6 +40,7 @@ npm install @filipgutica/design-system
 | `@filipgutica/design-system/tokens.json` | The resolved values as JSON. |
 | `@filipgutica/design-system/language/*` | The spec, catalogue, and example pages. |
 | `@filipgutica/design-system/theme-mapper` | Experimental: the API may change until a component library uses it. `mapVsCodeTheme(theme)` maps a VS Code colour theme onto theme inputs for its one mode, by selecting the theme's own colours, keeps the syntax colours its `tokenColors` set, and lists each check it still fails as a `theme` or `core` problem. `themeVariables(mapped)` returns the CSS custom properties to set inline on `<html>`, with `data-theme` forced to the theme's mode. Typed, with no framework and no runtime dependencies. |
+| `@filipgutica/design-system/open-vsx` | Experimental: the API may change in a minor release. `parseVsCodeTheme({ source, fileName })` parses a JSONC theme file and normalises its name. `createOpenVsxThemeService({ fetchImpl })` accepts an optional fetch implementation, searches Open VSX, and imports a verified package, resolving includes into `{ name, type?, colors, tokenColors? }` for `mapVsCodeTheme`. The parser throws `ThemeValidationError` with `malformed-json` or `invalid-shape`; the client returns success or error results. Uses native ZIP decompression and `jsonc-parser`; picker UI, persistence, and applying a theme belong to component libraries. |
 
 In a React app, import `tokens.css` and `fonts.css` once in the entry and write `var(--color-text)` in styles, or `cssVar('color-text')` in TypeScript. `tests/react-smoke/` is a working example.
 

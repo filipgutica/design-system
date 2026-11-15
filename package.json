@@ -19,6 +19,10 @@
       "types": "./theme-mapper/index.d.ts",
       "default": "./theme-mapper/index.js"
     },
+    "./open-vsx": {
+      "types": "./open-vsx/index.d.ts",
+      "default": "./open-vsx/index.js"
+    },
     "./fonts.css": "./fonts/fonts.css",
     "./fonts/*": "./fonts/*",
     "./language/*": "./language/*",
@@ -28,7 +32,8 @@
     "language/",
     "dist/",
     "fonts/",
-    "theme-mapper/"
+    "theme-mapper/",
+    "open-vsx/"
   ],
   "scripts": {
     "prepublishOnly": "pnpm verify",
@@ -66,15 +71,20 @@
     "@commitlint/config-conventional": "^21.2.2",
     "@playwright/test": "^1.65.0",
     "@semantic-release/commit-analyzer": "13.0.1",
+    "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.1",
     "conventional-changelog-conventionalcommits": "^9.3.1",
+    "jszip": "3.10.1",
     "publint": "^0.3.24",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "semantic-release": "^25.0.9",
     "typescript": "^5.9.3",
     "vite": "^8.3.6"
+  },
+  "dependencies": {
+    "jsonc-parser": "3.3.1"
   }
 }
