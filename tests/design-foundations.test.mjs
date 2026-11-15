@@ -216,7 +216,7 @@ const families = [
   { name: 'checkbox and radio', pattern: /^\.check\b/, pages: ['reference.html'] },
   { name: 'badge', pattern: /^\.badge\b/, pages: ['reference.html'] },
   { name: 'alert', pattern: /^\.alert\b/, pages: ['reference.html'] },
-  { name: 'code block and command plate', pattern: /^\.code\b/, pages: ['reference.html'] },
+  { name: 'code block and command plate', pattern: /^\.code\b/, pages: ['reference.html', 'docs.html'] },
 ]
 const perSelector = (rules) =>
   rules.flatMap(({ context, selector, body }) => selectors(selector).map((part) => ({ context, selector: part, list: selector, body })))
@@ -418,7 +418,7 @@ test('pages take depth from tokens.css: no literal shadow outside a focus ring o
 // Focus is one accent ring for every role, written from tokens. An outline that draws is
 // var(--focus-width) solid var(--color-focus), offset var(--focus-offset) or inset by the width. An
 // outline-color is var(--color-focus) or CanvasText (for forced colors). --color-focus is the accent, or the
-// dark-theme accent on a dark plate. In forced colors a focused field, which has no ring elsewhere,
+// dark-theme accent on a terminal capture. In forced colors a focused field, which has no ring elsewhere,
 // draws a Highlight outline 1px inside its edge. A per-role ring colour, set directly or by redefining
 // --color-focus, and a hand-written width or offset fail.
 const focusRules = [

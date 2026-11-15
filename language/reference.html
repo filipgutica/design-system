@@ -297,13 +297,8 @@
   .code.compact pre { align-content: center; padding: var(--space-2) var(--space-3); }
 
   /* Command plate: components.html#command-plate, unchanged. */
-  /* The plate is dark in both themes, so its focus ring takes the dark-theme accent, which reaches 3:1 on it,
-     and muted text, such as Copy at rest, takes the caption colour. */
-  .code.command { --color-code: color-mix(in srgb, var(--color-command-bg) 55%, var(--color-terminal)); --color-code-text: var(--color-terminal-text); --color-muted: var(--color-terminal-caption-text); --color-focus: var(--color-project-dark); border-color: var(--color-command-border); background: var(--color-command-bg); color: var(--color-terminal-text); }
-  .code.command .code-head { color: var(--color-terminal-caption-text); }
-  .code.command .code-head .lang { color: var(--color-terminal-caption-text); }
   /* The prompt is drawn by CSS, so copied and spoken text omit it. */
-  .code.command .line::before { content: "$ " / ""; flex: none; white-space: pre; color: var(--color-project-dark); user-select: none; }
+  .code.command .line::before { content: "$ " / ""; flex: none; white-space: pre; color: var(--color-accent); user-select: none; }
 
   /* Table */
   .table-wrap { overflow-x: auto; }
@@ -574,7 +569,7 @@
             <li class="spec"><div class="spec-meta"><span>Reading text and links</span><code>--text-reading --leading --measure</code><span class="use">Underline links in prose</span></div><p class="spec-sample t-reading">A shared language for personal products and tools. The <a href="docs.html">documentation example</a> shows it in a full page.</p></li>
             <li class="spec"><div class="spec-meta"><span>Secondary text</span><code>--text-sm --color-muted</code></div><p class="spec-sample t-secondary">Updated 4 minutes ago by the nightly sync.</p></li>
             <li class="spec"><div class="spec-meta"><span>Inline code</span><code>--font-mono --text-code</code></div><p class="spec-sample">Set <code class="t-code">--measure</code> on reading text.</p></li>
-            <li class="spec"><div class="spec-meta"><span>Shell command</span><code>--color-command-bg --color-project-dark</code><span class="use">A command plate tinted with the hue, with the <code>$</code> prompt drawn by CSS</span></div><div class="code command compact spec-sample"><pre tabindex="0" role="region" aria-label="Sample install command"><code><span class="line"><span>pnpm install --frozen-lockfile</span></span></code></pre></div></li>
+            <li class="spec"><div class="spec-meta"><span>Shell command</span><code>--color-code --color-accent</code><span class="use">The normal code well, with the <code>$</code> prompt drawn by CSS in the accent</span></div><div class="code command compact spec-sample"><pre tabindex="0" role="region" aria-label="Sample install command"><code><span class="line"><span>pnpm install --frozen-lockfile</span></span></code></pre></div></li>
             <li class="spec"><div class="spec-meta"><span>Source code</span><code>--color-code --color-syntax-*</code><span class="use">A theme-matched well with syntax colors and no prompt</span></div><div class="code spec-sample"><pre tabindex="0" role="region" aria-label="Sample monitor"><code><span class="line"><span><span class="c">// Sample monitor</span></span></span><span class="line"><span>{</span></span><span class="line"><span>  <span class="k">"metric"</span>: <span class="s">"latency_p95"</span>,</span></span><span class="line"><span>  <span class="k">"threshold"</span>: <span class="n">300</span></span></span><span class="line"><span>}</span></span></code></pre></div></li>
           </ul>
         </section>
@@ -612,8 +607,8 @@
           <h4>Identity, links, and focus</h4>
           <ul class="swatches">
             <li class="swatch" data-token="--color-project" data-on="--color-bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--color-project</code><span class="value"></span><span class="ratio"></span><span class="use">The project hue; <code>--color-accent</code> follows it</span></li>
-            <li class="swatch" data-token="--color-project-dark" data-on="--color-terminal" data-min="3"><i class="chip" aria-hidden="true"></i><code>--color-project-dark</code><span class="value"></span><span class="ratio"></span><span class="use">The hue on the terminal plate</span></li>
-            <li class="swatch" data-token="--color-accent" data-on="--color-bg --color-surface-raised" data-min="3"><i class="chip" aria-hidden="true"></i><code>--color-accent</code><span class="value"></span><span class="ratio"></span><span class="use">Primary action fill, marks, current items, checked controls; 4.5:1 where it colors text</span></li>
+            <li class="swatch" data-token="--color-project-dark" data-on="--color-terminal" data-min="3"><i class="chip" aria-hidden="true"></i><code>--color-project-dark</code><span class="value"></span><span class="ratio"></span><span class="use">The dark-theme hue and the terminal capture accent</span></li>
+            <li class="swatch" data-token="--color-accent" data-on="--color-bg --color-surface-raised --color-code" data-min="3"><i class="chip" aria-hidden="true"></i><code>--color-accent</code><span class="value"></span><span class="ratio"></span><span class="use">Primary action fill, marks, current items, checked controls; 4.5:1 where it colors text</span></li>
             <li class="swatch" data-token="--color-accent-text" data-on="--color-accent --color-button-hover" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--color-accent-text</code><span class="value"></span><span class="ratio"></span><span class="use">Primary button label</span></li>
             <li class="swatch" data-token="--color-button-hover" data-fg="var(--color-accent-text)" data-on="--color-button-hover" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--color-button-hover</code><span class="value"></span><span class="ratio"></span><span class="use">Primary button hover</span></li>
             <li class="swatch" data-token="--color-accent-hover"><i class="chip" aria-hidden="true"></i><code>--color-accent-hover</code><span class="value"></span><span class="use">Accent hover; no core component reads it</span></li>
@@ -651,10 +646,8 @@
             <li class="swatch" data-token="--color-syntax-punctuation" data-on="--color-code" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--color-syntax-punctuation</code><span class="value"></span><span class="ratio"></span></li>
             <li class="swatch" data-token="--color-syntax-tag" data-on="--color-code" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--color-syntax-tag</code><span class="value"></span><span class="ratio"></span></li>
             <li class="swatch" data-token="--color-syntax-attribute" data-on="--color-code" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--color-syntax-attribute</code><span class="value"></span><span class="ratio"></span></li>
-            <li class="swatch" data-token="--color-command-bg"><i class="chip" aria-hidden="true"></i><code>--color-command-bg</code><span class="value"></span><span class="use">Command plate, tinted with the hue, in both themes</span></li>
-            <li class="swatch" data-token="--color-command-border"><i class="chip" aria-hidden="true"></i><code>--color-command-border</code><span class="value"></span><span class="use">Command plate edge; transparent in light</span></li>
-            <li class="swatch" data-token="--color-terminal-text" data-fg="var(--color-terminal-text)" data-on="--color-command-bg" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--color-terminal-text</code><span class="value"></span><span class="ratio"></span><span class="use">Command text</span></li>
-            <li class="swatch" data-token="--color-project-dark" data-fg="var(--color-project-dark)" data-on="--color-command-bg" data-min="3"><i class="chip" aria-hidden="true"></i><code>--color-project-dark</code><span class="value"></span><span class="ratio"></span><span class="use">The <code>$</code> prompt on the command plate</span></li>
+            <li class="swatch" data-token="--color-command-bg"><i class="chip" aria-hidden="true"></i><code>--color-command-bg</code><span class="value"></span><span class="use">Kept for compatibility: equals the code well (<code>--color-code</code>) in both appearances</span></li>
+            <li class="swatch" data-token="--color-command-border"><i class="chip" aria-hidden="true"></i><code>--color-command-border</code><span class="value"></span><span class="use">Kept for compatibility: equals the code well edge (<code>--color-border-subtle</code>) in both appearances</span></li>
             <li class="swatch" data-token="--color-terminal"><i class="chip" aria-hidden="true"></i><code>--color-terminal</code><span class="value"></span><span class="use">Terminal capture plate, in both themes</span></li>
             <li class="swatch" data-token="--color-terminal-text" data-on="--color-terminal" data-min="4.5"><i class="chip" aria-hidden="true"></i><code>--color-terminal-text</code><span class="value"></span><span class="ratio"></span></li>
             <li class="swatch" data-token="--color-terminal-border"><i class="chip" aria-hidden="true"></i><code>--color-terminal-border</code><span class="value"></span><span class="use">Terminal plate edge</span></li>

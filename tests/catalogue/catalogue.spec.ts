@@ -538,8 +538,8 @@ const contrastPairs: Record<string, Pair> = {
   'every status badge label': { selector: '.badge:is(.success, .warning, .danger, .info)', min: 4.5 },
   'every enabled toggle card label and description': { selector: '.toggle:not(:disabled) :is(.toggle-text, .toggle-text small)', min: 4.5 },
   'every selected segmented label on its thumb': { selector: '.segmented button[aria-pressed="true"]:not(:disabled)', fillPseudo: '::before', min: 4.5 },
-  'the command plate text': { selector: '.code.command .line', min: 4.5 },
-  'the command plate prompt': { selector: '.code.command .line', textPseudo: '::before', min: 3 },
+  'shell command text on the code well': { selector: '.code.command .line', min: 4.5 },
+  'the accent shell prompt on the code well': { selector: '.code.command .line', textPseudo: '::before', min: 3 },
   'every code block header label and Copy on the frame': { selector: '.code-head :is(b, .lang, .copy)', min: 4.5 },
   'every code block Copy at rest, in muted text': { selector: '.code .copy:not(.is-hover, [data-copied])', min: 4.5 },
   'every source line, line number, and syntax colour on its panel': { selector: '.code :is(.line, .ln, .k, .s, .n, .c)', min: 4.5 },
@@ -803,7 +803,7 @@ test('the code block source is a 12px panel 4px inside a 16px frame', async ({ p
       right: head ? outer.right - panel.right - border : frame.querySelector(':scope > .copy')!.getBoundingClientRect().left - panel.right,
     }
   }))
-  // Specimens with and without a header, on the source well and on the command plate.
+  // Source and shell specimens, with and without a header, on the same code well.
   expect(blocks.filter(({ head }) => head).length).toBeGreaterThanOrEqual(2)
   expect(blocks.filter(({ head }) => !head).length).toBeGreaterThanOrEqual(3)
   // Under a header the panel meets the header; without one it sits 4px below the frame's edge.

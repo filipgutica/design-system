@@ -27,7 +27,7 @@
   color-scheme: light;
 
   /* Identity layer: a project swaps these four lines. --color-project is the light-theme hue;
-     --color-project-dark is the dark-theme hue, also used on dark plates in both themes. */
+     --color-project-dark is the dark-theme hue, also used on terminal captures in both themes. */
   --color-project: #4b45d1;
   --color-project-dark: #a5a1ff;
   --font-ui: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
@@ -85,10 +85,10 @@
   --color-info-surface: #d9e3f2;
   --color-status-ink: black;
 
-  /* Identity layer, derived: terminal folio plates. Commands take the hue; captures stay neutral.
-     A project without terminal plates leaves these unused. */
-  --color-command-bg: color-mix(in srgb, var(--color-project) 25%, #101010);
-  --color-command-border: transparent;
+  /* Identity layer: neutral terminal captures in both appearances.
+     Command tokens stay as compatibility aliases for the code well and its edge. */
+  --color-command-bg: var(--color-code);
+  --color-command-border: var(--color-border-subtle);
   --color-terminal: #0a0c0e;
   --color-terminal-text: #e6e9eb;
   --color-terminal-border: #2a3036;
@@ -207,8 +207,6 @@
     --color-error-surface: #312020;
     --color-info-surface: #202938;
     --color-status-ink: var(--color-text);
-    --color-command-bg: color-mix(in srgb, var(--color-project) 16%, black);
-    --color-command-border: color-mix(in srgb, var(--color-project) 28%, black);
     --color-syntax-keyword: #d8c2a5;
     --color-syntax-string: #a8bd9c;
     --color-syntax-number: #d5b98c;
@@ -249,8 +247,6 @@
   --color-error-surface: #312020;
   --color-info-surface: #202938;
   --color-status-ink: var(--color-text);
-  --color-command-bg: color-mix(in srgb, var(--color-project) 16%, black);
-  --color-command-border: color-mix(in srgb, var(--color-project) 28%, black);
   --color-syntax-keyword: #d8c2a5;
   --color-syntax-string: #a8bd9c;
   --color-syntax-number: #d5b98c;

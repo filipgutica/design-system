@@ -6,9 +6,6 @@
 import { themeChecks } from '../../theme-mapper/engine.js'
 import { esc, stackedTablesCss } from './shell.mjs'
 
-// The engine's check labels are plain text; the page marks up the ones that name code.
-const LABELS = { prompt: 'The <code>$</code> prompt on the command plate' }
-
 const icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`
 const MODES = [['light', 'Light'], ['dark', 'Dark']]
 
@@ -45,7 +42,7 @@ const checkTable = ({ id, name }, checks) => `<table class="checks stack" aria-l
       <colgroup><col><col class="c-mode"><col class="c-mode"></colgroup>
       <thead><tr><th scope="col">Check</th><th scope="col">Light</th><th scope="col">Dark</th></tr></thead>
       <tbody>
-      ${checks.map(({ id: check, label, min, light, dark }) => `<tr data-check="${check}"><th scope="row">${LABELS[check] ?? esc(label)}<small>Needs ${min}:1</small></th><td data-label="Light">${result(light, min)}</td><td data-label="Dark">${result(dark, min)}</td></tr>`).join('\n      ')}
+      ${checks.map(({ id: check, label, min, light, dark }) => `<tr data-check="${check}"><th scope="row">${esc(label)}<small>Needs ${min}:1</small></th><td data-label="Light">${result(light, min)}</td><td data-label="Dark">${result(dark, min)}</td></tr>`).join('\n      ')}
       </tbody>
     </table>`
 

@@ -2,7 +2,7 @@
 // exports table come from the build (the release tag and package.json), not from page text.
 import { esc, stackedTablesCss } from './shell.mjs'
 
-// A command plate (one shell line) and a source block with a header and Copy, in the catalogue's markup.
+// Shell commands and source use the same code block, in the catalogue's markup.
 const command = ({ id, label, line }) => `<div class="code command compact"><pre tabindex="0" role="region" aria-label="${esc(label)}"><code id="${id}"><span class="line"><span>${esc(line)}</span></span></code></pre><button class="quiet-action copy" type="button" data-copy="${id}" aria-label="Copy ${esc(label.toLowerCase())}"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></div>`
 const commands = ({ id, head, label, lines }) => `<div class="code command"><div class="code-head"><b>${esc(head)}</b><button class="quiet-action copy" type="button" data-copy="${id}"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="${esc(label)}"><code id="${id}">${lines.map((line) => `<span class="line"><span>${esc(line)}</span></span>`).join('')}</code></pre></div>`
 const source = ({ id, file, text }) => `<div class="code"><div class="code-head"><b>${esc(file)}</b><button class="quiet-action copy" type="button" data-copy="${id}"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button></div><pre tabindex="0" role="region" aria-label="${esc(file)}"><code id="${id}">${text.trim().split('\n').map((line) => `<span class="line"><span>${esc(line)}</span></span>`).join('')}</code></pre></div>`

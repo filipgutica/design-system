@@ -254,7 +254,7 @@ test('the theme contrast reader mixes as the browser does and refuses a colour i
   const failing = themeChecks({ light: pale, dark: values.dark }).filter(({ light, min }) => !passes(light, min)).map(({ id }) => id)
   assert.deepEqual(failing, ['focus', 'nav', 'thumb', 'primary'])
   // A planted value the reader cannot read stops the checks instead of passing them.
-  const planted = { ...values.light, 'color-command-bg': 'color-mix(in srgb, #000000, #101010)' }
+  const planted = { ...values.light, 'color-code': 'color-mix(in srgb, #000000, #101010)' }
   assert.throws(() => themeChecks({ light: planted, dark: values.dark }), /unsupported colour/)
   // A ratio that is not a number fails.
   assert.equal(passes(Number.NaN, 3), false)
