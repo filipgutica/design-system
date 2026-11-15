@@ -14,6 +14,8 @@ import { ThemeValidationError, parseVsCodeTheme, isRecord } from './parse.js'
 /** @typedef {'light' | 'dark'} PreferredAppearance */
 /** @typedef {{ label?: unknown, uiTheme?: unknown, path?: unknown }} ThemeContribution */
 /** @typedef {ReturnType<typeof createRequester>} Requester */
+/** @typedef {{ name: string; uncompressed: number; compressed: number; compression: number; data: Uint8Array; nextOffset: number; }} ZipEntry */
+/** @typedef {(options: { path: string; description: string; limit?: number; }) => Promise<string>} ReadZipText */
 
 const OPEN_VSX_ORIGIN = 'https://open-vsx.org'
 const OPEN_VSX_RESOURCE_ORIGIN = 'https://openvsx.eclipsecontent.org'
@@ -266,6 +268,9 @@ const normalizePackagePath = (path, relativeTo = 'extension/') => {
  * @returns {string}
  */
 const normalizeArchiveEntryPath = (path) => {
+  if (path.includes('\\') || path.split('/').includes('..')) {
+    throw new OpenVsxThemeError('unsupported-extension', 'A theme path escapes its package.')
+  }
   const normalized = resolveSafePath({ path, initialSegments: [], minimumDepth: 0 })
   if (!normalized) {
     throw new OpenVsxThemeError('unsupported-extension', 'The extension package has an invalid file name.')
@@ -311,13 +316,14 @@ const zipDirectoryBounds = (view) => {
 }
 
 /**
- * @param {{ bytes: Uint8Array; view: DataView; offset: number; directoryEnd: number; }} options
- * @returns {{ name: string; uncompressed: number; nextOffset: number; }}
+ * @param {{ bytes: Uint8Array; view: DataView; offset: number; directoryStart: number; directoryEnd: number; }} options
+ * @returns {ZipEntry}
  */
 const readZipEntry = ({
   bytes,
   view,
   offset,
+  directoryStart,
   directoryEnd,
 }) => {
   if (offset + 46 > directoryEnd || view.getUint32(offset, true) !== 0x02014b50) {
@@ -335,26 +341,42 @@ const readZipEntry = ({
   if (uncompressed > 0 && (compressed === 0 || uncompressed / compressed > MAX_COMPRESSION_RATIO)) {
     throw new OpenVsxThemeError('unsupported-extension', 'The extension package has unsafe ZIP metadata.')
   }
+  const localOffset = view.getUint32(offset + 42, true)
+  if (localOffset + 30 > directoryStart || view.getUint32(localOffset, true) !== 0x04034b50) {
+    throw new OpenVsxThemeError('unsupported-extension', 'The extension package has an invalid local ZIP header.')
+  }
+  const localNameLength = view.getUint16(localOffset + 26, true)
+  const dataOffset = localOffset + 30 + localNameLength + view.getUint16(localOffset + 28, true)
+  const compression = view.getUint16(offset + 10, true)
+  if (dataOffset > directoryStart || (compression !== 0 && compression !== 8)) {
+    throw new OpenVsxThemeError('unsupported-extension', 'The extension package has unsafe ZIP metadata.')
+  }
   try {
     const name = new TextDecoder('utf-8', { fatal: true }).decode(
       bytes.subarray(offset + 46, offset + 46 + nameLength),
     )
-    return { name, uncompressed, nextOffset }
-  } catch {
+    const localName = new TextDecoder('utf-8', { fatal: true }).decode(
+      bytes.subarray(localOffset + 30, localOffset + 30 + localNameLength),
+    )
+    normalizeArchiveEntryPath(localName)
+    if (localName !== name) throw new Error('Mismatched ZIP entry names')
+    return { name, uncompressed, compressed, compression, data: bytes.subarray(dataOffset, Math.min(dataOffset + compressed, directoryStart)), nextOffset }
+  } catch (error) {
+    if (error instanceof OpenVsxThemeError) throw error
     throw new OpenVsxThemeError('unsupported-extension', 'The extension package has an invalid file name.')
   }
 }
 
 /**
  * @param {Uint8Array} bytes
- * @returns {Map<string, number>}
+ * @returns {Map<string, ZipEntry>}
  */
 const inspectZipDirectory = (bytes) => {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
   const directory = zipDirectoryBounds(view)
 
-  /** @type {Map<string, number>} */
-  const sizes = new Map()
+  /** @type {Map<string, ZipEntry>} */
+  const entries = new Map()
   let totalUncompressed = 0
   let entryCount = 0
   let offset = directory.start
@@ -363,46 +385,82 @@ const inspectZipDirectory = (bytes) => {
     if (entryCount > MAX_ZIP_ENTRIES) {
       throw new OpenVsxThemeError('unsupported-extension', 'The extension package has an invalid ZIP directory.')
     }
-    const entry = readZipEntry({ bytes, view, offset, directoryEnd: directory.end })
+    const entry = readZipEntry({ bytes, view, offset, directoryStart: directory.start, directoryEnd: directory.end })
     totalUncompressed += entry.uncompressed
     if (totalUncompressed > MAX_UNCOMPRESSED_BYTES) {
       throw new OpenVsxThemeError('file-too-large', 'The extension package expands beyond the safe limit.')
     }
-    sizes.set(normalizeArchiveEntryPath(entry.name), entry.uncompressed)
+    const path = normalizeArchiveEntryPath(entry.name)
+    if (entries.has(path)) {
+      throw new OpenVsxThemeError('unsupported-extension', 'The extension package has duplicate file names.')
+    }
+    entries.set(path, entry)
     offset = entry.nextOffset
   }
-  return sizes
+  for (const entry of entries.values()) {
+    if (entry.data.byteLength !== entry.compressed) {
+      throw new OpenVsxThemeError('unsupported-extension', 'The extension package has unsafe ZIP metadata.')
+    }
+  }
+  return entries
 }
 
 /**
- * @param {{ zip: JSZip; sizes: ReadonlyMap<string, number>; path: string; description: string; }} options
+ * @param {{ entries: ReadonlyMap<string, ZipEntry>; budget: { remaining: number }; path: string; description: string; limit?: number; }} options
  * @returns {Promise<string>}
  */
 const readZipText = async ({
-  zip,
-  sizes,
+  entries,
+  budget,
   path,
   description,
+  limit = MAX_THEME_BYTES,
 }) => {
-  const size = sizes.get(path)
-  if (size === undefined) {
+  const entry = entries.get(path)
+  if (!entry || entry.name.endsWith('/')) {
     throw new OpenVsxThemeError('unsupported-extension', `${description} is missing.`)
   }
-  if (size > MAX_THEME_BYTES) {
+  if (entry.uncompressed > limit) {
     throw new OpenVsxThemeError('file-too-large', `${description} is too large.`)
   }
-  const file = zip.file(path)
-  if (!file) throw new OpenVsxThemeError('unsupported-extension', `${description} is missing.`)
-  return file.async('string')
+  let offset = 0
+  const input = new ReadableStream({
+    pull(controller) {
+      if (offset === entry.data.byteLength) {
+        controller.close()
+        return
+      }
+      // Bound each native inflation step too: a small DEFLATE input can expand
+      // roughly 1,032-fold before output backpressure or cancellation takes effect.
+      const end = Math.min(offset + (entry.compression === 8 ? 64 : 16 * 1024), entry.data.byteLength)
+      controller.enqueue(entry.data.subarray(offset, end))
+      offset = end
+    },
+  }, { highWaterMark: 0 })
+  try {
+    // JSZip's pause() cannot interrupt pako's synchronous inflation of a chunk.
+    const output = entry.compression === 8 ? input.pipeThrough(new DecompressionStream('deflate-raw')) : input
+    const bytes = await readCappedResponse({
+      response: new Response(output),
+      limit: Math.min(limit, budget.remaining),
+      tooLargeMessage: budget.remaining < limit
+        ? 'The extension package expands beyond the safe limit.'
+        : `${description} is too large.`,
+    })
+    budget.remaining -= bytes.byteLength
+    return new TextDecoder().decode(bytes)
+  } catch (error) {
+    if (error instanceof OpenVsxThemeError) throw error
+    throw new OpenVsxThemeError('unsupported-extension', `${description} could not be decompressed.`)
+  }
 }
 
 /**
- * @param {{ zip: JSZip; sizes: ReadonlyMap<string, number>; path: string; ancestors?: ReadonlySet<string>; }} options
+ * @param {{ readText: ReadZipText; path: string; ancestors?: ReadonlySet<string>; }} options
  * @returns {Promise<Record<string, unknown>>}
  */
 const resolveThemeObject = async ({
-  zip,
-  sizes,
+  readText,
   path,
   ancestors = new Set(),
 }) => {
@@ -410,15 +468,14 @@ const resolveThemeObject = async ({
     throw new OpenVsxThemeError('unsupported-extension', 'Theme includes are cyclic or too deeply nested.')
   }
   const value = parseJsonObject(
-    await readZipText({ zip, sizes, path, description: `Theme file ${path}` }),
+    await readText({ path, description: `Theme file ${path}` }),
     `Theme file ${path}`,
   )
   if (typeof value.include !== 'string') return value
   const nextAncestors = new Set(ancestors)
   nextAncestors.add(path)
   const parent = await resolveThemeObject({
-    zip,
-    sizes,
+    readText,
     path: normalizePackagePath(value.include, path),
     ancestors: nextAncestors,
   })
@@ -559,31 +616,41 @@ const downloadVerifiedPackage = async ({
 
 /**
  * @param {Uint8Array} packageBytes
- * @returns {Promise<{ zip: JSZip; sizes: ReadonlyMap<string, number>; }>}
+ * @returns {Promise<ReadZipText>}
  */
 const openPackage = async (packageBytes) => {
-  const sizes = inspectZipDirectory(packageBytes)
+  const entries = inspectZipDirectory(packageBytes)
   try {
-    return { zip: await JSZip.loadAsync(packageBytes), sizes }
+    const zip = await JSZip.loadAsync(packageBytes)
+    if (Object.keys(zip.files).length !== entries.size) throw new Error('ZIP entry collision')
+    for (const [key, file] of Object.entries(zip.files)) {
+      const path = normalizeArchiveEntryPath(key)
+      if (
+        key !== file.name
+        || normalizeArchiveEntryPath(file.name) !== path
+        || (file.unsafeOriginalName !== undefined && normalizeArchiveEntryPath(file.unsafeOriginalName) !== path)
+        || !entries.has(path)
+      ) throw new Error('Ambiguous ZIP entry name')
+    }
   } catch {
     throw new OpenVsxThemeError('unsupported-extension', 'That extension package could not be opened.')
   }
+  const budget = { remaining: MAX_UNCOMPRESSED_BYTES }
+  return options => readZipText({ entries, budget, ...options })
 }
 
 /**
- * @param {{ zip: JSZip; sizes: ReadonlyMap<string, number>; extensionId: string; version: string; }} options
+ * @param {{ readText: ReadZipText; extensionId: string; version: string; }} options
  * @returns {Promise<Record<string, unknown>>}
  */
 const readMatchingManifest = async ({
-  zip,
-  sizes,
+  readText,
   extensionId,
   version,
 }) => {
   const manifest = parseJsonObject(
-    await readZipText({
-      zip,
-      sizes,
+    await readText({
+      limit: MAX_MANIFEST_BYTES,
       path: 'extension/package.json',
       description: 'The packaged extension manifest',
     }),
@@ -602,12 +669,11 @@ const readMatchingManifest = async ({
 }
 
 /**
- * @param {{ zip: JSZip; sizes: ReadonlyMap<string, number>; manifest: Record<string, unknown>; fallbackName: string; }} options
+ * @param {{ readText: ReadZipText; manifest: Record<string, unknown>; fallbackName: string; }} options
  * @returns {Promise<VsCodeTheme[]>}
  */
 const parseContributedThemes = async ({
-  zip,
-  sizes,
+  readText,
   manifest,
   fallbackName,
 }) => {
@@ -623,7 +689,7 @@ const parseContributedThemes = async ({
       throw new OpenVsxThemeError('unsupported-extension', 'A contributed theme has no valid path.')
     }
     const path = normalizePackagePath(contribution.path)
-    const value = await resolveThemeObject({ zip, sizes, path })
+    const value = await resolveThemeObject({ readText, path })
     const type = contributionType(contribution.uiTheme)
     const label = typeof contribution.label === 'string' && contribution.label.trim()
       ? contribution.label.trim()
@@ -706,16 +772,14 @@ export const createOpenVsxThemeService = ({
       const location = await getPackageLocation({ request, extensionId })
       await validateAdvertisedThemes({ request, manifestUrl: location.manifestUrl })
       const packageBytes = await downloadVerifiedPackage({ request, ...location })
-      const { zip, sizes } = await openPackage(packageBytes)
+      const readText = await openPackage(packageBytes)
       const manifest = await readMatchingManifest({
-        zip,
-        sizes,
+        readText,
         extensionId,
         version: location.version,
       })
       const themes = await parseContributedThemes({
-        zip,
-        sizes,
+        readText,
         manifest,
         fallbackName: location.extensionName,
       })

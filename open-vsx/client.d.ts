@@ -14,6 +14,19 @@ export type ThemeContribution = {
     path?: unknown;
 };
 export type Requester = ReturnType<typeof createRequester>;
+export type ZipEntry = {
+    name: string;
+    uncompressed: number;
+    compressed: number;
+    compression: number;
+    data: Uint8Array;
+    nextOffset: number;
+};
+export type ReadZipText = (options: {
+    path: string;
+    description: string;
+    limit?: number;
+}) => Promise<string>;
 /**
  * @param {typeof fetch} fetchImpl
  * @returns {(options: {url: string | URL, limit: number, failureMessage: string, tooLargeMessage: string, allowResourceOrigin?: boolean}) => Promise<Uint8Array>}

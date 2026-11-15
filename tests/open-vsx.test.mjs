@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { deflateRawSync } from 'node:zlib'
 import JSZip from 'jszip'
 import { describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
@@ -44,6 +45,76 @@ const packageFixture = async ({ rootDecoy = false, unsafeEntry = false } = {}) =
   if (rootDecoy) zip.file('package.json', 'x'.repeat(1024 * 1024 + 1))
   if (unsafeEntry) zip.file('../escape.txt', 'unsafe')
   return zip.generateAsync({ type: 'uint8array' })
+}
+
+// Local and central names/sizes are deliberately independent, unlike JSZip's writer.
+const crc32 = bytes => {
+  let crc = 0xffffffff
+  for (const byte of bytes) {
+    crc ^= byte
+    for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0)
+  }
+  return (crc ^ 0xffffffff) >>> 0
+}
+
+const rawZip = (entries) => {
+  const locals = []
+  const directory = []
+  let offset = 0
+  for (const { name, localName = name, source, declaredSize, deflate = false, unicodeName } of entries) {
+    const bytes = Buffer.from(source)
+    const compressed = deflate ? deflateRawSync(bytes) : bytes
+    const crc = crc32(bytes)
+    const localNameBytes = Buffer.from(localName)
+    const nameBytes = Buffer.from(name)
+    const extra = unicodeName === undefined ? Buffer.alloc(0) : Buffer.alloc(9 + Buffer.byteLength(unicodeName))
+    if (unicodeName !== undefined) {
+      extra.writeUInt16LE(0x7075)
+      extra.writeUInt16LE(extra.length - 4, 2)
+      extra[4] = 1
+      extra.writeUInt32LE(crc32(localNameBytes), 5)
+      extra.write(unicodeName, 9)
+    }
+    const local = Buffer.alloc(30)
+    local.writeUInt32LE(0x04034b50)
+    local.writeUInt16LE(20, 4)
+    local.writeUInt16LE(unicodeName === undefined ? 0x800 : 0, 6)
+    local.writeUInt16LE(deflate ? 8 : 0, 8)
+    local.writeUInt32LE(crc, 14)
+    local.writeUInt32LE(compressed.length, 18)
+    local.writeUInt32LE(declaredSize ?? bytes.length, 22)
+    local.writeUInt16LE(localNameBytes.length, 26)
+    locals.push(local, localNameBytes, compressed)
+    const central = Buffer.alloc(46)
+    central.writeUInt32LE(0x02014b50)
+    central.writeUInt16LE(20, 4)
+    central.writeUInt16LE(20, 6)
+    central.writeUInt16LE(unicodeName === undefined ? 0x800 : 0, 8)
+    central.writeUInt16LE(deflate ? 8 : 0, 10)
+    central.writeUInt32LE(crc, 16)
+    central.writeUInt32LE(compressed.length, 20)
+    central.writeUInt32LE(declaredSize ?? bytes.length, 24)
+    central.writeUInt16LE(nameBytes.length, 28)
+    central.writeUInt16LE(extra.length, 30)
+    central.writeUInt32LE(offset, 42)
+    directory.push(central, nameBytes, extra)
+    offset += local.length + localNameBytes.length + compressed.length
+  }
+  const central = Buffer.concat(directory)
+  const end = Buffer.alloc(22)
+  end.writeUInt32LE(0x06054b50)
+  end.writeUInt16LE(entries.length, 8)
+  end.writeUInt16LE(entries.length, 10)
+  end.writeUInt32LE(central.length, 12)
+  end.writeUInt32LE(offset, 16)
+  return Buffer.concat([...locals, central, end])
+}
+
+const forgedPackage = async ({ replace = [], append = [] } = {}) => {
+  const zip = await JSZip.loadAsync(await packageFixture())
+  const entries = await Promise.all(Object.values(zip.files).filter(file => !file.dir).map(async file =>
+    replace.find(entry => entry.name === file.name) ?? { name: file.name, source: await file.async('uint8array') }))
+  return rawZip([...entries, ...append])
 }
 
 const registryFetch = async ({ packageBytes }) => {
@@ -484,5 +555,111 @@ it('rejects ZIP bombs by expansion ratio, entry count, and total declared size b
     const result = await service.importTheme(extensionId, 'dark')
     assert.equal(result.status, 'error', kind)
     assert.equal(result.error.code, code, kind)
+  }
+})
+
+it('stops understated DEFLATE output at the actual byte cap for themes, includes, and manifests', async t => {
+  const NativeDecompressionStream = globalThis.DecompressionStream
+  let emitted = 0
+  let cancelled = false
+  t.mock.method(globalThis, 'DecompressionStream', class extends NativeDecompressionStream {
+    constructor(format) {
+      super(format)
+      const reader = this.readable.getReader()
+      const readable = new ReadableStream({
+        async pull(controller) {
+          const { done, value } = await reader.read()
+          if (done) controller.close()
+          else { emitted += value.byteLength; controller.enqueue(value) }
+        },
+        async cancel(reason) { cancelled = true; await reader.cancel(reason) },
+      }, { highWaterMark: 0 })
+      return { readable, writable: this.writable }
+    }
+  })
+  for (const [name, limit] of [
+    ['extension/themes/mocha.json', 1024 * 1024],
+    ['extension/themes/base.json', 1024 * 1024],
+    ['extension/package.json', 256 * 1024],
+  ]) {
+    emitted = 0
+    cancelled = false
+    const source = JSON.stringify({ colors: {}, padding: 'x'.repeat(2 * 1024 * 1024) })
+    const packageBytes = await forgedPackage({ replace: [{ name, source, declaredSize: 100, deflate: true }] })
+    const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
+    assert.equal(result.status, 'error', name)
+    assert.equal(result.error.code, 'file-too-large', name)
+    assert.ok(emitted > limit && emitted < Buffer.byteLength(source), `stopped early: ${emitted} bytes for ${name}`)
+    assert.equal(cancelled, true, name)
+    t.diagnostic(`${name}: cancelled after ${emitted} of ${Buffer.byteLength(source)} output bytes`)
+  }
+})
+
+it('rejects mismatched central/local names hiding an oversized local theme', async () => {
+  const source = JSON.stringify({ colors: {}, padding: 'x'.repeat(1024 * 1024) })
+  const packageBytes = await forgedPackage({ append: [{
+    name: 'extension/decoy.json', localName: 'extension/themes/mocha.json', source,
+  }] })
+  const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
+  assert.equal(result.status, 'error')
+  assert.equal(result.error.code, 'unsupported-extension')
+})
+
+it('rejects traversal and other unsafe local-header names', async () => {
+  for (const localName of ['../escape.txt', 'extension/../escape.txt', '/escape.txt', 'extension\\escape.txt', 'C:/escape.txt']) {
+    const packageBytes = await forgedPackage({ append: [{ name: 'extension/safe.txt', localName, source: 'unsafe' }] })
+    const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
+    assert.equal(result.status, 'error', localName)
+    assert.equal(result.error.code, 'unsupported-extension', localName)
+  }
+})
+
+it('rejects duplicate effective entry names instead of silently replacing files', async () => {
+  for (const [name, localName] of [
+    ['extension/themes/mocha.json', 'extension/themes/mocha.json'],
+    ['extension/decoy.json', 'extension/themes/mocha.json'],
+    ['extension/themes/./mocha.json', 'extension/themes/./mocha.json'],
+  ]) {
+    const packageBytes = await forgedPackage({ append: [{ name, localName, source: '{"colors":{}}' }] })
+    const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
+    assert.equal(result.status, 'error', name)
+    assert.equal(result.error.code, 'unsupported-extension', name)
+  }
+})
+
+it('imports valid DEFLATE themes and preserves multibyte UTF-8 across chunks', async () => {
+  const padding = Array.from({ length: 10_000 }, (_, i) => `🌲${createHash('sha256').update(String(i)).digest('hex')}`).join('')
+  const source = JSON.stringify({ colors: { 'editor.background': '#1E1E2E', 'custom.padding': padding } })
+  const packageBytes = await forgedPackage({ replace: [{ name: 'extension/themes/mocha.json', source, deflate: true }] })
+  const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
+  assert.equal(result.status, 'success')
+  assert.equal(result.theme.colors['editor.background'], '#1E1E2E')
+  assert.equal(result.theme.colors['custom.padding'], padding)
+})
+
+it('counts actual bytes across repeated include reads toward the total expansion budget', async () => {
+  const manifest = { publisher: 'catppuccin', name: 'catppuccin-vsc', version: '1.0.0', contributes: {
+    themes: Array.from({ length: 40 }, () => ({ path: './themes/mocha.json', uiTheme: 'vs-dark' })),
+  } }
+  const entries = [{ name: 'extension/package.json', source: JSON.stringify(manifest) }]
+  for (let i = 0; i < 4; i++) {
+    entries.push({
+      name: `extension/themes/${i === 0 ? 'mocha' : i}.json`,
+      source: JSON.stringify({ colors: {}, padding: 'x'.repeat(700_000), ...(i < 3 ? { include: `./${i + 1}.json` } : {}) }),
+    })
+  }
+  const packageBytes = rawZip(entries)
+  const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
+  assert.equal(result.status, 'error')
+  assert.equal(result.error.code, 'file-too-large')
+  assert.match(result.error.message, /expands beyond the safe limit/)
+})
+
+it('rejects unsafe or colliding Unicode path overrides exposed by JSZip', async () => {
+  for (const unicodeName of ['../escape.txt', '/escape.txt', 'extension\\escape.txt', 'C:/escape.txt', 'extension/themes/mocha.json']) {
+    const packageBytes = await forgedPackage({ append: [{ name: 'extension/safe.txt', unicodeName, source: '{"colors":{}}' }] })
+    const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
+    assert.equal(result.status, 'error', unicodeName)
+    assert.equal(result.error.code, 'unsupported-extension', unicodeName)
   }
 })
