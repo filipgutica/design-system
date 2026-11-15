@@ -1,0 +1,9 @@
+{
+  "name": "design-system",
+  "version": "0.0.0-development",
+  "description": "Filip's design language for agents: the spec, the tokens, the component catalogue, and the decisions behind them.",
+  "author": {
+    "name": "Filip Gutica"
+  },
+  "skills": "./skills"
+}

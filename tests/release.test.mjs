@@ -43,6 +43,10 @@ test('the release analyzer caps feat, fix, and breaking changes, from a commit o
   }
 })
 
+test('the release analyzer releases a patch for a docs commit, since agents read language/ through the plugin', async () => {
+  assert.equal((await analyze(['docs(language): clarify a rule'])).release, 'patch')
+})
+
 test('the release analyzer releases nothing for chore-only commits', async () => {
   assert.equal((await analyze(['chore(deps): a bump', 'build: a script'])).release, null)
   assert.equal((await analyze(['chore(deps): a bump'], ['No breaking change here.'])).release, null)

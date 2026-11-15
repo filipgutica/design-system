@@ -1,0 +1,21 @@
+{
+  "name": "design-system",
+  "version": "0.0.0-development",
+  "interface": {
+    "displayName": "Design System"
+  },
+  "plugins": [
+    {
+      "name": "design-system",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Design"
+    }
+  ]
+}
