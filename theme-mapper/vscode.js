@@ -2,7 +2,7 @@
 // each input takes the first key in its row whose colour passes the row's gate, and no colour is changed.
 // What still fails once every input is chosen goes to `problems`.
 import { core } from './core.js'
-import { CHECKS, NEUTRALS, TEXT_ON_FILL_TOKENS, applyTheme, measurePairs, over, parseColour, passes, ratio, resolveData } from './engine.js'
+import { CHECKS, LIGHT, NEUTRALS, SYNTAX_ROLES, TEXT_ON_FILL_TOKENS, applyTheme, flatTokens, measurePairs, over, parseColour, passes, ratio, reference, resolveData, valueFor } from './engine.js'
 
 /** @typedef {import('./engine.js').Colour} Colour */
 /** @typedef {import('./engine.js').Mode} Mode */
@@ -17,11 +17,13 @@ import { CHECKS, NEUTRALS, TEXT_ON_FILL_TOKENS, applyTheme, measurePairs, over, 
  *   theme then never counts as high contrast. Many theme files leave the type to the extension manifest's `uiTheme`;
  *   translate it: `vs` is `light`, `vs-dark` is `dark`, `hc-black` is `hc`, and `hc-light` is `hcLight`.
  * @property {Record<string, unknown>} [colors] Workbench colours by key, as #rgb, #rgba, #rrggbb, or #rrggbbaa.
+ * @property {unknown[]} [tokenColors] TextMate rules, `{ scope, settings: { foreground } }`. Merge an `include`'s
+ *   rules first, so the including file's rules come later and win.
  */
 /**
  * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours, or a
- * colour that follows them. A `core` problem is a core colour, such as a link, status, or syntax colour, on the
- * theme's fills: the theme cannot fix it.
+ * colour that follows them, such as a syntax colour the theme sets. A `core` problem is a core colour, such as a
+ * link, status, or core syntax colour, on the theme's fills: the theme cannot fix it. One check can report both.
  * @typedef {object} Problem
  * @property {'theme' | 'core'} kind
  * @property {string} check The check's id.
@@ -39,9 +41,11 @@ import { CHECKS, NEUTRALS, TEXT_ON_FILL_TOKENS, applyTheme, measurePairs, over, 
  * @property {string} hue `--color-project`.
  * @property {string} hueOnDark `--color-project-dark`: the prompt on the command plate, which is dark in both modes.
  * @property {Record<string, string>} neutrals Every neutral token, by name, such as `color-bg`.
+ * @property {Record<string, string>} syntax The syntax colours the theme sets, by role, such as `comment`. A role
+ *   it leaves out stays core.
  * @property {Problem[]} problems Every check the theme fails after selection.
  */
-/** @typedef {Pick<MappedTheme, 'appearance' | 'hue' | 'hueOnDark' | 'neutrals'>} ThemeColours */
+/** @typedef {Pick<MappedTheme, 'appearance' | 'hue' | 'hueOnDark' | 'neutrals'> & { syntax?: Record<string, string> }} ThemeColours */
 
 /** A theme that cannot be mapped, or mapped values that are not safe to set. */
 export class ThemeValidationError extends Error {
@@ -57,6 +61,62 @@ const WHITE = [255, 255, 255, 1]
 /** @type {Colour} */
 const BLACK = [0, 0, 0, 1]
 const HUE_KEYS = ['button.background', 'focusBorder', 'textLink.foreground', 'progressBar.background']
+
+// Each syntax role's TextMate scope families. A scope takes the roles whose family matches it most closely, so
+// `keyword.operator` is an operator, not a keyword.
+/** @type {Record<string, string[]>} */
+const SCOPE_FAMILIES = {
+  comment: ['comment'],
+  keyword: ['keyword', 'storage'],
+  string: ['string'],
+  number: ['constant.numeric', 'constant.language'],
+  function: ['entity.name.function', 'support.function'],
+  type: ['entity.name.type', 'entity.name.class', 'support.type', 'support.class'],
+  variable: ['variable'],
+  operator: ['keyword.operator'],
+  punctuation: ['punctuation'],
+  tag: ['entity.name.tag'],
+  attribute: ['entity.other.attribute-name'],
+}
+/**
+ * The roles a scope belongs to, by its closest family, with how many segments the scope adds to that family:
+ * `keyword.control` adds one to `keyword`.
+ * @param {string} scope
+ * @returns {{ role: string, extra: number }[]}
+ */
+const rolesForScope = (scope) => {
+  const matches = SYNTAX_ROLES.map((role) => ({
+    role,
+    family: SCOPE_FAMILIES[role].filter((family) => scope === family || scope.startsWith(`${family}.`)).sort((a, b) => b.length - a.length)[0] ?? '',
+  }))
+  const closest = matches.map(({ family }) => family).reduce((a, b) => (b.length > a.length ? b : a))
+  if (closest === '') return []
+  const extra = scope.split('.').length - closest.split('.').length
+  return matches.filter(({ family }) => family.length === closest.length).map(({ role }) => ({ role, extra }))
+}
+/**
+ * Each role's raw colour from TextMate rules: the rule whose scope is nearest the role's family, so a theme's
+ * `keyword` colour wins over its `keyword.control.anchor.regexp` colour; a later rule wins a tie. A rule that is
+ * not readable is skipped, as a missing key is. A selector with context, such as `meta.tag string`, counts as
+ * its last scope.
+ * @param {unknown} rules
+ * @returns {Record<string, unknown>}
+ */
+const syntaxColours = (rules) => {
+  /** @type {Record<string, { extra: number, foreground: unknown }>} */
+  const found = {}
+  for (const rule of Array.isArray(rules) ? rules : []) {
+    const foreground = rule?.settings?.foreground
+    const scopes = typeof rule?.scope === 'string' ? [rule.scope] : rule?.scope
+    if (foreground === undefined || !Array.isArray(scopes)) continue
+    for (const selector of scopes.filter((scope) => typeof scope === 'string').flatMap((scope) => scope.split(','))) {
+      for (const { role, extra } of rolesForScope(selector.trim().split(/\s+/).at(-1) ?? '')) {
+        if (!(extra > (found[role]?.extra ?? Infinity))) found[role] = { extra, foreground }
+      }
+    }
+  }
+  return Object.fromEntries(Object.entries(found).map(([role, { foreground }]) => [role, foreground]))
+}
 
 /**
  * A #rgb, #rgba, #rrggbb, or #rrggbbaa value as a colour; anything else is undefined, as a missing key is.
@@ -89,7 +149,22 @@ const contrast = (ink, surfaces) => Math.min(...surfaces.map((surface) => ratio(
  * @param {ThemeColours} theme
  * @returns {ThemeInputs}
  */
-export const themeInputs = ({ hue, hueOnDark, neutrals }) => ({ hue: { light: hue, dark: hueOnDark }, neutrals: { light: neutrals, dark: neutrals } })
+export const themeInputs = ({ hue, hueOnDark, neutrals, syntax = {} }) => ({
+  hue: { light: hue, dark: hueOnDark }, neutrals: { light: neutrals, dark: neutrals }, syntax: { light: syntax, dark: syntax },
+})
+
+/**
+ * Whether a token is a theme input or follows one through plain references, such as the muted syntax roles.
+ * @param {Record<string, import('./engine.js').TokenValue>} tokens
+ * @param {Set<string>} inputs
+ * @param {string} name
+ * @returns {boolean}
+ */
+const followsInput = (tokens, inputs, name) => {
+  if (inputs.has(name)) return true
+  const target = valueFor(tokens, name, LIGHT).match(/^\{([\w-]+)\}$/)?.[1]
+  return target !== undefined && followsInput(tokens, inputs, target)
+}
 
 /**
  * Each check that fails in the theme's mode, with the pairs that fail it.
@@ -98,11 +173,26 @@ export const themeInputs = ({ hue, hueOnDark, neutrals }) => ({ hue: { light: hu
  */
 const failures = (theme) => {
   const mode = theme.appearance
-  const values = resolveData(applyTheme(core, themeInputs(theme)))[mode]
+  const data = applyTheme(core, themeInputs(theme))
+  const values = resolveData(data)[mode]
+  const tokens = flatTokens(data)
+  const inputs = new Set(['color-project', 'color-project-dark', ...NEUTRALS, ...Object.keys(theme.syntax ?? {}).map((role) => `color-syntax-${role}`)])
+  /**
+   * A core check's pair is the theme's when its ink is one token that is, or follows, a theme input.
+   * @param {'theme' | 'core'} kind
+   * @param {PairResult} pair
+   */
+  const kindOf = (kind, { ink }) => {
+    const name = ink.match(new RegExp(`^${reference.source}$`))?.[1]
+    return kind === 'core' && name !== undefined && followsInput(tokens, inputs, name) ? 'theme' : kind
+  }
   return CHECKS.flatMap(({ id, kind, min, pairs }) => {
     const measured = measurePairs(values, pairs, mode)
     const failing = measured.filter((pair) => !passes(pair.ratio, min))
-    return failing.length === 0 ? [] : [{ kind, check: id, mode, ratio: Math.min(...measured.map((pair) => pair.ratio)), min, pairs: failing }]
+    return /** @type {const} */ (['theme', 'core']).flatMap((found) => {
+      const own = failing.filter((pair) => kindOf(kind, pair) === found)
+      return own.length === 0 ? [] : [{ kind: found, check: id, mode, ratio: Math.min(...own.map((pair) => pair.ratio)), min, pairs: own }]
+    })
   })
 }
 /**
@@ -131,11 +221,13 @@ export const mapVsCodeTheme = (theme) => {
     : ratio(WHITE, over(background, WHITE)) > ratio(BLACK, over(background, WHITE)) ? 'dark' : 'light'
   const bg = toHex(over(background, appearance === 'dark' ? BLACK : WHITE))
 
-  /** @param {string} key Every other colour composites over the page. */
-  const colour = (key) => {
-    const value = readColour(colors[key])
+  /** @param {unknown} raw Every other colour composites over the page. */
+  const composite = (raw) => {
+    const value = readColour(raw)
     return value && toHex(over(value, parseColour(bg)))
   }
+  /** @param {string} key */
+  const colour = (key) => composite(colors[key])
   /**
    * The first key whose colour passes the gate.
    * @param {string[]} keys
@@ -212,6 +304,13 @@ export const mapVsCodeTheme = (theme) => {
   // Text also sits on core fills, such as status alerts. When no candidate reads on every fill, the first that reads
   // on the page stays and its failures are reported.
   const colours = readableEverywhere(texts, '{color-text}', withText) ?? withText(texts[0])
+  // Syntax colours are the author's, kept as they are; the checks report the ones that fail.
+  /** @type {Record<string, string>} */
+  const syntax = {}
+  for (const [role, raw] of Object.entries(syntaxColours(theme.tokenColors))) {
+    const value = composite(raw)
+    if (value !== undefined) syntax[role] = value
+  }
   return {
     name: typeof theme.name === 'string' ? theme.name : '',
     appearance,
@@ -219,7 +318,8 @@ export const mapVsCodeTheme = (theme) => {
     hue: colours.hue,
     hueOnDark: colours.hueOnDark,
     neutrals: colours.neutrals,
-    problems: failures(colours),
+    syntax,
+    problems: failures({ ...colours, syntax }),
   }
 }
 
@@ -227,22 +327,31 @@ const HEX = /^#[\da-f]{6}$/i
 
 /**
  * The CSS custom properties a mapped theme sets, by name with their dashes: the hue pair, the neutrals,
- * and the text on the selected fills, as the engine resolves them in the theme's mode. Set them as inline
+ * the text on the selected fills, as the engine resolves them in the theme's mode, and the syntax colours the
+ * theme sets. A syntax role it leaves out is not set, so it keeps following its core token. Set them as inline
  * properties on the root element, with `data-theme` forced to the theme's appearance. Experimental.
  * @param {ThemeColours} theme
  * @returns {Record<string, string>}
- * @throws {ThemeValidationError} When the theme is not an object, its mode is not light or dark, or a colour is
- *   not #rrggbb.
+ * @throws {ThemeValidationError} When the theme is not an object, its mode is not light or dark, a syntax role is
+ *   unknown, or a colour is not #rrggbb.
  */
 export const themeVariables = (theme) => {
   // Persisted input may be anything, whatever its type says.
   if (typeof theme !== 'object' || theme === null) throw new ThemeValidationError('The theme is not an object')
-  const { appearance, hue, hueOnDark, neutrals } = theme
+  const { appearance, hue, hueOnDark, neutrals, syntax = {} } = theme
   if (appearance !== 'light' && appearance !== 'dark') throw new ThemeValidationError('appearance is not light or dark')
-  const colours = [['hue', hue], ['hueOnDark', hueOnDark], ...NEUTRALS.map((name) => [`neutrals["${name}"]`, neutrals?.[name]])]
+  if (typeof syntax !== 'object' || syntax === null) throw new ThemeValidationError('syntax is not an object')
+  const unknown = Object.keys(syntax).find((role) => !SYNTAX_ROLES.includes(role))
+  if (unknown !== undefined) throw new ThemeValidationError(`syntax["${unknown}"] is not a syntax role`)
+  const colours = [
+    ['hue', hue], ['hueOnDark', hueOnDark], ...NEUTRALS.map((name) => [`neutrals["${name}"]`, neutrals?.[name]]),
+    ...Object.entries(syntax).map(([role, value]) => [`syntax["${role}"]`, value]),
+  ]
   for (const [where, value] of colours) {
     if (typeof value !== 'string' || !HEX.test(value)) throw new ThemeValidationError(`${where} is not a #rrggbb colour`)
   }
   const values = resolveData(applyTheme(core, themeInputs(theme)))[appearance]
-  return Object.fromEntries(['color-project', 'color-project-dark', ...NEUTRALS, ...TEXT_ON_FILL_TOKENS].map((name) => [`--${name}`, values[name]]))
+  return Object.fromEntries([
+    'color-project', 'color-project-dark', ...NEUTRALS, ...TEXT_ON_FILL_TOKENS, ...Object.keys(syntax).map((role) => `color-syntax-${role}`),
+  ].map((name) => [`--${name}`, values[name]]))
 }

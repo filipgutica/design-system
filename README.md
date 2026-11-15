@@ -38,7 +38,7 @@ npm install @filipgutica/design-system
 | `@filipgutica/design-system` | `tokens` (resolved values per theme and mode) and `cssVar(name)`, with types. |
 | `@filipgutica/design-system/tokens.json` | The resolved values as JSON. |
 | `@filipgutica/design-system/language/*` | The spec, catalogue, and example pages. |
-| `@filipgutica/design-system/theme-mapper` | Experimental: the API may change until a component library uses it. `mapVsCodeTheme(theme)` maps a VS Code colour theme onto theme inputs for its one mode, by selecting the theme's own colours, and lists each check it still fails as a `theme` or `core` problem. `themeVariables(mapped)` returns the CSS custom properties to set inline on `<html>`, with `data-theme` forced to the theme's mode. Typed, with no framework and no runtime dependencies. |
+| `@filipgutica/design-system/theme-mapper` | Experimental: the API may change until a component library uses it. `mapVsCodeTheme(theme)` maps a VS Code colour theme onto theme inputs for its one mode, by selecting the theme's own colours, keeps the syntax colours its `tokenColors` set, and lists each check it still fails as a `theme` or `core` problem. `themeVariables(mapped)` returns the CSS custom properties to set inline on `<html>`, with `data-theme` forced to the theme's mode. Typed, with no framework and no runtime dependencies. |
 
 In a React app, import `tokens.css` and `fonts.css` once in the entry and write `var(--color-text)` in styles, or `cssVar('color-text')` in TypeScript. `tests/react-smoke/` is a working example.
 

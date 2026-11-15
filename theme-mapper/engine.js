@@ -17,6 +17,8 @@
  * @property {ModePair} hue The hue, `--color-project` in light and `--color-project-dark`.
  * @property {{ ui?: string, mono?: string }} [fonts] The two font stacks.
  * @property {{ light: Record<string, string>, dark: Record<string, string> }} [neutrals] Every NEUTRALS token, per mode.
+ * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [syntax] Syntax colours by SYNTAX_ROLES
+ *   role, per mode. A role a theme leaves out stays core.
  */
 /**
  * Every token's resolved value in light and in dark, as getComputedStyle reports it.
@@ -140,6 +142,12 @@ export const resolveData = (data) => {
   return { light: values(LIGHT), dark: values(DARK) }
 }
 
+/**
+ * The syntax roles, `--color-syntax-<role>`. Keyword, string, number, and comment have core colours; the others
+ * follow one of those or the code text, muted or not, unless a theme sets them.
+ */
+export const SYNTAX_ROLES = ['keyword', 'string', 'number', 'comment', 'function', 'type', 'variable', 'operator', 'punctuation', 'tag', 'attribute']
+
 /** The surfaces text and edges sit on: the page, a surface, and a raised surface. */
 export const SURFACES = ['color-bg', 'color-surface', 'color-surface-raised']
 
@@ -199,6 +207,13 @@ export const applyTheme = (core, theme) => {
   if (theme.fonts?.mono) identity['font-mono'] = theme.fonts.mono
   const { neutrals } = theme
   if (neutrals) for (const name of NEUTRALS) groupOf(data, name).tokens[name] = [neutrals.light[name], neutrals.dark[name]]
+  for (const role of SYNTAX_ROLES) {
+    const [light, dark] = [theme.syntax?.light?.[role], theme.syntax?.dark?.[role]]
+    if (light === undefined && dark === undefined) continue
+    const name = `color-syntax-${role}`
+    const { tokens } = groupOf(data, name)
+    tokens[name] = [light ?? valueFor(tokens, name, LIGHT), dark ?? valueFor(tokens, name, DARK)]
+  }
   return withReadableText(data)
 }
 
@@ -294,8 +309,10 @@ export const CHECKS = [
       ...STATUS.flatMap((tone) => on([statusInk(tone)], [mix(`{${tone}}`, 22, '{color-surface-raised}')])),
       ...on([statusInk('color-error')], ['{color-error-surface}', ...[10, 16].map((share) => mix('{color-error}', share, '{color-error-surface}'))]),
     ] },
+  // Core unless a theme sets a role, or the role follows a theme input such as the muted text; the mapper reports
+  // those pairs as the theme's.
   { id: 'syntax', label: 'Syntax colours on a code block', min: 4.5, kind: 'core',
-    pairs: on(['keyword', 'string', 'number', 'comment'].map((role) => `{color-syntax-${role}}`), ['{color-code}']) },
+    pairs: on(SYNTAX_ROLES.map((role) => `{color-syntax-${role}}`), ['{color-code}']) },
   { id: 'command', label: 'Text and captions on the command plate', min: 4.5, kind: 'core',
     pairs: on(['{color-terminal-text}', '{color-terminal-caption-text}'], ['{color-command-bg}', mix('{color-command-bg}', 55, '{color-terminal}')]) },
 ]
