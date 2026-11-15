@@ -1,4 +1,3 @@
-import JSZip from 'jszip'
 import { parse } from 'jsonc-parser'
 
 import { ThemeValidationError, parseVsCodeTheme, isRecord } from './parse.js'
@@ -268,7 +267,10 @@ const normalizePackagePath = (path, relativeTo = 'extension/') => {
  * @returns {string}
  */
 const normalizeArchiveEntryPath = (path) => {
-  if (path.includes('\\') || path.split('/').includes('..')) {
+  if (path.includes('\\')) {
+    throw new OpenVsxThemeError('unsupported-extension', 'An extension package file name contains a backslash.')
+  }
+  if (path.split('/').includes('..')) {
     throw new OpenVsxThemeError('unsupported-extension', 'A theme path escapes its package.')
   }
   const normalized = resolveSafePath({ path, initialSegments: [], minimumDepth: 0 })
@@ -397,6 +399,7 @@ const inspectZipDirectory = (bytes) => {
     entries.set(path, entry)
     offset = entry.nextOffset
   }
+  // Check lengths after the directory walk so file-too-large takes precedence.
   for (const entry of entries.values()) {
     if (entry.data.byteLength !== entry.compressed) {
       throw new OpenVsxThemeError('unsupported-extension', 'The extension package has unsafe ZIP metadata.')
@@ -438,7 +441,6 @@ const readZipText = async ({
     },
   }, { highWaterMark: 0 })
   try {
-    // JSZip's pause() cannot interrupt pako's synchronous inflation of a chunk.
     const output = entry.compression === 8 ? input.pipeThrough(new DecompressionStream('deflate-raw')) : input
     const bytes = await readCappedResponse({
       response: new Response(output),
@@ -620,21 +622,6 @@ const downloadVerifiedPackage = async ({
  */
 const openPackage = async (packageBytes) => {
   const entries = inspectZipDirectory(packageBytes)
-  try {
-    const zip = await JSZip.loadAsync(packageBytes)
-    if (Object.keys(zip.files).length !== entries.size) throw new Error('ZIP entry collision')
-    for (const [key, file] of Object.entries(zip.files)) {
-      const path = normalizeArchiveEntryPath(key)
-      if (
-        key !== file.name
-        || normalizeArchiveEntryPath(file.name) !== path
-        || (file.unsafeOriginalName !== undefined && normalizeArchiveEntryPath(file.unsafeOriginalName) !== path)
-        || !entries.has(path)
-      ) throw new Error('Ambiguous ZIP entry name')
-    }
-  } catch {
-    throw new OpenVsxThemeError('unsupported-extension', 'That extension package could not be opened.')
-  }
   const budget = { remaining: MAX_UNCOMPRESSED_BYTES }
   return options => readZipText({ entries, budget, ...options })
 }

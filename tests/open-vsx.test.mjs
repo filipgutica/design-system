@@ -61,27 +61,22 @@ const rawZip = (entries) => {
   const locals = []
   const directory = []
   let offset = 0
-  for (const { name, localName = name, source, declaredSize, deflate = false, unicodeName } of entries) {
+  for (const {
+    name, localName = name, source, declaredSize, deflate = false,
+    compression = deflate ? 8 : 0, localSignature = 0x04034b50, compressedSize,
+  } of entries) {
     const bytes = Buffer.from(source)
     const compressed = deflate ? deflateRawSync(bytes) : bytes
     const crc = crc32(bytes)
     const localNameBytes = Buffer.from(localName)
     const nameBytes = Buffer.from(name)
-    const extra = unicodeName === undefined ? Buffer.alloc(0) : Buffer.alloc(9 + Buffer.byteLength(unicodeName))
-    if (unicodeName !== undefined) {
-      extra.writeUInt16LE(0x7075)
-      extra.writeUInt16LE(extra.length - 4, 2)
-      extra[4] = 1
-      extra.writeUInt32LE(crc32(localNameBytes), 5)
-      extra.write(unicodeName, 9)
-    }
     const local = Buffer.alloc(30)
-    local.writeUInt32LE(0x04034b50)
+    local.writeUInt32LE(localSignature)
     local.writeUInt16LE(20, 4)
-    local.writeUInt16LE(unicodeName === undefined ? 0x800 : 0, 6)
-    local.writeUInt16LE(deflate ? 8 : 0, 8)
+    local.writeUInt16LE(0x800, 6)
+    local.writeUInt16LE(compression, 8)
     local.writeUInt32LE(crc, 14)
-    local.writeUInt32LE(compressed.length, 18)
+    local.writeUInt32LE(compressedSize ?? compressed.length, 18)
     local.writeUInt32LE(declaredSize ?? bytes.length, 22)
     local.writeUInt16LE(localNameBytes.length, 26)
     locals.push(local, localNameBytes, compressed)
@@ -89,15 +84,14 @@ const rawZip = (entries) => {
     central.writeUInt32LE(0x02014b50)
     central.writeUInt16LE(20, 4)
     central.writeUInt16LE(20, 6)
-    central.writeUInt16LE(unicodeName === undefined ? 0x800 : 0, 8)
-    central.writeUInt16LE(deflate ? 8 : 0, 10)
+    central.writeUInt16LE(0x800, 8)
+    central.writeUInt16LE(compression, 10)
     central.writeUInt32LE(crc, 16)
-    central.writeUInt32LE(compressed.length, 20)
+    central.writeUInt32LE(compressedSize ?? compressed.length, 20)
     central.writeUInt32LE(declaredSize ?? bytes.length, 24)
     central.writeUInt16LE(nameBytes.length, 28)
-    central.writeUInt16LE(extra.length, 30)
     central.writeUInt32LE(offset, 42)
-    directory.push(central, nameBytes, extra)
+    directory.push(central, nameBytes)
     offset += local.length + localNameBytes.length + compressed.length
   }
   const central = Buffer.concat(directory)
@@ -561,6 +555,7 @@ it('rejects ZIP bombs by expansion ratio, entry count, and total declared size b
 it('stops understated DEFLATE output at the actual byte cap for themes, includes, and manifests', async t => {
   const NativeDecompressionStream = globalThis.DecompressionStream
   let emitted = 0
+  let largestInputChunk = 0
   let cancelled = false
   t.mock.method(globalThis, 'DecompressionStream', class extends NativeDecompressionStream {
     constructor(format) {
@@ -574,7 +569,16 @@ it('stops understated DEFLATE output at the actual byte cap for themes, includes
         },
         async cancel(reason) { cancelled = true; await reader.cancel(reason) },
       }, { highWaterMark: 0 })
-      return { readable, writable: this.writable }
+      const writer = this.writable.getWriter()
+      const writable = new WritableStream({
+        write(chunk) {
+          largestInputChunk = Math.max(largestInputChunk, chunk.byteLength)
+          return writer.write(chunk)
+        },
+        close() { return writer.close() },
+        abort(reason) { return writer.abort(reason) },
+      })
+      return { readable, writable }
     }
   })
   for (const [name, limit] of [
@@ -583,26 +587,28 @@ it('stops understated DEFLATE output at the actual byte cap for themes, includes
     ['extension/package.json', 256 * 1024],
   ]) {
     emitted = 0
+    largestInputChunk = 0
     cancelled = false
     const source = JSON.stringify({ colors: {}, padding: 'x'.repeat(2 * 1024 * 1024) })
     const packageBytes = await forgedPackage({ replace: [{ name, source, declaredSize: 100, deflate: true }] })
     const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
     assert.equal(result.status, 'error', name)
     assert.equal(result.error.code, 'file-too-large', name)
-    assert.ok(emitted > limit && emitted < Buffer.byteLength(source), `stopped early: ${emitted} bytes for ${name}`)
+    assert.ok(largestInputChunk > 0 && largestInputChunk <= 64, `largest input chunk: ${largestInputChunk} bytes for ${name}`)
+    assert.ok(emitted > limit && emitted <= limit + 128 * 1024, `stopped early: ${emitted} bytes for ${name}`)
     assert.equal(cancelled, true, name)
     t.diagnostic(`${name}: cancelled after ${emitted} of ${Buffer.byteLength(source)} output bytes`)
   }
 })
 
-it('rejects mismatched central/local names hiding an oversized local theme', async () => {
-  const source = JSON.stringify({ colors: {}, padding: 'x'.repeat(1024 * 1024) })
+it('rejects mismatched central/local names before reading themes', async () => {
   const packageBytes = await forgedPackage({ append: [{
-    name: 'extension/decoy.json', localName: 'extension/themes/mocha.json', source,
+    name: 'extension/decoy.json', localName: 'extension/themes/mocha.json', source: '{"colors":{}}',
   }] })
   const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
   assert.equal(result.status, 'error')
   assert.equal(result.error.code, 'unsupported-extension')
+  assert.match(result.error.message, /invalid file name/)
 })
 
 it('rejects traversal and other unsafe local-header names', async () => {
@@ -615,15 +621,12 @@ it('rejects traversal and other unsafe local-header names', async () => {
 })
 
 it('rejects duplicate effective entry names instead of silently replacing files', async () => {
-  for (const [name, localName] of [
-    ['extension/themes/mocha.json', 'extension/themes/mocha.json'],
-    ['extension/decoy.json', 'extension/themes/mocha.json'],
-    ['extension/themes/./mocha.json', 'extension/themes/./mocha.json'],
-  ]) {
-    const packageBytes = await forgedPackage({ append: [{ name, localName, source: '{"colors":{}}' }] })
+  for (const name of ['extension/themes/mocha.json', 'extension/themes/./mocha.json']) {
+    const packageBytes = await forgedPackage({ append: [{ name, source: '{"colors":{}}' }] })
     const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
     assert.equal(result.status, 'error', name)
     assert.equal(result.error.code, 'unsupported-extension', name)
+    assert.match(result.error.message, /duplicate file names/, name)
   }
 })
 
@@ -655,11 +658,30 @@ it('counts actual bytes across repeated include reads toward the total expansion
   assert.match(result.error.message, /expands beyond the safe limit/)
 })
 
-it('rejects unsafe or colliding Unicode path overrides exposed by JSZip', async () => {
-  for (const unicodeName of ['../escape.txt', '/escape.txt', 'extension\\escape.txt', 'C:/escape.txt', 'extension/themes/mocha.json']) {
-    const packageBytes = await forgedPackage({ append: [{ name: 'extension/safe.txt', unicodeName, source: '{"colors":{}}' }] })
+for (const [kind, name, message] of [
+  ['parent segments', 'extension/../escape.txt', /escapes its package/],
+  ['backslashes', 'extension\\escape.txt', /contains a backslash/],
+]) {
+  it(`rejects ${kind} when local and central names agree`, async () => {
+    const packageBytes = await forgedPackage({ append: [{ name, source: 'unused' }] })
     const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
-    assert.equal(result.status, 'error', unicodeName)
-    assert.equal(result.error.code, 'unsupported-extension', unicodeName)
-  }
-})
+    assert.equal(result.status, 'error')
+    assert.equal(result.error.code, 'unsupported-extension')
+    assert.match(result.error.message, message)
+  })
+}
+
+for (const [kind, metadata, message] of [
+  // The last local entry ends at the directory, so an overstated compressed size crosses that boundary.
+  ['truncated entry data', { compressedSize: 7 }, /unsafe ZIP metadata/],
+  ['invalid local-header signatures', { localSignature: 0 }, /invalid local ZIP header/],
+  ['unsupported compression methods', { compression: 99 }, /unsafe ZIP metadata/],
+]) {
+  it(`rejects ${kind} even for an unused entry`, async () => {
+    const packageBytes = await forgedPackage({ append: [{ name: 'extension/unused.txt', source: 'unused', ...metadata }] })
+    const result = await createOpenVsxThemeService({ fetchImpl: await registryFetch({ packageBytes }) }).importTheme(extensionId, 'dark')
+    assert.equal(result.status, 'error')
+    assert.equal(result.error.code, 'unsupported-extension')
+    assert.match(result.error.message, message)
+  })
+}
