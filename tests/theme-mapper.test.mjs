@@ -29,11 +29,9 @@ test('Graphite Indigo Light maps its own colours, and takes the button text for 
   assert.equal(mapped.hue, '#6359a7')
   // Every hue key is too dark for the command plate, so the next candidate is the button's text.
   assert.equal(mapped.hueOnDark, '#ffffff')
-  // Its syntax colours are VS Code's Light+, made for the page; a code well is the darker surface.
+  // Its syntax colours are VS Code's Light+, four of them a step darker so they read on the surface a code well takes.
   assert.equal(mapped.syntax.keyword, '#0000ff')
-  assert.deepEqual(mapped.problems.map(({ kind, check, pairs }) => [kind, check, pairs.map(({ ink }) => ink)]), [
-    ['theme', 'syntax', ['{color-syntax-number}', '{color-syntax-comment}', '{color-syntax-type}', '{color-syntax-attribute}']],
-  ])
+  assert.deepEqual(mapped.problems, [])
 })
 
 test('a theme without the optional keys falls back along each row', () => {
