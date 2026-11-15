@@ -1,6 +1,6 @@
 # Graphite Indigo
 
-Cool graphite surfaces, indigo primary actions, and blue links and focus. Sidebar hover is neutral; current rows use white in light mode and a restrained indigo tint in dark mode. Includes light and dark themes with VS Code Light+ and Dark+ syntax token colors.
+Cool graphite surfaces, indigo primary actions, and blue links and focus. Sidebar hover is neutral; current rows use white in light mode and a restrained indigo tint in dark mode. Includes light and dark themes with VS Code Light+ and Dark+ syntax token colors. Four Light+ colors are a step darker (number, comment, type, attribute), the smallest OKLCH lightness step that keeps their hue and reaches 4.5:1 on the light sidebar, where the design system draws code.
 
 ## Try it in T3 Code
 

@@ -32,7 +32,7 @@
     {
       "scope": "comment",
       "settings": {
-        "foreground": "#008000"
+        "foreground": "#007a00"
       }
     },
     {
@@ -49,7 +49,7 @@
         "keyword.operator.minus.exponent"
       ],
       "settings": {
-        "foreground": "#098658"
+        "foreground": "#00784b"
       }
     },
     {
@@ -74,7 +74,7 @@
     {
       "scope": "entity.other.attribute-name",
       "settings": {
-        "foreground": "#e50000"
+        "foreground": "#d40000"
       }
     },
     {
@@ -135,7 +135,7 @@
     {
       "scope": "markup.inserted",
       "settings": {
-        "foreground": "#098658"
+        "foreground": "#00784b"
       }
     },
     {
@@ -190,7 +190,7 @@
     {
       "scope": "meta.preprocessor.numeric",
       "settings": {
-        "foreground": "#098658"
+        "foreground": "#00784b"
       }
     },
     {
@@ -299,7 +299,7 @@
         "source.coffee.embedded"
       ],
       "settings": {
-        "foreground": "#e50000"
+        "foreground": "#d40000"
       }
     },
     {
@@ -348,7 +348,7 @@
     {
       "scope": "keyword.other.unit",
       "settings": {
-        "foreground": "#098658"
+        "foreground": "#00784b"
       }
     },
     {
@@ -369,7 +369,7 @@
     {
       "scope": "constant.sha.git-rebase",
       "settings": {
-        "foreground": "#098658"
+        "foreground": "#00784b"
       }
     },
     {
@@ -440,7 +440,7 @@
         "storage.type.primitive.groovy"
       ],
       "settings": {
-        "foreground": "#267f99"
+        "foreground": "#11728b"
       }
     },
     {
@@ -455,7 +455,7 @@
         "punctuation.separator.namespace.ruby"
       ],
       "settings": {
-        "foreground": "#267f99"
+        "foreground": "#11728b"
       }
     },
     {
@@ -588,7 +588,7 @@
     "newOperator": "#AF00DB",
     "stringLiteral": "#a31515",
     "customLiteral": "#795E26",
-    "numberLiteral": "#098658"
+    "numberLiteral": "#00784b"
   },
   "name": "Graphite Indigo Light",
   "type": "light",
