@@ -3,7 +3,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { ThemeValidationError, mapVsCodeTheme, themeVariables } from '@filipgutica/design-system/theme-mapper'
-import { NEUTRALS } from '../theme-mapper/engine.js'
+import { NEUTRALS, SYNTAX_ROLES } from '../theme-mapper/engine.js'
 
 const json = (path) => JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8'))
 const fixture = (name) => json(`fixtures/vscode-themes/${name}.json`)
@@ -29,7 +29,11 @@ test('Graphite Indigo Light maps its own colours, and takes the button text for 
   assert.equal(mapped.hue, '#6359a7')
   // Every hue key is too dark for the command plate, so the next candidate is the button's text.
   assert.equal(mapped.hueOnDark, '#ffffff')
-  assert.deepEqual(mapped.problems, [])
+  // Its syntax colours are VS Code's Light+, made for the page; a code well is the darker surface.
+  assert.equal(mapped.syntax.keyword, '#0000ff')
+  assert.deepEqual(mapped.problems.map(({ kind, check, pairs }) => [kind, check, pairs.map(({ ink }) => ink)]), [
+    ['theme', 'syntax', ['{color-syntax-number}', '{color-syntax-comment}', '{color-syntax-type}', '{color-syntax-attribute}']],
+  ])
 })
 
 test('a theme without the optional keys falls back along each row', () => {
@@ -95,7 +99,10 @@ test('a theme without a usable background or text throws ThemeValidationError', 
 test('themeVariables sets the hue pair, the neutrals, and the selected-fill text, as the engine resolves them', () => {
   const mapped = mapVsCodeTheme(graphiteIndigo('light'))
   const variables = themeVariables(mapped)
-  assert.deepEqual(Object.keys(variables), ['--color-project', '--color-project-dark', ...NEUTRALS.map((name) => `--${name}`), '--color-nav-current-text', '--color-segmented-current-text'])
+  assert.deepEqual(Object.keys(variables), [
+    '--color-project', '--color-project-dark', ...NEUTRALS.map((name) => `--${name}`), '--color-nav-current-text', '--color-segmented-current-text',
+    ...SYNTAX_ROLES.map((role) => `--color-syntax-${role}`),
+  ])
   assert.equal(variables['--color-project'], '#6359a7')
   assert.equal(variables['--color-project-dark'], '#ffffff')
   assert.equal(variables['--color-bg'], '#f8f9fb')
@@ -112,7 +119,74 @@ test('themeVariables refuses a value that is not #rrggbb, so persisted input can
     { ...mapped, neutrals: { ...mapped.neutrals, 'color-bg': '#000000; background: url(x)' } },
     { ...mapped, neutrals: { ...mapped.neutrals, 'color-muted': undefined } },
     { ...mapped, appearance: 'dim' },
+    { ...mapped, syntax: { comment: 'red' } },
+    { ...mapped, syntax: { heading: '#000000' } },
+    { ...mapped, syntax: null },
   ]) assert.throws(() => themeVariables(bad), ThemeValidationError)
+})
+
+// A dark theme with Dracula's palette: its comment colour reaches about 3:1 on its own background.
+const DRACULA_LIKE = {
+  type: 'dark',
+  colors: { 'editor.background': '#282a36', 'editor.foreground': '#f8f8f2', 'sideBar.background': '#282a36', 'button.background': '#bd93f9' },
+  tokenColors: [
+    { scope: ['comment', 'punctuation.definition.comment'], settings: { foreground: '#6272a4' } },
+    { scope: 'string', settings: { foreground: '#f1fa8c' } },
+    { scope: 'keyword, storage.type', settings: { foreground: '#ff79c6' } },
+    { scope: 'entity.name.function', settings: { foreground: '#50fa7b' } },
+  ],
+}
+
+test('an imported theme keeps its own syntax colours, and a failing one is the theme\'s problem', () => {
+  const mapped = mapVsCodeTheme(DRACULA_LIKE)
+  assert.deepEqual(mapped.syntax, { comment: '#6272a4', punctuation: '#6272a4', string: '#f1fa8c', keyword: '#ff79c6', function: '#50fa7b' })
+  const syntax = mapped.problems.filter(({ check }) => check === 'syntax')
+  assert.deepEqual(syntax.map(({ kind, pairs }) => [kind, pairs.map(({ ink }) => ink)]), [
+    ['theme', ['{color-syntax-comment}', '{color-syntax-punctuation}']],
+  ])
+  // The variables set the theme's roles, and the core colour for each role it leaves out, so applying another
+  // theme replaces every one of them.
+  const variables = themeVariables(mapped)
+  assert.equal(variables['--color-syntax-comment'], '#6272a4')
+  assert.equal(variables['--color-syntax-number'], '#d5b98c')
+  // Tag follows keyword, which the theme sets.
+  assert.equal(variables['--color-syntax-tag'], '#ff79c6')
+  const plain = themeVariables(mapVsCodeTheme({ ...DRACULA_LIKE, tokenColors: undefined }))
+  assert.deepEqual(Object.keys(plain), Object.keys(variables))
+  assert.equal(plain['--color-syntax-comment'], '#a0a6b1')
+})
+
+test('a role the theme leaves out stays core, so a core syntax colour that fails is core\'s problem', () => {
+  // A mid-grey code well that the core light comment colour cannot read on.
+  const mapped = mapVsCodeTheme({ type: 'light', colors: { 'editor.background': '#ffffff', 'editor.foreground': '#000000', 'sideBar.background': '#9a9a9a' } })
+  assert.deepEqual(mapped.syntax, {})
+  const syntax = mapped.problems.filter(({ check }) => check === 'syntax')
+  // Every core role fails on the grey well. Variable, operator, and punctuation follow the theme's text, which reads.
+  assert.deepEqual(syntax.map(({ kind, pairs }) => [kind, pairs.map(({ ink }) => ink)]), [
+    ['core', ['keyword', 'string', 'number', 'comment', 'function', 'type', 'tag', 'attribute'].map((role) => `{color-syntax-${role}}`)],
+  ])
+})
+
+test('each role takes the rule nearest its scope family, a later rule winning a tie', () => {
+  const syntaxOf = (tokenColors) => mapVsCodeTheme({ type: 'dark', colors: { 'editor.background': '#000000', 'editor.foreground': '#ffffff' }, tokenColors }).syntax
+  assert.deepEqual(syntaxOf([
+    { scope: 'keyword', settings: { foreground: '#111111' } },
+    // Deeper than keyword, so it does not replace it, even later.
+    { scope: 'keyword.control.anchor.regexp', settings: { foreground: '#222222' } },
+    // An operator is its own role, not a keyword.
+    { scope: 'keyword.operator', settings: { foreground: '#333333' } },
+    // A selector with context counts as its last scope.
+    { scope: 'meta.embedded string', settings: { foreground: '#444444' } },
+    { scope: 'string', settings: { foreground: '#555555' } },
+    // Not readable rules are skipped, and one that cannot be read does not displace one that can.
+    { scope: 'comment', settings: {} },
+    { scope: 'variable', settings: { foreground: '#777777' } },
+    { scope: 'variable', settings: { foreground: 'not-a-colour' } },
+    { scope: 'variable', settings: { foreground: null } },
+    { settings: { foreground: '#666666' } },
+    null,
+  ]), { keyword: '#111111', operator: '#333333', string: '#555555', variable: '#777777' })
+  assert.deepEqual(syntaxOf('not rules'), {})
 })
 
 test('muted text must also read on the muted surface, where neutral badges sit', () => {
@@ -171,4 +245,16 @@ test('a focus ring drawn inside a hovered row must reach 3:1 on the row fill', (
     'editor.background': '#000000', 'editor.foreground': '#ffffff', 'button.background': '#a99ce2', 'list.hoverBackground': '#767676',
   } })
   assert.deepEqual(failing(mapped), ['theme focus'])
+})
+
+test('a role that follows a role the theme sets fails as the theme\'s', () => {
+  // The theme sets only a dim keyword; function and tag follow it.
+  const mapped = mapVsCodeTheme({
+    type: 'dark', colors: { 'editor.background': '#000000', 'editor.foreground': '#ffffff' },
+    tokenColors: [{ scope: 'keyword', settings: { foreground: '#333333' } }],
+  })
+  const syntax = mapped.problems.filter(({ check }) => check === 'syntax')
+  assert.deepEqual(syntax.map(({ kind, pairs }) => [kind, pairs.map(({ ink }) => ink)]), [
+    ['theme', ['{color-syntax-keyword}', '{color-syntax-function}', '{color-syntax-tag}']],
+  ])
 })

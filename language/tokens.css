@@ -104,6 +104,13 @@
   --color-syntax-string: #346347;
   --color-syntax-number: #86532e;
   --color-syntax-comment: #626772;
+  --color-syntax-function: var(--color-syntax-keyword);
+  --color-syntax-type: var(--color-syntax-number);
+  --color-syntax-variable: var(--color-code-text);
+  --color-syntax-operator: var(--color-muted);
+  --color-syntax-punctuation: var(--color-muted);
+  --color-syntax-tag: var(--color-syntax-keyword);
+  --color-syntax-attribute: var(--color-syntax-number);
 
   /* Type scale. The identity block names the families. */
   --text-xs: 0.75rem;

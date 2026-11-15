@@ -10,11 +10,13 @@
  *   theme then never counts as high contrast. Many theme files leave the type to the extension manifest's `uiTheme`;
  *   translate it: `vs` is `light`, `vs-dark` is `dark`, `hc-black` is `hc`, and `hc-light` is `hcLight`.
  * @property {Record<string, unknown>} [colors] Workbench colours by key, as #rgb, #rgba, #rrggbb, or #rrggbbaa.
+ * @property {unknown[]} [tokenColors] TextMate rules, `{ scope, settings: { foreground } }`. Merge an `include`'s
+ *   rules first, so the including file's rules come later and win.
  */
 /**
  * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours, or a
- * colour that follows them. A `core` problem is a core colour, such as a link, status, or syntax colour, on the
- * theme's fills: the theme cannot fix it.
+ * colour that follows them, such as a syntax colour the theme sets. A `core` problem is a core colour, such as a
+ * link, status, or core syntax colour, on the theme's fills: the theme cannot fix it. One check can report both.
  * @typedef {object} Problem
  * @property {'theme' | 'core'} kind
  * @property {string} check The check's id.
@@ -32,15 +34,17 @@
  * @property {string} hue `--color-project`.
  * @property {string} hueOnDark `--color-project-dark`: the prompt on the command plate, which is dark in both modes.
  * @property {Record<string, string>} neutrals Every neutral token, by name, such as `color-bg`.
+ * @property {Record<string, string>} syntax The syntax colours the theme sets, by role, such as `comment`. A role
+ *   it leaves out stays core.
  * @property {Problem[]} problems Every check the theme fails after selection.
  */
-/** @typedef {Pick<MappedTheme, 'appearance' | 'hue' | 'hueOnDark' | 'neutrals'>} ThemeColours */
+/** @typedef {Pick<MappedTheme, 'appearance' | 'hue' | 'hueOnDark' | 'neutrals'> & { syntax?: Record<string, string> }} ThemeColours */
 /** A theme that cannot be mapped, or mapped values that are not safe to set. */
 export class ThemeValidationError extends Error {
     /** @param {string} message */
     constructor(message: string);
 }
-export function themeInputs({ hue, hueOnDark, neutrals }: ThemeColours): ThemeInputs;
+export function themeInputs({ hue, hueOnDark, neutrals, syntax }: ThemeColours): ThemeInputs;
 export function mapVsCodeTheme(theme: VsCodeTheme): MappedTheme;
 export function themeVariables(theme: ThemeColours): Record<string, string>;
 export type Colour = import("./engine.js").Colour;
@@ -65,11 +69,16 @@ export type VsCodeTheme = {
      * Workbench colours by key, as #rgb, #rgba, #rrggbb, or #rrggbbaa.
      */
     colors?: Record<string, unknown> | undefined;
+    /**
+     * TextMate rules, `{ scope, settings: { foreground } }`. Merge an `include`'s
+     * rules first, so the including file's rules come later and win.
+     */
+    tokenColors?: unknown[] | undefined;
 };
 /**
  * A contrast check the mapped theme fails in its mode. A `theme` problem is in the theme's own colours, or a
- * colour that follows them. A `core` problem is a core colour, such as a link, status, or syntax colour, on the
- * theme's fills: the theme cannot fix it.
+ * colour that follows them, such as a syntax colour the theme sets. A `core` problem is a core colour, such as a
+ * link, status, or core syntax colour, on the theme's fills: the theme cannot fix it. One check can report both.
  */
 export type Problem = {
     kind: "theme" | "core";
@@ -117,8 +126,15 @@ export type MappedTheme = {
      */
     neutrals: Record<string, string>;
     /**
+     * The syntax colours the theme sets, by role, such as `comment`. A role
+     * it leaves out stays core.
+     */
+    syntax: Record<string, string>;
+    /**
      * Every check the theme fails after selection.
      */
     problems: Problem[];
 };
-export type ThemeColours = Pick<MappedTheme, "appearance" | "hue" | "hueOnDark" | "neutrals">;
+export type ThemeColours = Pick<MappedTheme, "appearance" | "hue" | "hueOnDark" | "neutrals"> & {
+    syntax?: Record<string, string>;
+};

@@ -13,6 +13,8 @@
  * @property {ModePair} hue The hue, `--color-project` in light and `--color-project-dark`.
  * @property {{ ui?: string, mono?: string }} [fonts] The two font stacks.
  * @property {{ light: Record<string, string>, dark: Record<string, string> }} [neutrals] Every NEUTRALS token, per mode.
+ * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [syntax] Syntax colours by SYNTAX_ROLES
+ *   role, per mode. A role a theme leaves out stays core.
  */
 /**
  * Every token's resolved value in light and in dark, as getComputedStyle reports it.
@@ -37,6 +39,11 @@ export function flatTokens(data: TokenSource): {
 };
 export function valueFor(tokens: Record<string, TokenValue>, name: string, mode: number): string;
 export function resolveData(data: TokenSource): ResolvedValues;
+/**
+ * The syntax roles, `--color-syntax-<role>`. Keyword, string, number, and comment have core colours; the others
+ * follow one of those or the code text, muted or not, unless a theme sets them.
+ */
+export const SYNTAX_ROLES: string[];
 /** The surfaces text and edges sit on: the page, a surface, and a raised surface. */
 export const SURFACES: string[];
 /** The selected-fill text tokens, which take their readable value from the theme. */
@@ -88,6 +95,14 @@ export type ThemeInputs = {
     neutrals?: {
         light: Record<string, string>;
         dark: Record<string, string>;
+    } | undefined;
+    /**
+     * Syntax colours by SYNTAX_ROLES
+     * role, per mode. A role a theme leaves out stays core.
+     */
+    syntax?: {
+        light?: Record<string, string>;
+        dark?: Record<string, string>;
     } | undefined;
 };
 /**
