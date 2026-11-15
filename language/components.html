@@ -551,7 +551,8 @@
   .viewer .dialog-body { overscroll-behavior: contain; }
   /* Inset: the dialog clips the body's edges. */
   .viewer .dialog-body:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
-  .viewer .screen { overflow: visible; }
+  /* The plate grows with its text, so the body scrolls the dark background with it. */
+  .viewer .screen { width: max-content; min-width: 100%; overflow: visible; }
   /* The full-size viewer clones the screen outside .capture, so it carries its own plate focus. */
   .screen { --color-focus: var(--color-project-dark); margin: 0; padding: var(--space-4); overflow-x: auto; background: var(--color-terminal); color: var(--color-terminal-text); font-size: var(--text-code); line-height: 1.5; }
   /* Inset: the capture and the viewer body clip the screen's edges. */

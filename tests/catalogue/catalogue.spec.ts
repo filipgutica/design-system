@@ -502,6 +502,19 @@ test.describe('outside a dialog', { tag: '@webkit' }, () => {
       expect(await page.evaluate(() => (window as unknown as { reached: string[] }).reached)).toEqual([])
     })
   })
+
+  test.describe('viewer at 320px', () => {
+    test.use({ viewport: { width: 320, height: 640 }, colorScheme: 'light' })
+
+    test('a capture wider than the viewer keeps its text on the terminal background while the body scrolls', async ({ page }) => {
+      const { dialog } = await open(page, { opener: '[data-full-size]', id: 'capture-viewer' })
+      const body = dialog.getByRole('region', { name: 'status capture' })
+      expect(await body.evaluate((element) => element.scrollWidth > element.clientWidth), 'the capture overflows the viewer').toBe(true)
+      const { plate, text } = await dialog.locator('.screen').evaluate((element) => ({ plate: element.getBoundingClientRect().width, text: element.scrollWidth }))
+      // scrollWidth rounds to whole pixels.
+      expect(plate).toBeGreaterThan(text - 1)
+    })
+  })
 })
 
 test.describe('without JavaScript', () => {
