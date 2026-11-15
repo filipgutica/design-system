@@ -2,7 +2,7 @@
 
 Filip's design language for any framework: the spec, the tokens, the component catalogue, and the editor themes. It ships as the npm package `@filipgutica/design-system`.
 
-- **Agents** get `language/` at `~/design-system` through filip-stack host config, or by copying it from the package; the site's [Agents](https://filipgutica.github.io/design-system/#agents) section has both.
+- **Agents** get the `design-system` plugin for Claude and Codex. Its skill reads `language/`; see [Install for agents](#install-for-agents).
 - **Vue apps** can use [`@filipgutica/ui`](https://github.com/filipgutica/ui), a Vue component library built on this design system.
 - **Site:** <https://filipgutica.github.io/design-system/> has the Overview, Foundations, and Components pages, with `index.json` and `llms.txt` for agents.
 
@@ -11,6 +11,7 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | Path | What it holds |
 | --- | --- |
 | `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
+| `skills/design-system/`, `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/` | The agent plugin: the skill that points agents at `language/`, and the Claude and Codex plugin and marketplace manifests. The repository root is the plugin root |
 | `tokens/core.json`, `tokens/themes/*.tokens.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file is a W3C Design Tokens file (2025.10) that holds only its name, a note, its hue pair, and optional fonts and neutrals |
 | `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css`, `dist/`, and the theme mapper's `core.js`; generates and checks declarations from JSDoc for `theme-mapper/` and `open-vsx/` |
 | `open-vsx/` | Experimental JSONC theme-file parser and Open VSX client, with resolved includes and unaltered colours and syntax rules |
@@ -44,6 +45,22 @@ npm install @filipgutica/design-system
 
 In a React app, import `tokens.css` and `fonts.css` once in the entry and write `var(--color-text)` in styles, or `cssVar('color-text')` in TypeScript. `tests/react-smoke/` is a working example.
 
+## Install for agents
+
+The repository is a Claude and Codex plugin marketplace. The `design-system` skill tells the agent to read `language/DESIGN.md` and the files it names.
+
+```sh
+claude plugin marketplace add filipgutica/design-system
+claude plugin install design-system@design-system
+```
+
+```sh
+codex plugin marketplace add filipgutica/design-system
+codex plugin add design-system@design-system
+```
+
+Update with `claude plugin update design-system@design-system` or `codex plugin marketplace upgrade design-system`. Each release stamps its version into the plugin manifests, so an update fetches the new files.
+
 ## Develop
 
 ```sh
@@ -58,12 +75,13 @@ pnpm verify
 
 semantic-release publishes from `main` with npm provenance. Releases stay 1.0.x while the design system has no outside users ([decisions.md](language/decisions.md), Versioning):
 
-- Any commit that releases, such as `fix`, `feat`, or a breaking change, releases a patch.
+- Any commit that releases, such as `fix`, `feat`, `docs`, or a breaking change, releases a patch. `docs` releases because agents read `language/` through the plugin.
 - The release notes name a breaking change only when its commit message has `!` after the type or a `BREAKING CHANGE:` or `BREAKING-CHANGE:` footer. Put it there; a marker only in the PR body releases a patch but does not reach the notes.
-- `build`, `chore`, `docs`, `test`, and similar types release nothing, unless the commit or its PR marks a breaking change.
+- `build`, `chore`, `test`, and similar types release nothing, unless the commit or its PR marks a breaking change.
+- Each release stamps its version into the four plugin manifests and commits them to `main` as `chore(release): <version> [skip ci]`. `package.json` keeps `0.0.0-development`.
 - Release tags are `ds-v*`. The `v1.0.0`–`v2.4.0` tags and npm versions are the earlier series.
 
-Commits follow Conventional Commits, and CI checks them with commitlint. Do not edit the version by hand.
+Commits follow Conventional Commits, and CI checks them with commitlint. Do not edit a version by hand.
 
 ## History
 

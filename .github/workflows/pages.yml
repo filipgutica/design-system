@@ -2,8 +2,9 @@ name: Pages
 
 # The site shows the released version, which semantic-release tags in the Release workflow, so the
 # deploy waits for Release to finish on main. Pull requests build the site without deploying it.
-# Each successful Release run deploys the commit it built. A manual re-run of an older Release would
-# deploy that older commit; the next Release or a manual run of this workflow restores main.
+# Each successful Release run deploys the commit it built, or the release commit it tagged on top of
+# it. A manual re-run of an older Release would deploy that older commit; the next Release or a manual
+# run of this workflow restores main.
 on:
   workflow_run:
     workflows:
@@ -32,6 +33,16 @@ jobs:
           # The commit Release built, with its tags: the site build reads the version from the latest ds-v* tag.
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0
+      # A release commits the stamped plugin manifests on top of the commit Release built and tags that
+      # release commit, so the tag is not an ancestor of head_sha. Build that release commit instead: the
+      # tagged child of head_sha, never a later release.
+      - name: Check out the release commit when this Release run tagged one
+        if: github.event_name == 'workflow_run'
+        run: |
+          built=$(git rev-parse HEAD)
+          for tag in $(git tag --contains HEAD --list 'ds-v*'); do
+            if [ "$(git rev-parse "$tag^{commit}^")" = "$built" ]; then git checkout --quiet "$tag"; break; fi
+          done
       - uses: actions/setup-node@v6
         with:
           node-version: 24

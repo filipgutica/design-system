@@ -1,0 +1,13 @@
+{
+  "name": "design-system",
+  "version": "0.0.0-development",
+  "owner": {
+    "name": "Filip Gutica"
+  },
+  "plugins": [
+    {
+      "name": "design-system",
+      "source": "./"
+    }
+  ]
+}

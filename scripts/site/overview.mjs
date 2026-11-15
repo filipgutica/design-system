@@ -25,14 +25,12 @@ export const EXPORT_USES = {
 const PATHS = [
   { id: 'html', name: 'Plain HTML', who: 'A static page, a prototype, or an explainer', pkg: '@filipgutica/design-system', start: '<code>tokens.css</code>' },
   { id: 'react', name: 'React', who: 'A React app', pkg: '@filipgutica/design-system', start: '<code>tokens.css</code> and <code>cssVar()</code>' },
-  { id: 'agents', name: 'Agents', who: 'Claude or Codex doing UI work for you', pkg: 'filip-stack host config', start: '<code>~/design-system/DESIGN.md</code>' },
+  { id: 'agents', name: 'Agents', who: 'Claude or Codex doing UI work for you', pkg: 'design-system plugin', start: 'The <code>design-system</code> skill' },
 ]
 
 export const overviewPage = ({ pkg, version }) => {
   const unknown = Object.keys(pkg.exports).filter((path) => !(path in EXPORT_USES))
   if (unknown.length) throw new Error(`Overview: say what ${unknown.join(', ')} is for in EXPORT_USES`)
-  // npm pack names the tarball after the package: @scope/name@1.2.3 becomes scope-name-1.2.3.tgz.
-  const tarball = `${pkg.name.slice(1).replace('/', '-')}-${version}.tgz`
   const exportRows = Object.keys(pkg.exports).map((path) => `<tr><th scope="row"><code>${esc(path === '.' ? pkg.name : `${pkg.name}${path.slice(1)}`)}</code></th><td data-label="For"><div>${EXPORT_USES[path]}</div></td></tr>`).join('\n        ')
 
   const main = `  <section class="intro" aria-labelledby="title">
@@ -85,18 +83,15 @@ export const Panel = ({ children }: { children: React.ReactNode }) => (
 
   <section class="doc-section" id="agents" aria-labelledby="agents-title">
     <h2 id="agents-title">Agents</h2>
-    <p>Claude and Codex read the design system from <code>~/design-system</code>, the package’s <code>language/</code> folder.</p>
-    <h3>With filip-stack</h3>
-    <p><a href="https://filipgutica.github.io/filip-stack/#install">Install filip-stack</a>, then apply its host config. It installs the design system from a pinned package version and tells Claude and Codex to read it.</p>
-    ${command({ id: 'cmd-agents', label: 'Apply command', line: 'filip-stack apply' })}
-    <h3>Without filip-stack</h3>
-    <p>Copy the package’s <code>language/</code> folder to <code>~/design-system</code>.</p>
-    ${commands({ id: 'cmd-agents-copy', head: 'Copy the design system', label: 'Copy commands', lines: [
-      `npm pack ${pkg.name}@${version}`,
-      `mkdir -p ~/design-system && tar -xzf ${tarball} -C ~/design-system --strip-components=2 package/language`,
+    <p>The design system’s repository is a Claude and Codex plugin. Its <code>design-system</code> skill tells the agent to read <code>DESIGN.md</code> and the files it names, from the plugin’s own <code>language/</code> folder, so the files update with the plugin.</p>
+    ${commands({ id: 'cmd-agents-claude', head: 'Claude', label: 'Claude install commands', lines: [
+      'claude plugin marketplace add filipgutica/design-system',
+      'claude plugin install design-system@design-system',
     ] })}
-    <p>Then tell your agent to read it. Add this line to <code>CLAUDE.md</code> or <code>AGENTS.md</code>:</p>
-    ${source({ id: 'src-agents', file: 'CLAUDE.md or AGENTS.md', text: 'For UX and visual work, read ~/design-system/DESIGN.md first and follow it.' })}
+    ${commands({ id: 'cmd-agents-codex', head: 'Codex', label: 'Codex install commands', lines: [
+      'codex plugin marketplace add filipgutica/design-system',
+      'codex plugin add design-system@design-system',
+    ] })}
     <p>This site also publishes the files for agents to read:</p>
     <dl class="defs">
       <dt><a href="DESIGN.md"><code>DESIGN.md</code></a></dt><dd>Selection rules and acceptance checks. Agents read it first.</dd>
