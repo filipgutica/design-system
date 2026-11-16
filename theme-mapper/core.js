@@ -143,7 +143,24 @@ export const core = {
         "color-terminal-border": "#2a3036",
         "color-terminal-caption": "#13171a",
         "color-terminal-caption-text": "#c9d0d6",
-        "shadow-nav-current-dark": "0 1px 2px rgb(0 0 0 / 25%)"
+        "shadow-nav-current-dark": "0 1px 2px rgb(0 0 0 / 25%)",
+        "color-terminal-ansi-0": "#2b2b31",
+        "color-terminal-ansi-1": "#f0776c",
+        "color-terminal-ansi-2": "#4cc38a",
+        "color-terminal-ansi-3": "#e2a54b",
+        "color-terminal-ansi-4": "#7d97ff",
+        "color-terminal-ansi-5": "#c792ea",
+        "color-terminal-ansi-6": "#5fd3d9",
+        "color-terminal-ansi-7": "#c8c8d0",
+        "color-terminal-ansi-8": "#a0a0ab",
+        "color-terminal-ansi-9": "#ff8f85",
+        "color-terminal-ansi-10": "#6fd3a0",
+        "color-terminal-ansi-11": "#e8b56a",
+        "color-terminal-ansi-12": "#7d97ff",
+        "color-terminal-ansi-13": "#d9a8f0",
+        "color-terminal-ansi-14": "#8ee3e8",
+        "color-terminal-ansi-15": "#ffffff",
+        "color-terminal-ansi-4-bg": "#3354c4"
       }
     },
     {

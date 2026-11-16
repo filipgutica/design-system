@@ -28,6 +28,8 @@ const standaloneModes = (css) => {
 const ADDED_SINCE_DS1 = [
   '--color-status-ink',
   ...['function', 'type', 'variable', 'operator', 'punctuation', 'tag', 'attribute'].map((role) => `--color-syntax-${role}`),
+  ...Array.from({ length: 16 }, (_, slot) => `--color-terminal-ansi-${slot}`),
+  '--color-terminal-ansi-4-bg',
 ]
 const withoutAdded = (css) => css.replace(new RegExp(`^\\s*(?:${ADDED_SINCE_DS1.join('|')}):[^;]+;\\n`, 'gm'), '')
 

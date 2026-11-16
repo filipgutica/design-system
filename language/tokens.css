@@ -85,7 +85,7 @@
   --color-info-surface: #d9e3f2;
   --color-status-ink: black;
 
-  /* Identity layer: neutral terminal captures in both appearances.
+  /* Identity layer: neutral terminal captures in both appearances, with the ANSI colours their output uses.
      Command tokens stay as compatibility aliases for the code well and its edge. */
   --color-command-bg: var(--color-code);
   --color-command-border: var(--color-border-subtle);
@@ -96,6 +96,23 @@
   --color-terminal-caption-text: #c9d0d6;
   /* The terminal capture's header stays dark in both appearances, so its selected tab keeps the dark lift. */
   --shadow-nav-current-dark: 0 1px 2px rgb(0 0 0 / 25%);
+  --color-terminal-ansi-0: #2b2b31;
+  --color-terminal-ansi-1: #f0776c;
+  --color-terminal-ansi-2: #4cc38a;
+  --color-terminal-ansi-3: #e2a54b;
+  --color-terminal-ansi-4: #7d97ff;
+  --color-terminal-ansi-5: #c792ea;
+  --color-terminal-ansi-6: #5fd3d9;
+  --color-terminal-ansi-7: #c8c8d0;
+  --color-terminal-ansi-8: #a0a0ab;
+  --color-terminal-ansi-9: #ff8f85;
+  --color-terminal-ansi-10: #6fd3a0;
+  --color-terminal-ansi-11: #e8b56a;
+  --color-terminal-ansi-12: #7d97ff;
+  --color-terminal-ansi-13: #d9a8f0;
+  --color-terminal-ansi-14: #8ee3e8;
+  --color-terminal-ansi-15: #ffffff;
+  --color-terminal-ansi-4-bg: #3354c4;
 
   /* Source code wells */
   --color-code: var(--color-surface);

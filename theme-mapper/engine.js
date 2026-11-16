@@ -301,6 +301,12 @@ export const CHECKS = [
   // A terminal capture's highlight and its current tab, in the dark hue on the terminal.
   { id: 'terminal', label: 'Highlighted text in a terminal capture, and its current tab', min: 4.5, kind: 'theme',
     pairs: on(['{color-project-dark}'], ['{color-terminal}', [mix('{color-project-dark}', 20, 'transparent'), '{color-terminal}']]) },
+  // ANSI colour 0 is black: captures use it as a background, so only colours 1 to 15 are measured as text.
+  { id: 'ansi', label: 'ANSI text colours on a terminal capture, and its text on the ANSI blue background', min: 4.5, kind: 'core',
+    pairs: [
+      ...on(Array.from({ length: 15 }, (_, slot) => `{color-terminal-ansi-${slot + 1}}`), ['{color-terminal}']),
+      ...on(['{color-terminal-text}'], ['{color-terminal-ansi-4-bg}']),
+    ] },
   { id: 'link', label: 'Link text on the page, a surface, and a raised surface', min: 4.5, kind: 'core',
     pairs: on(['{color-link}'], ON_SURFACES) },
   { id: 'status', label: 'Status text on the page, a surface, and a raised surface, on its badge, and on a danger button', min: 4.5, kind: 'core',

@@ -559,6 +559,24 @@
   .screen:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
   .screen .hi { color: var(--color-project-dark); }
   .screen .dim { color: var(--color-terminal-caption-text); }
+  /* ANSI output: the classes a capture converter emits for the 16 colours. Black is a background only. */
+  .screen .tf1 { color: var(--color-terminal-ansi-1); }
+  .screen .tf2 { color: var(--color-terminal-ansi-2); }
+  .screen .tf3 { color: var(--color-terminal-ansi-3); }
+  .screen .tf4 { color: var(--color-terminal-ansi-4); }
+  .screen .tf5 { color: var(--color-terminal-ansi-5); }
+  .screen .tf6 { color: var(--color-terminal-ansi-6); }
+  .screen .tf7 { color: var(--color-terminal-ansi-7); }
+  .screen .tf8 { color: var(--color-terminal-ansi-8); }
+  .screen .tf9 { color: var(--color-terminal-ansi-9); }
+  .screen .tf10 { color: var(--color-terminal-ansi-10); }
+  .screen .tf11 { color: var(--color-terminal-ansi-11); }
+  .screen .tf12 { color: var(--color-terminal-ansi-12); }
+  .screen .tf13 { color: var(--color-terminal-ansi-13); }
+  .screen .tf14 { color: var(--color-terminal-ansi-14); }
+  .screen .tf15 { color: var(--color-terminal-ansi-15); }
+  .screen .tb0 { background: var(--color-terminal-ansi-0); }
+  .screen .tb4 { background: var(--color-terminal-ansi-4-bg); }
   .capture-caption { padding: var(--space-1) var(--space-4); background: var(--color-terminal-caption); color: var(--color-terminal-caption-text); font: var(--text-xs) / var(--leading) var(--font-mono); overflow-wrap: anywhere; }
 
   /* Site header */
@@ -1453,7 +1471,11 @@
       <div class="capture-head" hidden><button class="quiet-action full" type="button" data-full-size><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>Full size</button></div>
       <section class="tabpanel" id="cap-status" aria-labelledby="cap-status-heading"><h4 class="tabs-heading" id="cap-status-heading">status</h4><pre class="screen" tabindex="0" role="region" aria-label="status capture"><span class="hi">●</span> host-config   <span class="dim">3 targets current</span>
 <span class="hi">●</span> field-guide   <span class="dim">synced 2 minutes ago</span></pre><p class="capture-caption">~/code/filip-stack · main</p></section>
-      <section class="tabpanel" id="cap-diff" aria-labelledby="cap-diff-heading"><h4 class="tabs-heading" id="cap-diff-heading">diff</h4><pre class="screen" tabindex="0" role="region" aria-label="diff capture"><span class="dim">tokens.css</span>  +12 −4</pre><p class="capture-caption">~/code/filip-stack · docs/design-catalogue</p></section>
+      <section class="tabpanel" id="cap-diff" aria-labelledby="cap-diff-heading"><h4 class="tabs-heading" id="cap-diff-heading">diff</h4><pre class="screen" tabindex="0" role="region" aria-label="diff capture"><span class="dim">tokens.css</span>  <span class="tf2">+12</span> <span class="tf1">−4</span></pre><p class="capture-caption">~/code/filip-stack · docs/design-catalogue</p></section>
+      <section class="tabpanel" id="cap-colours" aria-labelledby="cap-colours-heading"><h4 class="tabs-heading" id="cap-colours-heading">colours</h4><pre class="screen" tabindex="0" role="region" aria-label="colours capture"><span class="tb0">   </span> <span class="tf1">███</span> <span class="tf2">███</span> <span class="tf3">███</span> <span class="tf4">███</span> <span class="tf5">███</span> <span class="tf6">███</span> <span class="tf7">███</span>
+<span class="tf8">███</span> <span class="tf9">███</span> <span class="tf10">███</span> <span class="tf11">███</span> <span class="tf12">███</span> <span class="tf13">███</span> <span class="tf14">███</span> <span class="tf15">███</span>
+<span class="tb4">&gt; tokens.css     </span>
+  components.md</pre><p class="capture-caption">~/code/filip-stack · main</p></section>
     </div>
   </section>
 
