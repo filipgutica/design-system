@@ -9,6 +9,7 @@ import { Button } from '@ui-sdk/react/button'
 import { Checkbox, CheckboxIndicator } from '@ui-sdk/react/checkbox'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@ui-sdk/react/field'
 import { Input } from '@ui-sdk/react/input'
+import { Menu, MenuContent, MenuItem, MenuItemIcon, MenuSeparator, MenuTrigger } from '@ui-sdk/react/menu'
 import { Drawer, DrawerBackdrop, DrawerClose, DrawerContent, DrawerTitle, DrawerTrigger } from '@ui-sdk/react/drawer'
 import { Dialog, DialogBackdrop, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@ui-sdk/react/dialog'
 import { Progress, ProgressIndicator, ProgressLabel, ProgressTrack, ProgressValue } from '@ui-sdk/react/progress'
@@ -30,6 +31,29 @@ const App = () => {
   return (
     <main style={{ display: 'grid', gap: 'var(--space-4)', maxWidth: '28rem', padding: 'var(--space-6)' }}>
       <h1>Project settings</h1>
+      <div style={{ display: 'flex', justifyContent: 'end', gap: 'var(--space-2)' }}>
+        <Menu>
+          <MenuTrigger data-testid="menu-trigger" aria-label="More actions for Apollo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h0m7 0h0m7 0h0" /></svg>
+          </MenuTrigger>
+          <MenuContent data-testid="menu-content" align="end">
+            <MenuItem data-testid="menu-rename" render={<button type="button" />}>Rename</MenuItem>
+            <MenuItem data-testid="menu-duplicate" render={<button type="button" />}>Duplicate</MenuItem>
+            <MenuItem data-testid="menu-disabled" disabled render={<button type="button" disabled />}>Export</MenuItem>
+            <MenuItem data-testid="menu-icon-item" render={<button type="button" />}>
+              <MenuItemIcon data-testid="menu-icon"><svg viewBox="0 0 24 24"><path d="M8 5H5v14h14v-3M9 15 19 5m-6 0h6v6" /></svg></MenuItemIcon>
+              Open details
+            </MenuItem>
+            <MenuSeparator data-testid="menu-separator" />
+            <MenuItem data-testid="menu-danger" destructive render={<button type="button" />}>Delete…</MenuItem>
+          </MenuContent>
+        </Menu>
+        <Menu>
+          <MenuTrigger data-testid="menu-trigger-disabled" disabled aria-label="More actions for archived project">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h0m7 0h0m7 0h0" /></svg>
+          </MenuTrigger>
+        </Menu>
+      </div>
       <p>Read the <a href="#guide" data-testid="link">settings guide</a> first.</p>
       <Field>
         <FieldLabel data-testid="field-label">Project name</FieldLabel>
