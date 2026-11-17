@@ -243,6 +243,9 @@
   .detail > * { padding: var(--space-4); }
   .detail > * + * { border-top: 1px solid var(--color-border-subtle); }
   .detail h2 { font-size: var(--text-md); }
+  /* A status the badge cannot carry is one sentence under the title, with its icon, instead of a badge and an alert. */
+  .status-line { display: flex; align-items: flex-start; gap: var(--space-2); margin: 0; font-size: var(--text-sm); }
+  .status-line .icon { margin-top: 0.125rem; color: var(--color-warning); }
   /* A code block inside a panel becomes a flush section, not a nested box. */
   .detail > .code { padding: 0; border: 0; border-radius: 0; border-top: 1px solid var(--color-border-subtle); box-shadow: none; }
   /* Its source spans the section, under one hairline, as a live example's does. */
@@ -904,12 +907,13 @@
       <div style="display:grid;gap:var(--space-2)">
         <span class="caption mono">${m.id}</span>
         <h2>${esc(m.name)}</h2>
-        <div><span class="badge ${st.badge}">${st.label}</span></div>
+        ${m.status === 'nodata'
+          ? `<p class="status-line">${icon('i-alert')}<span>No data for 42 minutes. Check ingestion before you trust this monitor.</span></p>`
+          : `<div><span class="badge ${st.badge}">${st.label}</span></div>`}
       </div>
       <figure class="chart-wrap">${chart(m)}
         <figcaption class="caption">Last 24 hours. The dashed line is the threshold.</figcaption>
       </figure>
-      ${m.status === 'nodata' ? `<div class="alert warning">${icon('i-alert')}<p>No data for 42 minutes. Check ingestion before you trust this monitor.</p></div>` : ''}
       <dl class="props">
         <dt>Current</dt><dd class="mono num">${m.value}</dd>
         <dt>Condition</dt><dd class="mono">${m.op} ${m.threshold} ${m.unit} for 10m</dd>
