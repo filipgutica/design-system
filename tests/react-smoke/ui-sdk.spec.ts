@@ -16,8 +16,34 @@ const label = (testId: string) => `[data-slot="label"]:has([data-testid="${testI
 const mark = ['width', 'height', 'margin-top', 'border-right-width', 'border-bottom-width', 'border-top-width', 'border-right-color', 'transform']
 
 // specimen: the components.html element; part: a data-testid on ui-sdk.html, or a selector there.
-type Pair = { name: string; specimen: string; part: string; props: string[]; state?: 'hover' | 'focus' | 'press' | 'click'; pseudo?: '::before' }
+type Pair = { name: string; specimen: string; part: string; props: string[]; state?: 'hover' | 'focus' | 'press' | 'click'; pseudo?: '::before'; menu?: boolean }
+const menuTrigger = '#overflow-menu .overflow > .quiet-action'
+const menuList = '#overflow-menu .menu-list.is-static'
+const menuBox = [...control, 'width', 'gap', 'text-align', 'cursor']
+const icon = ['width', 'height', 'flex-shrink', 'stroke', 'fill', 'stroke-width', 'stroke-linecap', 'stroke-linejoin']
+const menuPairs: Pair[] = [
+  { name: 'overflow trigger', specimen: `${menuTrigger}[aria-controls]`, part: 'menu-trigger', props: menuBox },
+  { name: 'overflow trigger on hover', specimen: `${menuTrigger}.is-hover`, part: 'menu-trigger', props: menuBox, state: 'hover' },
+  { name: 'overflow trigger focused', specimen: `${menuTrigger}.is-focus`, part: 'menu-trigger', props: ring, state: 'focus' },
+  { name: 'overflow trigger pressed', specimen: `${menuTrigger}.is-active`, part: 'menu-trigger', props: menuBox, state: 'press' },
+  { name: 'overflow trigger open', specimen: `${menuTrigger}[aria-expanded="true"]`, part: 'menu-trigger', props: menuBox, state: 'click' },
+  { name: 'overflow trigger disabled', specimen: `${menuTrigger}[disabled]`, part: 'menu-trigger-disabled', props: menuBox },
+  { name: 'overflow More icon', specimen: `${menuTrigger}[aria-controls] .icon`, part: '[data-testid="menu-trigger"] > svg', props: icon },
+  { name: 'overflow layer', specimen: menuList, part: 'menu-content', props: [...box.filter((prop) => prop !== 'height'), ...text, 'min-width', 'padding-top', 'padding-right', 'display'], menu: true },
+  { name: 'overflow item', specimen: `${menuList} [role="menuitem"]:nth-child(2)`, part: 'menu-duplicate', props: menuBox, menu: true },
+  { name: 'overflow item highlighted', specimen: `${menuList} .is-highlight`, part: 'menu-rename', props: menuBox, state: 'hover', menu: true },
+  { name: 'overflow item focused', specimen: `${menuList} .is-highlight`, part: 'menu-rename', props: [...menuBox, ...ring], state: 'focus', menu: true },
+  { name: 'overflow item disabled', specimen: `${menuList} [disabled]`, part: 'menu-disabled', props: menuBox, menu: true },
+  { name: 'overflow disabled item on hover', specimen: `${menuList} [disabled]`, part: 'menu-disabled', props: menuBox, state: 'hover', menu: true },
+  { name: 'overflow danger item', specimen: `${menuList} .danger`, part: 'menu-danger', props: menuBox, menu: true },
+  { name: 'overflow danger item highlighted', specimen: `${menuList} .danger`, part: 'menu-danger', props: [...menuBox, ...ring], state: 'focus', menu: true },
+  { name: 'overflow separator', specimen: `${menuList} [role="separator"]`, part: 'menu-separator', props: [...box, 'margin-top', 'margin-bottom', 'margin-left', 'margin-right'], menu: true },
+  // The menu recipe uses the shared 16px leading icon; its static specimen has text-only items.
+  { name: 'overflow item icon', specimen: '#button .btn .icon', part: '[data-testid="menu-icon"] > svg', props: icon.filter((prop) => prop !== 'stroke'), menu: true },
+  { name: 'overflow item icon colour', specimen: `${menuList} [role="menuitem"]:nth-child(2)`, part: '[data-testid="menu-icon"] > svg', props: ['color'], menu: true },
+]
 const pairs: Pair[] = [
+  ...menuPairs,
   { name: 'primary button', specimen: `#button .btn${restButton}`, part: 'primary', props: control },
   { name: 'primary button on hover', specimen: `#button .btn.is-hover${notVariant}`, part: 'primary', props: control, state: 'hover' },
   { name: 'primary button pressed', specimen: `#button .btn.is-active${notVariant}`, part: 'primary', props: [...control, 'transform'], state: 'press' },
@@ -86,10 +112,22 @@ const compare = async ({ page, context, mode, pair }: { page: Page; context: Bro
   await reference.evaluate((value) => { document.documentElement.dataset.theme = value }, mode)
   // A real press also hovers, so the pressed specimen takes the pinned hover as well.
   if (state === 'press') await reference.locator(specimen).first().evaluate((element) => element.classList.add('is-hover'))
+  if (pair.menu && state === 'focus') {
+    await reference.locator(specimen).first().evaluate((element) => element.closest('[inert]')?.removeAttribute('inert'))
+    await reference.locator(specimen).first().focus()
+  }
+  // Forced-colour UA styles distinguish a real hovered/focused button from an inert drawing.
+  if (part === 'menu-trigger' && state) {
+    const trigger = reference.locator(specimen).first()
+    await trigger.evaluate((element) => element.closest('[inert]')?.removeAttribute('inert'))
+    if (state === 'focus') await trigger.focus()
+    else await trigger.hover()
+  }
   const expected = await read(reference, specimen, props, pseudo)
 
   await page.goto('/ui-sdk.html')
   await page.evaluate((value) => { document.documentElement.dataset.theme = value }, mode)
+  if (pair.menu) await page.getByTestId('menu-trigger').press('ArrowDown')
   // A checked part is clicked on its control, which is the part itself or the box it marks.
   const control = page.locator(uiPart(part.includes('checkbox-indicator') ? 'checkbox' : part)).first()
   await expect(control).toBeVisible()
@@ -98,10 +136,24 @@ const compare = async ({ page, context, mode, pair }: { page: Page; context: Bro
   if (state === 'click') await control.click()
   if (state === 'press') {
     await control.hover()
-    await page.mouse.down()
+    // ui-sdk opens on pointerdown and moves focus to the popup, ending the native :active
+    // state. Holding Space keeps the trigger pressed until keyup, as the recipe draws it.
+    if (part === 'menu-trigger') {
+      await control.focus()
+      await page.keyboard.down('Space')
+    } else await page.mouse.down()
   }
   expect(await read(page, uiPart(part), props, pseudo)).toEqual(expected)
-  if (state === 'press') await page.mouse.up()
+  if (part === 'menu-content') {
+    const [trigger, content] = await Promise.all([page.getByTestId('menu-trigger').boundingBox(), control.boundingBox()])
+    const gap = parseFloat((await read(reference, '#overflow-live', ['margin-top']))['margin-top'])
+    expect(content!.x + content!.width).toBeCloseTo(trigger!.x + trigger!.width, 1)
+    expect(content!.y - trigger!.y - trigger!.height).toBeCloseTo(gap, 1)
+  }
+  if (state === 'press') {
+    if (part === 'menu-trigger') await page.keyboard.up('Space')
+    else await page.mouse.up()
+  }
 }
 
 // Motion would leave a hover or press mid-transition, so both pages run with reduced motion.
@@ -116,6 +168,9 @@ for (const mode of ['light', 'dark'] as const) {
 // At tablet width unsized controls grow to --control-lg for touch.
 test.describe('ui-sdk parts match the catalogue at 375px', () => {
   test.use({ viewport: { width: 375, height: 800 } })
+  for (const mode of ['light', 'dark']) {
+    for (const pair of menuPairs) test(`${pair.name} in ${mode}`, ({ page, context }) => compare({ page, context, mode, pair }))
+  }
   for (const name of ['primary button', 'input', 'checkbox row']) {
     const pair = pairs.find((candidate) => candidate.name === name)!
     test(name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
@@ -127,6 +182,7 @@ test.describe('ui-sdk parts match the catalogue in forced colours', () => {
   test.use({ forcedColors: 'active' })
   const outline = ['outline-style', 'outline-width', 'outline-offset', 'outline-color']
   const forced: Pair[] = [
+    ...menuPairs,
     { ...pairs.find(({ name }) => name === 'checked checkbox')!, props: ['background-color', 'border-top-color'] },
     { ...pairs.find(({ name }) => name === 'check mark')!, props: ['border-right-color'] },
     { ...pairs.find(({ name }) => name === 'checked radio')!, props: ['background-color', 'border-top-color'] },
@@ -139,6 +195,7 @@ test.describe('ui-sdk parts match the catalogue in forced colours', () => {
 test('every part ui-sdk.css draws renders from the installed ui-sdk', async ({ page }) => {
   await page.goto('/ui-sdk.html')
   await page.getByTestId('checkbox').click()
+  await page.getByTestId('menu-trigger').click()
   // The slots come from the loaded stylesheet's own selectors, so a new rule is checked with no list to update.
   const { slots, missing } = await page.evaluate(() => {
     const rules = (list: CSSRuleList): string[] => [...list].flatMap((rule) =>
@@ -149,6 +206,24 @@ test('every part ui-sdk.css draws renders from the installed ui-sdk', async ({ p
   })
   expect(slots.length).toBeGreaterThan(10)
   expect(missing).toEqual([])
+})
+
+test('menu keyboard navigation opens, moves, and Escape restores the trigger', async ({ page }) => {
+  await page.goto('/ui-sdk.html')
+  const trigger = page.getByTestId('menu-trigger')
+  await trigger.focus()
+  await trigger.press('Enter')
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.getByTestId('menu-rename')).toBeFocused()
+  await expect(page.getByTestId('menu-rename')).toHaveAttribute('data-highlighted', '')
+  await page.keyboard.press('ArrowDown')
+  await expect(page.getByTestId('menu-duplicate')).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(page.getByTestId('menu-rename')).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.getByTestId('menu-content')).not.toBeVisible()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await expect(trigger).toBeFocused()
 })
 
 test('prose links keep the link colour', async ({ page }) => {
