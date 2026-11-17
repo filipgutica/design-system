@@ -257,11 +257,11 @@ Every interface built with this language starts minimal: application screens, mo
 
 - **Status in one sentence.** A view's summary sentence carries its status, the numbers behind it, and a status icon. Use an [alert](components.md#alert) only for a caveat or an action the summary cannot carry: one per view at most, and never one that repeats a sentence, badge, or heading in view.
 - **One meta line.** Context, such as who ran it, the scope, the size, and liveness ("still running"), sits on one muted line under the title, joined with " · ". It is the one deliberate run of middle dots. Its details sit behind a disclosure on that line.
-- **One-line rows.** Table and list rows are one line, `--row` tall. Show a direction, trend, or unit as a glyph (↑ or ↓) and put the words in the accessible name. Secondary detail goes in the selected row's detail or a disclosure.
+- **One-line rows.** Data rows in a table or list are one line, `--row` tall. Show a direction, trend, or unit as a glyph (↑ or ↓) and put the words in the accessible name. Secondary detail goes in the selected row's detail or a disclosure.
 - **Mark the exceptions.** Status columns, badges, and status icons show only the values that differ from the default. The default has no mark, and one key line names it. Drop an icon that repeats a badge or label in the same row.
-- **One action in reach.** A row or card shows its primary next action as a button, plus either one secondary button or, for two or more secondary actions, one overflow menu trigger. A failed or blocked item keeps its recovery action, such as Retry, Resume, or Reconnect, visible.
+- **Primary action in reach.** A row or card shows its primary next action as a button, plus either one secondary button or, for two or more secondary actions, one overflow menu trigger. A failed or blocked item keeps its recovery action, such as Retry, Resume, or Reconnect, visible.
 - **Forms.** A field takes a description only for a format, limit, or consequence its label does not state. No intro sentence restates the fields. A sticky action bar sits on the page background with a hairline divider, without a panel or shadow.
-- **Containers group.** Never put a container, such as a panel, card, well, or alert, inside another; controls inside a container are fine. Grid cells and stat tiles take a fill or nothing, not a border each.
+- **Containers group.** Never nest a panel, card, or well in another. A component's own parts, as its spec draws them, such as a code block's source panel, and the controls and alerts inside a container or a dialog are fine. Grid cells and stat tiles take a fill or nothing, not a border each.
 - **Explanations on request.** Method notes, "How to read this", and multiple-comparison caveats go in a closed disclosure next to what they explain.
 
 Never cut these:
