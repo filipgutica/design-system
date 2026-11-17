@@ -391,6 +391,44 @@ test.describe('a scrolling tab list', () => {
   })
 })
 
+// The file runs under reduced motion; these run with motion allowed, where the glides apply.
+test.describe('with motion allowed', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  // Lists the CSS transitions running on a part, as property and duration.
+  const running = (page: Page, testId: string) => page.getByTestId(testId).evaluate((element) =>
+    element.getAnimations().filter((animation) => animation instanceof CSSTransition)
+      .map((animation) => `${(animation as CSSTransition).transitionProperty} ${animation.effect?.getTiming().duration}`).sort())
+
+  test('the thumb and the tab fill do not glide on first render', async ({ page }) => {
+    // Records every transition from the first frame, before ui-sdk measures the indicators.
+    await page.addInitScript(() => {
+      const started: string[] = []
+      Object.assign(window, { started })
+      document.addEventListener('transitionstart', (event) => started.push(`${(event.target as Element).getAttribute('data-slot')} ${event.propertyName}`))
+    })
+    await page.goto('/ui-sdk.html')
+    await page.waitForTimeout(500)
+    const started = await page.evaluate(() => (window as unknown as { started: string[] }).started)
+    expect(started.filter((entry) => /indicator/.test(entry))).toEqual([])
+  })
+
+  test('a change of choice glides both edges over 260ms and cross-fades the labels', async ({ page }) => {
+    await page.goto('/ui-sdk.html')
+    await page.getByTestId('seg-grid').click()
+    expect(await running(page, 'segmented-indicator')).toEqual(['left 260', 'width 260'])
+    expect(await running(page, 'seg-grid')).toEqual(['color 260'])
+
+    // The first tab change glides, and so does a change back the other way.
+    await page.getByTestId('tab-history').click()
+    expect(await running(page, 'tabs-indicator')).toEqual(['left 260', 'right 260'])
+    expect(await running(page, 'tab-history')).toContain('color 260')
+    await page.waitForTimeout(400)
+    await page.getByTestId('tab-overview').click()
+    expect(await running(page, 'tabs-indicator')).toEqual(['left 260', 'right 260'])
+  })
+})
+
 test('a scrolling tab list does not fade under reduced motion, where the base stops animations', async ({ page }) => {
   await page.goto('/ui-sdk.html')
   expect(await fade(page)).toEqual(['', '', 'none'])

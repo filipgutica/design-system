@@ -260,14 +260,18 @@
   [data-slot="drawer-title"] { margin: 0; font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }
 
   @media (prefers-reduced-motion: no-preference) {
-    /* Motion answers only the reader: a glide runs while the pointer or focus is in the control, so a resize,
-       a font swap, or ui-sdk's first measurement moves the thumb at once. ui-sdk does not say which way a
-       segmented choice moved, so both edges of its thumb glide together. */
-    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"] { transition: color var(--duration-fast) var(--ease-out); }
+    /* Motion answers the reader: a glide runs only while the pointer or focus is in the control, so ui-sdk's
+       first measurement after mount places the thumb at once. A re-measure while the pointer or focus is in
+       the control, such as on a resize, glides too; nothing in the markup tells it from a change of choice.
+       ui-sdk does not say which way a choice moved before it moves the thumb (a tab's direction attribute
+       arrives a frame late), so both edges glide together over 260ms, without the spec's stretch. */
     [data-slot="segmented-control"][data-orientation="horizontal"]:is(:hover, :focus-within) > [data-slot="segmented-control-indicator"] { transition: left 260ms ease, width 260ms ease; }
-    /* A tab change says its direction, so the leading edge glides over 260ms and the trailing edge over 300ms. */
-    [data-slot="tabs-list"][data-orientation="horizontal"]:is(:hover, :focus-within) > [data-slot="tabs-indicator"][data-activation-direction="right"] { transition: left 300ms ease, right 260ms ease; }
-    [data-slot="tabs-list"][data-orientation="horizontal"]:is(:hover, :focus-within) > [data-slot="tabs-indicator"][data-activation-direction="left"] { transition: left 260ms ease, right 300ms ease; }
+    [data-slot="tabs-list"][data-orientation="horizontal"]:is(:hover, :focus-within) > [data-slot="tabs-indicator"] { transition: left 260ms ease, right 260ms ease; }
+    /* Hover fades a label over --duration-fast. A change of choice comes with focus in the control (a click
+       focuses the option), and then the labels cross-fade over 260ms, with the glide. */
+    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"] { transition: color var(--duration-fast) var(--ease-out); }
+    [data-slot="segmented-control"][data-orientation="horizontal"]:focus-within > [data-slot="segmented-control-item"] { transition: color 260ms ease; }
+    [data-slot="tabs-list"][data-orientation="horizontal"]:focus-within > [data-slot="tabs-tab"] { transition: background-color var(--duration-fast) var(--ease-out), color 260ms ease; }
   }
 
   /* ---------- Focus ---------- */
