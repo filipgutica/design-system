@@ -173,15 +173,109 @@
   [data-slot="dialog-content"][data-presentation="dialog"] > footer { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface); }
   [data-slot="dialog-title"] { margin: 0; font-size: 1.125rem; font-weight: var(--weight-semibold); letter-spacing: -0.02em; }
   [data-slot="dialog-description"] { margin: var(--space-1) 0 0; color: var(--color-muted); }
-  /* The header's close button is a quiet action. A Close rendered as a Button is drawn as that button. */
-  [data-slot="dialog-content"] > header > [data-slot="dialog-close"] { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  /* The header's close button, in a dialog or a drawer, is a quiet action. A Close rendered as a Button is drawn as that button. */
+  :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]) { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
   @media (hover: hover) {
-    [data-slot="dialog-content"] > header > [data-slot="dialog-close"]:hover { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
+    :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]):hover { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
   }
-  [data-slot="dialog-content"] > header > [data-slot="dialog-close"]:active { background: color-mix(in srgb, currentColor 12%, transparent); }
+  :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]):active { background: color-mix(in srgb, currentColor 12%, transparent); }
   /* Phones: the dialog becomes a bottom sheet with rounded top corners. */
   @media (max-width: 640px) {
     [data-slot="dialog-content"][data-presentation="dialog"] { width: 100%; margin: auto 0 0; border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
+  }
+
+  /* ---------- Segmented control ---------- */
+  /* An undivided sunk track; the indicator is the raised thumb, inset 2px inside the checked item, from the
+     position ui-sdk measures. Horizontal only. */
+  [data-slot="segmented-control"][data-orientation="horizontal"] { --item: var(--control-md); position: relative; display: inline-flex; flex: none; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-well); box-shadow: var(--shadow-sink); isolation: isolate; }
+  [data-slot="segmented-control"][data-orientation="horizontal"][data-size="sm"] { --item: var(--control-sm); font-size: var(--text-sm); }
+  [data-slot="segmented-control"][data-orientation="horizontal"][data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
+  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"] { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; }
+  [data-slot="segmented-control"][data-orientation="horizontal"][data-icon-only] > [data-slot="segmented-control-item"] { width: var(--item); padding: 0; }
+  /* The hover thumb sits behind the label and under the indicator, inside the control's stacking context. */
+  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]::before { content: ""; position: absolute; inset: 2px; z-index: -2; border-radius: var(--radius-control); pointer-events: none; }
+  @media (hover: hover) {
+    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]:hover:not([data-disabled], [data-checked]) { color: var(--color-text); }
+    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]:hover:not([data-disabled], [data-checked])::before { background: color-mix(in srgb, var(--color-control-thumb) 45%, transparent); }
+  }
+  /* The checked label reads at 4.5:1 on its thumb, and an icon at 3:1 (--color-segmented-current-text). */
+  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked] { color: var(--color-segmented-current-text); }
+  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-disabled] { opacity: 0.58; cursor: not-allowed; }
+  /* The thumb is the option's sibling, so a disabled checked option dims it too. */
+  [data-slot="segmented-control"][data-orientation="horizontal"]:has(> [data-slot="segmented-control-item"][data-checked][data-disabled]) > [data-slot="segmented-control-indicator"] { opacity: 0.58; }
+  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-indicator"] { position: absolute; z-index: -1; top: calc(var(--segmented-control-indicator-top) + 2px); left: calc(var(--segmented-control-indicator-left) + 2px); width: calc(var(--segmented-control-indicator-width) - 4px); height: calc(var(--segmented-control-indicator-height) - 4px); border-radius: var(--radius-control); background: var(--color-control-thumb); box-shadow: var(--shadow-raise); pointer-events: none; }
+
+  /* ---------- Tabs ---------- */
+  /* The list scrolls, so it clips on every side: the padding keeps the selected tab's shadow whole. The indicator
+     is the selected tab's lifted fill, from the position ui-sdk measures. Horizontal only. */
+  /* The fill takes its left edge and width: ui-sdk measures --active-tab-right from the end of the scrolled content. */
+  [data-slot="tabs-list"][data-orientation="horizontal"] { position: relative; display: flex; width: max-content; max-width: 100%; overflow-x: auto; padding: var(--space-1); isolation: isolate; }
+  [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"] { position: relative; flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-inline); background: transparent; color: var(--color-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-ui); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  @media (hover: hover) {
+    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"]:hover:not([data-disabled], [data-selected]) { background: var(--color-row-hover); color: var(--color-text); }
+  }
+  [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"][data-selected] { color: var(--color-nav-current-text); }
+  [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"][data-disabled] { opacity: 0.58; cursor: not-allowed; }
+  [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-indicator"] { position: absolute; z-index: -1; top: var(--active-tab-top); left: var(--active-tab-left); width: var(--active-tab-width); height: var(--active-tab-height); border-radius: var(--radius-inline); background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); pointer-events: none; }
+  [data-slot="tabs"][data-orientation="horizontal"] > [data-slot="tabs-panel"] { padding-top: var(--space-3); }
+  /* A clipped edge fades over 24px. The list's own scroll position drives the two fade widths, so a list that
+     does not scroll has no fade. The tokens.css base stops every animation under reduced motion, which would
+     pin the fade at its end, so a reduced-motion reader sees clipped edges without the fade. */
+  @supports (animation-timeline: scroll()) { @media (prefers-reduced-motion: no-preference) {
+    [data-slot="tabs-list"][data-orientation="horizontal"] { mask-image: linear-gradient(to right, transparent, #000 var(--tab-fade-start), #000 calc(100% - var(--tab-fade-end)), transparent); animation: ui-sdk-tab-fade auto linear both; animation-timeline: scroll(self inline); }
+  } }
+  @keyframes ui-sdk-tab-fade { 0% { --tab-fade-start: 0px; --tab-fade-end: 24px; } 1%, 99% { --tab-fade-start: 24px; --tab-fade-end: 24px; } 100% { --tab-fade-start: 24px; --tab-fade-end: 0px; } }
+
+  /* ---------- Slider ---------- */
+  /* A 6px track with the accent range and a ringed round thumb; the value follows the track. Horizontal only. */
+  [data-slot="slider"][data-orientation="horizontal"] { --thumb: 18px; display: flex; align-items: center; gap: var(--space-3); width: 100%; min-width: 0; }
+  [data-slot="slider"][data-orientation="horizontal"][data-size="sm"] { --thumb: 16px; }
+  [data-slot="slider"][data-orientation="horizontal"][data-size="lg"] { --thumb: 20px; }
+  [data-slot="slider"][data-orientation="horizontal"] > [data-slot="slider-value"] { order: 1; min-width: 4ch; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+  /* ui-sdk centres the thumb on the value's point of the track, so the control's inline padding keeps the thumb
+     inside it at both ends, as a native range does. */
+  [data-slot="slider"][data-orientation="horizontal"] > [data-slot="slider-control"] { display: flex; flex: 1; align-items: center; min-width: 0; height: var(--control-md); padding-inline: calc(var(--thumb) / 2); cursor: pointer; }
+  [data-slot="slider"][data-orientation="horizontal"][data-size="sm"] > [data-slot="slider-control"] { height: var(--control-sm); }
+  [data-slot="slider"][data-orientation="horizontal"][data-size="lg"] > [data-slot="slider-control"] { height: var(--control-lg); }
+  [data-slot="slider"][data-orientation="horizontal"] [data-slot="slider-track"] { flex: 1; height: 6px; border-radius: var(--radius-pill); background: var(--color-surface-muted); }
+  [data-slot="slider"][data-orientation="horizontal"] [data-slot="slider-indicator"] { border-radius: inherit; background: var(--color-accent); }
+  [data-slot="slider"][data-orientation="horizontal"] [data-slot="slider-thumb"] { box-sizing: border-box; width: var(--thumb); height: var(--thumb); border: 2px solid var(--color-accent); border-radius: 50%; background: var(--color-surface-raised); }
+  [data-slot="slider"][data-orientation="horizontal"][data-dragging] :is([data-slot="slider-control"], [data-slot="slider-thumb"]) { cursor: grabbing; }
+  [data-slot="slider"][data-orientation="horizontal"][data-disabled] { opacity: 0.58; }
+  [data-slot="slider"][data-orientation="horizontal"][data-disabled] :is([data-slot="slider-control"], [data-slot="slider-thumb"]) { cursor: not-allowed; }
+
+  /* ---------- Progress ---------- */
+  /* A 9px track with a hairline edge holding the accent indicator. ui-sdk sizes the indicator with an inline
+     width. An indeterminate progress (no value) is unsupported. */
+  [data-slot="progress"]:not([data-indeterminate]) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-1) var(--space-3); }
+  [data-slot="progress"]:not([data-indeterminate]) > [data-slot="progress-value"] { color: var(--color-muted); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+  [data-slot="progress"]:not([data-indeterminate]) > [data-slot="progress-track"] { grid-column: 1 / -1; height: 9px; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-pill); background: var(--color-surface-muted); }
+  [data-slot="progress"]:not([data-indeterminate]) [data-slot="progress-indicator"] { height: 100%; border-radius: inherit; background: var(--color-accent); transition: width var(--duration-fast) var(--ease-out); }
+
+  /* ---------- Drawer ---------- */
+  /* A full-height floating layer with square corners on the left or right edge; ui-sdk places and slides it.
+     The content holds a <header> (the title, then the close button) and a body that scrolls on its own.
+     A top or bottom sheet is unsupported. */
+  [data-slot="drawer-backdrop"] { position: fixed; inset: 0; background: var(--color-overlay); }
+  [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) { display: flex; flex-direction: column; width: min(calc(var(--sidebar) + var(--space-12)), calc(100vw - var(--space-12))); height: 100%; overflow: hidden; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
+  [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) > header { display: flex; flex: none; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
+  [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) > :not(header) { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: var(--space-4); }
+  [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) > header > [data-slot="drawer-title"] { margin: 0; font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Motion answers the reader: a glide runs only while the pointer or focus is in the control, so ui-sdk's
+       first measurement after mount places the thumb at once. A re-measure while the pointer or focus is in
+       the control, such as on a resize, glides too; nothing in the markup tells it from a change of choice.
+       ui-sdk does not say which way a choice moved before it moves the thumb (a tab's direction attribute
+       arrives a frame late), so both edges glide together over 260ms, without the spec's stretch. */
+    [data-slot="segmented-control"][data-orientation="horizontal"]:is(:hover, :focus-within) > [data-slot="segmented-control-indicator"] { transition: left 260ms ease, width 260ms ease; }
+    [data-slot="tabs-list"][data-orientation="horizontal"]:is(:hover, :focus-within) > [data-slot="tabs-indicator"] { transition: left 260ms ease, width 260ms ease; }
+    /* Hover fades a label over --duration-fast. While focus is in the control, the labels cross-fade over 260ms
+       with the glide, hover included. A click focuses the option in Chromium and Firefox; where a click does not
+       focus a button (Safari on macOS), a clicked choice's labels fade over --duration-fast. */
+    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"] { transition: color var(--duration-fast) var(--ease-out); }
+    [data-slot="segmented-control"][data-orientation="horizontal"]:focus-within > [data-slot="segmented-control-item"] { transition: color 260ms ease; }
+    [data-slot="tabs-list"][data-orientation="horizontal"]:focus-within > [data-slot="tabs-tab"] { transition: background-color var(--duration-fast) var(--ease-out), color 260ms ease; }
   }
 
   /* ---------- Focus ---------- */
@@ -191,9 +285,14 @@
      outline-color rules below still win. */
   :is([data-slot="button"], [data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"]):focus-visible,
   [data-slot="toggle"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty):focus-visible,
-  [data-slot="dialog-content"] > header > [data-slot="dialog-close"]:focus-visible,
+  :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]):focus-visible,
   [data-slot="dialog-content"][data-presentation="dialog"]:focus-visible,
   [data-slot="card"]:has(> [data-slot="radio"]:focus-visible) { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
+  /* The slider's hidden range input takes focus, so the ring goes on the thumb around it. */
+  [data-slot="slider"][data-orientation="horizontal"] [data-slot="slider-thumb"]:has(:focus-visible) { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
+  /* Inset: a segmented option's ring hugs its thumb instead of crossing into the next option, and the tab list
+     scrolls, which would clip an outer ring. */
+  :is([data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"], [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"]):focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   /* The card draws the ring, so the radio inside it does not. */
   [data-slot="card"] > [data-slot="radio"]:focus-visible { outline: none; }
 
@@ -204,6 +303,9 @@
     [data-slot="label"]:not([data-size]):has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-lg); }
     [data-slot="toggle"]:not([data-size], [data-orientation]):has(> [data-slot="toggle-icon"]:empty) { min-height: var(--control-lg); }
     [data-slot="select-trigger"]:not([data-size]) { height: var(--control-lg); }
+    [data-slot="segmented-control"][data-orientation="horizontal"]:not([data-size]) { --item: var(--control-lg); }
+    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"] { min-height: var(--control-lg); }
+    [data-slot="slider"][data-orientation="horizontal"]:not([data-size]) > [data-slot="slider-control"] { height: var(--control-lg); }
   }
 
   @media (forced-colors: active) {
@@ -219,5 +321,14 @@
     :is([data-slot="switch"][data-checked], [data-slot="toggle"][data-pressed]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child) { border-color: Highlight; background: Highlight; }
     [data-slot="switch-thumb"][data-checked], [data-slot="toggle"][data-pressed]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child::after { background: HighlightText; }
     [data-slot="switch"]:focus-visible { outline-color: CanvasText; }
+    /* The checked segmented option draws Highlight behind HighlightText; both opt out, so its ring takes CanvasText. */
+    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-indicator"] { forced-color-adjust: none; background: Highlight; }
+    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked] { forced-color-adjust: none; color: HighlightText; }
+    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked]:focus-visible { outline-color: CanvasText; }
+    /* The fill drops, so the selected tab takes a system border; the padding absorbs it. */
+    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-indicator"] { display: none; }
+    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"][data-selected] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }
+    /* Value marks: only the mark opts out of adjustment and redraws in the system highlight. */
+    :is([data-slot="slider"][data-orientation="horizontal"] [data-slot="slider-indicator"], [data-slot="progress"]:not([data-indeterminate]) [data-slot="progress-indicator"]) { forced-color-adjust: none; background: Highlight; }
   }
 }
