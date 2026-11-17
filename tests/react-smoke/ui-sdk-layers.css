@@ -1,0 +1,3 @@
+/* The page's first stylesheet fixes the layer order DESIGN.md "ui-sdk" names. ui-sdk adds its
+   behaviour CSS to @layer ui-sdk at run time, so declaring it first keeps it below the design system. */
+@layer ui-sdk, base, components;

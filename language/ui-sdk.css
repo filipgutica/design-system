@@ -1,0 +1,111 @@
+/*
+ * Experimental: this design language drawn on ui-sdk's headless components (https://ui-sdk.dev),
+ * checked against @ui-sdk/* 0.1.0-beta.5. It may change in any release until ui-sdk leaves
+ * beta. Pin @ui-sdk/* to that exact version.
+ *
+ * ui-sdk renders unstyled markup with data-slot and state attributes, such as data-checked,
+ * data-disabled, and data-invalid. These rules draw those parts as components.md specifies,
+ * with the same values as the components.html recipes; do not load @ui-sdk/core/web.css.
+ * DESIGN.md "ui-sdk (experimental)" gives the load order and the supported components. A
+ * ui-sdk component this file does not draw is unsupported: it renders unstyled.
+ *
+ * The rules sit in @layer components, so they outrank the tokens.css base, and a page's
+ * utilities layer can adjust size, spacing, and position. ui-sdk adds its behaviour CSS to
+ * @layer ui-sdk at run time. In a plain app that loads tokens.css and then this file, the
+ * statement below ranks that layer under these rules. A page with Tailwind or another layered
+ * stylesheet declares the order first, as DESIGN.md says, because a layer ranks where its name
+ * first appears.
+ */
+
+@layer ui-sdk, components;
+
+@layer components {
+  /* ---------- Button ---------- */
+  /* No data-variant is the primary button; data-variant="secondary", "ghost", "danger", or "text"
+     picks another, and data-size="sm" or "lg" another size. */
+  [data-slot="button"] { --depth: var(--shadow-raise); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--control-md); padding: 0 var(--space-3); border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-accent); color: var(--color-accent-text); box-shadow: var(--depth); font: var(--weight-medium) var(--text-md) / 1.25 var(--font-ui); letter-spacing: -0.01em; text-decoration: none; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  [data-slot="button"][data-size="sm"] { min-height: var(--control-sm); padding: 0 0.625rem; font-size: var(--text-sm); }
+  [data-slot="button"][data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-4); font-size: var(--text-lg); }
+  [data-slot="button"][data-variant="secondary"] { background: var(--color-control-thumb); color: var(--color-text); }
+  [data-slot="button"][data-variant="ghost"] { --depth: none; background: transparent; color: var(--color-muted); }
+  /* Danger rises like the other filled variants; its text mixes the hue toward --color-text, as status badges do. */
+  [data-slot="button"][data-variant="danger"] { background: var(--color-error-surface); color: light-dark(color-mix(in srgb, var(--color-error) 75%, var(--color-status-ink)), color-mix(in srgb, var(--color-error) 85%, var(--color-status-ink))); }
+  [data-slot="button"][data-variant="text"] { --depth: none; min-height: auto; padding: var(--space-1); background: transparent; color: var(--color-link); text-decoration: underline; text-underline-offset: 0.2em; }
+  @media (hover: hover) {
+    [data-slot="button"]:hover:not([data-disabled], [data-pending]) { background: var(--color-button-hover); }
+    [data-slot="button"][data-variant="secondary"]:hover:not([data-disabled], [data-pending]) { background: color-mix(in srgb, var(--color-text) 8%, var(--color-control-thumb)); }
+    [data-slot="button"][data-variant="ghost"]:hover:not([data-disabled], [data-pending]) { background: var(--color-row-hover); color: var(--color-text); }
+    [data-slot="button"][data-variant="danger"]:hover:not([data-disabled], [data-pending]) { background: color-mix(in srgb, var(--color-error) 10%, var(--color-error-surface)); }
+    [data-slot="button"][data-variant="text"]:hover:not([data-disabled], [data-pending]) { background: transparent; }
+  }
+  /* A press sinks the button 1px and changes its fill, so the click reads at a glance. */
+  [data-slot="button"]:not([data-variant]):is(:active, [aria-pressed="true"]):not([data-disabled], [data-pending]) { background: var(--color-button-hover); }
+  [data-slot="button"]:is([data-variant="secondary"], [data-variant="ghost"]):is(:active, [aria-pressed="true"]):not([data-disabled], [data-pending]) { background: var(--color-well); }
+  [data-slot="button"][data-variant="danger"]:is(:active, [aria-pressed="true"]):not([data-disabled], [data-pending]) { background: color-mix(in srgb, var(--color-error) 16%, var(--color-error-surface)); }
+  [data-slot="button"]:not([data-variant="text"]):is(:active, [aria-pressed="true"]):not([data-disabled], [data-pending]) { --depth: var(--shadow-sink); transform: translateY(1px); }
+  /* ui-sdk marks a pending button, one whose async action is running, with data-pending and aria-busy
+     but not data-disabled. Busy is disabled in the spec, so it dims and takes no hover or press too. */
+  [data-slot="button"]:is([data-disabled], [data-pending]) { --depth: none; opacity: 0.58; cursor: not-allowed; }
+  [data-slot="button"][aria-busy="true"] { cursor: wait; }
+  [data-slot="button"][aria-busy="true"]::before { content: ""; flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: ui-sdk-spin 700ms linear infinite; }
+  @keyframes ui-sdk-spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Field wrapper, input, and textarea ---------- */
+  [data-slot="field"] { display: grid; gap: 0.375rem; justify-items: start; min-width: 0; }
+  [data-slot="field-label"] { font-size: var(--text-sm); font-weight: var(--weight-semibold); }
+  [data-slot="field-description"] { font-size: var(--text-sm); color: var(--color-muted); }
+  [data-slot="field-error"] { font-size: var(--text-sm); color: var(--color-error); }
+  :is([data-slot="input"], [data-slot="textarea"]) { --depth: var(--shadow-field); width: 100%; border: 1px solid var(--color-field-edge); border-radius: var(--radius-field); background: var(--color-field-bg); box-shadow: var(--depth); color: var(--color-text); font: var(--text-md) / 1.35 var(--font-ui); }
+  [data-slot="input"] { height: var(--control-md); padding: 0 0.625rem; }
+  [data-slot="input"][data-size="sm"] { height: var(--control-sm); padding-inline: 0.5625rem; font-size: var(--text-sm); }
+  [data-slot="input"][data-size="lg"] { height: var(--control-lg); padding-inline: 0.6875rem; font-size: var(--text-lg); }
+  [data-slot="textarea"] { display: block; min-height: 5.5rem; padding: 0.625rem; resize: vertical; }
+  :is([data-slot="input"], [data-slot="textarea"])::placeholder { color: var(--color-muted); opacity: 1; }
+  /* A disabled field drops into the grey well (the same fill as rest in dark) and loses its shadow. */
+  :is([data-slot="input"], [data-slot="textarea"]):disabled { background-color: var(--color-well); box-shadow: none; opacity: 0.58; cursor: not-allowed; }
+  :is([data-slot="input"], [data-slot="textarea"])[aria-invalid="true"] { border-color: var(--color-error); }
+  /* Fields draw no ring: the edge turns the accent with a muted accent line inside it, and the fill stays. */
+  :is([data-slot="input"], [data-slot="textarea"]):focus-visible { outline: none; border-color: var(--color-accent); box-shadow: var(--shadow-field-focus); }
+  :is([data-slot="input"], [data-slot="textarea"])[aria-invalid="true"]:focus-visible { border-color: var(--color-error); box-shadow: var(--shadow-field-focus-invalid); }
+
+  /* ---------- Checkbox and radio ---------- */
+  /* ui-sdk's checkbox and radio are buttons with role="checkbox" or "radio" inside a data-slot="label" label;
+     the indicator exists only while the control is checked. */
+  [data-slot="radio-group"] { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  [data-slot="label"]:has(> :is([data-slot="checkbox"], [data-slot="radio"])) { display: inline-flex; align-items: center; gap: 0.5625rem; min-height: var(--control-md); cursor: pointer; }
+  [data-slot="label"][data-size="sm"]:has(> :is([data-slot="checkbox"], [data-slot="radio"])) { min-height: var(--control-sm); font-size: var(--text-sm); }
+  [data-slot="label"][data-size="lg"]:has(> :is([data-slot="checkbox"], [data-slot="radio"])) { min-height: var(--control-lg); font-size: var(--text-lg); }
+  [data-slot="label"]:has(> [data-disabled]:is([data-slot="checkbox"], [data-slot="radio"])) { opacity: 0.58; cursor: not-allowed; }
+  :is([data-slot="checkbox"], [data-slot="radio"]) { display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius-inline); background: var(--color-surface-raised); color: var(--color-accent-text); cursor: inherit; }
+  [data-slot="label"][data-size="sm"] > :is([data-slot="checkbox"], [data-slot="radio"]) { width: 16px; height: 16px; }
+  [data-slot="label"][data-size="lg"] > :is([data-slot="checkbox"], [data-slot="radio"]) { width: 20px; height: 20px; }
+  [data-slot="radio"] { border-radius: 50%; }
+  [data-slot="checkbox"][data-checked] { border-color: var(--color-accent); background: var(--color-accent); }
+  [data-slot="radio"][data-checked] { border-width: 5px; border-color: var(--color-accent); background: var(--color-surface-raised); }
+  [data-slot="checkbox-indicator"] { display: grid; place-items: center; }
+  /* The spec has no mixed state, and keepMounted leaves the indicator in an unchecked box: neither shows a mark. */
+  [data-slot="checkbox-indicator"]:not([data-checked]) { display: none; }
+  [data-slot="checkbox-indicator"]:not(:has(svg))::before { content: ""; width: 5px; height: 9px; margin-top: -2px; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  [data-slot="checkbox-indicator"] > svg { width: 14px; height: 14px; }
+  /* The radio's thick accent border is its mark. */
+  [data-slot="radio-indicator"] { display: none; }
+
+  /* ---------- Focus ---------- */
+  /* One ring for every role, over the control's own raise or sink; the base draws the same ring, and this pins it. */
+  :is([data-slot="button"], [data-slot="checkbox"], [data-slot="radio"]):focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
+
+  /* Touch: at tablet width and below, unsized controls grow to --control-lg, as the catalogue's do. */
+  @media (max-width: 800px) {
+    [data-slot="button"]:not([data-size]) { min-height: var(--control-lg); }
+    [data-slot="input"]:not([data-size]) { height: var(--control-lg); }
+    [data-slot="label"]:not([data-size]):has(> :is([data-slot="checkbox"], [data-slot="radio"])) { min-height: var(--control-lg); }
+  }
+
+  @media (forced-colors: active) {
+    /* The inset accent line drops, so a focused field draws the system ring just inside its edge. */
+    :is([data-slot="input"], [data-slot="textarea"]):focus-visible { outline: var(--focus-width) solid Highlight; outline-offset: -1px; }
+    [data-slot="checkbox"][data-checked] { forced-color-adjust: none; border-color: Highlight; background: Highlight; color: HighlightText; }
+    [data-slot="radio"][data-checked] { forced-color-adjust: none; border-color: Highlight; background: HighlightText; }
+    :is([data-slot="checkbox"], [data-slot="radio"]):focus-visible { outline-color: CanvasText; }
+  }
+}

@@ -12,6 +12,7 @@
       "default": "./dist/tokens.js"
     },
     "./tokens.css": "./language/tokens.css",
+    "./ui-sdk.css": "./language/ui-sdk.css",
     "./themes/*.css": "./dist/themes/*.css",
     "./themes/*.tokens.json": "./dist/themes/*.tokens.json",
     "./tokens.json": "./dist/tokens.json",
@@ -75,6 +76,8 @@
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@ui-sdk/core": "0.1.0-beta.5",
+    "@ui-sdk/react": "0.1.0-beta.5",
     "@vitejs/plugin-react": "6.2.1",
     "conventional-changelog-conventionalcommits": "9.3.1",
     "jszip": "3.10.1",

@@ -11,6 +11,7 @@ const source = ({ id, file, text }) => `<div class="code"><div class="code-head"
 export const EXPORT_USES = {
   '.': 'Typed token data: <code>tokens</code> and <code>cssVar()</code>',
   './tokens.css': 'Every token, light and dark, with the base element styles',
+  './ui-sdk.css': 'Experimental. The component specs drawn on ui-sdk’s headless components, to load after <code>tokens.css</code>',
   './themes/*.css': 'A theme’s identity inputs, to load after <code>tokens.css</code>; the Themes page lists them',
   './themes/*.tokens.json': 'Each theme’s source as a W3C Design Tokens file, for design-token tools',
   './tokens.json': 'Every value per theme and mode, for tools and generators',
