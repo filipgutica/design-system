@@ -1,0 +1,39 @@
+/*
+ * Experimental: a theme bridge from this design language to ui-sdk (https://ui-sdk.dev),
+ * checked against @ui-sdk/core 0.1.0-beta.5. It may change in any release until ui-sdk
+ * leaves beta. Pin @ui-sdk/* to an exact version.
+ *
+ * It sets ui-sdk's --ui-* theme variables to design-system roles, so every theme, and
+ * every theme the theme mapper imports, restyles ui-sdk components with no other file.
+ * It writes only variables, never component rules, and it stays outside every layer so it
+ * outranks the defaults in ui-sdk's @layer ui-sdk. Load it after tokens.css and
+ * @ui-sdk/core/web.css.
+ *
+ * The result is close to the spec, not equal to it. One radius, one spacing unit, and one
+ * focus ring drive every ui-sdk control, so DESIGN.md "Use ui-sdk" lists what differs.
+ * Do not patch those differences on a page.
+ *
+ * Left at ui-sdk's default: the --ui-icon-* masks.
+ */
+
+:root {
+  --ui-background: var(--color-surface-raised);
+  --ui-foreground: var(--color-text);
+  --ui-muted: var(--color-row-hover);
+  --ui-muted-foreground: var(--color-muted);
+  --ui-border: var(--color-border-subtle);
+  --ui-input: var(--color-border);
+  --ui-primary: var(--color-accent);
+  --ui-primary-foreground: var(--color-accent-text);
+  --ui-destructive: var(--color-error);
+  --ui-ring: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  --ui-ring-border: var(--color-focus);
+  --ui-overlay: var(--color-overlay);
+  --ui-shadow: var(--shadow-dialog);
+  --ui-radius: var(--radius-field);
+  --ui-spacing: 0.25rem;
+  --ui-font-size: var(--text-sm);
+  --ui-line-height: var(--leading);
+  --ui-font-sans: var(--font-ui);
+  --ui-font-mono: var(--font-mono);
+}

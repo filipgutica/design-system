@@ -10,7 +10,7 @@ Filip's design language for any framework: the spec, the tokens, the component c
 
 | Path | What it holds |
 | --- | --- |
-| `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
+| `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the experimental `ui-sdk.css` bridge, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
 | `skills/design-system/`, `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/` | The agent plugin: the skill that points agents at `language/`, and the Claude and Codex plugin and marketplace manifests. The repository root is the plugin root |
 | `tokens/core.json`, `tokens/themes/*.tokens.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file is a W3C Design Tokens file (2025.10) that holds only its name, a note, its hue pair, and optional fonts and neutrals |
 | `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css`, `dist/`, and the theme mapper's `core.js`; generates and checks declarations from JSDoc for `theme-mapper/` and `open-vsx/` |
@@ -34,6 +34,7 @@ npm install @filipgutica/design-system
 | Import | What it is |
 | --- | --- |
 | `@filipgutica/design-system/tokens.css` | The tokens. Dark mode follows `prefers-color-scheme`; set `data-theme="light"` or `"dark"` on `<html>` to override it. |
+| `@filipgutica/design-system/ui-sdk.css` | Experimental: sets [ui-sdk](https://ui-sdk.dev)'s `--ui-*` theme variables to the tokens, checked against `@ui-sdk/core` 0.1.0-beta.5. Load it after `tokens.css` and `@ui-sdk/core/web.css`; [DESIGN.md](language/DESIGN.md#ui-sdk-experimental) gives the layer order and what still differs from the spec. |
 | `@filipgutica/design-system/themes/*.css` | A theme's inputs (hue pair, and any fonts or neutrals): `graphite-indigo` (the default, already in `tokens.css`); the family sites' hues `lagoon` (annoterm), `copper` (devps), `iris` (filip-stack), `lapis` (Workbench), and `fern` (wtree); or the open palettes `catppuccin` and `github`. Load one after `tokens.css`, on `:root`. |
 | `@filipgutica/design-system/themes/*.tokens.json` | Each theme's source as a W3C Design Tokens file (2025.10), for design-token tools such as Style Dictionary and Tokens Studio. |
 | `@filipgutica/design-system/fonts.css` | IBM Plex Sans and Mono. |

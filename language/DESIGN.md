@@ -40,6 +40,7 @@ Center the **container**, not every sentence. Align header, content, images, and
 ## Files and examples
 
 - `tokens.css`: the values of the default theme, Graphite Indigo, generated from the token source (`tokens/core.json` and `tokens/themes/graphite-indigo.tokens.json`) in `@filipgutica/design-system`. Other themes ship as `themes/<id>.css`, which set only a theme's inputs: its hue pair, and any fonts or neutrals it brings; load one after `tokens.css`, on `:root`. To change a value, edit the JSON there and run `pnpm tokens:build`; do not edit `tokens.css` by hand. The identity inputs sit in one block at the top.
+- `ui-sdk.css`: experimental. Sets ui-sdk's theme variables to these tokens; see [ui-sdk](#ui-sdk-experimental).
 - `components.md`: one spec for each component, with anatomy, states, Do and Don't lines, keyboard and screen-reader behavior, motion, and forced colors. Read it for any component work.
 - `components.html`: every component in each of its states, in plain HTML and CSS on `tokens.css`. Copy component markup and styles from there.
 - `decisions.md`: the choices behind the components, and the options they replaced.
@@ -168,6 +169,23 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 - Source code sits in a theme-matched panel with syntax colours, inset in the code block's frame; multiline samples may have a small descriptive header and Copy action. Put useful setup context above a command; omit repeated language labels.
 - Examples: show a live component on a stage above its code, in one frame, with Copy in the code's corner. The stage sits on the page background. See [code block with a live example](components.md#with-a-live-example).
 - A screenshot opens at full size in a [viewer](components.md#viewer) when clicked; use a native accessible trigger and restore its focus on close.
+
+### ui-sdk (experimental)
+
+[ui-sdk](https://ui-sdk.dev) gives unstyled, accessible components that an agent can read and operate through its agent bridge. Use it only where no owning library covers the framework or the component, such as a React app or a control that `@filipgutica/ui` lacks; where an owning library has the component, use the library's.
+
+- Pin every `@ui-sdk/*` package to one exact version. `ui-sdk.css` is checked against `0.1.0-beta.5`. Do not load the unversioned `https://ui-sdk.dev/web.js`.
+- Load a stylesheet that starts with `@layer ui-sdk, base;` first, then `tokens.css`, `@ui-sdk/core/web.css`, and `ui-sdk.css`. This replaces the ui-sdk skill's `@layer ui-sdk;` line: without `base` after it, ui-sdk's link and 4px focus rules replace the link colour and the focus ring. In this order, `@layer base` also outranks ui-sdk's part rules, so scope a page's own element rules to its content.
+- `ui-sdk.css` sets only ui-sdk's `--ui-*` variables, so every theme applies. The result is close to the spec, not equal to it:
+  - buttons have 10px corners, not pills
+  - controls are `--control-sm` high, not `--control-md`
+  - controls have a `--color-border` edge, and no raise, sink, or pressed shadow
+  - fields draw the focus ring as well as the accent edge
+  - dark fields fill with `--color-surface-raised`, not the `--color-well` well
+  - checkbox corners are 5px
+- Do not patch these differences on a page. Report them, so the bridge or a library fixes them once.
+- This file owns the look, the tokens, and the layer order. The ui-sdk skill owns which component to use, composition, `render`, ARIA, and the agent bridge. `interface-design` owns states and copy. The repository's own testing rules apply, not the ui-sdk skill's `test.fails` advice.
+- The app decides whether to expose its UI to agents through `createAgent` or WebMCP, and which actions to allow.
 
 ### Navigation
 

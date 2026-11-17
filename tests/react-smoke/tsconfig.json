@@ -18,6 +18,8 @@
   "include": [
     "main.tsx",
     "smoke.spec.ts",
-    "theme-mapper.spec.ts"
+    "theme-mapper.spec.ts",
+    "ui-sdk.tsx",
+    "ui-sdk.spec.ts"
   ]
 }
