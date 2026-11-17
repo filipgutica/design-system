@@ -240,6 +240,25 @@ test('every part ui-sdk.css draws renders from the installed ui-sdk', async ({ p
   expect(closed.slots.filter((slot) => !rendered.has(slot))).toEqual([])
 })
 
+test('a keyboard-highlighted select option draws the inset focus ring', async ({ page }) => {
+  await page.goto('/ui-sdk.html')
+  await page.getByTestId('select').click()
+  await page.keyboard.press('ArrowDown')
+  const option = page.locator('[data-slot="select-item"][data-highlighted]')
+  await expect(option).toHaveCount(1)
+  const { ring, expected } = await option.evaluate((element) => {
+    const probe = document.createElement('span')
+    probe.style.cssText = 'color: var(--color-focus); background: var(--color-row-hover); width: var(--focus-width)'
+    document.body.append(probe)
+    const token = getComputedStyle(probe)
+    const expected = { outlineStyle: 'solid', outlineWidth: token.width, outlineOffset: `-${token.width}`, outlineColor: token.color, backgroundColor: token.backgroundColor }
+    probe.remove()
+    const style = getComputedStyle(element)
+    return { ring: { outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth, outlineOffset: style.outlineOffset, outlineColor: style.outlineColor, backgroundColor: style.backgroundColor }, expected }
+  })
+  expect(ring).toEqual(expected)
+})
+
 test('the dialog opens centred over the overlay, and as a bottom sheet on phones', async ({ page }) => {
   const open = async () => {
     await page.goto('/ui-sdk.html')

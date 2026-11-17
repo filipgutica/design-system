@@ -95,7 +95,7 @@
      sits in the top right corner. Depth and a check badge show the choice, without an accent ring. */
   [data-slot="radio-group"]:has(> [data-slot="card"]) { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-3); }
   [data-slot="card"]:has(> [data-slot="radio"]) { --depth: var(--shadow-raise); position: relative; display: grid; gap: var(--space-1); min-width: 0; padding: var(--space-3); padding-right: var(--space-8); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); box-shadow: var(--depth); cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out); }
-  [data-slot="card"]:has(> [data-slot="radio"]) > span { color: var(--color-muted); }
+  [data-slot="card"]:has(> [data-slot="radio"]) > span:not([data-slot]) { color: var(--color-muted); }
   @media (hover: hover) {
     [data-slot="card"]:has(> [data-slot="radio"]):hover:not(:has(> [data-slot="radio"]:is([data-checked], [data-disabled]))) { background: color-mix(in srgb, var(--color-surface-muted) 45%, var(--color-surface-raised)); }
   }
@@ -132,17 +132,18 @@
   [data-slot="toggle"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) small { color: var(--color-muted); font-size: var(--text-xs); }
 
   /* ---------- Select ---------- */
-  /* The trigger takes the field recipe with a thin chevron; the list is a floating layer. ui-sdk positions it. */
+  /* The trigger takes the field recipe with a thin chevron; the list is a floating layer. ui-sdk positions it.
+     The list rules draw only data-presentation="popover"; a sheet is unsupported. */
   [data-slot="select-trigger"] { position: relative; display: flex; align-items: center; height: var(--control-md); padding: 0 1.75rem 0 0.625rem; text-align: start; cursor: pointer; }
   [data-slot="select-trigger"][data-size="sm"] { height: var(--control-sm); padding-left: 0.5625rem; font-size: var(--text-sm); }
   [data-slot="select-trigger"][data-size="lg"] { height: var(--control-lg); padding-left: 0.6875rem; font-size: var(--text-lg); }
   [data-slot="select-trigger"]::after { content: ""; position: absolute; right: var(--space-3); width: var(--space-2); height: var(--space-2); border-right: 1.5px solid var(--color-muted); border-bottom: 1.5px solid var(--color-muted); transform: translateY(-2px) rotate(45deg); }
   [data-slot="select-value"] { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   [data-slot="select-value"][data-placeholder] { color: var(--color-muted); }
-  [data-slot="select-content"] { box-sizing: border-box; min-width: var(--anchor-width); max-height: min(20rem, 50dvh, var(--available-height, 50dvh)); overflow: auto; padding: var(--space-1); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); font: var(--text-md) / var(--leading) var(--font-ui); }
+  [data-slot="select-content"][data-presentation="popover"] { box-sizing: border-box; min-width: var(--anchor-width); max-height: min(20rem, 50dvh, var(--available-height, 50dvh)); overflow: auto; padding: var(--space-1); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); font: var(--text-md) / var(--leading) var(--font-ui); }
   /* ui-sdk sets the list's margin inline, so a translate leaves the catalogue's gap to the trigger. */
-  [data-slot="select-content"][data-side="bottom"] { translate: 0 var(--space-1); }
-  [data-slot="select-content"][data-side="top"] { translate: 0 calc(var(--space-1) * -1); }
+  [data-slot="select-content"][data-presentation="popover"][data-side="bottom"] { translate: 0 var(--space-1); }
+  [data-slot="select-content"][data-presentation="popover"][data-side="top"] { translate: 0 calc(var(--space-1) * -1); }
   [data-slot="select-item"] { display: flex; align-items: center; gap: var(--space-2); min-height: var(--control-sm); padding: var(--space-2) var(--space-3); border-radius: calc(var(--radius-panel) - var(--space-1)); cursor: pointer; }
   /* The check carries the state, because the selected fill equals the list's. It sits on the item, so a list
      without SelectItemIndicator still shows it. */
@@ -150,32 +151,34 @@
   [data-slot="select-item"][data-selected]::after { content: "✓"; margin-left: auto; color: var(--color-accent); }
   [data-slot="select-item-indicator"] { display: none; }
   @media (hover: hover) {
-    [data-slot="select-content"]:not([data-modality="keyboard"]) [data-slot="select-item"][data-highlighted]:not([data-disabled]) { background: var(--color-row-hover); }
+    [data-slot="select-item"][data-highlighted]:not([data-disabled]) { background: var(--color-row-hover); }
   }
-  /* Keyboard focus is the ring, inset because the list scrolls. */
-  [data-slot="select-content"][data-modality="keyboard"] [data-slot="select-item"][data-highlighted] { background: var(--color-row-hover); outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
+  /* Keyboard focus is the ring, inset because the list scrolls. ui-sdk focuses the highlighted option, and its
+     data-modality can still say pointer after an arrow key, so the browser's :focus-visible decides. */
+  [data-slot="select-item"]:focus-visible { background: var(--color-row-hover); outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   [data-slot="select-item"][data-disabled] { opacity: 0.58; cursor: not-allowed; }
   @media (pointer: coarse) { [data-slot="select-item"] { min-height: var(--control-lg); } }
 
   /* ---------- Dialog ---------- */
   /* A centred panel on the overlay. ui-sdk's behaviour CSS resets the popover's position, so these set it.
+     They draw only data-presentation="dialog"; a sheet is unsupported and keeps ui-sdk's own placement.
      The content holds a <header> (the title and description, then the close button), a body that scrolls,
      and an optional <footer> with the actions at the end. Without a <header>, the content itself pads and scrolls. */
   [data-slot="dialog-backdrop"] { position: fixed; inset: 0; background: var(--color-overlay); }
-  [data-slot="dialog-content"] { position: fixed; inset: 0; display: flex; flex-direction: column; width: min(512px, calc(100% - var(--space-8))); height: fit-content; max-height: min(672px, calc(100dvh - var(--space-8))); margin: auto; overflow: hidden; padding: 0; border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
-  [data-slot="dialog-content"]:not(:has(> header)) { overflow: auto; padding: var(--space-4); }
-  [data-slot="dialog-content"] > :is(header, footer) { display: flex; flex: none; align-items: flex-start; justify-content: space-between; gap: var(--space-4); padding: var(--space-4); }
-  [data-slot="dialog-content"] > header { border-bottom: 1px solid var(--color-border-subtle); }
-  [data-slot="dialog-content"]:has(> header) > :not(header, footer) { flex: 1 1 auto; min-height: 0; overflow: auto; padding: var(--space-4); }
-  [data-slot="dialog-content"] > footer { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface); }
+  [data-slot="dialog-content"][data-presentation="dialog"] { position: fixed; inset: 0; display: flex; flex-direction: column; width: min(512px, calc(100% - var(--space-8))); height: fit-content; max-height: min(672px, calc(100dvh - var(--space-8))); margin: auto; overflow: hidden; padding: 0; border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
+  [data-slot="dialog-content"][data-presentation="dialog"]:not(:has(> header)) { overflow: auto; padding: var(--space-4); }
+  [data-slot="dialog-content"][data-presentation="dialog"] > :is(header, footer) { display: flex; flex: none; align-items: flex-start; justify-content: space-between; gap: var(--space-4); padding: var(--space-4); }
+  [data-slot="dialog-content"][data-presentation="dialog"] > header { border-bottom: 1px solid var(--color-border-subtle); }
+  [data-slot="dialog-content"][data-presentation="dialog"]:has(> header) > :not(header, footer) { flex: 1 1 auto; min-height: 0; overflow: auto; padding: var(--space-4); }
+  [data-slot="dialog-content"][data-presentation="dialog"] > footer { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface); }
   [data-slot="dialog-title"] { margin: 0; font-size: 1.125rem; font-weight: var(--weight-semibold); letter-spacing: -0.02em; }
   [data-slot="dialog-description"] { margin: var(--space-1) 0 0; color: var(--color-muted); }
-  /* The close button is a quiet action. A Close rendered as a Button is drawn as that button. */
-  [data-slot="dialog-close"] { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  /* The header's close button is a quiet action. A Close rendered as a Button is drawn as that button. */
+  [data-slot="dialog-content"] > header > [data-slot="dialog-close"] { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
   @media (hover: hover) {
-    [data-slot="dialog-close"]:hover { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
+    [data-slot="dialog-content"] > header > [data-slot="dialog-close"]:hover { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
   }
-  [data-slot="dialog-close"]:active { background: color-mix(in srgb, currentColor 12%, transparent); }
+  [data-slot="dialog-content"] > header > [data-slot="dialog-close"]:active { background: color-mix(in srgb, currentColor 12%, transparent); }
   /* Phones: the dialog becomes a bottom sheet with rounded top corners. */
   @media (max-width: 640px) {
     [data-slot="dialog-content"][data-presentation="dialog"] { width: 100%; margin: auto 0 0; border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
@@ -184,7 +187,12 @@
   /* ---------- Focus ---------- */
   /* One ring for every role, over the control's own raise or sink; the base draws the same ring, and this pins it. */
   /* It goes on the visible part of a composite control: the switch track and the radio card. */
-  :is([data-slot="button"], [data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"], [data-slot="toggle"], [data-slot="dialog-close"], [data-slot="dialog-content"]):focus-visible,
+  /* A comma list rather than one :is(), so each selector keeps its own specificity and the forced-colours
+     outline-color rules below still win. */
+  :is([data-slot="button"], [data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"]):focus-visible,
+  [data-slot="toggle"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty):focus-visible,
+  [data-slot="dialog-content"] > header > [data-slot="dialog-close"]:focus-visible,
+  [data-slot="dialog-content"][data-presentation="dialog"]:focus-visible,
   [data-slot="card"]:has(> [data-slot="radio"]:focus-visible) { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
   /* The card draws the ring, so the radio inside it does not. */
   [data-slot="card"] > [data-slot="radio"]:focus-visible { outline: none; }
