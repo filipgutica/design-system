@@ -27,6 +27,8 @@ for (const mode of ['light', 'dark'] as const) {
       expect(await computed(page, 'checkbox', 'background-color')).toBe(await tokenAs(page, 'background-color', 'color-accent'))
       expect(await computed(page, 'save', 'background-color')).toBe(await tokenAs(page, 'background-color', 'color-accent'))
       expect(await computed(page, 'save', 'color')).toBe(await tokenAs(page, 'color', 'color-accent-text'))
+      // A button rendered as a link keeps the button's text colour, not the base link colour.
+      expect(await computed(page, 'docs', 'color')).toBe(await tokenAs(page, 'color', 'color-accent-text'))
       expect(await computed(page, 'input', 'background-color')).toBe(await tokenAs(page, 'background-color', 'color-surface-raised'))
       expect(await computed(page, 'input', 'border-radius')).toBe(await tokenAs(page, 'border-radius', 'radius-field'))
     })

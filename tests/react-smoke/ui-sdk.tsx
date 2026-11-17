@@ -32,7 +32,10 @@ const App = () => {
         Email me about deploys
       </label>
       <p data-testid="state">Deploy emails {notify ? 'on' : 'off'}</p>
-      <Button data-testid="save" data-variant="solid">Save</Button>
+      <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+        <Button data-testid="save" data-variant="solid">Save</Button>
+        <Button data-testid="docs" data-variant="solid" render={<a href="#guide" />}>Open guide</Button>
+      </div>
     </main>
   )
 }

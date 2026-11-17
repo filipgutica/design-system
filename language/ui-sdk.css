@@ -10,7 +10,7 @@
  * @ui-sdk/core/web.css.
  *
  * The result is close to the spec, not equal to it. One radius, one spacing unit, and one
- * focus ring drive every ui-sdk control, so DESIGN.md "Use ui-sdk" lists what differs.
+ * focus ring drive every ui-sdk control, so DESIGN.md "ui-sdk (experimental)" lists what differs.
  * Do not patch those differences on a page.
  *
  * Left at ui-sdk's default: the --ui-icon-* masks.
@@ -26,7 +26,7 @@
   --ui-primary: var(--color-accent);
   --ui-primary-foreground: var(--color-accent-text);
   --ui-destructive: var(--color-error);
-  --ui-ring: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  --ui-ring: var(--color-focus);
   --ui-ring-border: var(--color-focus);
   --ui-overlay: var(--color-overlay);
   --ui-shadow: var(--shadow-dialog);

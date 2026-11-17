@@ -175,12 +175,14 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 [ui-sdk](https://ui-sdk.dev) gives unstyled, accessible components that an agent can read and operate through its agent bridge. Use it only where no owning library covers the framework or the component, such as a React app or a control that `@filipgutica/ui` lacks; where an owning library has the component, use the library's.
 
 - Pin every `@ui-sdk/*` package to one exact version. `ui-sdk.css` is checked against `0.1.0-beta.5`. Do not load the unversioned `https://ui-sdk.dev/web.js`.
-- Load a stylesheet that starts with `@layer ui-sdk, base;` first, then `tokens.css`, `@ui-sdk/core/web.css`, and `ui-sdk.css`. This replaces the ui-sdk skill's `@layer ui-sdk;` line: without `base` after it, ui-sdk's link and 4px focus rules replace the link colour and the focus ring. In this order, `@layer base` also outranks ui-sdk's part rules, so scope a page's own element rules to its content.
-- `ui-sdk.css` sets only ui-sdk's `--ui-*` variables, so every theme applies. The result is close to the spec, not equal to it:
-  - buttons have 10px corners, not pills
+- Load a stylesheet that starts with `@layer ui-sdk, base;` first, then `tokens.css`, `@ui-sdk/core/web.css`, and `ui-sdk.css`. This replaces the ui-sdk skill's `@layer ui-sdk;` line: without `base` after it, ui-sdk's link and 4px focus rules replace the link colour and the focus ring. In this order `@layer base` outranks ui-sdk's part rules, the reverse of the [component rule above](#components) for library components, so a page's own element rules in `base` also reach ui-sdk parts: scope them to the page's content. The base link rules skip parts marked `data-slot`, so a ui-sdk button rendered as a link keeps the button's colours.
+- `ui-sdk.css` sets only ui-sdk's `--ui-*` variables, so every theme applies. The result is close to the spec, not equal to it. Known differences:
+  - buttons have 10px corners, not pills, and the destructive button is a red tint, not the danger button
   - controls are `--control-sm` high, not `--control-md`
   - controls have a `--color-border` edge, and no raise, sink, or pressed shadow
-  - fields draw the focus ring as well as the accent edge
+  - hover fills also apply on touch, outside `@media (hover: hover)`, and disabled controls fade to 0.5, not 0.58
+  - fields draw the focus ring as well as the accent edge, with no inset line
+  - parts that ui-sdk gives no outline, such as menu and listbox items, draw the base ring, which a popover's edge can clip; controls that ring a wrapper or a label instead, such as a slider, a password field, or a tree, draw a 4px `--color-focus` ring
   - dark fields fill with `--color-surface-raised`, not the `--color-well` well
   - checkbox corners are 5px
 - Do not patch these differences on a page. Report them, so the bridge or a library fixes them once.
@@ -280,4 +282,4 @@ The personal sites are terminal tools that read Markdown and paths, so their ide
 - [ ] At 390, 720, and 1280 px wide there is no horizontal page scroll, and the page's own viewport media queries use only `max-width: 640px`, `max-width: 800px`, `min-width: 801px`, and the documented `min-width: 1024px` hero split.
 - [ ] Keyboard, focus, touch, deep links, and reduced motion work across relevant states.
 - [ ] Every control is the owning system's component or class, never a local copy built from its tokens; spacing uses its tokens; each panel and visual effect has a purpose.
-- [ ] Control states match between `components.html`, the example pages, and the owning library: hover, press, focus, disabled, busy, invalid, and forced colors.
+- [ ] Control states match between `components.html`, the example pages, and the owning library: hover, press, focus, disabled, busy, invalid, and forced colors. On a ui-sdk page, only the differences that [ui-sdk](#ui-sdk-experimental) lists are exempt; report any other, and it fails until the list or the bridge covers it.
