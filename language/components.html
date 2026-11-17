@@ -125,7 +125,8 @@
   /* Overflow menu: a quiet-action trigger and a floating list of actions (the WAI-ARIA menu button pattern). */
   .overflow { position: relative; display: inline-flex; }
   .overflow > .quiet-action { width: var(--control-sm); height: var(--control-sm); color: var(--color-muted); }
-  .overflow > .quiet-action .icon { stroke-width: 2.5; }
+  /* The More icon is three round dots: zero-length strokes with the icon's round caps. */
+  .overflow > .quiet-action .icon { stroke-width: 3; }
   :where(.overflow > .quiet-action[aria-expanded="true"]) { background: color-mix(in srgb, currentColor 6%, transparent); }
   .menu-list { position: absolute; z-index: 3; top: 100%; right: 0; display: grid; min-width: 180px; margin-top: var(--space-1); padding: var(--space-1); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); box-shadow: var(--shadow-dialog); }
   .menu-list.is-static { position: static; margin-top: 0; }
@@ -896,7 +897,7 @@
   <symbol id="i-arrow-right" viewBox="0 0 16 16"><path d="M3.5 8h9M9 4.5l3.5 3.5L9 11.5"/></symbol>
   <symbol id="i-system" viewBox="0 0 16 16"><rect x="2" y="2.5" width="12" height="8.5" rx="1.5"/><path d="M5.5 14h5M8 11v3"/></symbol>
   <symbol id="i-light" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></symbol>
-  <symbol id="i-more" viewBox="0 0 16 16"><circle cx="3" cy="8" r="0.75"/><circle cx="8" cy="8" r="0.75"/><circle cx="13" cy="8" r="0.75"/></symbol>
+  <symbol id="i-more" viewBox="0 0 16 16"><path d="M3 8h.01M8 8h.01M13 8h.01"/></symbol>
   <symbol id="i-dark" viewBox="0 0 16 16"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z"/></symbol>
 </svg>
 
