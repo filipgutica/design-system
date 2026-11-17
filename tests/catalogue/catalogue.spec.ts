@@ -312,14 +312,30 @@ test.describe('tablet and phone', () => {
     await expect(current(page)).not.toHaveText('Slider')
   })
 
-  test('the overflow menu follows the menu button pattern', async ({ page }) => {
+  for (const width of [1280, 390, 320]) test(`the overflow menu follows the menu button pattern at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
     await page.goto(`${url}#overflow-menu`)
     const trigger = page.getByRole('button', { name: 'More actions for API latency' })
     const menu = page.locator('#overflow-live')
     const item = (name: string) => menu.getByRole('menuitem', { name })
+    // The trigger takes the quiet action's hover text colour over its muted rest.
+    const textColor = await page.evaluate(() => {
+      const probe = document.body.appendChild(document.createElement('i'))
+      probe.style.color = 'var(--color-text)'
+      const color = getComputedStyle(probe).color
+      probe.remove()
+      return color
+    })
+    await expect(page.locator('#overflow-menu .quiet-action.is-hover')).toHaveCSS('color', textColor)
     await trigger.focus()
     await page.keyboard.press('Enter')
     await expect(menu).toBeVisible()
+    // The open menu stays inside the viewport.
+    const box = (await menu.boundingBox())!
+    expect(box.x).toBeGreaterThanOrEqual(0)
+    expect(box.x + box.width).toBeLessThanOrEqual(width)
+    expect(box.y).toBeGreaterThanOrEqual(0)
+    expect(box.y + box.height).toBeLessThanOrEqual(900)
     await expect(trigger).toHaveAttribute('aria-expanded', 'true')
     await expect(item('Rename')).toBeFocused()
     // Arrows wrap and skip the disabled Export; Home, End, and a first letter move focus.
