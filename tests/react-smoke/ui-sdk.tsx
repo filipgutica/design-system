@@ -40,6 +40,14 @@ const App = () => {
         <FieldLabel>Note</FieldLabel>
         <Textarea data-testid="textarea" />
       </Field>
+      <Field invalid>
+        <FieldLabel>Reason</FieldLabel>
+        <Textarea data-testid="textarea-invalid" />
+      </Field>
+      <Field disabled>
+        <FieldLabel>History</FieldLabel>
+        <Textarea data-testid="textarea-disabled" />
+      </Field>
       <Field>
         <FieldLabel>Size</FieldLabel>
         <Input data-testid="input-sm" data-size="sm" />
@@ -70,6 +78,10 @@ const App = () => {
       <RadioGroup defaultValue="private" aria-label="Visibility">
         <label data-slot="label"><Radio data-testid="radio-checked" value="private"><RadioIndicator /></Radio>Private</label>
         <label data-slot="label"><Radio data-testid="radio" value="public"><RadioIndicator /></Radio>Public</label>
+      </RadioGroup>
+      <RadioGroup defaultValue="small" aria-label="Density">
+        <label data-slot="label" data-size="sm"><Radio data-testid="radio-sm" value="small"><RadioIndicator /></Radio>Compact</label>
+        <label data-slot="label" data-size="lg"><Radio data-testid="radio-lg" value="large"><RadioIndicator /></Radio>Roomy</label>
       </RadioGroup>
       <p data-testid="state">Deploy emails {notify ? 'on' : 'off'}</p>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'var(--space-2)' }}>

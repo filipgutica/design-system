@@ -46,17 +46,24 @@ const pairs: Pair[] = [
   { name: 'disabled input', specimen: '#in-disabled', part: 'input-disabled', props: control },
   { name: 'textarea', specimen: '#ta-rest', part: 'textarea', props: [...box.filter((prop) => prop !== 'height'), ...text, 'min-height', 'padding-left', 'padding-top'] },
   { name: 'textarea focused', specimen: '#ta-focus', part: 'textarea', props: ring, state: 'focus' },
+  { name: 'invalid textarea', specimen: '#ta-invalid', part: 'textarea-invalid', props: [...box.filter((prop) => prop !== 'height'), 'min-height'] },
+  { name: 'disabled textarea', specimen: '#ta-disabled', part: 'textarea-disabled', props: [...box.filter((prop) => prop !== 'height'), 'min-height'] },
   { name: 'checkbox', specimen: '#checkbox-and-radio .check:not([data-size]) input[type="checkbox"]:not(:checked, :disabled, .is-focus)', part: 'checkbox', props: box },
   { name: 'checkbox focused', specimen: '#checkbox-and-radio .check input[type="checkbox"].is-focus', part: 'checkbox', props: ring, state: 'focus' },
   { name: 'checked checkbox', specimen: '#checkbox-and-radio .check:not([data-size]) input[type="checkbox"]:checked:not(:disabled)', part: 'checkbox', props: box, state: 'click' },
   { name: 'check mark', specimen: '#checkbox-and-radio .check:not([data-size]) input[type="checkbox"]:checked:not(:disabled)', part: '[data-testid="checkbox"] [data-slot="checkbox-indicator"]', props: mark, state: 'click', pseudo: '::before' },
   { name: 'checkbox row', specimen: '#checkbox-and-radio .check:not([data-size]):has(input[type="checkbox"]:not(:disabled))', part: label('checkbox'), props: ['min-height', 'gap', 'font-size', 'opacity'] },
   { name: 'disabled checkbox row', specimen: '#checkbox-and-radio .check:has(input[type="checkbox"]:disabled:not(:checked))', part: label('checkbox-disabled'), props: ['opacity', 'min-height', 'gap'] },
+  { name: 'checked disabled checkbox', specimen: '#checkbox-and-radio .check input[type="checkbox"]:disabled:checked', part: 'checkbox-checked-disabled', props: box },
+  { name: 'checked disabled check mark', specimen: '#checkbox-and-radio .check input[type="checkbox"]:disabled:checked', part: '[data-testid="checkbox-checked-disabled"] [data-slot="checkbox-indicator"]', props: mark, pseudo: '::before' },
   { name: 'checked disabled checkbox row', specimen: '#checkbox-and-radio .check:has(input[type="checkbox"]:disabled:checked)', part: label('checkbox-checked-disabled'), props: ['opacity', 'min-height', 'gap'] },
   { name: 'small checkbox', specimen: '.check[data-size="sm"] input', part: 'checkbox-sm', props: box },
   { name: 'small checkbox row', specimen: '.check[data-size="sm"]', part: 'checkbox-sm-label', props: ['min-height', 'font-size'] },
   { name: 'large checkbox', specimen: '.check[data-size="lg"] input', part: 'checkbox-lg', props: box },
   { name: 'large checkbox row', specimen: '.check[data-size="lg"]', part: 'checkbox-lg-label', props: ['min-height', 'font-size'] },
+  // The catalogue sizes radios with the same .check[data-size] rule as checkboxes, so a checkbox is the specimen.
+  { name: 'small radio', specimen: '.check[data-size="sm"] input', part: 'radio-sm', props: ['width', 'height'] },
+  { name: 'large radio', specimen: '.check[data-size="lg"] input', part: 'radio-lg', props: ['width', 'height'] },
   { name: 'radio', specimen: '#checkbox-and-radio .check input[type="radio"]:not(:checked, :disabled)', part: 'radio', props: box },
   { name: 'checked radio', specimen: '#checkbox-and-radio .check input[type="radio"]:checked:not(:disabled)', part: 'radio-checked', props: box },
 ]
@@ -124,6 +131,7 @@ test.describe('ui-sdk parts match the catalogue in forced colours', () => {
     { ...pairs.find(({ name }) => name === 'check mark')!, props: ['border-right-color'] },
     { ...pairs.find(({ name }) => name === 'checked radio')!, props: ['background-color', 'border-top-color'] },
     { ...pairs.find(({ name }) => name === 'input focused')!, props: outline },
+    { ...pairs.find(({ name }) => name === 'checkbox focused')!, props: outline },
   ]
   for (const pair of forced) test(pair.name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
 })

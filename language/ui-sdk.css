@@ -11,8 +11,10 @@
  *
  * The rules sit in @layer components, so they outrank the tokens.css base, and a page's
  * utilities layer can adjust size, spacing, and position. ui-sdk adds its behaviour CSS to
- * @layer ui-sdk at run time; the statement below keeps that layer under these rules even when a
- * page loads this file without declaring the order first.
+ * @layer ui-sdk at run time. In a plain app that loads tokens.css and then this file, the
+ * statement below ranks that layer under these rules. A page with Tailwind or another layered
+ * stylesheet declares the order first, as DESIGN.md says, because a layer ranks where its name
+ * first appears.
  */
 
 @layer ui-sdk, components;
