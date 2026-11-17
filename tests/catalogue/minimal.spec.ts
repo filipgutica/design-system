@@ -36,7 +36,8 @@ const minimalProblems = (page: Page) => page.evaluate((roots) => {
     if (actions > 2) problems.push(`${name(row)} "${text(row).slice(0, 24)}" shows ${actions} actions`)
   }
 
-  // A sticky bar sits on the page without a shadow.
+  // A sticky bar sits on the page without a shadow. A bar spans most of the page; a narrower sticky element,
+  // such as the detail panel beside the list, is a panel and may keep its raise.
   for (const node of all) {
     const style = getComputedStyle(node)
     if (style.position === 'sticky' && node.getBoundingClientRect().width > innerWidth / 2 && style.boxShadow !== 'none') problems.push(`the sticky bar ${name(node)} has a shadow`)
@@ -73,6 +74,8 @@ test.describe('minimal by default, on the application example', () => {
     const detail = page.locator('#detail')
     await expect(detail.locator('.status-line')).toHaveText('No data for 42 minutes. Check ingestion before you trust this monitor.')
     await expect(detail.locator('.badge, .alert')).toHaveCount(0)
+    // The sentence takes the No data status's own icon and colour, as its list row does.
+    await expect(detail.locator('.status-line .st-nodata use')).toHaveAttribute('href', '#i-dash')
   })
 
   test('the guard catches a second alert, an alert that repeats a badge, a tall row, a row of actions, a sticky shadow, and a box in a box', async ({ page }) => {
