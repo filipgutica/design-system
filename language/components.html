@@ -1195,7 +1195,7 @@
   <section class="component" id="field-wrapper" data-layer="Core" data-states="invalid" aria-labelledby="fieldw-title">
     <header><h3 id="fieldw-title">Field wrapper</h3><span class="badge">Core</span><a href="components.md#field-wrapper">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="field-wrapper" aria-label="Copy link to Field wrapper" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Label, description, and error text around a field.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Write the error as the fix, such as “Enter a date after today”, and the description as a format or limit, such as “Up to 64 characters”.</dd><dt>Don’t</dt><dd>A description that repeats the label, or an error that only says “Invalid”.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Write the error as the fix, such as “Enter a date after today”, and the description as a format or limit, such as “Up to 64 characters”. Leave the description out when the label is enough.</dd><dt>Don’t</dt><dd>A description that repeats the label, or an error that only says “Invalid”.</dd></dl>
     <div class="row"><h4>Description and error</h4><div class="states">
       <div class="state"><div class="field"><label class="field-label" for="fw-desc">Threshold</label><input class="input" id="fw-desc" inputmode="numeric" value="300" aria-describedby="fw-desc-text"><p class="field-description" id="fw-desc-text">Milliseconds at p95.</p></div><span class="caption">With description</span></div>
       <div class="state" inert><div class="field"><label class="field-label" for="fw-error">Threshold</label><input class="input" id="fw-error" value="-1" aria-invalid="true" aria-errormessage="fw-error-text"><p class="field-error" id="fw-error-text">Enter a positive number.</p></div><span class="caption">Error replaces the description</span></div>
@@ -1247,7 +1247,7 @@
   <section class="component" id="badge" data-layer="Core" aria-labelledby="badge-title">
     <header><h3 id="badge-title">Badge</h3><span class="badge">Core</span><a href="components.md#badge">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="badge" aria-label="Copy link to Badge" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A short status label.</p>
-    <dl class="guidance"><dt>Do</dt><dd>A one- or two-word status or category on an item, such as “Healthy” or “Beta”, with a status tone only when it is a status.</dd><dt>Don’t</dt><dd>A badge that repeats the title, or one on every row with the same value. Badge the exceptions.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>A one- or two-word status or category on an item, such as “Healthy” or “Beta”, with a status tone only when it is a status.</dd><dt>Don’t</dt><dd>A badge that repeats the title, or one on every row with the same value. Badge the exceptions. An icon beside a badge that says the same.</dd></dl>
     <div class="row"><h4>Tones</h4><div class="states">
       <div class="state"><span class="badge">No data</span><span class="caption">Neutral</span></div>
       <div class="state"><span class="badge success">Healthy</span><span class="caption">Success</span></div>
@@ -1260,7 +1260,7 @@
   <section class="component" id="alert" data-layer="Core" aria-labelledby="alert-title">
     <header><h3 id="alert-title">Alert</h3><span class="badge">Core</span><a href="components.md#alert">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="alert" aria-label="Copy link to Alert" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A real caveat or status message in the page.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use an alert for a caveat or status message the reader needs before acting. When action is needed, name it, such as “Reconnect the source to resume sync”.</dd><dt>Don’t</dt><dd>An alert for decoration or routine emphasis. A short status label is a badge; explanations and recovery instructions stay in an alert.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Use an alert for a caveat or status message the reader needs before acting. When action is needed, name it, such as “Reconnect the source to resume sync”.</dd><dt>Don’t</dt><dd>An alert for decoration or routine emphasis. A short status label is a badge; explanations and recovery instructions stay in an alert. An alert that repeats the summary sentence, a badge, or the heading in view, or a second alert in the same view.</dd></dl>
     <div class="row"><h4>Tones</h4><div class="states">
       <div class="state wide"><div class="alert"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg><p>Values are sampled every 5 minutes.</p></div><span class="caption">Neutral</span></div>
       <div class="state wide"><div class="alert success"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><p>The monitor recovered at 14:20.</p></div><span class="caption">Success</span></div>

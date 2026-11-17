@@ -176,7 +176,7 @@ Layer: Core.
 - **Anatomy.** A grid with a 6px gap: label, control, then a description or an error. The error replaces the description.
 - **Tokens.** Label `--text-sm` semibold `--color-text`. Description `--text-sm` `--color-muted`. Error `--text-sm` `--color-error`.
 - **States.** Rest, and invalid: the error replaces the description, and the control takes its own invalid state.
-- **Do.** Write the error as the fix, such as "Enter a date after today", and the description as a format or limit, such as "Up to 64 characters".
+- **Do.** Write the error as the fix, such as "Enter a date after today", and the description as a format or limit, such as "Up to 64 characters". Leave the description out when the label is enough.
 - **Don't.** A description that repeats the label, or an error that only says "Invalid".
 - **Keyboard and screen reader.** The label's `for` names the control. The control points `aria-describedby` at the description, and `aria-errormessage` at the error with `aria-invalid="true"`.
 - **Motion.** None: the error replaces the description at once, so it is never half shown.
@@ -226,7 +226,7 @@ Layer: Core.
 - **Tokens.** Neutral: `--color-surface-muted` fill, `--color-muted`, no dot. Status tones (success, warning, danger, info): the tone at 22% over `--color-surface-raised`, text of the tone mixed 75% with `--color-status-ink` in light and 85% in dark, and a leading 6px dot in `currentColor`.
 - **States.** None: a badge is static text. Its tone is a variant, not a state.
 - **Do.** A one- or two-word status or category on an item, such as "Healthy" or "Beta", with a status tone only when it is a status.
-- **Don't.** A badge that repeats the title, or one on every row with the same value. Badge the exceptions.
+- **Don't.** A badge that repeats the title, or one on every row with the same value. Badge the exceptions. An icon beside a badge that says the same.
 - **Keyboard and screen reader.** Static text; the label carries the meaning, never the colour alone.
 - **Motion.** None: a badge is static.
 - **Forced colors.** Fills drop and the transparent border draws as the system edge, so each badge reads as an outlined label. The tone dot opts out of adjustment (`forced-color-adjust: none`) and draws in `CanvasText`, the label's colour; the label still carries the status.
@@ -239,7 +239,7 @@ Layer: Core.
 - **Tokens.** Neutral: `--color-surface`. Status tones use their `--color-*-surface` tint with `--color-text`; the icon takes the status colour.
 - **States.** None: an alert is static content. Its tone is a variant, not a state.
 - **Do.** Use an alert for a caveat or status message the reader needs before acting. When action is needed, name it, such as "Reconnect the source to resume sync".
-- **Don't.** An alert for decoration or routine emphasis. A short status label is a badge; explanations and recovery instructions stay in an alert.
+- **Don't.** An alert for decoration or routine emphasis. A short status label is a badge; explanations and recovery instructions stay in an alert. An alert that repeats the summary sentence, a badge, or the heading in view, or a second alert in the same view.
 - **Keyboard and screen reader.** Static content. Use `role="status"` or `role="alert"` only for a message that appears while the reader works.
 - **Motion.** None: an alert shows at once, with no entrance animation.
 - **Forced colors.** Fills drop and the transparent border draws as the system edge. The icon takes `CanvasText`, the text colour, because an SVG keeps the status colour it sets; the text carries the message.
