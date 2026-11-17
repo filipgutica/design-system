@@ -1,6 +1,6 @@
 {
   "name": "design-system",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "description": "Filip's design language for agents: the spec, the tokens, the component catalogue, and the decisions behind them.",
   "author": {
     "name": "Filip Gutica"
