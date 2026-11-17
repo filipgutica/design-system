@@ -232,7 +232,9 @@
   [data-slot="slider"][data-orientation="horizontal"][data-size="sm"] { --thumb: 16px; }
   [data-slot="slider"][data-orientation="horizontal"][data-size="lg"] { --thumb: 20px; }
   [data-slot="slider"][data-orientation="horizontal"] > [data-slot="slider-value"] { order: 1; min-width: 4ch; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
-  [data-slot="slider"][data-orientation="horizontal"] > [data-slot="slider-control"] { display: flex; flex: 1; align-items: center; min-width: 0; height: var(--control-md); cursor: pointer; }
+  /* ui-sdk centres the thumb on the value's point of the track, so the control's inline padding keeps the thumb
+     inside it at both ends, as a native range does. */
+  [data-slot="slider"][data-orientation="horizontal"] > [data-slot="slider-control"] { display: flex; flex: 1; align-items: center; min-width: 0; height: var(--control-md); padding-inline: calc(var(--thumb) / 2); cursor: pointer; }
   [data-slot="slider"][data-orientation="horizontal"][data-size="sm"] > [data-slot="slider-control"] { height: var(--control-sm); }
   [data-slot="slider"][data-orientation="horizontal"][data-size="lg"] > [data-slot="slider-control"] { height: var(--control-lg); }
   [data-slot="slider"][data-orientation="horizontal"] [data-slot="slider-track"] { flex: 1; height: 6px; border-radius: var(--radius-pill); background: var(--color-surface-muted); }

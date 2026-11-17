@@ -346,6 +346,21 @@ test('the slider draws the spec track, range, thumb, and value', async ({ page }
   expect(await style('slider-thumb', ['outline-style', 'outline-color'])).toEqual({ 'outline-style': 'solid', 'outline-color': focus.color })
 })
 
+// A native range keeps its thumb inside the track at both ends, so ui-sdk's thumb must too.
+test('the slider thumb stays inside its control at both ends of the range', async ({ page }) => {
+  await page.goto('/ui-sdk.html')
+  const input = page.getByTestId('slider-thumb').locator('input')
+  for (const key of ['Home', 'End']) {
+    await input.press(key)
+    const [control, thumb] = await Promise.all(['slider-control', 'slider-thumb'].map((id) => page.getByTestId(id).evaluate((element) => {
+      const { left, right } = element.getBoundingClientRect()
+      return { left, right }
+    })))
+    expect(thumb.left, key).toBeGreaterThanOrEqual(control.left)
+    expect(thumb.right, key).toBeLessThanOrEqual(control.right)
+  }
+})
+
 const rect = (page: Page, testId: string, of: string) => page.getByTestId(testId).evaluate((element, selector) => {
   const box = (target: Element) => { const { left, top, width, height } = target.getBoundingClientRect(); return [left, top, width, height].map((value) => Math.round(value)) }
   return { indicator: box(element), target: box(element.parentElement!.querySelector(selector)!) }
