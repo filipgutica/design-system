@@ -27,8 +27,9 @@ for (const mode of ['light', 'dark'] as const) {
       expect(await computed(page, 'checkbox', 'background-color')).toBe(await tokenAs(page, 'background-color', 'color-accent'))
       expect(await computed(page, 'save', 'background-color')).toBe(await tokenAs(page, 'background-color', 'color-accent'))
       expect(await computed(page, 'save', 'color')).toBe(await tokenAs(page, 'color', 'color-accent-text'))
-      // A button rendered as a link keeps the button's text colour, not the base link colour.
+      // A button rendered as a link keeps the button's text colour and no underline, not the link's.
       expect(await computed(page, 'docs', 'color')).toBe(await tokenAs(page, 'color', 'color-accent-text'))
+      expect(await computed(page, 'docs', 'text-decoration-line')).toBe('none')
       expect(await computed(page, 'input', 'background-color')).toBe(await tokenAs(page, 'background-color', 'color-surface-raised'))
       expect(await computed(page, 'input', 'border-radius')).toBe(await tokenAs(page, 'border-radius', 'radius-field'))
     })
@@ -40,6 +41,9 @@ for (const mode of ['light', 'dark'] as const) {
       expect(await computed(page, 'save', 'outline-width')).toBe(await tokenAs(page, 'outline-width', 'focus-width'))
       expect(await computed(page, 'save', 'outline-offset')).toBe(await tokenAs(page, 'outline-offset', 'focus-offset'))
       expect(await computed(page, 'save', 'outline-color')).toBe(await tokenAs(page, 'outline-color', 'color-focus'))
+      // A composite control rings its wrapper with --ui-ring, which must be the full focus colour.
+      await page.getByTestId('password-control').focus()
+      expect(await computed(page, 'password', 'outline-color')).toBe(await tokenAs(page, 'outline-color', 'color-focus'))
     })
   })
 }

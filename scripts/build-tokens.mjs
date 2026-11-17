@@ -217,8 +217,9 @@ body { background: var(--color-bg); color: var(--color-text); }
   code, kbd, pre { font-family: var(--font-mono); }
   table, .num { font-variant-numeric: tabular-nums; }
   /* A component part marked data-slot, such as a ui-sdk button rendered as a link, keeps its own
-     colour and decoration. :where() keeps each selector's specificity. */
-  a:where(:not([data-slot])) { color: var(--color-link); text-decoration: none; }
+     colour and never takes the hover or prose underline. :where() keeps each selector's specificity. */
+  a { text-decoration: none; }
+  a:where(:not([data-slot])) { color: var(--color-link); }
   a:where(:not([data-slot])):hover { text-decoration: underline; }
   p a:where(:not([data-slot])), dd a:where(:not([data-slot])) { text-decoration: underline; text-underline-offset: 0.18em; }
   :focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }

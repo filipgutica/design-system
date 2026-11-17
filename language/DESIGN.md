@@ -182,7 +182,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
   - controls have a `--color-border` edge, and no raise, sink, or pressed shadow
   - hover fills also apply on touch, outside `@media (hover: hover)`, and disabled controls fade to 0.5, not 0.58
   - fields draw the focus ring as well as the accent edge, with no inset line
-  - parts that ui-sdk gives no outline, such as menu and listbox items, draw the base ring, which a popover's edge can clip; controls that ring a wrapper or a label instead, such as a slider, a password field, or a tree, draw a 4px `--color-focus` ring
+  - parts that ui-sdk gives no outline, such as menu and listbox items, draw the base ring, which a popover's edge can clip; controls that ring a wrapper or a label instead, such as a slider, a password field, or a tree, draw a 4px `--color-focus` ring, and the focused part inside also draws the base ring
   - dark fields fill with `--color-surface-raised`, not the `--color-well` well
   - checkbox corners are 5px
 - Do not patch these differences on a page. Report them, so the bridge or a library fixes them once.

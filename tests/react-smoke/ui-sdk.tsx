@@ -10,6 +10,7 @@ import { Button } from '@ui-sdk/react/button'
 import { Checkbox, CheckboxIndicator } from '@ui-sdk/react/checkbox'
 import { Field, FieldLabel } from '@ui-sdk/react/field'
 import { Input } from '@ui-sdk/react/input'
+import { PasswordInput, PasswordInputControl } from '@ui-sdk/react/password-input'
 import { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
@@ -24,6 +25,12 @@ const App = () => {
       <Field>
         <FieldLabel>Project name</FieldLabel>
         <Input data-testid="input" defaultValue="Apollo" />
+      </Field>
+      <Field>
+        <FieldLabel>Deploy key</FieldLabel>
+        <PasswordInput data-testid="password">
+          <PasswordInputControl data-testid="password-control" />
+        </PasswordInput>
       </Field>
       <label data-slot="label">
         <Checkbox data-testid="checkbox" checked={notify} onCheckedChange={(checked) => setNotify(checked === true)}>
