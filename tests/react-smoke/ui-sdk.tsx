@@ -10,8 +10,12 @@ import { Checkbox, CheckboxIndicator } from '@ui-sdk/react/checkbox'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@ui-sdk/react/field'
 import { Input } from '@ui-sdk/react/input'
 import { Menu, MenuContent, MenuItem, MenuItemIcon, MenuSeparator, MenuTrigger } from '@ui-sdk/react/menu'
+import { Dialog, DialogBackdrop, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@ui-sdk/react/dialog'
 import { Radio, RadioGroup, RadioIndicator } from '@ui-sdk/react/radio'
+import { Select, SelectContent, SelectItem, SelectItemIndicator, SelectTrigger, SelectValue } from '@ui-sdk/react/select'
+import { Switch, SwitchThumb } from '@ui-sdk/react/switch'
 import { Textarea } from '@ui-sdk/react/textarea'
+import { Toggle, ToggleIcon } from '@ui-sdk/react/toggle'
 import { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
@@ -107,6 +111,69 @@ const App = () => {
         <label data-slot="label" data-size="sm"><Radio data-testid="radio-sm" value="small"><RadioIndicator /></Radio>Compact</label>
         <label data-slot="label" data-size="lg"><Radio data-testid="radio-lg" value="large"><RadioIndicator /></Radio>Roomy</label>
       </RadioGroup>
+      <RadioGroup defaultValue="immediate" aria-label="Delivery">
+        <label data-slot="card" data-testid="card-checked"><strong>Immediate</strong><span>Send each alert.</span><Radio data-testid="card-radio-checked" value="immediate"><RadioIndicator /></Radio></label>
+        <label data-slot="card" data-testid="card"><strong>Digest</strong><span>Group the alerts.</span><Radio data-testid="card-radio" value="digest"><RadioIndicator /></Radio></label>
+        <label data-slot="card" data-testid="card-disabled"><strong>Webhook</strong><span>Not configured.</span><Radio value="webhook" disabled><RadioIndicator /></Radio></label>
+      </RadioGroup>
+      <label data-slot="label" data-testid="switch-label"><Switch data-testid="switch"><SwitchThumb data-testid="switch-thumb" /></Switch>Alerts</label>
+      <label data-slot="label"><Switch data-testid="switch-on" defaultChecked><SwitchThumb data-testid="switch-on-thumb" /></Switch>Single-key shortcuts</label>
+      <label data-slot="label" data-testid="switch-disabled-label"><Switch data-testid="switch-disabled" disabled><SwitchThumb /></Switch>Archived alerts</label>
+      <label data-slot="label" data-size="sm"><Switch data-testid="switch-sm" defaultChecked><SwitchThumb /></Switch>Small</label>
+      <label data-slot="label" data-size="lg"><Switch data-testid="switch-lg" defaultChecked><SwitchThumb /></Switch>Large</label>
+      <Toggle data-testid="toggle"><ToggleIcon /><span>Wrap lines<small>Long lines fold</small></span></Toggle>
+      <Toggle data-testid="toggle-pressed" defaultPressed><ToggleIcon /><span>Wrap lines</span></Toggle>
+      <Toggle data-testid="toggle-disabled" disabled><ToggleIcon /><span>Wrap lines</span></Toggle>
+      <Toggle data-testid="toggle-sm" data-size="sm" defaultPressed><ToggleIcon /><span>Small</span></Toggle>
+      <Toggle data-testid="toggle-lg" data-size="lg" defaultPressed><ToggleIcon /><span>Large</span></Toggle>
+      <Field>
+        <FieldLabel>Region</FieldLabel>
+        <Select defaultValue="eu-west">
+          <SelectTrigger data-testid="select"><SelectValue /></SelectTrigger>
+          <SelectContent data-testid="select-content">
+            <SelectItem data-testid="select-item" value="us-east">us-east</SelectItem>
+            <SelectItem data-testid="select-item-selected" value="eu-west">eu-west<SelectItemIndicator /></SelectItem>
+            <SelectItem value="ap-south">ap-south</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+      <Field invalid>
+        <FieldLabel>Runtime</FieldLabel>
+        <Select placeholder="Pick a runtime">
+          <SelectTrigger data-testid="select-invalid"><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="node">Node</SelectItem></SelectContent>
+        </Select>
+      </Field>
+      <Field disabled>
+        <FieldLabel>Zone</FieldLabel>
+        <Select defaultValue="a">
+          <SelectTrigger data-testid="select-disabled"><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="a">Zone A</SelectItem></SelectContent>
+        </Select>
+      </Field>
+      <Field>
+        <FieldLabel>Size</FieldLabel>
+        <Select defaultValue="s"><SelectTrigger data-testid="select-sm" data-size="sm"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="s">Small</SelectItem></SelectContent></Select>
+        <Select defaultValue="l"><SelectTrigger data-testid="select-lg" data-size="lg"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="l">Large</SelectItem></SelectContent></Select>
+      </Field>
+      <Dialog>
+        <DialogTrigger render={<Button data-variant="danger" />} data-testid="dialog-trigger">Delete project</DialogTrigger>
+        <DialogBackdrop data-testid="dialog-backdrop" />
+        <DialogContent data-testid="dialog">
+          <header>
+            <div>
+              <DialogTitle data-testid="dialog-title">Delete Apollo?</DialogTitle>
+              <DialogDescription data-testid="dialog-description">This removes its deploys too.</DialogDescription>
+            </div>
+            <DialogClose data-testid="dialog-close" aria-label="Close">✕</DialogClose>
+          </header>
+          <div data-testid="dialog-body"><p>Type the project name to confirm.</p></div>
+          <footer data-testid="dialog-footer">
+            <DialogClose render={<Button data-variant="secondary" />}>Cancel</DialogClose>
+            <Button data-variant="danger">Delete</Button>
+          </footer>
+        </DialogContent>
+      </Dialog>
       <p data-testid="state">Deploy emails {notify ? 'on' : 'off'}</p>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'var(--space-2)' }}>
         <Button data-testid="primary">Save</Button>
