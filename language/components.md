@@ -19,7 +19,7 @@ The sections follow the catalogue's purpose groups, in this order. Each componen
 
 | Group | Components |
 | --- | --- |
-| Actions | Button, quiet action |
+| Actions | Button, quiet action, overflow menu |
 | Selection | Checkbox and radio, radio card group, switch, toggle button, segmented control |
 | Inputs | Text input and textarea, select, field wrapper, slider |
 | Feedback and status | Progress, score, badge, alert |
@@ -72,11 +72,24 @@ Layer: Core.
 
 - **Anatomy.** A native `<button>`, or the `<summary>` of a menu. Transparent fill, a transparent 1px border, `--radius-control`, and `--color-muted`. The project trigger overrides the corner with `--radius-field`, because it opens a menu and does not act (see [Site header](#site-header)). The content is centred in the box. An icon-only action holds an SVG icon, never a text glyph such as ×, because a font draws a glyph's ink off the centre of its box. Give the shared recipe zero specificity (`:where()`), so each component sets the action's size, place, and resting colour.
 - **States.** Hover turns the text `--color-text` and fills `currentColor` at 6% over transparent, only where the pointer can hover (`@media (hover: hover)`). Pressed fills `currentColor` at 12%, with no sink. Focus-visible is the focus ring, inset where the parent clips. An open menu keeps its trigger at the 6% hover tint, below the press. The code block's Copy is `--color-muted` at rest and takes the block's text colour (`--color-code-text`) on hover and while its tick shows. A disabled quiet action follows the shared [disabled](#rules-for-every-control) rule.
-- **Do.** Use it for an action inside a component: Copy in a code block or command list, close in a dialog or drawer, Full size on a capture, and the project trigger.
+- **Do.** Use it for an action inside a component: Copy in a code block or command list, close in a dialog or drawer, Full size on a capture, the project trigger, and the overflow menu trigger.
 - **Don't.** An action that stands on its own in the page, such as Save or Next. That is a button.
 - **Keyboard and screen reader.** Native button behavior. An icon-only action needs `aria-label`.
 - **Motion.** Fill and colour change over `--duration-fast` with `--ease-out`.
 - **Forced colors.** The transparent border draws as the system edge.
+
+## Overflow menu
+
+Layer: Core.
+
+- **Anatomy.** A trigger and a menu of actions. The trigger is an icon-only [quiet action](#quiet-action), `--control-sm` square, holding the SVG "more" icon (three dots, never a text glyph). Its `aria-label` names the item it acts on, such as "More actions for API latency", and it carries `aria-haspopup="menu"` and `aria-expanded`. The menu is a floating layer, as the project menu is: `--color-surface-raised`, a transparent 1px border, `--radius-panel`, `--shadow-dialog`, and `--space-1` padding, at least 180px wide, opening `--space-1` below the trigger and aligned to its end edge. Each item is a `<button role="menuitem">`, `--row` tall with `--space-3` side padding, in `--color-text`, with corners concentric with the menu, `calc(var(--radius-panel) - var(--space-1))`, and an optional 16px leading icon. A destructive item comes last, after a separator (`role="separator"`, a 1px `--color-border-subtle` line), with the danger button's text colour.
+- **States.** The trigger takes the quiet action's hover, press, focus-visible, and disabled states; while the menu is open it keeps the 6% hover tint, below the press, and `aria-expanded="true"`. An item is highlighted while a pointer hovers it or it has keyboard focus: it takes `--color-row-hover`, and keyboard focus also draws the focus ring. A disabled item uses the native `disabled` attribute, opacity 0.58, and no hover fill, and the arrow keys skip it.
+- **Do.** Use it for two or more secondary actions of a row, card, or toolbar, ordered by how often they are used. Put a destructive action last, after a separator, and confirm it in a dialog.
+- **Don't.** The item's primary action, a recovery action such as Retry on a failed item, a menu with one action, or links to other pages. Those stay buttons or links.
+- **Keyboard and screen reader.** The WAI-ARIA menu button pattern. Enter, Space, or Down Arrow on the trigger opens the menu and focuses the first item; Up Arrow opens it on the last. Down and Up Arrow move between items and wrap, Home and End go to the first and last, and a printable character moves to the next item that starts with it. Enter or Space runs the item and closes the menu. Escape closes it and returns focus to the trigger; Tab closes it and moves on; a press outside closes it. After an item runs, focus returns to the trigger, unless the action opens a dialog, which returns focus to the trigger when it closes. Items take `tabindex="-1"`, so the menu adds no Tab stops.
+- **Motion.** None: the menu opens and closes at once, as the project menu does.
+- **Forced colors.** The trigger and menu borders draw as system edges. A highlighted item opts out of adjustment and takes `Highlight` with `HighlightText`; the separator takes `CanvasText`.
+- **Touch.** At tablet width (`max-width: 800px`) the trigger and each item grow to `--control-lg`.
 
 ## Checkbox and radio
 

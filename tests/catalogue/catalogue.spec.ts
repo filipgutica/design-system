@@ -312,6 +312,59 @@ test.describe('tablet and phone', () => {
     await expect(current(page)).not.toHaveText('Slider')
   })
 
+  test('the overflow menu follows the menu button pattern', async ({ page }) => {
+    await page.goto(`${url}#overflow-menu`)
+    const trigger = page.getByRole('button', { name: 'More actions for API latency' })
+    const menu = page.locator('#overflow-live')
+    const item = (name: string) => menu.getByRole('menuitem', { name })
+    await trigger.focus()
+    await page.keyboard.press('Enter')
+    await expect(menu).toBeVisible()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    await expect(item('Rename')).toBeFocused()
+    // Arrows wrap and skip the disabled Export; Home, End, and a first letter move focus.
+    await page.keyboard.press('ArrowDown')
+    await expect(item('Duplicate')).toBeFocused()
+    await page.keyboard.press('ArrowDown')
+    await expect(item('Delete…')).toBeFocused()
+    await page.keyboard.press('ArrowDown')
+    await expect(item('Rename')).toBeFocused()
+    await page.keyboard.press('ArrowUp')
+    await expect(item('Delete…')).toBeFocused()
+    await page.keyboard.press('Home')
+    await expect(item('Rename')).toBeFocused()
+    await page.keyboard.press('d')
+    await expect(item('Duplicate')).toBeFocused()
+    await page.keyboard.press('End')
+    await expect(item('Delete…')).toBeFocused()
+    // Escape closes it and returns focus to the trigger.
+    await page.keyboard.press('Escape')
+    await expect(menu).toBeHidden()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await expect(trigger).toBeFocused()
+    // Up Arrow opens it on the last item; Tab closes it and moves on.
+    await page.keyboard.press('ArrowUp')
+    await expect(item('Delete…')).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(menu).toBeHidden()
+    // Running an item closes the menu and returns focus to the trigger.
+    await trigger.click()
+    await item('Duplicate').click()
+    await expect(menu).toBeHidden()
+    await expect(trigger).toBeFocused()
+    // A destructive item confirms in a dialog, which returns focus to the trigger when it closes.
+    await trigger.click()
+    await item('Delete…').click()
+    await expect(page.locator('#live-dialog')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.locator('#live-dialog')).toBeHidden()
+    await expect(trigger).toBeFocused()
+    // A press outside closes it.
+    await trigger.click()
+    await page.mouse.click(5, 5)
+    await expect(menu).toBeHidden()
+  })
+
   test('the page behind an open drawer does not scroll, and keeps its place', async ({ page }) => {
     await page.goto(`${url}#badge`)
     await expect(current(page)).toHaveText('Badge')
@@ -556,6 +609,7 @@ type Pair = { selector: string; min: number; textPseudo?: string; fillPseudo?: s
 const contrastPairs: Record<string, Pair> = {
   'every enabled primary button label': { selector: '.btn:not(.secondary, .ghost, .danger, .text):not(:disabled)', min: 4.5 },
   'every enabled danger button label': { selector: '.btn.danger:not(:disabled)', min: 4.5 },
+  'every danger menu item': { selector: '.menu-list [role="menuitem"].danger', min: 4.5 },
   'every status badge label': { selector: '.badge:is(.success, .warning, .danger, .info)', min: 4.5 },
   'every enabled toggle card label and description': { selector: '.toggle:not(:disabled) :is(.toggle-text, .toggle-text small)', min: 4.5 },
   'every selected segmented label on its thumb': { selector: '.segmented button[aria-pressed="true"]:not(:disabled)', fillPseudo: '::before', min: 4.5 },
@@ -626,10 +680,10 @@ const shapeRoles: Record<string, string[]> = {
   // One-line controls that are not actions take the field corner: the select, the project-menu trigger,
   // the labelled contents trigger at rest and pressed, its no-JavaScript summary, and the skip link.
   '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
-  '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist'],
+  '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist', '.menu-list'],
 }
 // Rows that sit --space-1 inside a panel are concentric with it, as is a code block's source panel.
-const concentricRows = ['.select option', '.picker li', '.projects .navlist a', '.code:not(.example > .code) > pre']
+const concentricRows = ['.select option', '.picker li', '.projects .navlist a', '.menu-list [role="menuitem"]', '.code:not(.example > .code) > pre']
 const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
   const corners = (style: CSSStyleDeclaration) => [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].join(' ')
   const probe = document.body.appendChild(document.createElement('i'))
