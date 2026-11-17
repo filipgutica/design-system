@@ -30,9 +30,9 @@ Choose readable density for the actual number of items. Keep the overview and re
 
 Charts follow [Minimal by default](DESIGN.md#minimal-by-default): the data carries the view, and every mark, label, and line of text earns its place.
 
-- **Emphasise the selection.** The selected point or series takes full-strength marks and whiskers. The others keep their marks and uncertainty, drawn faint, at about 20% opacity. Never remove an interval, a provisional mark, or a sample size to quiet the view.
-- **Cells carry a value and an icon.** In a matrix or heatmap, each cell shows its value and a direction or status icon, with no border of its own. A verdict word, such as Better or Worse, appears only on the cells that matter. Every cell's accessible name holds the full words: the row, the column, the value, and the verdict.
-- **One key line.** Name the icons, line styles, and states on one line under the chart, not in a legend box.
+- **Emphasise the selection.** Every point, line, and label stays at full strength. Only the intervals of the points that are not selected fade, to about 20% opacity; the selected point keeps strong intervals and an accent ring, so colour is not its only cue. Never remove an interval, a provisional mark, or a sample size to quiet the view.
+- **Cells carry a value and an icon.** In a matrix or heatmap, each cell shows its value and a direction or status icon, on a fill or nothing, not a border of its own. The verdict word, such as Better or Worse, shows only on cells with a clear result, the ones that take a status fill; an unclear cell shows the icon alone. Every cell's accessible name holds the full words: the row, the column, the value, and the verdict.
+- **One key line.** Name the icons, line styles, and states on one line under the chart, not in a legend box, as [Mark the exceptions](DESIGN.md#minimal-by-default) asks.
 - **Short captions.** Start with how to read the chart, such as "Up and left is better", in one or two sentences. Method notes and multiple-comparison caveats go in a closed disclosure beside the chart.
 - **Direct labels.** Label points and series beside their marks, and move a label that would overlap another.
 - **Bigger, not busier.** Give the space these cuts free to the chart and its key values.

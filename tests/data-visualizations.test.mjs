@@ -69,6 +69,13 @@ test('standalone mode requires tokens; missing aggregate evidence and empty resu
   assert.throws(() => validateSnapshot(value), /HTTP\(S\)/)
 })
 
+test('the view and its source sit on one meta line under the title', async () => {
+  const html = await renderReport(sample())
+  const meta = html.slice(html.indexOf('</header>') + '</header>'.length, html.indexOf('<div id="ov-summary"'))
+  assert.equal(meta.match(/<p\b/g)?.length, 1)
+  assert.match(meta, /<span id="ov-caption">[^<]+<\/span> · synthetic · Spans -&gt; Count · Synthetic fixture, no live data<\/p>/)
+})
+
 test('the inline script keeps a __proto__ category as data', async () => {
   const value = JSON.parse(JSON.stringify(sample()).replaceAll('"other"', '"__proto__"'))
   const html = await renderReport(value)
