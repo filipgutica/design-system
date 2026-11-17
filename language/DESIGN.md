@@ -1,6 +1,6 @@
 # Design language
 
-A shared visual language for personal products, documentation, tools, mockups, and inline explainers. Claude and Codex follow this file. Take inspiration from the clarity and restraint of [Linear](https://linear.app/), [Codex](https://openai.com/codex/), [Director](https://director.sh/), and [T3 Code](https://t3.codes/): clear hierarchy, a balanced page frame, and real product evidence. Adapt their principles to the task; use original copy and assets.
+A shared visual language for personal products, applications, documentation, tools, mockups, artifacts, dashboards, charts, and inline explainers. Claude and Codex follow this file. Take inspiration from the clarity and restraint of [Linear](https://linear.app/), [Codex](https://openai.com/codex/), [Director](https://director.sh/), and [T3 Code](https://t3.codes/): clear hierarchy, a balanced page frame, and real product evidence. Adapt their principles to the task; use original copy and assets.
 
 ## Scope and precedence
 
@@ -64,6 +64,7 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 
 Controls use quiet depth and familiar shapes: borderless surfaces with one tight shadow at rest that sink when pressed or filled in.
 
+- **Minimal by default.** Start from less: fewer words, boxes, and controls, and larger evidence. See [Minimal by default](#minimal-by-default).
 - **Quiet surfaces, clear hierarchy.** Neutral paper and graphite backgrounds, with color reserved for the project hue, links, and meaningful states. Contrast, type, alignment, and proximity carry the structure.
 - **Purposeful space.** Compact elements within a group, larger gaps between groups. Every gap should help a reader understand a relationship.
 - **Evidence before decoration.** Show the actual product, command, or example. Use restrained framing so the evidence remains the focal point.
@@ -104,7 +105,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
   | Phone | `@media (max-width: 640px)` | Side gutters drop from `--space-6` to `--space-4`, and section gaps take their phone step. |
 
   Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. One documented exception: the tool-home hero splits at `@media (min-width: 1024px)`, with the title across the top, the lede on the left, and the install block and facts on the right. Below 1024px it stacks in source order. Pages add no viewport breakpoint beyond the table and the hero split. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.
-- Density: an application screen has one size for each place, not a range. Toolbar controls (buttons, segmented filters, and search fields) are `sm`, `--control-sm` tall. Rows in a table or list, such as the console's monitor list, and rail and navigation rows, are `--row` tall. Other controls keep the default `md` (`--control-md`). At tablet width every touch target grows to `--control-lg`. The console in `reference.html` uses these sizes.
+- Density: an application screen has one size for each place, not a range. Toolbar controls (buttons, segmented filters, and search fields) are `sm`, `--control-sm` tall. Rows in a table or list, such as the console's monitor list, and rail and navigation rows, are `--row` tall. Other controls keep the default `md` (`--control-md`). At tablet width every touch target grows to `--control-lg`. The console in `reference.html` uses these sizes. This density is control size; how much a screen shows is [Minimal by default](#minimal-by-default).
 - [Navigation](#navigation) is a strip of 6 links or fewer, or a section rail that moves into a drawer at tablet width. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line. Keep wide code, tables, and charts scrolling inside their containers.
 - Keep main headings, actions, and product evidence visible on load. Scrolling should reveal more content without being required to make existing content appear.
 
@@ -250,6 +251,36 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 - Label illustrative data and demo outcomes clearly. Credit upstream creators when presenting a derivative product.
 - Use monochrome line icons sparingly; give an icon a purpose beyond filling space.
 
+### Minimal by default
+
+Every interface built with this language starts minimal: application screens, mockups, artifacts, dashboards, charts, and the interface parts of documentation and product pages. Prose in lessons, documentation, and product pages keeps the [copy rules](#copy-and-density). A word, box, or control stays only when it changes what the reader knows or can do; remove anything that repeats what is already in view. Give the space that frees to the evidence, such as a chart or a key value, not to more items.
+
+- **Status in one sentence.** A view's summary sentence carries its status, the numbers behind it, and a status icon. Use an [alert](components.md#alert) only for a caveat or an action the summary cannot carry: one per view at most, and never one that repeats a sentence, badge, or heading in view.
+- **One meta line.** Context, such as who ran it, the scope, the size, and liveness ("still running"), sits on one muted line under the title, joined with " · ". It is the one deliberate run of middle dots. Its details sit behind a disclosure on that line.
+- **One-line rows.** Data rows in a table or list are one line, `--row` tall. Show a direction, trend, or unit as a glyph (↑ or ↓) and put the words in the accessible name. Secondary detail goes in the selected row's detail or a disclosure.
+- **Mark the exceptions.** Status columns, badges, and status icons show only the values that differ from the default. The default has no mark, and one key line names it. Drop an icon that repeats a badge or label in the same row.
+- **Primary action in reach.** A row or card shows its primary next action as a button, plus either one secondary button or, for two or more secondary actions, one overflow menu trigger. A failed or blocked item keeps its recovery action, such as Retry, Resume, or Reconnect, visible.
+- **Forms.** A field takes a description only for a format, limit, or consequence its label does not state. No intro sentence restates the fields. A sticky action bar sits on the page background with a hairline divider, without a panel or shadow.
+- **Containers group.** Never nest a panel, card, or well in another. A component's own parts, as its spec draws them, such as a code block's source panel, and the controls and alerts inside a container or a dialog are fine. Grid cells and stat tiles take a fill or nothing, not a border each.
+- **Explanations on request.** Method notes, "How to read this", and multiple-comparison caveats go in a closed disclosure next to what they explain.
+
+Never cut these:
+
+- Accessible names that keep the full words: verdict, direction, and status.
+- A second signal beside colour.
+- Safety, cost, and consent text, and the confirmation of a destructive action.
+- Recovery paths, and an error's fix.
+- Uncertainty cues: intervals, provisional and partial marks, sample sizes, and "may be chance". They may be faint; they stay.
+- Labels on illustrative data.
+- Loading, empty, and error states.
+- Keyboard paths, visible focus, and target sizes.
+
+Measure each screen you build or revise. Count its words, boxes, and controls with `interface-design`'s `ui-check.mjs --count`, at 1280px wide, for the whole page and the tool's first screen, and report the counts before and after. A count that rises needs a reason. There is no fixed budget.
+
+- Words are visible text tokens. The count leaves out screen-reader-only text, so cutting visible words never means cutting accessible names.
+- For the count, a box is any element with three or more visible borders, or any shadow, so raised buttons count too.
+- Controls are buttons, links, fields, selects, and summaries.
+
 ## Identity layer: terminal folio
 
 The personal sites are terminal tools that read Markdown and paths, so their identity comes from that world. A new project replaces this section with its own identity and keeps the core.
@@ -272,6 +303,10 @@ The personal sites are terminal tools that read Markdown and paths, so their ide
 - Large blank gaps that push the action or evidence away from the introduction.
 - Centered long paragraphs, excessively faint text, and horizontal page overflow.
 - Theme controls added automatically to inline charts and explainers.
+- An alert that repeats the summary sentence, or a status icon beside a badge that says the same.
+- A bordered box around each grid cell, or a sticky bar drawn as a panel with a shadow.
+- Helper text that restates its label.
+- A row of secondary buttons on every list row.
 
 ## Acceptance
 
@@ -283,4 +318,7 @@ The personal sites are terminal tools that read Markdown and paths, so their ide
 - [ ] At 390, 720, and 1280 px wide there is no horizontal page scroll, and the page's own viewport media queries use only `max-width: 640px`, `max-width: 800px`, `min-width: 801px`, and the documented `min-width: 1024px` hero split.
 - [ ] Keyboard, focus, touch, deep links, and reduced motion work across relevant states.
 - [ ] Every control is the owning system's component or class, never a local copy built from its tokens; spacing uses its tokens; each panel and visual effect has a purpose.
+- [ ] Each status sits in one sentence or one alert, and nothing in view repeats it.
+- [ ] Rows are one line, and each item shows its primary action plus one secondary button or one menu trigger at most.
+- [ ] Words, boxes, and controls are counted before and after, and nothing on the never-cut list is gone.
 - [ ] Control states match between `components.html`, the example pages, and the owning library: hover, press, focus, disabled, busy, invalid, and forced colors.
