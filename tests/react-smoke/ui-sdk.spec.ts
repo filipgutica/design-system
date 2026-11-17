@@ -148,6 +148,9 @@ const pairs: Pair[] = [
   { name: 'segmented thumb', specimen: `${liveSegmented} button[aria-pressed="true"]`, specimenPseudo: '::before', part: 'segmented-indicator', props: thumb },
   { name: 'segmented option focused', specimen: '#segmented-control .segmented button.is-focus', part: 'seg-list', props: ring, state: 'focus' },
   { name: 'disabled segmented option', specimen: '#segmented-control .segmented button[aria-pressed="false"]:disabled', part: 'seg-disabled', props: control },
+  { name: 'disabled checked segmented option', specimen: '#segmented-control .segmented button[aria-pressed="true"]:disabled', part: 'seg-off-list', props: control },
+  { name: 'disabled segmented thumb', specimen: '#segmented-control .segmented button[aria-pressed="true"]:disabled', part: 'segmented-off-indicator', props: ['opacity'] },
+  { name: 'icon-only segmented option', specimen: '#segmented-control .segmented[data-icon-only] button[aria-pressed="false"]', part: 'seg-icon-grid', props: [...control, 'width'] },
   { name: 'small segmented option', specimen: '#segmented-control .segmented[data-size="sm"] button[aria-pressed="true"]', part: 'seg-sm-item', props: control },
   { name: 'large segmented option', specimen: '#segmented-control .segmented[data-size="lg"] button[aria-pressed="true"]', part: 'seg-lg-item', props: control },
   { name: 'tab list', specimen: '#tabs .tablist', part: 'tabs-list', props: ['display', 'padding-top', 'padding-left', 'overflow-x', 'isolation'] },
@@ -220,7 +223,7 @@ for (const mode of ['light', 'dark'] as const) {
 // At tablet width unsized controls grow to --control-lg for touch.
 test.describe('ui-sdk parts match the catalogue at 375px', () => {
   test.use({ viewport: { width: 375, height: 800 } })
-  for (const name of ['primary button', 'input', 'checkbox row', 'switch row', 'toggle button', 'select', 'segmented option', 'tab']) {
+  for (const name of ['primary button', 'input', 'checkbox row', 'switch row', 'toggle button', 'select', 'segmented option', 'icon-only segmented option', 'tab']) {
     const pair = pairs.find((candidate) => candidate.name === name)!
     test(name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
   }
@@ -247,6 +250,8 @@ test.describe('ui-sdk parts match the catalogue in forced colours', () => {
     { ...pairs.find(({ name }) => name === 'segmented option focused')!, props: outline },
     { ...pairs.find(({ name }) => name === 'selected tab')!, props: ['border-top-width', 'border-top-color', 'padding-left', 'padding-top'] },
     { ...pairs.find(({ name }) => name === 'progress indicator')!, props: ['background-color'] },
+    // The catalogue's range draws its fill as a pseudo-element, so the slider's range compares with the progress mark.
+    { ...pairs.find(({ name }) => name === 'progress indicator')!, name: 'slider range', part: 'slider-indicator', props: ['background-color'] },
   ]
   for (const pair of forced) test(pair.name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
 })
@@ -421,11 +426,11 @@ test.describe('with motion allowed', () => {
 
     // The first tab change glides, and so does a change back the other way.
     await page.getByTestId('tab-history').click()
-    expect(await running(page, 'tabs-indicator')).toEqual(['left 260', 'right 260'])
+    expect(await running(page, 'tabs-indicator')).toEqual(['left 260', 'width 260'])
     expect(await running(page, 'tab-history')).toContain('color 260')
     await page.waitForTimeout(400)
     await page.getByTestId('tab-overview').click()
-    expect(await running(page, 'tabs-indicator')).toEqual(['left 260', 'right 260'])
+    expect(await running(page, 'tabs-indicator')).toEqual(['left 260', 'width 260'])
   })
 })
 

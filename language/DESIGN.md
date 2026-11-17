@@ -195,6 +195,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 - Where ui-sdk drives a behaviour, it differs from the spec:
   - The segmented thumb and the tab fill glide with both edges together over 260ms, without the stretch, because ui-sdk does not say which way a choice moved before it moves them.
   - A glide runs while the pointer or focus is in the control, so a re-measure then, such as on a resize, glides too.
+  - While focus is in a segmented control or tab list, its labels fade over 260ms, hover included, so a choice's labels cross-fade with the glide.
   - ui-sdk times the drawer's slide, and under reduced motion it fades the drawer over 150ms instead of showing it at once.
   - The progress indicator animates its width, not a transform.
   - Under reduced motion, a scrolling tab list's clipped edges do not fade, because the `tokens.css` base stops the animation that drives the fade.

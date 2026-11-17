@@ -174,6 +174,16 @@ const App = () => {
       <SegmentedControl data-testid="segmented-lg" data-size="lg" aria-label="Large view" defaultValue="a">
         <SegmentedControlIndicator /><SegmentedControlItem data-testid="seg-lg-item" value="a">Large</SegmentedControlItem>
       </SegmentedControl>
+      <SegmentedControl data-testid="segmented-off" aria-label="View, disabled" defaultValue="list" disabled>
+        <SegmentedControlIndicator data-testid="segmented-off-indicator" />
+        <SegmentedControlItem data-testid="seg-off-list" value="list">List</SegmentedControlItem>
+        <SegmentedControlItem value="board">Board</SegmentedControlItem>
+      </SegmentedControl>
+      <SegmentedControl data-testid="segmented-icon" data-icon-only aria-label="Layout" defaultValue="list">
+        <SegmentedControlIndicator />
+        <SegmentedControlItem value="list" aria-label="List"><svg width="16" height="16" aria-hidden="true" /></SegmentedControlItem>
+        <SegmentedControlItem data-testid="seg-icon-grid" value="grid" aria-label="Grid"><svg width="16" height="16" aria-hidden="true" /></SegmentedControlItem>
+      </SegmentedControl>
       </div>
       <Tabs defaultValue="overview">
         <TabsList data-testid="tabs-list" aria-label="Monitor">

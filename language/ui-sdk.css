@@ -201,13 +201,14 @@
   /* The checked label reads at 4.5:1 on its thumb, and an icon at 3:1 (--color-segmented-current-text). */
   [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked] { color: var(--color-segmented-current-text); }
   [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-disabled] { opacity: 0.58; cursor: not-allowed; }
+  /* The thumb is the option's sibling, so a disabled checked option dims it too. */
+  [data-slot="segmented-control"][data-orientation="horizontal"]:has(> [data-slot="segmented-control-item"][data-checked][data-disabled]) > [data-slot="segmented-control-indicator"] { opacity: 0.58; }
   [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-indicator"] { position: absolute; z-index: -1; top: calc(var(--segmented-control-indicator-top) + 2px); left: calc(var(--segmented-control-indicator-left) + 2px); width: calc(var(--segmented-control-indicator-width) - 4px); height: calc(var(--segmented-control-indicator-height) - 4px); border-radius: var(--radius-control); background: var(--color-control-thumb); box-shadow: var(--shadow-raise); pointer-events: none; }
 
   /* ---------- Tabs ---------- */
   /* The list scrolls, so it clips on every side: the padding keeps the selected tab's shadow whole. The indicator
      is the selected tab's lifted fill, from the position ui-sdk measures. Horizontal only. */
-  /* ui-sdk measures --active-tab-right from the end of the scrolled content, so the fill's right edge comes from
-     its left edge and width, which stay true in a list that scrolls. */
+  /* The fill takes its left edge and width: ui-sdk measures --active-tab-right from the end of the scrolled content. */
   [data-slot="tabs-list"][data-orientation="horizontal"] { position: relative; display: flex; width: max-content; max-width: 100%; overflow-x: auto; padding: var(--space-1); isolation: isolate; }
   [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"] { position: relative; flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-inline); background: transparent; color: var(--color-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-ui); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
   @media (hover: hover) {
@@ -215,7 +216,7 @@
   }
   [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"][data-selected] { color: var(--color-nav-current-text); }
   [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"][data-disabled] { opacity: 0.58; cursor: not-allowed; }
-  [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-indicator"] { position: absolute; z-index: -1; top: var(--active-tab-top); left: var(--active-tab-left); right: calc(100% - var(--active-tab-left) - var(--active-tab-width)); height: var(--active-tab-height); border-radius: var(--radius-inline); background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); pointer-events: none; }
+  [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-indicator"] { position: absolute; z-index: -1; top: var(--active-tab-top); left: var(--active-tab-left); width: var(--active-tab-width); height: var(--active-tab-height); border-radius: var(--radius-inline); background: var(--color-nav-current); box-shadow: var(--shadow-nav-current); pointer-events: none; }
   [data-slot="tabs"][data-orientation="horizontal"] > [data-slot="tabs-panel"] { padding-top: var(--space-3); }
   /* A clipped edge fades over 24px. The list's own scroll position drives the two fade widths, so a list that
      does not scroll has no fade. The tokens.css base stops every animation under reduced motion, which would
@@ -257,7 +258,7 @@
   [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) { display: flex; flex-direction: column; width: min(calc(var(--sidebar) + var(--space-12)), calc(100vw - var(--space-12))); height: 100%; overflow: hidden; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
   [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) > header { display: flex; flex: none; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
   [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) > :not(header) { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: var(--space-4); }
-  [data-slot="drawer-title"] { margin: 0; font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }
+  [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) > header > [data-slot="drawer-title"] { margin: 0; font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }
 
   @media (prefers-reduced-motion: no-preference) {
     /* Motion answers the reader: a glide runs only while the pointer or focus is in the control, so ui-sdk's
@@ -266,9 +267,10 @@
        ui-sdk does not say which way a choice moved before it moves the thumb (a tab's direction attribute
        arrives a frame late), so both edges glide together over 260ms, without the spec's stretch. */
     [data-slot="segmented-control"][data-orientation="horizontal"]:is(:hover, :focus-within) > [data-slot="segmented-control-indicator"] { transition: left 260ms ease, width 260ms ease; }
-    [data-slot="tabs-list"][data-orientation="horizontal"]:is(:hover, :focus-within) > [data-slot="tabs-indicator"] { transition: left 260ms ease, right 260ms ease; }
-    /* Hover fades a label over --duration-fast. A change of choice comes with focus in the control (a click
-       focuses the option), and then the labels cross-fade over 260ms, with the glide. */
+    [data-slot="tabs-list"][data-orientation="horizontal"]:is(:hover, :focus-within) > [data-slot="tabs-indicator"] { transition: left 260ms ease, width 260ms ease; }
+    /* Hover fades a label over --duration-fast. While focus is in the control, the labels cross-fade over 260ms
+       with the glide, hover included. A click focuses the option in Chromium and Firefox; where a click does not
+       focus a button (Safari on macOS), a clicked choice's labels fade over --duration-fast. */
     [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"] { transition: color var(--duration-fast) var(--ease-out); }
     [data-slot="segmented-control"][data-orientation="horizontal"]:focus-within > [data-slot="segmented-control-item"] { transition: color 260ms ease; }
     [data-slot="tabs-list"][data-orientation="horizontal"]:focus-within > [data-slot="tabs-tab"] { transition: background-color var(--duration-fast) var(--ease-out), color 260ms ease; }
@@ -288,7 +290,7 @@
   [data-slot="slider"][data-orientation="horizontal"] [data-slot="slider-thumb"]:has(:focus-visible) { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
   /* Inset: a segmented option's ring hugs its thumb instead of crossing into the next option, and the tab list
      scrolls, which would clip an outer ring. */
-  :is([data-slot="segmented-control"] > [data-slot="segmented-control-item"], [data-slot="tabs-list"] > [data-slot="tabs-tab"]):focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
+  :is([data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"], [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"]):focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   /* The card draws the ring, so the radio inside it does not. */
   [data-slot="card"] > [data-slot="radio"]:focus-visible { outline: none; }
 
