@@ -254,9 +254,9 @@ Every interface built with this language starts minimal: application screens, mo
 - **One meta line.** Context, such as who ran it, the scope, the size, and liveness ("still running"), sits on one muted line under the title, joined with " · ". It is the one deliberate run of middle dots. Its details sit behind a disclosure on that line.
 - **One-line rows.** Table and list rows are one line, `--row` tall. Show a direction, trend, or unit as a glyph (↑ or ↓) and put the words in the accessible name. Secondary detail goes in the selected row's detail or a disclosure.
 - **Mark the exceptions.** Status columns, badges, and status icons show only the values that differ from the default. The default has no mark, and one key line names it. Drop an icon that repeats a badge or label in the same row.
-- **One action in reach.** A row or card shows one button at most, its primary next action. Two or more secondary actions go in an overflow menu; a single secondary action stays a button. A failed or blocked item keeps its recovery action, such as Retry, Resume, or Reconnect, visible.
+- **One action in reach.** A row or card shows its primary next action as a button, plus either one secondary button or, for two or more secondary actions, one overflow menu trigger. A failed or blocked item keeps its recovery action, such as Retry, Resume, or Reconnect, visible.
 - **Forms.** A field takes a description only for a format, limit, or consequence its label does not state. No intro sentence restates the fields. A sticky action bar sits on the page background with a hairline divider, without a panel or shadow.
-- **Boxes group.** Never put a box inside a box. Grid cells and stat tiles take a fill or nothing, not a border each.
+- **Containers group.** Never put a container, such as a panel, card, well, or alert, inside another; controls inside a container are fine. Grid cells and stat tiles take a fill or nothing, not a border each.
 - **Explanations on request.** Method notes, "How to read this", and multiple-comparison caveats go in a closed disclosure next to what they explain.
 
 Never cut these:
@@ -270,10 +270,10 @@ Never cut these:
 - Loading, empty, and error states.
 - Keyboard paths, visible focus, and target sizes.
 
-Measure each screen you build or revise. Count its words, boxes, and controls with `interface-design`'s `ui-check.mjs --count`, at 1280×1000, for the whole page and the first screen, and report the counts before and after. A count that rises needs a reason. There is no fixed budget.
+Measure each screen you build or revise. Count its words, boxes, and controls with `interface-design`'s `ui-check.mjs --count`, at 1280px wide, for the whole page and the tool's first screen, and report the counts before and after. A count that rises needs a reason. There is no fixed budget.
 
 - Words are visible text tokens. The count leaves out screen-reader-only text, so cutting visible words never means cutting accessible names.
-- A box is an element with three or more visible borders, or any shadow. Raised buttons count.
+- For the count, a box is any element with three or more visible borders, or any shadow, so raised buttons count too.
 - Controls are buttons, links, fields, selects, and summaries.
 
 ## Identity layer: terminal folio
@@ -314,6 +314,6 @@ The personal sites are terminal tools that read Markdown and paths, so their ide
 - [ ] Keyboard, focus, touch, deep links, and reduced motion work across relevant states.
 - [ ] Every control is the owning system's component or class, never a local copy built from its tokens; spacing uses its tokens; each panel and visual effect has a purpose.
 - [ ] Each status sits in one sentence or one alert, and nothing in view repeats it.
-- [ ] Rows are one line, and each item shows one action in reach.
+- [ ] Rows are one line, and each item shows its primary action plus one secondary button or one menu trigger at most.
 - [ ] Words, boxes, and controls are counted before and after, and nothing on the never-cut list is gone.
 - [ ] Control states match between `components.html`, the example pages, and the owning library: hover, press, focus, disabled, busy, invalid, and forced colors.
