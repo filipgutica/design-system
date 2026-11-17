@@ -50,32 +50,32 @@
   [data-slot="button"][aria-busy="true"]::before { content: ""; flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: ui-sdk-spin 700ms linear infinite; }
   @keyframes ui-sdk-spin { to { transform: rotate(360deg); } }
 
-  /* ---------- Field wrapper, input, and textarea ---------- */
+  /* ---------- Field wrapper, input, textarea, and select trigger ---------- */
   [data-slot="field"] { display: grid; gap: 0.375rem; justify-items: start; min-width: 0; }
   [data-slot="field-label"] { font-size: var(--text-sm); font-weight: var(--weight-semibold); }
   [data-slot="field-description"] { font-size: var(--text-sm); color: var(--color-muted); }
   [data-slot="field-error"] { font-size: var(--text-sm); color: var(--color-error); }
-  :is([data-slot="input"], [data-slot="textarea"]) { --depth: var(--shadow-field); width: 100%; border: 1px solid var(--color-field-edge); border-radius: var(--radius-field); background: var(--color-field-bg); box-shadow: var(--depth); color: var(--color-text); font: var(--text-md) / 1.35 var(--font-ui); }
+  :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"]) { --depth: var(--shadow-field); width: 100%; border: 1px solid var(--color-field-edge); border-radius: var(--radius-field); background: var(--color-field-bg); box-shadow: var(--depth); color: var(--color-text); font: var(--text-md) / 1.35 var(--font-ui); }
   [data-slot="input"] { height: var(--control-md); padding: 0 0.625rem; }
   [data-slot="input"][data-size="sm"] { height: var(--control-sm); padding-inline: 0.5625rem; font-size: var(--text-sm); }
   [data-slot="input"][data-size="lg"] { height: var(--control-lg); padding-inline: 0.6875rem; font-size: var(--text-lg); }
   [data-slot="textarea"] { display: block; min-height: 5.5rem; padding: 0.625rem; resize: vertical; }
   :is([data-slot="input"], [data-slot="textarea"])::placeholder { color: var(--color-muted); opacity: 1; }
   /* A disabled field drops into the grey well (the same fill as rest in dark) and loses its shadow. */
-  :is([data-slot="input"], [data-slot="textarea"]):disabled { background-color: var(--color-well); box-shadow: none; opacity: 0.58; cursor: not-allowed; }
-  :is([data-slot="input"], [data-slot="textarea"])[aria-invalid="true"] { border-color: var(--color-error); }
+  :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"]):disabled { background-color: var(--color-well); box-shadow: none; opacity: 0.58; cursor: not-allowed; }
+  :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"])[aria-invalid="true"] { border-color: var(--color-error); }
   /* Fields draw no ring: the edge turns the accent with a muted accent line inside it, and the fill stays. */
-  :is([data-slot="input"], [data-slot="textarea"]):focus-visible { outline: none; border-color: var(--color-accent); box-shadow: var(--shadow-field-focus); }
-  :is([data-slot="input"], [data-slot="textarea"])[aria-invalid="true"]:focus-visible { border-color: var(--color-error); box-shadow: var(--shadow-field-focus-invalid); }
+  :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"]):focus-visible { outline: none; border-color: var(--color-accent); box-shadow: var(--shadow-field-focus); }
+  :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"])[aria-invalid="true"]:focus-visible { border-color: var(--color-error); box-shadow: var(--shadow-field-focus-invalid); }
 
   /* ---------- Checkbox and radio ---------- */
   /* ui-sdk's checkbox and radio are buttons with role="checkbox" or "radio" inside a data-slot="label" label;
      the indicator exists only while the control is checked. */
   [data-slot="radio-group"] { display: flex; flex-wrap: wrap; gap: var(--space-4); }
-  [data-slot="label"]:has(> :is([data-slot="checkbox"], [data-slot="radio"])) { display: inline-flex; align-items: center; gap: 0.5625rem; min-height: var(--control-md); cursor: pointer; }
-  [data-slot="label"][data-size="sm"]:has(> :is([data-slot="checkbox"], [data-slot="radio"])) { min-height: var(--control-sm); font-size: var(--text-sm); }
-  [data-slot="label"][data-size="lg"]:has(> :is([data-slot="checkbox"], [data-slot="radio"])) { min-height: var(--control-lg); font-size: var(--text-lg); }
-  [data-slot="label"]:has(> [data-disabled]:is([data-slot="checkbox"], [data-slot="radio"])) { opacity: 0.58; cursor: not-allowed; }
+  [data-slot="label"]:has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { display: inline-flex; align-items: center; gap: 0.5625rem; min-height: var(--control-md); cursor: pointer; }
+  [data-slot="label"][data-size="sm"]:has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-sm); font-size: var(--text-sm); }
+  [data-slot="label"][data-size="lg"]:has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-lg); font-size: var(--text-lg); }
+  [data-slot="label"]:has(> [data-disabled]:is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { opacity: 0.58; cursor: not-allowed; }
   :is([data-slot="checkbox"], [data-slot="radio"]) { display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius-inline); background: var(--color-surface-raised); color: var(--color-accent-text); cursor: inherit; }
   [data-slot="label"][data-size="sm"] > :is([data-slot="checkbox"], [data-slot="radio"]) { width: 16px; height: 16px; }
   [data-slot="label"][data-size="lg"] > :is([data-slot="checkbox"], [data-slot="radio"]) { width: 20px; height: 20px; }
@@ -90,22 +90,126 @@
   /* The radio's thick accent border is its mark. */
   [data-slot="radio-indicator"] { display: none; }
 
+  /* ---------- Radio card group ---------- */
+  /* A <label data-slot="card"> holds a <strong> title, an optional <span> description, and the radio, which
+     sits in the top right corner. Depth and a check badge show the choice, without an accent ring. */
+  [data-slot="radio-group"]:has(> [data-slot="card"]) { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-3); }
+  [data-slot="card"]:has(> [data-slot="radio"]) { --depth: var(--shadow-raise); position: relative; display: grid; gap: var(--space-1); min-width: 0; padding: var(--space-3); padding-right: var(--space-8); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); box-shadow: var(--depth); cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out); }
+  [data-slot="card"]:has(> [data-slot="radio"]) > span { color: var(--color-muted); }
+  @media (hover: hover) {
+    [data-slot="card"]:has(> [data-slot="radio"]):hover:not(:has(> [data-slot="radio"]:is([data-checked], [data-disabled]))) { background: color-mix(in srgb, var(--color-surface-muted) 45%, var(--color-surface-raised)); }
+  }
+  [data-slot="card"]:has(> [data-slot="radio"][data-checked]) { --depth: var(--shadow-sink); background: var(--color-well); }
+  [data-slot="card"]:has(> [data-slot="radio"][data-disabled]) { opacity: 0.58; cursor: not-allowed; }
+  [data-slot="card"] > [data-slot="radio"] { position: absolute; top: var(--space-3); right: var(--space-3); width: 16px; height: 16px; }
+  [data-slot="card"] > [data-slot="radio"][data-checked] { border-width: 1px; background: var(--color-accent); }
+  [data-slot="card"] > [data-slot="radio"][data-checked]::after { content: ""; position: absolute; inset: 2px 4px 4px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
+
+  /* ---------- Switch and toggle button ---------- */
+  /* ui-sdk's switch button is the track and its thumb the knob. A data-slot="label" label wraps the switch
+     and its text, so the whole row is the hit area. A toggle button is a Toggle whose first child is an
+     empty ToggleIcon, drawn as the same track; a Toggle with an icon, or one in a ToggleGroup, is unsupported. */
+  [data-slot="label"]:has(> [data-slot="switch"]) { gap: var(--space-2); }
+  :is([data-slot="switch"], [data-slot="toggle"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty)) { --w: 2.75rem; --h: 1.375rem; --inset: 0.125rem; }
+  :is([data-slot="label"][data-size="sm"] > [data-slot="switch"], [data-slot="toggle"][data-size="sm"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty)) { --w: 2.2rem; --h: 1.1rem; --inset: 0.1rem; }
+  :is([data-slot="label"][data-size="lg"] > [data-slot="switch"], [data-slot="toggle"][data-size="lg"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty)) { --w: 3.3rem; --h: 1.65rem; --inset: 0.15rem; }
+  :is([data-slot="switch"], [data-slot="toggle"]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child) { --depth: var(--shadow-sink); position: relative; flex: none; width: var(--w); height: var(--h); margin: 0; padding: 0; border: 1px solid transparent; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--color-border) 90%, var(--color-well)); box-shadow: var(--depth); cursor: inherit; transition: background-color var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out); }
+  [data-slot="switch-thumb"], [data-slot="toggle"]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child::after { content: ""; position: absolute; top: calc(var(--inset) - 1px); left: calc(var(--inset) - 1px); width: calc(var(--h) - 2 * var(--inset)); height: calc(var(--h) - 2 * var(--inset)); border-radius: var(--radius-pill); background: var(--color-surface-raised); box-shadow: var(--shadow-raise); transition: transform var(--duration) var(--ease-out), background-color var(--duration) var(--ease-out); }
+  :is([data-slot="switch"][data-checked], [data-slot="toggle"][data-pressed]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child) { border-color: var(--color-accent); background: var(--color-accent); }
+  [data-slot="switch-thumb"][data-checked], [data-slot="toggle"][data-pressed]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child::after { background: var(--color-accent-text); transform: translateX(calc(var(--w) - var(--h))); }
+
+  /* The toggle button is a labelled card: a visible edge and no raise, a named exception in decisions.md. */
+  [data-slot="toggle"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) { display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-field); background: var(--color-surface-raised); color: var(--color-text); font: var(--text-md) / var(--leading-tight) var(--font-ui); text-align: left; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out); }
+  [data-slot="toggle"][data-size="sm"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) { min-height: var(--control-sm); font-size: var(--text-sm); }
+  [data-slot="toggle"][data-size="lg"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) { min-height: var(--control-lg); font-size: var(--text-lg); }
+  @media (hover: hover) {
+    [data-slot="toggle"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty):hover:not([data-disabled], [data-pressed]) { border-color: var(--color-border); }
+  }
+  /* The track carries the on state; the card takes a faint 8% accent tint and an accent hairline. */
+  [data-slot="toggle"][data-pressed]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) { border-color: color-mix(in srgb, var(--color-accent) 35%, transparent); background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-raised)); }
+  [data-slot="toggle"][data-disabled]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) { opacity: 0.58; cursor: not-allowed; }
+  [data-slot="toggle"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) > span:not([data-slot]) { display: grid; }
+  [data-slot="toggle"]:not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) small { color: var(--color-muted); font-size: var(--text-xs); }
+
+  /* ---------- Select ---------- */
+  /* The trigger takes the field recipe with a thin chevron; the list is a floating layer. ui-sdk positions it. */
+  [data-slot="select-trigger"] { position: relative; display: flex; align-items: center; height: var(--control-md); padding: 0 1.75rem 0 0.625rem; text-align: start; cursor: pointer; }
+  [data-slot="select-trigger"][data-size="sm"] { height: var(--control-sm); padding-left: 0.5625rem; font-size: var(--text-sm); }
+  [data-slot="select-trigger"][data-size="lg"] { height: var(--control-lg); padding-left: 0.6875rem; font-size: var(--text-lg); }
+  [data-slot="select-trigger"]::after { content: ""; position: absolute; right: var(--space-3); width: var(--space-2); height: var(--space-2); border-right: 1.5px solid var(--color-muted); border-bottom: 1.5px solid var(--color-muted); transform: translateY(-2px) rotate(45deg); }
+  [data-slot="select-value"] { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  [data-slot="select-value"][data-placeholder] { color: var(--color-muted); }
+  [data-slot="select-content"] { box-sizing: border-box; min-width: var(--anchor-width); max-height: min(20rem, 50dvh, var(--available-height, 50dvh)); overflow: auto; padding: var(--space-1); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); font: var(--text-md) / var(--leading) var(--font-ui); }
+  /* ui-sdk sets the list's margin inline, so a translate leaves the catalogue's gap to the trigger. */
+  [data-slot="select-content"][data-side="bottom"] { translate: 0 var(--space-1); }
+  [data-slot="select-content"][data-side="top"] { translate: 0 calc(var(--space-1) * -1); }
+  [data-slot="select-item"] { display: flex; align-items: center; gap: var(--space-2); min-height: var(--control-sm); padding: var(--space-2) var(--space-3); border-radius: calc(var(--radius-panel) - var(--space-1)); cursor: pointer; }
+  /* The check carries the state, because the selected fill equals the list's. It sits on the item, so a list
+     without SelectItemIndicator still shows it. */
+  [data-slot="select-item"][data-selected] { background: var(--color-row-selected); }
+  [data-slot="select-item"][data-selected]::after { content: "✓"; margin-left: auto; color: var(--color-accent); }
+  [data-slot="select-item-indicator"] { display: none; }
+  @media (hover: hover) {
+    [data-slot="select-content"]:not([data-modality="keyboard"]) [data-slot="select-item"][data-highlighted]:not([data-disabled]) { background: var(--color-row-hover); }
+  }
+  /* Keyboard focus is the ring, inset because the list scrolls. */
+  [data-slot="select-content"][data-modality="keyboard"] [data-slot="select-item"][data-highlighted] { background: var(--color-row-hover); outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
+  [data-slot="select-item"][data-disabled] { opacity: 0.58; cursor: not-allowed; }
+  @media (pointer: coarse) { [data-slot="select-item"] { min-height: var(--control-lg); } }
+
+  /* ---------- Dialog ---------- */
+  /* A centred panel on the overlay. ui-sdk's behaviour CSS resets the popover's position, so these set it.
+     The content holds a <header> (the title and description, then the close button), a body that scrolls,
+     and an optional <footer> with the actions at the end. Without a <header>, the content itself pads and scrolls. */
+  [data-slot="dialog-backdrop"] { position: fixed; inset: 0; background: var(--color-overlay); }
+  [data-slot="dialog-content"] { position: fixed; inset: 0; display: flex; flex-direction: column; width: min(512px, calc(100% - var(--space-8))); height: fit-content; max-height: min(672px, calc(100dvh - var(--space-8))); margin: auto; overflow: hidden; padding: 0; border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
+  [data-slot="dialog-content"]:not(:has(> header)) { overflow: auto; padding: var(--space-4); }
+  [data-slot="dialog-content"] > :is(header, footer) { display: flex; flex: none; align-items: flex-start; justify-content: space-between; gap: var(--space-4); padding: var(--space-4); }
+  [data-slot="dialog-content"] > header { border-bottom: 1px solid var(--color-border-subtle); }
+  [data-slot="dialog-content"]:has(> header) > :not(header, footer) { flex: 1 1 auto; min-height: 0; overflow: auto; padding: var(--space-4); }
+  [data-slot="dialog-content"] > footer { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface); }
+  [data-slot="dialog-title"] { margin: 0; font-size: 1.125rem; font-weight: var(--weight-semibold); letter-spacing: -0.02em; }
+  [data-slot="dialog-description"] { margin: var(--space-1) 0 0; color: var(--color-muted); }
+  /* The close button is a quiet action. A Close rendered as a Button is drawn as that button. */
+  [data-slot="dialog-close"] { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  @media (hover: hover) {
+    [data-slot="dialog-close"]:hover { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
+  }
+  [data-slot="dialog-close"]:active { background: color-mix(in srgb, currentColor 12%, transparent); }
+  /* Phones: the dialog becomes a bottom sheet with rounded top corners. */
+  @media (max-width: 640px) {
+    [data-slot="dialog-content"][data-presentation="dialog"] { width: 100%; margin: auto 0 0; border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
+  }
+
   /* ---------- Focus ---------- */
   /* One ring for every role, over the control's own raise or sink; the base draws the same ring, and this pins it. */
-  :is([data-slot="button"], [data-slot="checkbox"], [data-slot="radio"]):focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
+  /* It goes on the visible part of a composite control: the switch track and the radio card. */
+  :is([data-slot="button"], [data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"], [data-slot="toggle"], [data-slot="dialog-close"], [data-slot="dialog-content"]):focus-visible,
+  [data-slot="card"]:has(> [data-slot="radio"]:focus-visible) { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
+  /* The card draws the ring, so the radio inside it does not. */
+  [data-slot="card"] > [data-slot="radio"]:focus-visible { outline: none; }
 
   /* Touch: at tablet width and below, unsized controls grow to --control-lg, as the catalogue's do. */
   @media (max-width: 800px) {
     [data-slot="button"]:not([data-size]) { min-height: var(--control-lg); }
     [data-slot="input"]:not([data-size]) { height: var(--control-lg); }
-    [data-slot="label"]:not([data-size]):has(> :is([data-slot="checkbox"], [data-slot="radio"])) { min-height: var(--control-lg); }
+    [data-slot="label"]:not([data-size]):has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-lg); }
+    [data-slot="toggle"]:not([data-size], [data-orientation]):has(> [data-slot="toggle-icon"]:empty) { min-height: var(--control-lg); }
+    [data-slot="select-trigger"]:not([data-size]) { height: var(--control-lg); }
   }
 
   @media (forced-colors: active) {
     /* The inset accent line drops, so a focused field draws the system ring just inside its edge. */
-    :is([data-slot="input"], [data-slot="textarea"]):focus-visible { outline: var(--focus-width) solid Highlight; outline-offset: -1px; }
+    :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"]):focus-visible { outline: var(--focus-width) solid Highlight; outline-offset: -1px; }
     [data-slot="checkbox"][data-checked] { forced-color-adjust: none; border-color: Highlight; background: Highlight; color: HighlightText; }
     [data-slot="radio"][data-checked] { forced-color-adjust: none; border-color: Highlight; background: HighlightText; }
     :is([data-slot="checkbox"], [data-slot="radio"]):focus-visible { outline-color: CanvasText; }
+    [data-slot="card"] > [data-slot="radio"][data-checked] { background: Highlight; color: HighlightText; }
+    /* The tracks opt out of adjustment, so the switch's ring takes the system text colour too. */
+    :is([data-slot="switch"], [data-slot="toggle"]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child) { forced-color-adjust: none; border-color: ButtonText; background: Canvas; }
+    [data-slot="switch-thumb"], [data-slot="toggle"]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child::after { forced-color-adjust: none; background: ButtonText; }
+    :is([data-slot="switch"][data-checked], [data-slot="toggle"][data-pressed]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child) { border-color: Highlight; background: Highlight; }
+    [data-slot="switch-thumb"][data-checked], [data-slot="toggle"][data-pressed]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child::after { background: HighlightText; }
+    [data-slot="switch"]:focus-visible { outline-color: CanvasText; }
   }
 }

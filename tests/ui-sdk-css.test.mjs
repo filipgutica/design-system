@@ -20,9 +20,11 @@ test('ui-sdk.css uses no ui-sdk theme variable and loads no ui-sdk stylesheet', 
 })
 
 test('every token ui-sdk.css reads exists in tokens.css', () => {
-  // --depth is the file's own per-component variable, as in the components.html recipes.
+  // --depth is the file's own per-component variable, as in the components.html recipes. ui-sdk sets the
+  // popup variables on the select list to place it; they are layout values, not theme ones.
   const own = new Set([...css.matchAll(/(--[\w-]+)\s*:/g)].map(([, name]) => name))
-  const names = [...new Set([...css.matchAll(/var\((--[\w-]+)\)/g)].map(([, name]) => name))].filter((name) => !own.has(name))
+  const popup = new Set(['--anchor-width', '--available-height'])
+  const names = [...new Set([...css.matchAll(/var\((--[\w-]+)[,)]/g)].map(([, name]) => name))].filter((name) => !own.has(name) && !popup.has(name))
   assert.ok(names.length > 10)
   for (const name of names) assert.ok(name in tokens, `${name} is not a tokens.css token`)
 })
