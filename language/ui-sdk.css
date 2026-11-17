@@ -10,8 +10,12 @@
  * ui-sdk component this file does not draw is unsupported: it renders unstyled.
  *
  * The rules sit in @layer components, so they outrank the tokens.css base, and a page's
- * utilities layer can adjust size, spacing, and position.
+ * utilities layer can adjust size, spacing, and position. ui-sdk adds its behaviour CSS to
+ * @layer ui-sdk at run time; the statement below keeps that layer under these rules even when a
+ * page loads this file without declaring the order first.
  */
+
+@layer ui-sdk, components;
 
 @layer components {
   /* ---------- Button ---------- */
@@ -26,19 +30,20 @@
   [data-slot="button"][data-variant="danger"] { background: var(--color-error-surface); color: light-dark(color-mix(in srgb, var(--color-error) 75%, var(--color-status-ink)), color-mix(in srgb, var(--color-error) 85%, var(--color-status-ink))); }
   [data-slot="button"][data-variant="text"] { --depth: none; min-height: auto; padding: var(--space-1); background: transparent; color: var(--color-link); text-decoration: underline; text-underline-offset: 0.2em; }
   @media (hover: hover) {
-    [data-slot="button"]:hover:not([data-disabled]) { background: var(--color-button-hover); }
-    [data-slot="button"][data-variant="secondary"]:hover:not([data-disabled]) { background: color-mix(in srgb, var(--color-text) 8%, var(--color-control-thumb)); }
-    [data-slot="button"][data-variant="ghost"]:hover:not([data-disabled]) { background: var(--color-row-hover); color: var(--color-text); }
-    [data-slot="button"][data-variant="danger"]:hover:not([data-disabled]) { background: color-mix(in srgb, var(--color-error) 10%, var(--color-error-surface)); }
-    [data-slot="button"][data-variant="text"]:hover:not([data-disabled]) { background: transparent; }
+    [data-slot="button"]:hover:not([data-disabled], [data-pending]) { background: var(--color-button-hover); }
+    [data-slot="button"][data-variant="secondary"]:hover:not([data-disabled], [data-pending]) { background: color-mix(in srgb, var(--color-text) 8%, var(--color-control-thumb)); }
+    [data-slot="button"][data-variant="ghost"]:hover:not([data-disabled], [data-pending]) { background: var(--color-row-hover); color: var(--color-text); }
+    [data-slot="button"][data-variant="danger"]:hover:not([data-disabled], [data-pending]) { background: color-mix(in srgb, var(--color-error) 10%, var(--color-error-surface)); }
+    [data-slot="button"][data-variant="text"]:hover:not([data-disabled], [data-pending]) { background: transparent; }
   }
   /* A press sinks the button 1px and changes its fill, so the click reads at a glance. */
-  [data-slot="button"]:not([data-variant]):is(:active, [aria-pressed="true"]):not([data-disabled]) { background: var(--color-button-hover); }
-  [data-slot="button"]:is([data-variant="secondary"], [data-variant="ghost"]):is(:active, [aria-pressed="true"]):not([data-disabled]) { background: var(--color-well); }
-  [data-slot="button"][data-variant="danger"]:is(:active, [aria-pressed="true"]):not([data-disabled]) { background: color-mix(in srgb, var(--color-error) 16%, var(--color-error-surface)); }
-  [data-slot="button"]:not([data-variant="text"]):is(:active, [aria-pressed="true"]):not([data-disabled]) { --depth: var(--shadow-sink); transform: translateY(1px); }
-  [data-slot="button"][data-disabled] { --depth: none; opacity: 0.58; cursor: not-allowed; }
-  /* Busy also sets disabled, so it takes no hover or press. */
+  [data-slot="button"]:not([data-variant]):is(:active, [aria-pressed="true"]):not([data-disabled], [data-pending]) { background: var(--color-button-hover); }
+  [data-slot="button"]:is([data-variant="secondary"], [data-variant="ghost"]):is(:active, [aria-pressed="true"]):not([data-disabled], [data-pending]) { background: var(--color-well); }
+  [data-slot="button"][data-variant="danger"]:is(:active, [aria-pressed="true"]):not([data-disabled], [data-pending]) { background: color-mix(in srgb, var(--color-error) 16%, var(--color-error-surface)); }
+  [data-slot="button"]:not([data-variant="text"]):is(:active, [aria-pressed="true"]):not([data-disabled], [data-pending]) { --depth: var(--shadow-sink); transform: translateY(1px); }
+  /* ui-sdk marks a pending button, one whose async action is running, with data-pending and aria-busy
+     but not data-disabled. Busy is disabled in the spec, so it dims and takes no hover or press too. */
+  [data-slot="button"]:is([data-disabled], [data-pending]) { --depth: none; opacity: 0.58; cursor: not-allowed; }
   [data-slot="button"][aria-busy="true"] { cursor: wait; }
   [data-slot="button"][aria-busy="true"]::before { content: ""; flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: ui-sdk-spin 700ms linear infinite; }
   @keyframes ui-sdk-spin { to { transform: rotate(360deg); } }
@@ -66,12 +71,18 @@
      the indicator exists only while the control is checked. */
   [data-slot="radio-group"] { display: flex; flex-wrap: wrap; gap: var(--space-4); }
   [data-slot="label"]:has(> :is([data-slot="checkbox"], [data-slot="radio"])) { display: inline-flex; align-items: center; gap: 0.5625rem; min-height: var(--control-md); cursor: pointer; }
+  [data-slot="label"][data-size="sm"]:has(> :is([data-slot="checkbox"], [data-slot="radio"])) { min-height: var(--control-sm); font-size: var(--text-sm); }
+  [data-slot="label"][data-size="lg"]:has(> :is([data-slot="checkbox"], [data-slot="radio"])) { min-height: var(--control-lg); font-size: var(--text-lg); }
   [data-slot="label"]:has(> [data-disabled]:is([data-slot="checkbox"], [data-slot="radio"])) { opacity: 0.58; cursor: not-allowed; }
   :is([data-slot="checkbox"], [data-slot="radio"]) { display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius-inline); background: var(--color-surface-raised); color: var(--color-accent-text); cursor: inherit; }
+  [data-slot="label"][data-size="sm"] > :is([data-slot="checkbox"], [data-slot="radio"]) { width: 16px; height: 16px; }
+  [data-slot="label"][data-size="lg"] > :is([data-slot="checkbox"], [data-slot="radio"]) { width: 20px; height: 20px; }
   [data-slot="radio"] { border-radius: 50%; }
   [data-slot="checkbox"][data-checked] { border-color: var(--color-accent); background: var(--color-accent); }
   [data-slot="radio"][data-checked] { border-width: 5px; border-color: var(--color-accent); background: var(--color-surface-raised); }
   [data-slot="checkbox-indicator"] { display: grid; place-items: center; }
+  /* The spec has no mixed state, and keepMounted leaves the indicator in an unchecked box: neither shows a mark. */
+  [data-slot="checkbox-indicator"]:not([data-checked]) { display: none; }
   [data-slot="checkbox-indicator"]:not(:has(svg))::before { content: ""; width: 5px; height: 9px; margin-top: -2px; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(45deg); }
   [data-slot="checkbox-indicator"] > svg { width: 14px; height: 14px; }
   /* The radio's thick accent border is its mark. */
@@ -80,6 +91,13 @@
   /* ---------- Focus ---------- */
   /* One ring for every role, over the control's own raise or sink; the base draws the same ring, and this pins it. */
   :is([data-slot="button"], [data-slot="checkbox"], [data-slot="radio"]):focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
+
+  /* Touch: at tablet width and below, unsized controls grow to --control-lg, as the catalogue's do. */
+  @media (max-width: 800px) {
+    [data-slot="button"]:not([data-size]) { min-height: var(--control-lg); }
+    [data-slot="input"]:not([data-size]) { height: var(--control-lg); }
+    [data-slot="label"]:not([data-size]):has(> :is([data-slot="checkbox"], [data-slot="radio"])) { min-height: var(--control-lg); }
+  }
 
   @media (forced-colors: active) {
     /* The inset accent line drops, so a focused field draws the system ring just inside its edge. */

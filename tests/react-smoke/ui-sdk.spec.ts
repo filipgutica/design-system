@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test'
+import { type BrowserContext, expect, type Page, test } from '@playwright/test'
 
 // ui-sdk.css redraws the catalogue's components on ui-sdk's parts, so each ui-sdk part must compute
 // the same styles as its components.html specimen, state by state, in light and dark.
@@ -11,76 +11,122 @@ const ring = ['outline-style', 'outline-width', 'outline-offset', 'outline-color
 
 const notVariant = ':not(.secondary, .ghost, .danger, .text, [data-size])'
 const restButton = `${notVariant}:not(.is-hover, .is-focus, .is-active, [disabled])`
+const restOf = (variant: string) => `#button .btn.${variant}:not(.is-hover, .is-focus, .is-active, [disabled], [data-size])`
+const label = (testId: string) => `[data-slot="label"]:has([data-testid="${testId}"])`
+const mark = ['width', 'height', 'margin-top', 'border-right-width', 'border-bottom-width', 'border-top-width', 'border-right-color', 'transform']
 
-type Pair = { name: string; specimen: string; part: string; props: string[]; state?: 'hover' | 'focus' | 'press' | 'check' }
+// specimen: the components.html element; part: a data-testid on ui-sdk.html, or a selector there.
+type Pair = { name: string; specimen: string; part: string; props: string[]; state?: 'hover' | 'focus' | 'press' | 'click'; pseudo?: '::before' }
 const pairs: Pair[] = [
   { name: 'primary button', specimen: `#button .btn${restButton}`, part: 'primary', props: control },
   { name: 'primary button on hover', specimen: `#button .btn.is-hover${notVariant}`, part: 'primary', props: control, state: 'hover' },
   { name: 'primary button pressed', specimen: `#button .btn.is-active${notVariant}`, part: 'primary', props: [...control, 'transform'], state: 'press' },
   { name: 'primary button focused', specimen: `#button .btn.is-focus${notVariant}`, part: 'primary', props: ring, state: 'focus' },
+  { name: 'small button', specimen: '#button .btn[data-size="sm"]:not(.secondary)', part: 'primary-sm', props: control },
+  { name: 'large button', specimen: '#button .btn[data-size="lg"]:not(.secondary)', part: 'primary-lg', props: control },
   { name: 'disabled button', specimen: `#button .btn${notVariant}[disabled]:not([aria-busy])`, part: 'disabled', props: control },
-  { name: 'secondary button', specimen: '#button .btn.secondary:not(.is-hover, .is-focus, .is-active, [disabled], [data-size])', part: 'secondary', props: control },
-  { name: 'secondary button on hover', specimen: '#button .btn.secondary.is-hover', part: 'secondary', props: control, state: 'hover' },
-  { name: 'ghost button', specimen: '#button .btn.ghost:not(.is-hover, .is-focus, .is-active, [disabled])', part: 'ghost', props: control },
-  { name: 'danger button', specimen: '#button .btn.danger:not(.is-hover, .is-focus, .is-active, [disabled])', part: 'danger', props: control },
-  { name: 'text button', specimen: '#button .btn.text:not(.is-hover, .is-focus, .is-active, [disabled])', part: 'text', props: control },
+  { name: 'busy button', specimen: `#button .btn${notVariant}[aria-busy="true"]`, part: 'pending', props: [...control, 'cursor'], state: 'click' },
+  { name: 'busy button spinner', specimen: `#button .btn${notVariant}[aria-busy="true"]`, part: 'pending', props: ['width', 'height', 'border-top-width', 'border-right-color', 'border-top-left-radius'], state: 'click', pseudo: '::before' },
+  ...['secondary', 'ghost', 'danger', 'text'].map((variant): Pair => (
+    { name: `${variant} button`, specimen: restOf(variant), part: variant, props: control })),
+  ...['secondary', 'ghost', 'danger'].map((variant): Pair => (
+    { name: `${variant} button on hover`, specimen: `#button .btn.${variant}.is-hover`, part: variant, props: control, state: 'hover' })),
+  ...['secondary', 'ghost', 'danger'].map((variant): Pair => (
+    { name: `${variant} button pressed`, specimen: `#button .btn.${variant}.is-active`, part: variant, props: [...control, 'transform'], state: 'press' })),
   { name: 'link styled as a button', specimen: '#button a.btn.secondary:not(.is-focus)', part: 'link-button', props: control },
   { name: 'field label', specimen: 'label[for="in-rest"]', part: 'field-label', props: text },
+  { name: 'field description', specimen: '#fw-desc-text', part: 'field-description', props: text },
   { name: 'field error', specimen: '#text-input-and-textarea .field-error', part: 'field-error', props: text },
   { name: 'input', specimen: '#in-rest', part: 'input', props: control },
   { name: 'input focused', specimen: '#in-focus', part: 'input', props: ring, state: 'focus' },
+  { name: 'small input', specimen: '.input[data-size="sm"]', part: 'input-sm', props: control },
+  { name: 'large input', specimen: '.input[data-size="lg"]', part: 'input-lg', props: control },
   { name: 'invalid input', specimen: '#in-invalid', part: 'input-invalid', props: control },
   { name: 'invalid input focused', specimen: '#in-invalid-focus', part: 'input-invalid', props: ring, state: 'focus' },
   { name: 'disabled input', specimen: '#in-disabled', part: 'input-disabled', props: control },
   { name: 'textarea', specimen: '#ta-rest', part: 'textarea', props: [...box.filter((prop) => prop !== 'height'), ...text, 'min-height', 'padding-left', 'padding-top'] },
-  { name: 'checkbox', specimen: '#checkbox-and-radio .check input[type="checkbox"]:not(:checked, :disabled, .is-focus)', part: 'checkbox', props: box },
-  { name: 'checked checkbox', specimen: '#checkbox-and-radio .check input[type="checkbox"]:checked:not(:disabled)', part: 'checkbox', props: box, state: 'check' },
-  { name: 'disabled checkbox label', specimen: '#checkbox-and-radio .check:has(input[type="checkbox"]:disabled:not(:checked))', part: 'checkbox-disabled-label', props: ['opacity', 'min-height', 'gap'] },
+  { name: 'textarea focused', specimen: '#ta-focus', part: 'textarea', props: ring, state: 'focus' },
+  { name: 'checkbox', specimen: '#checkbox-and-radio .check:not([data-size]) input[type="checkbox"]:not(:checked, :disabled, .is-focus)', part: 'checkbox', props: box },
+  { name: 'checkbox focused', specimen: '#checkbox-and-radio .check input[type="checkbox"].is-focus', part: 'checkbox', props: ring, state: 'focus' },
+  { name: 'checked checkbox', specimen: '#checkbox-and-radio .check:not([data-size]) input[type="checkbox"]:checked:not(:disabled)', part: 'checkbox', props: box, state: 'click' },
+  { name: 'check mark', specimen: '#checkbox-and-radio .check:not([data-size]) input[type="checkbox"]:checked:not(:disabled)', part: '[data-testid="checkbox"] [data-slot="checkbox-indicator"]', props: mark, state: 'click', pseudo: '::before' },
+  { name: 'checkbox row', specimen: '#checkbox-and-radio .check:not([data-size]):has(input[type="checkbox"]:not(:disabled))', part: label('checkbox'), props: ['min-height', 'gap', 'font-size', 'opacity'] },
+  { name: 'disabled checkbox row', specimen: '#checkbox-and-radio .check:has(input[type="checkbox"]:disabled:not(:checked))', part: label('checkbox-disabled'), props: ['opacity', 'min-height', 'gap'] },
+  { name: 'checked disabled checkbox row', specimen: '#checkbox-and-radio .check:has(input[type="checkbox"]:disabled:checked)', part: label('checkbox-checked-disabled'), props: ['opacity', 'min-height', 'gap'] },
+  { name: 'small checkbox', specimen: '.check[data-size="sm"] input', part: 'checkbox-sm', props: box },
+  { name: 'small checkbox row', specimen: '.check[data-size="sm"]', part: 'checkbox-sm-label', props: ['min-height', 'font-size'] },
+  { name: 'large checkbox', specimen: '.check[data-size="lg"] input', part: 'checkbox-lg', props: box },
+  { name: 'large checkbox row', specimen: '.check[data-size="lg"]', part: 'checkbox-lg-label', props: ['min-height', 'font-size'] },
   { name: 'radio', specimen: '#checkbox-and-radio .check input[type="radio"]:not(:checked, :disabled)', part: 'radio', props: box },
   { name: 'checked radio', specimen: '#checkbox-and-radio .check input[type="radio"]:checked:not(:disabled)', part: 'radio-checked', props: box },
 ]
 
-const read = (page: Page, selector: string, props: string[]) =>
-  page.locator(selector).first().evaluate((element, names) => {
-    const style = getComputedStyle(element)
+const read = (page: Page, selector: string, props: string[], pseudo?: string) =>
+  page.locator(selector).first().evaluate((element, [names, pseudoElement]) => {
+    const style = getComputedStyle(element, pseudoElement)
     // With no outline drawn, its width, offset, and colour do not show, and the base's :focus-visible
     // sets them on a really focused part but not on a specimen pinned with .is-focus.
     const hidden = style.outlineStyle === 'none' ? ['outline-width', 'outline-offset', 'outline-color'] : []
-    return Object.fromEntries(names.filter((name) => !hidden.includes(name)).map((name) => [name, style.getPropertyValue(name)]))
-  }, props)
+    return Object.fromEntries((names as string[]).filter((name) => !hidden.includes(name)).map((name) => [name, style.getPropertyValue(name)]))
+  }, [props, pseudo] as const)
 
-const uiPart = (page: Page, part: string) =>
-  part === 'checkbox-disabled-label' ? '[data-slot="label"]:has([data-testid="checkbox-disabled"])' : `[data-testid="${part}"]`
+const uiPart = (part: string) => (/^[\[.#]/.test(part) ? part : `[data-testid="${part}"]`)
+
+const compare = async ({ page, context, mode, pair }: { page: Page; context: BrowserContext; mode: string; pair: Pair }) => {
+  const { specimen, part, props, state, pseudo } = pair
+  const reference = await context.newPage()
+  await reference.goto(catalogue)
+  await reference.evaluate((value) => { document.documentElement.dataset.theme = value }, mode)
+  // A real press also hovers, so the pressed specimen takes the pinned hover as well.
+  if (state === 'press') await reference.locator(specimen).first().evaluate((element) => element.classList.add('is-hover'))
+  const expected = await read(reference, specimen, props, pseudo)
+
+  await page.goto('/ui-sdk.html')
+  await page.evaluate((value) => { document.documentElement.dataset.theme = value }, mode)
+  // A checked part is clicked on its control, which is the part itself or the box it marks.
+  const control = page.locator(uiPart(part.includes('checkbox-indicator') ? 'checkbox' : part)).first()
+  await expect(control).toBeVisible()
+  if (state === 'hover') await control.hover()
+  if (state === 'focus') await control.focus()
+  if (state === 'click') await control.click()
+  if (state === 'press') {
+    await control.hover()
+    await page.mouse.down()
+  }
+  expect(await read(page, uiPart(part), props, pseudo)).toEqual(expected)
+  if (state === 'press') await page.mouse.up()
+}
 
 // Motion would leave a hover or press mid-transition, so both pages run with reduced motion.
 test.use({ reducedMotion: 'reduce' })
 
 for (const mode of ['light', 'dark'] as const) {
   test.describe(`ui-sdk parts match the catalogue in ${mode}`, () => {
-    for (const { name, specimen, part, props, state } of pairs) {
-      test(name, async ({ page, context }) => {
-        const reference = await context.newPage()
-        await reference.goto(catalogue)
-        await reference.evaluate((value) => { document.documentElement.dataset.theme = value }, mode)
-        const expected = await read(reference, specimen, props)
-
-        await page.goto('/ui-sdk.html')
-        await page.evaluate((value) => { document.documentElement.dataset.theme = value }, mode)
-        const target = page.locator(uiPart(page, part))
-        await expect(target).toBeVisible()
-        if (state === 'hover') await target.hover()
-        if (state === 'focus') await target.focus()
-        if (state === 'check') await target.click()
-        if (state === 'press') {
-          await target.hover()
-          await page.mouse.down()
-        }
-        expect(await read(page, uiPart(page, part), props)).toEqual(expected)
-        if (state === 'press') await page.mouse.up()
-      })
-    }
+    for (const pair of pairs) test(pair.name, ({ page, context }) => compare({ page, context, mode, pair }))
   })
 }
+
+// At tablet width unsized controls grow to --control-lg for touch.
+test.describe('ui-sdk parts match the catalogue at 375px', () => {
+  test.use({ viewport: { width: 375, height: 800 } })
+  for (const name of ['primary button', 'input', 'checkbox row']) {
+    const pair = pairs.find((candidate) => candidate.name === name)!
+    test(name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
+  }
+})
+
+// Forced colours replace author colours with system ones, so these compare what the rules set there.
+test.describe('ui-sdk parts match the catalogue in forced colours', () => {
+  test.use({ forcedColors: 'active' })
+  const outline = ['outline-style', 'outline-width', 'outline-offset', 'outline-color']
+  const forced: Pair[] = [
+    { ...pairs.find(({ name }) => name === 'checked checkbox')!, props: ['background-color', 'border-top-color'] },
+    { ...pairs.find(({ name }) => name === 'check mark')!, props: ['border-right-color'] },
+    { ...pairs.find(({ name }) => name === 'checked radio')!, props: ['background-color', 'border-top-color'] },
+    { ...pairs.find(({ name }) => name === 'input focused')!, props: outline },
+  ]
+  for (const pair of forced) test(pair.name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
+})
 
 test('every part ui-sdk.css draws renders from the installed ui-sdk', async ({ page }) => {
   await page.goto('/ui-sdk.html')
