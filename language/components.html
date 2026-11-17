@@ -132,9 +132,12 @@
   :where(.overflow > .quiet-action[aria-expanded="true"]) { background: color-mix(in srgb, currentColor 6%, transparent); }
   .menu-list { position: absolute; z-index: 3; top: 100%; right: 0; display: grid; min-width: 180px; margin-top: var(--space-1); padding: var(--space-1); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); box-shadow: var(--shadow-dialog); }
   .menu-list.is-static { position: static; margin-top: 0; }
+  .menu-list.is-above { top: auto; bottom: 100%; margin: 0 0 var(--space-1); }
   .menu-list [role="menuitem"] { display: flex; align-items: center; gap: var(--space-2); min-height: var(--row); padding: 0 var(--space-3); border: 1px solid transparent; border-radius: calc(var(--radius-panel) - var(--space-1)); background: transparent; color: var(--color-text); font: inherit; text-align: start; cursor: pointer; }
   .menu-list [role="menuitem"].danger { color: light-dark(color-mix(in srgb, var(--color-error) 75%, var(--color-status-ink)), color-mix(in srgb, var(--color-error) 85%, var(--color-status-ink))); }
   .menu-list [role="menuitem"]:is(:focus-visible, .is-highlight) { background: var(--color-row-hover); }
+  /* An inset ring, as the project menu's rows draw, so it stays inside the menu and off the next row. */
+  .menu-list [role="menuitem"]:focus-visible { outline-offset: calc(var(--focus-width) * -1); }
   @media (hover: hover) { .menu-list [role="menuitem"]:hover:not(:disabled) { background: var(--color-row-hover); } }
   .menu-list [role="menuitem"]:disabled { opacity: 0.58; cursor: not-allowed; }
   .menu-list [role="separator"] { margin: var(--space-1) calc(var(--space-1) * -1); border-top: 1px solid var(--color-border-subtle); }
@@ -1057,7 +1060,7 @@
     <header><h3 id="quiet-action-title">Quiet action</h3><span class="badge">Core</span><a href="components.md#quiet-action">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="quiet-action" aria-label="Copy link to Quiet action" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">A small transparent action inside a component, such as Copy or Close.</p>
     <dl class="guidance"><dt>Do</dt><dd>Use it for an action inside a component: Copy in a code block or command list, close in a dialog or drawer, Full size on a capture, the project trigger, and the overflow menu trigger.</dd><dt>Don’t</dt><dd>An action that stands on its own in the page, such as Save or Next. That is a button.</dd></dl>
-    <p class="note">One recipe for Copy, Full size, dialog and drawer close, and the project trigger. Each component sets only its size and place.</p>
+    <p class="note">One recipe for Copy, Full size, dialog and drawer close, the project trigger, and the overflow menu trigger. Each component sets only its size and place.</p>
     <div class="row"><h4>Icon</h4><div class="states">
       <div class="state"><button class="quiet-action close" type="button" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button><span class="caption">Rest</span></div>
       <div class="state" inert><button class="quiet-action close is-hover" type="button" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button><span class="caption">Hover</span></div>
@@ -1900,7 +1903,17 @@
     const menu = wrap.querySelector('[role="menu"]');
     if (!menu || trigger.disabled) return;
     const items = () => [...menu.querySelectorAll('[role="menuitem"]:not(:disabled)')];
-    const open = (index) => { menu.hidden = false; trigger.setAttribute('aria-expanded', 'true'); items().at(index)?.focus(); };
+    // The menu opens below the trigger, or above it when the viewport has no room below and there is room above,
+    // as the headless libraries do. If neither fits, the page scrolls just enough to show the whole menu.
+    const open = (index) => {
+      menu.hidden = false;
+      menu.classList.remove('is-above');
+      const room = menu.getBoundingClientRect();
+      if (room.bottom > innerHeight && trigger.getBoundingClientRect().top - room.height - 4 >= 0) menu.classList.add('is-above');
+      menu.scrollIntoView({ block: 'nearest' });
+      trigger.setAttribute('aria-expanded', 'true');
+      items().at(index)?.focus();
+    };
     const close = (refocus) => {
       if (menu.hidden) return;
       menu.hidden = true;

@@ -334,6 +334,8 @@ test.describe('tablet and phone', () => {
     const box = (await menu.boundingBox())!
     expect(box.x).toBeGreaterThanOrEqual(0)
     expect(box.x + box.width).toBeLessThanOrEqual(width)
+    expect(box.y).toBeGreaterThanOrEqual(0)
+    expect(box.y + box.height).toBeLessThanOrEqual(900)
     await expect(trigger).toHaveAttribute('aria-expanded', 'true')
     await expect(item('Rename')).toBeFocused()
     // Arrows wrap and skip the disabled Export; Home, End, and a first letter move focus.
