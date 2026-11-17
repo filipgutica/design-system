@@ -20,11 +20,12 @@ test('ui-sdk.css uses no ui-sdk theme variable and loads no ui-sdk stylesheet', 
 })
 
 test('every token ui-sdk.css reads exists in tokens.css', () => {
-  // --depth is the file's own per-component variable, as in the components.html recipes. ui-sdk sets the
-  // popup variables on the select list to place it; they are layout values, not theme ones.
+  // --depth is the file's own per-component variable, as in the components.html recipes. ui-sdk measures
+  // and sets the rest inline: the select list's popup size, and the segmented thumb's and tab fill's
+  // positions. They are layout values, not theme ones.
   const own = new Set([...css.matchAll(/(--[\w-]+)\s*:/g)].map(([, name]) => name))
-  const popup = new Set(['--anchor-width', '--available-height'])
-  const names = [...new Set([...css.matchAll(/var\((--[\w-]+)[,)]/g)].map(([, name]) => name))].filter((name) => !own.has(name) && !popup.has(name))
+  const measured = /^--(anchor-width|available-height|segmented-control-indicator-(top|left|width|height)|active-tab-(top|left|width|height))$/
+  const names = [...new Set([...css.matchAll(/var\((--[\w-]+)[,)]/g)].map(([, name]) => name))].filter((name) => !own.has(name) && !measured.test(name))
   assert.ok(names.length > 10)
   for (const name of names) assert.ok(name in tokens, `${name} is not a tokens.css token`)
 })

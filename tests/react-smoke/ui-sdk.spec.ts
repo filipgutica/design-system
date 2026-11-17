@@ -25,7 +25,10 @@ const popup = ['background-color', 'border-top-width', 'border-top-color', 'bord
 const selectBox = [...control.filter((prop) => prop !== 'min-height'), 'padding-right']
 const option = ['min-height', 'padding-left', 'padding-top', 'border-top-left-radius', 'background-color']
 const section = ['padding-top', 'padding-left', 'gap', 'justify-content', 'background-color', 'border-top-width', 'border-top-color', 'border-bottom-width', 'border-bottom-color']
+const thumb = ['background-color', 'box-shadow', 'border-top-left-radius']
 // The live specimens sit outside the inert, pinned states.
+const liveSegmented = '#segmented-control .segmented[data-live]:not([data-icon-only])'
+const restTab = ':not([aria-selected="true"], .is-hover, .is-focus)'
 const liveCards = '#radio-card-group .state:not([inert])'
 const restToggle = ':not(.is-hover, .is-focus, [aria-pressed="true"], [disabled], [data-size])'
 
@@ -34,7 +37,7 @@ const restToggle = ':not(.is-hover, .is-focus, [aria-pressed="true"], [disabled]
 // specimenPseudo: the specimen's pseudo-element when the ui-sdk part draws it as a real element.
 type Pair = {
   name: string; specimen: string; part: string; props: string[]; state?: 'hover' | 'focus' | 'press' | 'click'
-  pseudo?: '::before' | '::after'; specimenPseudo?: '::after'; target?: string; open?: string
+  pseudo?: '::before' | '::after'; specimenPseudo?: '::before' | '::after'; target?: string; open?: string
 }
 const menuTrigger = '#overflow-menu .overflow > .quiet-action'
 const menuList = '#overflow-menu .menu-list.is-static'
@@ -164,6 +167,33 @@ const pairs: Pair[] = [
   { name: 'dialog title', specimen: '#live-dialog-title', part: 'dialog-title', props: text, open: 'dialog-trigger' },
   { name: 'dialog description', specimen: '#live-dialog-desc', part: 'dialog-description', props: [...text, 'margin-top'], open: 'dialog-trigger' },
   { name: 'dialog close button', specimen: '#live-dialog .close', part: 'dialog-close', props: ['width', 'min-height', 'color', 'background-color', 'border-top-left-radius', 'border-top-width'], open: 'dialog-trigger' },
+  { name: 'segmented control', specimen: `${liveSegmented}`, part: 'segmented', props: [...box.filter((prop) => prop !== 'height'), 'padding-left'] },
+  { name: 'segmented option', specimen: `${liveSegmented} button[aria-pressed="false"]`, part: 'seg-grid', props: control },
+  { name: 'segmented option on hover', specimen: '#segmented-control .segmented button.is-hover', part: 'seg-grid', props: ['color'], state: 'hover' },
+  { name: 'segmented hover thumb', specimen: '#segmented-control .segmented button.is-hover', part: 'seg-grid', props: thumb, state: 'hover', pseudo: '::before' },
+  { name: 'checked segmented option', specimen: `${liveSegmented} button[aria-pressed="true"]`, part: 'seg-list', props: control },
+  { name: 'segmented thumb', specimen: `${liveSegmented} button[aria-pressed="true"]`, specimenPseudo: '::before', part: 'segmented-indicator', props: thumb },
+  { name: 'segmented option focused', specimen: '#segmented-control .segmented button.is-focus', part: 'seg-list', props: ring, state: 'focus' },
+  { name: 'disabled segmented option', specimen: '#segmented-control .segmented button[aria-pressed="false"]:disabled', part: 'seg-disabled', props: control },
+  { name: 'disabled checked segmented option', specimen: '#segmented-control .segmented button[aria-pressed="true"]:disabled', part: 'seg-off-list', props: control },
+  { name: 'disabled segmented thumb', specimen: '#segmented-control .segmented button[aria-pressed="true"]:disabled', part: 'segmented-off-indicator', props: ['opacity'] },
+  { name: 'icon-only segmented option', specimen: '#segmented-control .segmented[data-icon-only] button[aria-pressed="false"]', part: 'seg-icon-grid', props: [...control, 'width'] },
+  { name: 'small segmented option', specimen: '#segmented-control .segmented[data-size="sm"] button[aria-pressed="true"]', part: 'seg-sm-item', props: control },
+  { name: 'large segmented option', specimen: '#segmented-control .segmented[data-size="lg"] button[aria-pressed="true"]', part: 'seg-lg-item', props: control },
+  { name: 'tab list', specimen: '#tabs .tablist', part: 'tabs-list', props: ['display', 'padding-top', 'padding-left', 'overflow-x', 'isolation'] },
+  { name: 'tab', specimen: `#tabs .tab${restTab}`, part: 'tab-history', props: [...control, 'border-top-left-radius'] },
+  { name: 'tab on hover', specimen: '#tabs .tab.is-hover', part: 'tab-history', props: control, state: 'hover' },
+  { name: 'selected tab', specimen: '#tabs .tab[aria-selected="true"]:not(.is-focus)', part: 'tab-overview', props: control },
+  { name: 'selected tab fill', specimen: '#tabs .tab[aria-selected="true"]:not(.is-focus)', specimenPseudo: '::before', part: 'tabs-indicator', props: thumb },
+  { name: 'tab focused', specimen: '#tabs .tab.is-focus', part: 'tab-overview', props: ring, state: 'focus' },
+  { name: 'tab panel', specimen: '#tabs .tabpanel', part: 'tabs-panel', props: ['padding-top'] },
+  { name: 'progress track', specimen: '#progress .progress[aria-valuenow="40"]', part: 'progress-track', props: [...box, 'overflow-x'] },
+  { name: 'progress indicator', specimen: '#progress .progress[aria-valuenow="40"] > span', part: 'progress-indicator', props: ['background-color', 'border-top-left-radius', 'height'] },
+  { name: 'drawer', specimen: '#live-drawer', part: 'drawer', props: [...box.filter((prop) => prop !== 'height'), 'color'], open: 'drawer-trigger' },
+  { name: 'drawer header', specimen: '#live-drawer .drawer-head', part: 'drawer-header', props: section, open: 'drawer-trigger' },
+  { name: 'drawer body', specimen: '#live-drawer .drawer-body', part: 'drawer-body', props: ['padding-top', 'padding-left', 'overflow-y', 'overscroll-behavior-y'], open: 'drawer-trigger' },
+  { name: 'drawer title', specimen: '#live-drawer-title', part: 'drawer-title', props: text, open: 'drawer-trigger' },
+  { name: 'drawer close button', specimen: '#live-drawer .close', part: 'drawer-close', props: ['width', 'min-height', 'color', 'background-color', 'border-top-left-radius', 'border-top-width'], open: 'drawer-trigger' },
 ]
 
 const read = (page: Page, selector: string, props: string[], pseudo?: string) =>
@@ -204,6 +234,8 @@ const compare = async ({ page, context, mode, pair }: { page: Page; context: Bro
     if (open === 'menu-trigger') await page.getByTestId(open).press('ArrowDown')
     else await page.getByTestId(open).click()
     await expect(page.locator(uiPart(part)).first()).toBeVisible()
+    // ui-sdk fades a drawer in with the Web Animations API even under reduced motion.
+    await settled(page)
   }
   // A checked part is clicked on its control, which is the part itself or the box it marks.
   const control = page.locator(uiPart(target ?? (part.includes('checkbox-indicator') ? 'checkbox' : part))).first()
@@ -252,7 +284,7 @@ test.describe('ui-sdk parts match the catalogue at 375px', () => {
   for (const mode of ['light', 'dark']) {
     for (const pair of menuPairs) test(`${pair.name} in ${mode}`, ({ page, context }) => compare({ page, context, mode, pair }))
   }
-  for (const name of ['primary button', 'input', 'checkbox row', 'switch row', 'toggle button', 'select']) {
+  for (const name of ['primary button', 'input', 'checkbox row', 'switch row', 'toggle button', 'select', 'segmented option', 'icon-only segmented option', 'tab']) {
     const pair = pairs.find((candidate) => candidate.name === name)!
     test(name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
   }
@@ -275,6 +307,13 @@ test.describe('ui-sdk parts match the catalogue in forced colours', () => {
     ...['switch', 'switch on', 'switch knob', 'switch knob on', 'pressed toggle button track', 'pressed toggle button knob'].map((name): Pair => (
       { ...pairs.find((pair) => pair.name === name)!, props: ['background-color', 'border-top-color'] })),
     { ...pairs.find(({ name }) => name === 'switch focused')!, props: outline },
+    { ...pairs.find(({ name }) => name === 'checked segmented option')!, props: ['color'] },
+    { ...pairs.find(({ name }) => name === 'segmented thumb')!, props: ['background-color'] },
+    { ...pairs.find(({ name }) => name === 'segmented option focused')!, props: outline },
+    { ...pairs.find(({ name }) => name === 'selected tab')!, props: ['border-top-width', 'border-top-color', 'padding-left', 'padding-top'] },
+    { ...pairs.find(({ name }) => name === 'progress indicator')!, props: ['background-color'] },
+    // The catalogue's range draws its fill as a pseudo-element, so the slider's range compares with the progress mark.
+    { ...pairs.find(({ name }) => name === 'progress indicator')!, name: 'slider range', part: 'slider-indicator', props: ['background-color'] },
   ]
   for (const pair of forced) test(pair.name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
 })
@@ -300,7 +339,10 @@ test('every part ui-sdk.css draws renders from the installed ui-sdk', async ({ p
   await page.keyboard.press('Escape')
   await page.getByTestId('dialog-trigger').click()
   const dialogOpen = await slotsIn()
-  const rendered = new Set([...closed.rendered, ...menuOpen.rendered, ...selectOpen.rendered, ...dialogOpen.rendered])
+  await page.keyboard.press('Escape')
+  await page.getByTestId('drawer-trigger').click()
+  const drawerOpen = await slotsIn()
+  const rendered = new Set([...closed.rendered, ...menuOpen.rendered, ...selectOpen.rendered, ...dialogOpen.rendered, ...drawerOpen.rendered])
   expect(closed.slots.length).toBeGreaterThan(10)
   expect(closed.slots.filter((slot) => !rendered.has(slot))).toEqual([])
 })
@@ -322,6 +364,176 @@ test('a keyboard-highlighted select option draws the inset focus ring', async ({
     return { ring: { outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth, outlineOffset: style.outlineOffset, outlineColor: style.outlineColor, backgroundColor: style.backgroundColor }, expected }
   })
   expect(ring).toEqual(expected)
+})
+
+// Waits for time-based animations, such as ui-sdk's drawer fade, to finish. The tab list's edge fade runs on
+// a scroll timeline, so it never finishes and is left out.
+const settled = (page: Page) => page.waitForFunction(() =>
+  document.getAnimations().every((animation) => animation.timeline !== document.timeline || animation.playState !== 'running'))
+
+// Resolves design tokens on a probe element, so a test can compare a part with the values the spec names.
+const tokens = (page: Page, css: string) => page.evaluate((text) => {
+  const probe = document.createElement('div')
+  probe.style.cssText = text
+  document.body.append(probe)
+  const style = getComputedStyle(probe)
+  const values = { color: style.color, background: style.backgroundColor, width: style.width, height: style.height, border: style.borderTopColor }
+  probe.remove()
+  return values
+}, css)
+
+// The catalogue's slider is a native range whose thumb and track are pseudo-elements that computed styles do not
+// expose, so the slider's parts are checked against the tokens components.md names.
+test('the slider draws the spec track, range, thumb, and value', async ({ page }) => {
+  await page.goto('/ui-sdk.html')
+  const style = (testId: string, props: string[]) => page.getByTestId(testId).evaluate((element, names) => {
+    const computed = getComputedStyle(element)
+    return Object.fromEntries(names.map((name) => [name, computed.getPropertyValue(name)]))
+  }, props)
+  const muted = await tokens(page, 'background: var(--color-surface-muted)')
+  const accent = await tokens(page, 'background: var(--color-accent); color: var(--color-accent)')
+  const raised = await tokens(page, 'background: var(--color-surface-raised)')
+  const control = await tokens(page, 'height: var(--control-md)')
+  expect(await style('slider-track', ['height', 'background-color'])).toEqual({ height: '6px', 'background-color': muted.background })
+  expect(await style('slider-indicator', ['background-color'])).toEqual({ 'background-color': accent.background })
+  expect(await style('slider-thumb', ['width', 'height', 'border-top-width', 'border-top-color', 'background-color', 'border-top-left-radius'])).toEqual({
+    width: '18px', height: '18px', 'border-top-width': '2px', 'border-top-color': accent.color, 'background-color': raised.background, 'border-top-left-radius': '50%',
+  })
+  expect(await style('slider-control', ['height'])).toEqual({ height: control.height })
+  expect((await style('slider-value', ['font-variant-numeric']))['font-variant-numeric']).toBe('tabular-nums')
+  expect((await style('slider-sm-thumb', ['width']))['width']).toBe('16px')
+  expect((await style('slider-lg-thumb', ['width']))['width']).toBe('20px')
+  expect((await style('slider-disabled', ['opacity']))['opacity']).toBe('0.58')
+
+  // The thumb's hidden range input takes focus, and the ring goes on the thumb.
+  await page.getByTestId('slider-thumb').locator('input').focus()
+  const focus = await tokens(page, 'color: var(--color-focus)')
+  expect(await style('slider-thumb', ['outline-style', 'outline-color'])).toEqual({ 'outline-style': 'solid', 'outline-color': focus.color })
+})
+
+// A native range keeps its thumb inside the track at both ends, so ui-sdk's thumb must too.
+test('the slider thumb stays inside its control at both ends of the range', async ({ page }) => {
+  await page.goto('/ui-sdk.html')
+  const input = page.getByTestId('slider-thumb').locator('input')
+  for (const key of ['Home', 'End']) {
+    await input.press(key)
+    const [control, thumb] = await Promise.all(['slider-control', 'slider-thumb'].map((id) => page.getByTestId(id).evaluate((element) => {
+      const { left, right } = element.getBoundingClientRect()
+      return { left, right }
+    })))
+    expect(thumb.left, key).toBeGreaterThanOrEqual(control.left)
+    expect(thumb.right, key).toBeLessThanOrEqual(control.right)
+  }
+})
+
+const rect = (page: Page, testId: string, of: string) => page.getByTestId(testId).evaluate((element, selector) => {
+  const box = (target: Element) => { const { left, top, width, height } = target.getBoundingClientRect(); return [left, top, width, height].map((value) => Math.round(value)) }
+  return { indicator: box(element), target: box(element.parentElement!.querySelector(selector)!) }
+}, of)
+
+test('the segmented thumb sits 2px inside the checked option, with no glide on first render', async ({ page }) => {
+  await page.goto('/ui-sdk.html')
+  // A control that starts on its second option is already in place, with no animation.
+  const first = await rect(page, 'segmented-second-indicator', '[data-checked]')
+  expect(await page.getByTestId('segmented-second-indicator').evaluate((element) => element.getAnimations().length)).toBe(0)
+  const inset = ([left, top, width, height]: number[]) => [left + 2, top + 2, width - 4, height - 4]
+  expect(first.indicator).toEqual(inset(first.target))
+
+  await page.getByTestId('seg-grid').click()
+  await settled(page)
+  const after = await rect(page, 'segmented-indicator', '[data-checked]')
+  expect(after.indicator).toEqual(inset(after.target))
+})
+
+test('the tab fill covers the selected tab, in a list that scrolls too', async ({ page }) => {
+  await page.goto('/ui-sdk.html')
+  const fixed = await rect(page, 'tabs-indicator', '[data-selected]')
+  expect(fixed.indicator).toEqual(fixed.target)
+
+  // Selecting the last tab scrolls the list; the fill follows the tab.
+  await page.getByTestId('tab-t6').click()
+  await settled(page)
+  const scrolled = await rect(page, 'tabs-scroll-indicator', '[data-selected]')
+  expect(scrolled.indicator).toEqual(scrolled.target)
+})
+
+const fade = (page: Page) => page.getByTestId('tabs-scroll').evaluate((element) => {
+  const style = getComputedStyle(element)
+  return [style.getPropertyValue('--tab-fade-start').trim(), style.getPropertyValue('--tab-fade-end').trim(), style.maskImage === 'none' ? 'none' : 'mask']
+})
+
+test.describe('a scrolling tab list', () => {
+  test.use({ reducedMotion: 'no-preference' })
+  test('fades each clipped edge over 24px', async ({ page }) => {
+    await page.goto('/ui-sdk.html')
+    const list = page.getByTestId('tabs-scroll')
+    // At the start only the end is clipped; in the middle both are; at the end only the start is.
+    expect(await fade(page)).toEqual(['0px', '24px', 'mask'])
+    await list.evaluate((element) => { element.scrollLeft = (element.scrollWidth - element.clientWidth) / 2 })
+    await expect.poll(() => fade(page)).toEqual(['24px', '24px', 'mask'])
+    await list.evaluate((element) => { element.scrollLeft = element.scrollWidth })
+    await expect.poll(() => fade(page)).toEqual(['24px', '0px', 'mask'])
+  })
+})
+
+// The file runs under reduced motion; these run with motion allowed, where the glides apply.
+test.describe('with motion allowed', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  // Lists the CSS transitions running on a part, as property and duration.
+  const running = (page: Page, testId: string) => page.getByTestId(testId).evaluate((element) =>
+    element.getAnimations().filter((animation) => animation instanceof CSSTransition)
+      .map((animation) => `${(animation as CSSTransition).transitionProperty} ${animation.effect?.getTiming().duration}`).sort())
+
+  test('the thumb and the tab fill do not glide on first render', async ({ page }) => {
+    // Records every transition from the first frame, before ui-sdk measures the indicators.
+    await page.addInitScript(() => {
+      const started: string[] = []
+      Object.assign(window, { started })
+      document.addEventListener('transitionstart', (event) => started.push(`${(event.target as Element).getAttribute('data-slot')} ${event.propertyName}`))
+    })
+    await page.goto('/ui-sdk.html')
+    await page.waitForTimeout(500)
+    const started = await page.evaluate(() => (window as unknown as { started: string[] }).started)
+    expect(started.filter((entry) => /indicator/.test(entry))).toEqual([])
+  })
+
+  test('a change of choice glides both edges over 260ms and cross-fades the labels', async ({ page }) => {
+    await page.goto('/ui-sdk.html')
+    await page.getByTestId('seg-grid').click()
+    expect(await running(page, 'segmented-indicator')).toEqual(['left 260', 'width 260'])
+    expect(await running(page, 'seg-grid')).toEqual(['color 260'])
+
+    // The first tab change glides, and so does a change back the other way.
+    await page.getByTestId('tab-history').click()
+    expect(await running(page, 'tabs-indicator')).toEqual(['left 260', 'width 260'])
+    expect(await running(page, 'tab-history')).toContain('color 260')
+    await page.waitForTimeout(400)
+    await page.getByTestId('tab-overview').click()
+    expect(await running(page, 'tabs-indicator')).toEqual(['left 260', 'width 260'])
+  })
+})
+
+test('a scrolling tab list does not fade under reduced motion, where the base stops animations', async ({ page }) => {
+  await page.goto('/ui-sdk.html')
+  expect(await fade(page)).toEqual(['', '', 'none'])
+})
+
+test('the drawer is a full-height layer on the left edge', async ({ page }) => {
+  // Below 320px the drawer is 48px narrower than the viewport.
+  for (const width of [1280, 300]) {
+    await page.setViewportSize({ width, height: 700 })
+    await page.goto('/ui-sdk.html')
+    await page.getByTestId('drawer-trigger').click()
+    await expect(page.getByTestId('drawer')).toBeVisible()
+    await settled(page)
+    const box = await page.getByTestId('drawer').evaluate((element) => {
+      const { left, top, width: drawn, height } = element.getBoundingClientRect()
+      return { left: Math.round(left), top: Math.round(top), width: Math.round(drawn), height: Math.round(height), radius: getComputedStyle(element).borderTopRightRadius }
+    })
+    // min(--sidebar + 48px, 100vw - 48px), with --sidebar at 224px.
+    expect(box).toEqual({ left: 0, top: 0, width: Math.min(224 + 48, width - 48), height: 700, radius: '0px' })
+  }
 })
 
 test('the dialog opens centred over the overlay, and as a bottom sheet on phones', async ({ page }) => {
