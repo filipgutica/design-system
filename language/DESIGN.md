@@ -40,7 +40,7 @@ Center the **container**, not every sentence. Align header, content, images, and
 ## Files and examples
 
 - `tokens.css`: the values of the default theme, Graphite Indigo, generated from the token source (`tokens/core.json` and `tokens/themes/graphite-indigo.tokens.json`) in `@filipgutica/design-system`. Other themes ship as `themes/<id>.css`, which set only a theme's inputs: its hue pair, and any fonts or neutrals it brings; load one after `tokens.css`, on `:root`. To change a value, edit the JSON there and run `pnpm tokens:build`; do not edit `tokens.css` by hand. The identity inputs sit in one block at the top.
-- `ui-sdk.css`: experimental. Sets ui-sdk's theme variables to these tokens; see [ui-sdk](#ui-sdk-experimental).
+- `ui-sdk.css`: experimental. Draws ui-sdk's headless parts as the component specs do; see [ui-sdk](#ui-sdk-experimental).
 - `components.md`: one spec for each component, with anatomy, states, Do and Don't lines, keyboard and screen-reader behavior, motion, and forced colors. Read it for any component work.
 - `components.html`: every component in each of its states, in plain HTML and CSS on `tokens.css`. Copy component markup and styles from there.
 - `decisions.md`: the choices behind the components, and the options they replaced.
@@ -172,22 +172,17 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 
 ### ui-sdk (experimental)
 
-[ui-sdk](https://ui-sdk.dev) gives unstyled, accessible components that an agent can read and operate through its agent bridge. Use it only where no owning library covers the framework or the component, such as a React app or a control that `@filipgutica/ui` lacks; where an owning library has the component, use the library's.
+[ui-sdk](https://ui-sdk.dev) gives headless, accessible components that an agent can read and operate through its agent bridge. `ui-sdk.css` draws their parts as this file and [`components.md`](components.md) specify. Use ui-sdk only where no owning library covers the framework or the component, such as a React app or a control that `@filipgutica/ui` lacks; where an owning library has the component, use the library's.
 
-- Pin every `@ui-sdk/*` package to one exact version. `ui-sdk.css` is checked against `0.1.0-beta.5`. Do not load the unversioned `https://ui-sdk.dev/web.js`.
-- Load a stylesheet that starts with `@layer ui-sdk, base;` first, then `tokens.css`, `@ui-sdk/core/web.css`, and `ui-sdk.css`. This replaces the ui-sdk skill's `@layer ui-sdk;` line: without `base` after it, ui-sdk's link and 4px focus rules replace the link colour and the focus ring. In this order `@layer base` outranks ui-sdk's part rules, the reverse of the [component rule above](#components) for library components, so a page's own element rules in `base` also reach ui-sdk parts: scope them to the page's content. The base link rules skip parts marked `data-slot`, so a ui-sdk button rendered as a link keeps the button's colours.
-- `ui-sdk.css` sets only ui-sdk's `--ui-*` variables, so every theme applies. The result is close to the spec, not equal to it. Known differences:
-  - buttons have 10px corners, not pills, and the destructive button is a red tint, not the danger button
-  - controls are `--control-sm` high, not `--control-md`
-  - controls have a `--color-border` edge, and no raise, sink, or pressed shadow
-  - hover fills also apply on touch, outside `@media (hover: hover)`, and disabled controls fade to 0.5, not 0.58
-  - fields draw the focus ring as well as the accent edge, with no inset line
-  - parts that ui-sdk gives no outline, such as menu and listbox items, draw the base ring, which a popover's edge can clip; controls that ring a wrapper or a label instead, such as a slider, a password field, or a tree, draw a 4px `--color-focus` ring, and the focused part inside also draws the base ring
-  - dark fields fill with `--color-surface-raised`, not the `--color-well` well
-  - checkbox corners are 5px
-- Do not patch these differences on a page. Report them, so the bridge or a library fixes them once.
-- This file owns the look, the tokens, and the layer order. The ui-sdk skill owns which component to use, composition, `render`, ARIA, and the agent bridge. `interface-design` owns states and copy. The repository's own testing rules apply, not the ui-sdk skill's `test.fails` advice.
-- The app decides whether to expose its UI to agents through `createAgent` or WebMCP, and which actions to allow.
+- Pin every `@ui-sdk/*` package to the exact version `ui-sdk.css` names, `0.1.0-beta.5`. Do not load `@ui-sdk/core/web.css`, its `--ui-*` variables, or the unversioned `https://ui-sdk.dev/web.js`.
+- Load a stylesheet that starts with `@layer ui-sdk, base, components;` first, then `tokens.css` and `ui-sdk.css`. ui-sdk adds the little CSS its behaviour needs to `@layer ui-sdk` at run time, so the declaration keeps it below the design system, and `ui-sdk.css` sits in `components`, above the base as the [component rule](#components) requires.
+- Supported components, with each variant and state of its [component spec](components.md):
+  - [Button](components.md#button): no `data-variant` is primary; `data-variant="secondary"`, `"ghost"`, `"danger"`, or `"text"` picks another, and `data-size="sm"` or `"lg"` a size. A button rendered as a link (`render={<a href=… />}`) keeps the button's look.
+  - [Field wrapper](components.md#field-wrapper) and [Text input and textarea](components.md#text-input-and-textarea): `Field`, `FieldLabel`, `FieldDescription`, `FieldError`, `Input`, and `Textarea`.
+  - [Checkbox and radio](components.md#checkbox-and-radio): each `Checkbox` or `Radio` inside a `<label data-slot="label">` with its text, and radios inside a `RadioGroup`.
+- Any other ui-sdk component is unsupported: it renders unstyled. Use the owning library's component or the [`components.html`](components.html) recipe, or add a spec and its `ui-sdk.css` rules first. Do not style an unsupported part on a page.
+- This file owns the look and the load order. The ui-sdk skill and the docs in the installed `@ui-sdk/*` package own which component to use, composition, `render`, ARIA, and the agent bridge. `interface-design` owns states and copy. The repository's own testing rules apply, not the ui-sdk skill's `test.fails` advice.
+- To let an agent operate the page, create the bridge with `createAgent()` before the app renders; the agent reads with `snapshot()` and acts with `act()`. The app decides whether to expose it, through `createAgent` or WebMCP, and which actions to allow.
 
 ### Navigation
 
@@ -282,4 +277,4 @@ The personal sites are terminal tools that read Markdown and paths, so their ide
 - [ ] At 390, 720, and 1280 px wide there is no horizontal page scroll, and the page's own viewport media queries use only `max-width: 640px`, `max-width: 800px`, `min-width: 801px`, and the documented `min-width: 1024px` hero split.
 - [ ] Keyboard, focus, touch, deep links, and reduced motion work across relevant states.
 - [ ] Every control is the owning system's component or class, never a local copy built from its tokens; spacing uses its tokens; each panel and visual effect has a purpose.
-- [ ] Control states match between `components.html`, the example pages, and the owning library: hover, press, focus, disabled, busy, invalid, and forced colors. On a ui-sdk page, only the differences that [ui-sdk](#ui-sdk-experimental) lists are exempt; report any other, and it fails until the list or the bridge covers it.
+- [ ] Control states match between `components.html`, the example pages, and the owning library: hover, press, focus, disabled, busy, invalid, and forced colors.
