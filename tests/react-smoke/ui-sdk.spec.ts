@@ -50,7 +50,8 @@ const menuPairs: Pair[] = [
   { name: 'overflow More icon', specimen: `${menuTrigger}[aria-controls] .icon`, part: '[data-testid="menu-trigger"] > svg', props: icon },
   { name: 'overflow layer', specimen: menuList, part: 'menu-content', props: [...box.filter((prop) => prop !== 'height'), ...text, 'min-width', 'padding-top', 'padding-right', 'display'], open: 'menu-trigger' },
   { name: 'overflow item', specimen: `${menuList} [role="menuitem"]:nth-child(2)`, part: 'menu-duplicate', props: menuBox, open: 'menu-trigger' },
-  { name: 'overflow item highlighted', specimen: `${menuList} .is-highlight`, part: 'menu-rename', props: menuBox, state: 'hover', open: 'menu-trigger' },
+  // Keyboard open focuses Rename, so the pointer case hovers Duplicate, which only the pointer highlights.
+  { name: 'overflow item highlighted', specimen: `${menuList} .is-highlight`, part: 'menu-duplicate', props: menuBox, state: 'hover', open: 'menu-trigger' },
   { name: 'overflow item focused', specimen: `${menuList} .is-highlight`, part: 'menu-rename', props: [...menuBox, ...ring], state: 'focus', open: 'menu-trigger' },
   { name: 'overflow item disabled', specimen: `${menuList} [disabled]`, part: 'menu-disabled', props: menuBox, open: 'menu-trigger' },
   { name: 'overflow disabled item on hover', specimen: `${menuList} [disabled]`, part: 'menu-disabled', props: menuBox, state: 'hover', open: 'menu-trigger' },
@@ -208,6 +209,10 @@ const compare = async ({ page, context, mode, pair }: { page: Page; context: Bro
   const control = page.locator(uiPart(target ?? (part.includes('checkbox-indicator') ? 'checkbox' : part))).first()
   await expect(control).toBeVisible()
   if (state === 'hover') await control.hover()
+  if (state === 'hover' && part === 'menu-duplicate') {
+    await expect(control).toHaveAttribute('data-highlighted', '')
+    await expect(page.getByTestId('menu-rename')).not.toHaveAttribute('data-highlighted', '')
+  }
   if (state === 'focus') await control.focus()
   if (state === 'click') await control.click()
   if (state === 'press') {
