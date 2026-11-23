@@ -80,7 +80,7 @@ for (const { path, name, find } of PAGES) {
             const { left, top, width, height } = element.getBoundingClientRect()
             const x = left + width / 2
             const centerY = top + height / 2
-            const inset = (checkTouchEdges ? touchHeight : height) / 2 - 1
+            const inset = (checkTouchEdges ? touchHeight : height) / 2 - 0.5
             const hitsTop = element.contains(document.elementFromPoint(x, centerY - inset))
             const hitsCenter = element.contains(document.elementFromPoint(x, centerY))
             const hitsBottom = element.contains(document.elementFromPoint(x, centerY + inset))
