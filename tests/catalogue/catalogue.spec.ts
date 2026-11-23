@@ -9,6 +9,87 @@ const url = new URL('../../language/components.html', import.meta.url).href
 const railLink = (page: Page, name: string) => page.locator('#rail .rail-list a', { hasText: new RegExp(`^${name}$`) })
 const current = (page: Page) => page.locator('#rail [aria-current="location"]')
 
+const controlHeights: Record<string, number> = { sm: 28, md: 32, lg: 36 }
+const touchHeight = 44
+
+// Measure compound controls at their visible boundary (the search wrapper and choice label).
+// Compact tool-call disclosures have their own recipe. The hover toolbar is hidden at touch widths.
+const controlTargets = [
+  '.btn', '.input', '.select', '.range', '.check', '.switch', '.toggle', '.search',
+  '.segmented', '.segmented > button', '.tab', '.radio-card', 'textarea',
+  '[role="option"]', '.navlist a', '.crumbs a', '.group-toggle', '.chip[href]',
+  '.overflow > button:not(.msg-tools *)', '.menu-list [role="menuitem"]', '.copy-link', '.page-head > .site-name',
+  '.header a', '.actions > a:not(.btn)', 'button.copy', '.close', '.full', '.projects > summary',
+].join(', ')
+
+const renderedControls = (page: Page) => page.locator(`:is(${controlTargets}):visible`).evaluateAll((elements) => elements.map((element) => {
+  // The caption names the size independently of the attribute that keeps the specimen small.
+  const caption = element.closest('.state')?.querySelector(':scope > .caption')?.textContent?.trim()
+  const specimenSize = caption && /^(sm|md|lg)$/.test(caption) ? caption : undefined
+  const label = element.id || element.getAttribute('aria-label') || element.textContent?.trim().replace(/\s+/g, ' ').slice(0, 48)
+  const { height, width } = element.getBoundingClientRect()
+  return {
+    label: `${element.tagName.toLowerCase()}.${element.getAttribute('class') ?? ''} ${label ?? ''}`.trim(),
+    size: element.closest('[data-size]')?.getAttribute('data-size') ?? 'md',
+    specimenSize,
+    height,
+    width,
+    // Search and a few standalone compact actions use the small height on desktop.
+    compact: element.matches('.search, .crumbs a, .group-toggle, .overflow > button, .copy-link, .page-head > .site-name, .composer-box textarea'),
+    row: element.matches('[role="option"], .navlist a, .menu-list [role="menuitem"]'),
+    alwaysTouch: element.matches('.header a, .actions > a:not(.btn), .page-head .strip a, .site-links a, .navlist.text-links a, button.copy, .close, .capture .tab, .full, .projects > summary'),
+    // Tabs, toggle cards and padded menu triggers can grow to fit their contents.
+    contentHeight: element.matches('.tab, .toggle, .btn.menu-glyph, .radio-card, textarea, .navlist a, .crumbs a'),
+    textButton: element.matches('.btn.text'),
+    chip: element.matches('.chip[href]'),
+    option: element.matches('.segmented > button'),
+    iconOption: element.matches('.segmented[data-icon-only] > button'),
+    consoleSizedButton: element.matches('.btn[data-size]'),
+  }
+}))
+
+const specimenBoxes = (controls: Awaited<ReturnType<typeof renderedControls>>) => controls
+  .filter(({ specimenSize }) => specimenSize)
+  .map(({ label, height }) => ({ label, height }))
+
+for (const file of ['components.html', 'reference.html', 'product.html', 'docs.html']) {
+  for (const width of [1280, 800, 375]) {
+    test(`${file} renders control sizes at ${width}px`, async ({ page }) => {
+      const touch = width <= 800
+      const measureAt = async (viewportWidth: number) => {
+        await page.setViewportSize({ width: viewportWidth, height: 900 })
+        await page.goto(new URL(file, url).href)
+        return renderedControls(page)
+      }
+      const desktopSpecimens = touch && file === 'components.html' ? specimenBoxes(await measureAt(1280)) : null
+      const controls = await measureAt(width)
+      expect(controls.length).toBeGreaterThan(0)
+      for (const control of controls) {
+        const { label, specimenSize, height, option } = control
+        // Desktop text buttons are inline actions with 4px padding and no fixed control height.
+        if (!touch && control.textButton) continue
+        const desktopHeight = control.compact ? 28 : control.row ? 36 : control.chip ? 24 : controlHeights[control.size]
+        const target = specimenSize ? controlHeights[specimenSize] : touch || control.alwaysTouch ? touchHeight : desktopHeight
+        // The track owns the control height. Each option is inset 2px from its top and bottom.
+        const expected = target - (option ? 4 : 0)
+        if (control.contentHeight) {
+          expect.soft(height, label).toBeGreaterThanOrEqual(expected)
+        } else {
+          expect.soft(height, label).toBe(expected)
+        }
+        if (control.iconOption) expect.soft(control.width, label).toBeCloseTo(height, 1)
+        if (file === 'reference.html' && touch && (option || control.consoleSizedButton)) {
+          expect.soft(control.width, label).toBeGreaterThanOrEqual(expected)
+        }
+      }
+      if (desktopSpecimens) {
+        expect(desktopSpecimens.length).toBeGreaterThan(0)
+        expect(specimenBoxes(controls)).toEqual(desktopSpecimens)
+      }
+    })
+  }
+}
+
 test.describe('desktop', () => {
   test.use({ viewport: { width: 1280, height: 900 } })
 
@@ -270,15 +351,6 @@ test.describe('tablet and phone', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 
   // Inert examples of a state grow like live controls; only a size specimen keeps its size.
-  test('state examples grow to the touch size, and size specimens keep theirs', async ({ page }) => {
-    await page.goto(url)
-    const height = (selector: string) => page.locator(selector).evaluate((element) => getComputedStyle(element).height)
-    expect(await height('#in-focus')).toBe('44px')
-    expect(await height('.btn.menu-glyph.is-active[data-size="lg"]')).toBe('44px')
-    expect(await height('#text-input-and-textarea .input[data-size="sm"]')).toBe('28px')
-    expect(await height('#sl-md')).toBe('32px')
-  })
-
   test('the trigger opens the drawer on the current row, and a link closes it and focuses the target', async ({ page }) => {
     await page.goto(`${url}#slider`)
     await expect(current(page)).toHaveText('Slider')

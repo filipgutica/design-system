@@ -959,7 +959,7 @@
     .row { grid-template-columns: minmax(0, 1fr); }
     /* Touch: controls of every size grow to --control-touch, the inert state examples included. Only the size
        specimens (data-specimen="size") keep their sizes. */
-    .btn:not([data-specimen="size"] *), .navlist a, .tab { min-height: var(--control-touch); }
+    .btn:not([data-specimen="size"] *), .navlist a, .rows [role="option"], .tab { min-height: var(--control-touch); }
     /* A segmented control grows its item size too, so icon-only options stay square. */
     .segmented:not([data-specimen="size"] *) { --item: var(--control-touch); }
     .input:not([data-specimen="size"] *), .select:not([data-specimen="size"] *), .range:not([data-specimen="size"] *) { height: var(--control-touch); }
