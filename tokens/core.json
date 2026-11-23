@@ -423,14 +423,14 @@
       "comment": "Shape",
       "roles": {
         "radius-inline": "Places and picked rows: navigation rows, tabs, list rows, breadcrumb links, checkboxes, and keyboard keys",
-        "radius-control": "Pills that act, or set a value in place with every option shown: buttons other than the labelled contents trigger, quiet actions other than the project-menu trigger, segmented controls, and their thumbs",
+        "radius-control": "Rounded rectangles that act, or set a value in place with every option shown: buttons other than the labelled contents trigger, quiet actions other than the project-menu trigger, and segmented controls; a segmented thumb takes this radius minus its inset",
         "radius-panel": "Containers: wells, plates, panels, radio cards, alerts, and floating layers",
         "radius-field": "Typed fields, controls whose label wraps, and one-line controls that are not actions: inputs, selects, textareas, toggle cards, pager links, the project-menu trigger, the labelled contents trigger and its no-JavaScript summary, and the skip link",
         "radius-pill": "Small state marks: status badges, switch tracks, slider and progress tracks, and score pips"
       },
       "tokens": {
         "radius-inline": "6px",
-        "radius-control": "999px",
+        "radius-control": "10px",
         "radius-panel": "16px",
         "radius-field": "10px",
         "radius-pill": "999px"
