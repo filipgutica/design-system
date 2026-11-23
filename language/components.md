@@ -33,7 +33,7 @@ A control's **States** line names each interactive state it has. In `components.
 
 ## Rules for every control
 
-- **Sizes.** `sm`, `md`, and `lg` use `--control-sm`, `--control-md`, and `--control-lg` for height (28px, 36px, and 44px), with `--text-sm`, `--text-md`, and `--text-lg`. An application screen sets its controls at `sm` and gives `md` only to its one main action ([density](DESIGN.md#layout-and-spacing)). At tablet width (`max-width: 800px`) touch targets use `--control-lg`.
+- **Sizes.** `sm`, `md`, and `lg` use `--control-sm`, `--control-md`, and `--control-lg` for height (28px, 36px, and 44px), with `--text-sm`, `--text-md`, and `--text-lg`. An application screen sets every control at `sm`, its main action included ([density](DESIGN.md#layout-and-spacing)). At tablet width (`max-width: 800px`) touch targets use `--control-lg`.
 - **Borders.** Every control keeps a 1px border, transparent unless its section says otherwise, so forced colors can draw an edge.
 - **Depth.** Each control takes its shadow from the [depth tiers](DESIGN.md#depth).
 - **Hover.** Hover fills apply only where the pointer can hover. Put every `:hover` rule that sets a background, shadow, border colour, or text colour in `@media (hover: hover)`, because a touch screen keeps `:hover` on the last element tapped. The pressed tint stays outside the query: it shows only while a finger is down.
