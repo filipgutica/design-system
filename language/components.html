@@ -583,9 +583,18 @@
   .composer-hint { color: var(--color-muted); font-size: var(--text-xs); }
 
   /* Thread panel: a side pane whose start edge is a resize handle. The catalogue frames it beside a channel column. */
-  .thread-demo { --pane: 26rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, var(--pane)); width: 100%; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-panel); background: var(--color-bg); }
+  .thread-demo { --pane: 26rem; display: grid; grid-template-columns: minmax(16rem, 1fr) minmax(0, var(--pane)); width: 100%; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-panel); background: var(--color-bg); }
+  /* A frame too narrow for a 16rem channel beside a 20rem pane stacks them, as the tablet layout does. */
+  .state:has(> .thread-demo) { container-type: inline-size; }
+  @container (max-width: 36rem) {
+    .thread-demo { grid-template-columns: minmax(0, 1fr); }
+    .thread-demo .thread-pane { border-left: 0; border-top: 1px solid var(--color-border-subtle); }
+    .thread-demo .pane-resize { display: none; }
+  }
   .thread-demo > .stream { align-content: start; padding: var(--space-5) var(--space-3); }
   .thread-pane { position: relative; display: flex; flex-direction: column; min-width: 0; border-left: 1px solid var(--color-border-subtle); }
+  /* A touch screen never shows the hover toolbar, at any width: a tap opens the thread, whose header holds More. */
+  @media (hover: none) { .msg-tools { display: none; } }
   .pane-resize { position: absolute; inset: 0 auto 0 -0.1875rem; z-index: 3; width: 0.375rem; cursor: col-resize; }
   .pane-resize.is-hover, .pane-resize:focus-visible { background: color-mix(in srgb, var(--color-accent) 40%, transparent); }
   @media (hover: hover) { .pane-resize:hover { background: color-mix(in srgb, var(--color-accent) 40%, transparent); } }
@@ -1219,7 +1228,7 @@
     <p class="purpose">A small suggestion that fills in a composer or opens a screen.</p>
     <dl class="guidance"><dt>Do</dt><dd>Offer two to four next steps under an empty composer, each named for its result, such as “Review last night’s run”. A chip either fills in the composer or opens a screen.</dd><dt>Don’t</dt><dd>A chip for a status or a category, which is a badge, or a chip that sends a message on its own.</dd></dl>
     <div class="row"><h4>Suggestions</h4><div class="states">
-      <div class="state wide"><div class="chip-stage"><div class="composer"><label class="sr-only" for="chip-composer">Post to #global</label><div class="composer-box"><textarea id="chip-composer" rows="1" placeholder="Post to #global, or start with /todo" aria-describedby="chip-composer-hint"></textarea><button class="btn" type="button" data-size="sm" aria-label="Send"><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></button></div><p class="composer-hint" id="chip-composer-hint">Posts to the board. It doesn’t start a T3 Code thread.</p></div><ul class="chips" aria-label="Suggestions"><li><a class="chip" href="#thread-panel"><svg class="icon" aria-hidden="true"><use href="#i-dark"/></svg>Review last night’s run</a></li><li><a class="chip" href="#message-group"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Open todos in #wtree</a></li><li><a class="chip" href="#find-field"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>Browse guidance</a></li></ul></div><span class="caption">Rest, live: a wrapping, centred row under an empty composer</span></div>
+      <div class="state wide"><div class="chip-stage"><div class="composer"><label class="sr-only" for="chip-composer">Post to #global</label><div class="composer-box"><textarea id="chip-composer" rows="1" placeholder="Post to #global, or start with /todo" aria-describedby="chip-composer-hint"></textarea><button class="btn" type="button" data-size="sm" aria-label="Send"><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></button></div><p class="composer-hint" id="chip-composer-hint">Posts to the board. It doesn’t start a T3 Code thread.</p></div><ul class="chips" aria-label="Suggestions"><li><a class="chip" href="#thread-panel"><svg class="icon" aria-hidden="true"><use href="#i-dark"/></svg>Open a thread</a></li><li><a class="chip" href="#message-group"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>See grouped messages</a></li><li><a class="chip" href="#find-field"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>Find a component</a></li></ul></div><span class="caption">Rest, live: a wrapping, centred row under an empty composer</span></div>
     </div></div>
     <div class="row"><h4>States</h4><div class="states">
       <div class="state" inert><a class="chip" href="#chip"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Open todos</a><span class="caption">Rest</span></div>
@@ -2206,14 +2215,18 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
   // and never so wide that the channel beside it drops below 16rem. The separator reports the width the pane takes.
   document.querySelectorAll('.pane-resize[role="separator"]:not([inert] *)').forEach((handle) => {
     const frame = handle.closest('.thread-demo');
+    const pane = handle.closest('.thread-pane');
     const set = (rem) => {
-      const frameRem = frame.getBoundingClientRect().width / parseFloat(getComputedStyle(root).fontSize);
-      const max = Math.max(20, Math.min(40, Math.floor(frameRem - 16)));
-      const width = Math.min(max, Math.max(20, rem));
-      frame.style.setProperty('--pane', `${width}rem`);
+      // Stacked (a narrow frame, or tablet width), the handle hides and the pane takes the full width.
+      if (getComputedStyle(handle).display === 'none') return;
+      const px = parseFloat(getComputedStyle(root).fontSize);
+      const max = Math.max(20, Math.min(40, Math.floor(frame.clientWidth / px - 16)));
+      frame.style.setProperty('--pane', `${Math.min(max, Math.max(20, rem))}rem`);
       handle.setAttribute('aria-valuemax', String(max));
-      handle.setAttribute('aria-valuenow', String(Math.round(width)));
+      handle.setAttribute('aria-valuenow', String(Math.round(pane.getBoundingClientRect().width / px)));
     };
+    set(26);
+    new ResizeObserver(() => set(Number(handle.getAttribute('aria-valuenow')))).observe(frame);
     handle.addEventListener('keydown', (e) => {
       const step = { ArrowLeft: 1, ArrowRight: -1 }[e.key];
       if (!step) return;

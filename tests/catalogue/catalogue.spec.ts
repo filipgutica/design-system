@@ -1009,6 +1009,30 @@ test.describe('conversation keyboard', () => {
     await expect(handle).toHaveAttribute('aria-valuenow', String(max - 1))
   })
 
+  test('a desktop frame too narrow for both panes stacks them; a wide one keeps the channel at least 16rem', async ({ page }) => {
+    const layout = () => page.locator('#thread-panel .thread-demo').evaluate((frame) => {
+      const [stream, pane] = [frame.querySelector('.stream')!, frame.querySelector('.thread-pane')!].map((node) => node.getBoundingClientRect())
+      return { stacked: pane.top > stream.top, channel: stream.width, handle: getComputedStyle(frame.querySelector('.pane-resize')!).display }
+    })
+    const rem = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))
+    await page.setViewportSize({ width: 900, height: 900 })
+    await page.goto(url)
+    expect(await layout()).toMatchObject({ stacked: true, handle: 'none' })
+    await page.setViewportSize({ width: 1280, height: 900 })
+    const wide = await layout()
+    expect(wide.stacked).toBe(false)
+    expect(wide.channel).toBeGreaterThanOrEqual(16 * rem - 1)
+  })
+
+  test('touch screens never show the hover toolbar, at any width', async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 1200, height: 900 }, hasTouch: true })
+    const page = await context.newPage()
+    await page.goto(url)
+    await page.locator('#message-row .msg button').first().focus()
+    await expect(page.locator('#message-row .msg-tools').first()).toBeHidden()
+    await context.close()
+  })
+
   test('at tablet width the toolbar and the handle hide, and the pane takes the full width', async ({ page }) => {
     await page.setViewportSize({ width: 720, height: 900 })
     await page.goto(url)
