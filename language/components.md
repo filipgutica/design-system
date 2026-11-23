@@ -387,7 +387,7 @@ Layer: Core.
 - **States.** Hover: `--color-row-hover` fill. Focus-visible: the focus ring. There is no current state.
 - **Do.** Use a pager for pages a reader goes through in order, such as a guide's chapters or the skills in one group.
 - **Don't.** A pager on pages with no reading order, or one per section on a page with a section rail.
-- **Phone.** No change: the two columns stay, so Previous and Next share one row, and a long title wraps inside its column.
+- **Phone.** No change: the two columns stay, so Previous and Next share one row, and a long title wraps inside its column, breaking inside a word when it must.
 - **Keyboard and screen reader.** The direction and the title are both inside the link, so it reads as one name, such as "Next Application example".
 - **Motion.** The fill changes over `--duration-fast` with `--ease-out`.
 - **Forced colors.** Each link's transparent border draws in the system link colour, so both links read as boxes, and the hover fill drops.
