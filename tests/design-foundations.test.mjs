@@ -336,7 +336,7 @@ test('example pages copy the state rules of every component variant their markup
 // shows a search field or a button grows it there, as the catalogue does.
 const touchNeeds = [
   { uses: /\bclass="(?:[^"]* )?search(?: [^"]*)?"/, rule: '@media (max-width: 800px) .search { height: var(--control-touch); }' },
-  { uses: /<(?![^>]*\bdata-size=)[^>]*\bclass="(?:[^"]* )?btn(?: [^"]*)?"/, rule: '@media (max-width: 800px) .btn:not([inert] *) { min-height: var(--control-touch); }' },
+  { uses: /<(?![^>]*\bdata-size=)[^>]*\bclass="(?:[^"]* )?btn(?: [^"]*)?"/, rule: '@media (max-width: 800px) .btn:not([inert] [data-size]) { min-height: var(--control-touch); }' },
 ]
 const missingTouch = (page, html) => {
   const have = new Set(perSelector(cssRules(html)).map(key))
@@ -346,7 +346,7 @@ const missingTouch = (page, html) => {
 test('the touch guard catches a page that keeps a search field or a button small at tablet width', () => {
   const catalogue = read('components.html').replace(/^\s*\.search \{ height: var\(--control-touch\); \}\n/m, '')
   assert.deepEqual(missingTouch('components.html', catalogue), [`components.html: ${touchNeeds[0].rule}`])
-  const page = read('reference.html').replace(/^\s*\.btn:not\(\[inert\] \*\), \.navlist a[^\n]*\n/m, '')
+  const page = read('reference.html').replace(/^\s*\.btn:not\(\[inert\] \[data-size\]\), \.navlist a[^\n]*\n/m, '')
   assert.deepEqual(missingTouch('reference.html', page), [`reference.html: ${touchNeeds[1].rule}`])
 })
 

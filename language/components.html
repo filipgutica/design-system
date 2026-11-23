@@ -957,14 +957,14 @@
     .skip[href="#contents"] { display: none; }
     .index-grid { columns: 1; }
     .row { grid-template-columns: minmax(0, 1fr); }
-    /* Touch: controls of every size grow to --control-touch. The inert size specimens keep their sizes.
-       :not([inert] *) has the specificity of a size rule, so these win by coming later. */
-    .btn:not([inert] *), .navlist a, .tab { min-height: var(--control-touch); }
+    /* Touch: controls of every size grow to --control-touch. Only the size specimens, sized controls inside an
+       inert example, keep their sizes; the inert state examples grow like live controls. */
+    .btn:not([inert] [data-size]), .navlist a, .tab { min-height: var(--control-touch); }
     /* A segmented control grows its item size too, so icon-only options stay square. */
-    .segmented:not([inert] *) { --item: var(--control-touch); }
-    .input:not([inert] *), .select:not([inert] *), .range:not([inert] *) { height: var(--control-touch); }
+    .segmented:not([inert] [data-size]) { --item: var(--control-touch); }
+    .input:not([inert] [data-size]), .select:not([inert] [data-size]), .range:not([inert] [data-size]) { height: var(--control-touch); }
     .search { height: var(--control-touch); }
-    .check:not([inert] *), .switch:not([inert] *), .toggle:not([inert] *) { min-height: var(--control-touch); }
+    .check:not([inert] [data-size]), .switch:not([inert] [data-size]), .toggle:not([inert] [data-size]) { min-height: var(--control-touch); }
     .copy-link { width: var(--control-touch); height: var(--control-touch); }
     .chip { min-height: var(--control-touch); }
     /* Touch: the hover toolbar never shows; a tap opens the thread, whose header holds More. */

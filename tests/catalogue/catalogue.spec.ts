@@ -269,6 +269,14 @@ test.describe('reduced motion', () => {
 test.describe('tablet and phone', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 
+  // Inert examples of a state grow like live controls; only a size specimen keeps its size.
+  test('state examples grow to the touch size, and size specimens keep theirs', async ({ page }) => {
+    await page.goto(url)
+    const height = (selector: string) => page.locator(selector).evaluate((element) => getComputedStyle(element).height)
+    expect(await height('#in-focus')).toBe('44px')
+    expect(await height('#text-input-and-textarea .input[data-size="sm"]')).toBe('28px')
+  })
+
   test('the trigger opens the drawer on the current row, and a link closes it and focuses the target', async ({ page }) => {
     await page.goto(`${url}#slider`)
     await expect(current(page)).toHaveText('Slider')

@@ -278,7 +278,7 @@ for (const mode of ['light', 'dark'] as const) {
   })
 }
 
-// At tablet width unsized controls grow to --control-lg for touch.
+// At tablet width controls grow to --control-touch for touch.
 test.describe('ui-sdk parts match the catalogue at 375px', () => {
   test.use({ viewport: { width: 375, height: 800 } })
   for (const mode of ['light', 'dark']) {
