@@ -476,7 +476,7 @@
 
   /* Pager: previous at the start, next always at the end. */
   .pager { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); width: 100%; padding-top: var(--space-6); border-top: 1px solid var(--color-border-subtle); }
-  .pager a { display: grid; align-content: start; gap: 0.125rem; padding: var(--space-3) var(--space-4); border: 1px solid transparent; border-radius: var(--radius-field); color: var(--color-text); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out); }
+  .pager a { display: grid; align-content: start; gap: 0.125rem; overflow-wrap: anywhere; padding: var(--space-3) var(--space-4); border: 1px solid transparent; border-radius: var(--radius-field); color: var(--color-text); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out); }
   .pager a.is-hover { background: var(--color-row-hover); }
   @media (hover: hover) { .pager a:hover { background: var(--color-row-hover); } }
   .pager a[rel="next"] { grid-column: 2; justify-items: end; text-align: end; }
@@ -869,8 +869,6 @@
     .crumbs ol:has(> li:nth-child(3)) > li::before { content: none; }
     .crumbs ol:has(> li:nth-child(3)) > li:nth-last-child(2) a { position: relative; padding-inline-start: 0.875rem; }
     .crumbs ol:has(> li:nth-child(3)) > li:nth-last-child(2) a::before { content: ""; position: absolute; inset-inline-start: 0.25rem; top: 50%; transform: translateY(-50%) rotate(-135deg); }
-    .pager { grid-template-columns: minmax(0, 1fr); }
-    .pager a[rel="next"] { grid-column: 1; }
     .definitions { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-1); }
     .definitions dd + dt { margin-top: var(--space-3); }
     .frame { width: calc(100% - var(--space-8)); }

@@ -272,6 +272,15 @@ test('Escape closes the project menu and returns focus to it; leaving it closes 
   await expect(menu).not.toHaveAttribute('open')
 })
 
+test('on a phone, Previous and Next share one row', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('foundations.html')
+  const prev = await page.locator('main > .pager a[rel="prev"]').boundingBox()
+  const next = await page.locator('main > .pager a[rel="next"]').boundingBox()
+  expect(next!.y).toBe(prev!.y)
+  expect(next!.x).toBeGreaterThan(prev!.x + prev!.width)
+})
+
 // Safari does not focus a link on a click or a tap, so focus leaves the open menu for no element. The menu
 // must stay open until the link gets its click; a press outside it closes it.
 test.describe('project menu, by pointer', { tag: '@webkit' }, () => {
