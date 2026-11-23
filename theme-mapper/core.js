@@ -230,7 +230,7 @@ export const core = {
     },
     {
       "tokens": {
-        "control-sm": "2rem",
+        "control-sm": "1.75rem",
         "control-md": "2.25rem",
         "control-lg": "2.75rem",
         "row": "2.25rem",
@@ -242,10 +242,11 @@ export const core = {
     },
     {
       "tokens": {
-        "radius-inline": "6px",
-        "radius-control": "10px",
-        "radius-panel": "16px",
-        "radius-field": "10px",
+        "radius-inline": "8px",
+        "radius-control": "8px",
+        "radius-panel": "12px",
+        "radius-field": "8px",
+        "radius-mark": "4px",
         "radius-pill": "999px"
       }
     },

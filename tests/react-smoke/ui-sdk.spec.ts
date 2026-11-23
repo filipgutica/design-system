@@ -431,18 +431,18 @@ const rect = (page: Page, testId: string, of: string) => page.getByTestId(testId
   return { indicator: box(element), target: box(element.parentElement!.querySelector(selector)!) }
 }, of)
 
-test('the segmented thumb sits 2px inside the checked option, with no glide on first render', async ({ page }) => {
+// The track insets its options 2px, so each option is its own thumb: the indicator covers the checked option exactly.
+test('the segmented thumb covers the checked option, with no glide on first render', async ({ page }) => {
   await page.goto('/ui-sdk.html')
   // A control that starts on its second option is already in place, with no animation.
   const first = await rect(page, 'segmented-second-indicator', '[data-checked]')
   expect(await page.getByTestId('segmented-second-indicator').evaluate((element) => element.getAnimations().length)).toBe(0)
-  const inset = ([left, top, width, height]: number[]) => [left + 2, top + 2, width - 4, height - 4]
-  expect(first.indicator).toEqual(inset(first.target))
+  expect(first.indicator).toEqual(first.target)
 
   await page.getByTestId('seg-grid').click()
   await settled(page)
   const after = await rect(page, 'segmented-indicator', '[data-checked]')
-  expect(after.indicator).toEqual(inset(after.target))
+  expect(after.indicator).toEqual(after.target)
 })
 
 test('the tab fill covers the selected tab, in a list that scrolls too', async ({ page }) => {

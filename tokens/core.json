@@ -406,7 +406,7 @@
         "sidebar": "This page's sidebar"
       },
       "tokens": {
-        "control-sm": "2rem",
+        "control-sm": "1.75rem",
         "control-md": "2.25rem",
         "control-lg": "2.75rem",
         "row": "2.25rem",
@@ -419,20 +419,22 @@
     {
       "id": "shape",
       "title": "Shape",
-      "note": "One radius per role, from inline code to floating panels.",
+      "note": "One radius per role, from small marks to floating panels.",
       "comment": "Shape",
       "roles": {
-        "radius-inline": "Places and picked rows: navigation rows, tabs, list rows, breadcrumb links, checkboxes, and keyboard keys",
-        "radius-control": "Rounded rectangles that act, or set a value in place with every option shown: buttons other than the labelled contents trigger, quiet actions other than the project-menu trigger, and segmented controls; a segmented thumb takes this radius minus its inset",
-        "radius-panel": "Containers: wells, plates, panels, radio cards, alerts, and floating layers",
+        "radius-inline": "Places and picked rows: navigation rows, tabs, list rows, menu rows, and breadcrumb links",
+        "radius-control": "Rounded rectangles that act, or set a value in place with every option shown: buttons other than the labelled contents trigger, quiet actions other than the project-menu trigger, and segmented controls; a segmented option takes this radius minus the track's 2px inset",
+        "radius-panel": "Containers: wells, plates, panels, radio cards, alerts, and floating layers; a container whose rows sit 4px inside it, such as a menu, takes it around rows at --radius-inline",
         "radius-field": "Typed fields, controls whose label wraps, and one-line controls that are not actions: inputs, selects, textareas, toggle cards, pager links, the project-menu trigger, the labelled contents trigger and its no-JavaScript summary, and the skip link",
+        "radius-mark": "Small marks inside text or a row: checkboxes, keyboard keys, and mentions",
         "radius-pill": "Small state marks: status badges, switch tracks, slider and progress tracks, and score pips"
       },
       "tokens": {
-        "radius-inline": "6px",
-        "radius-control": "10px",
-        "radius-panel": "16px",
-        "radius-field": "10px",
+        "radius-inline": "8px",
+        "radius-control": "8px",
+        "radius-panel": "12px",
+        "radius-field": "8px",
+        "radius-mark": "4px",
         "radius-pill": "999px"
       }
     },

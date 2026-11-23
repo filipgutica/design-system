@@ -226,7 +226,9 @@ const key = ({ context, selector, body }) => `${context} ${selector} { ${body} }
 // including the sized buttons and segmented controls that the catalogue keeps at their size.
 const sizingExemptions = [
   { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.btn[data-size]', body: 'min-height: var(--control-lg); min-width: var(--control-lg);' },
-  { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.segmented button', body: 'min-height: var(--control-lg); min-width: var(--control-lg);' },
+  // The console's sized segmented filters grow to the touch size too: the track takes --control-lg, and each option is at least square.
+  { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.segmented', body: '--item: var(--control-lg);' },
+  { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.segmented button', body: 'min-width: calc(var(--item) - 2 * var(--inset));' },
 ]
 
 test('example pages copy the catalogue rules for the shared controls and components they use unchanged', () => {

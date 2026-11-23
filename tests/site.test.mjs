@@ -194,7 +194,7 @@ test('every index.json entry has Do and Don’t lines that match its components.
   const spec = read('language/components.md')
   const lineOf = (name, part) => spec.split(/^(?=#{2,3} )/m).find((block) => block.startsWith(`## ${name}\n`))
     ?.match(new RegExp(`^- \\*\\*${part}\\.\\*\\* (.+)$`, 'm'))?.[1]
-  assert.equal(index.components.length, 33)
+  assert.equal(index.components.length, 41)
   for (const entry of index.components) {
     assert.ok(entry.do && entry.dont, entry.id)
     assert.equal(entry.do, lineOf(entry.name, 'Do'), entry.id)
