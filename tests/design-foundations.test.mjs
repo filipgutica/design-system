@@ -202,11 +202,9 @@ const selectors = (list) => {
   return [...parts, part.trim()]
 }
 
-// A page that copies a shared control copies the catalogue's rule unchanged. Each selector is
-// checked on its own, with its @media context, so a list that mixes in page selectors cannot hide a
-// drifted control rule. Focus selectors are left out: each page lists its own controls in one focus
-// rule, by role. Each family names the pages that must copy it; any other page that copies it is
-// checked too.
+// A page that copies a shared control copies the catalogue's visual recipe. Each selector is checked
+// on its own with its @media context. Focus selectors are left out because each page lists its own
+// controls in one focus rule, by role. Each family names the pages that must copy it.
 const families = [
   { name: 'button and quiet action', pattern: /^(?:a)?\.btn\b|^\.quiet-action\b|^:where\(\.quiet-action\)/, pages: ['reference.html', 'docs.html', 'product.html'] },
   { name: 'segmented control', pattern: /^\.segmented\b/, pages: ['reference.html'] },
@@ -222,23 +220,31 @@ const perSelector = (rules) =>
   rules.flatMap(({ context, selector, body }) => selectors(selector).map((part) => ({ context, selector: part, list: selector, body })))
 const key = ({ context, selector, body }) => `${context} ${selector} { ${body} }`.trim()
 
-// Page sizing rules that touch a shared control on purpose: the console's sized buttons and rows are at
-// least square at tablet width, and each segmented option is at least square.
-const sizingExemptions = [
-  { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.btn[data-size]', body: 'min-height: var(--control-touch); min-width: var(--control-touch);' },
-  { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.segmented button', body: 'min-width: calc(var(--item) - 2 * var(--inset));' },
-]
+// Playwright checks control box sizes, including the console's minimum touch widths.
+// Keep the styling of inner marks and pseudo-elements in the copy check.
+const copiedStyles = (html) => perSelector(cssRules(html)).map((rule) => {
+  const { selector, context, body } = rule
+  if (!/^(?:a?\.btn|\.segmented|\.tab|\.navlist a|\.check)\b/.test(selector) ||
+      selector.includes('::') || /^\.check\b.* input\b/.test(selector)) return rule
+  const segmented = /^\.segmented\b/.test(selector)
+  const touchWidth = context === '@media (max-width: 800px)' && /^(?:a?\.btn|\.segmented button)\b/.test(selector)
+  const style = body.split(';').map((declaration) => declaration.trim()).filter((declaration) => {
+    const property = declaration.split(':', 1)[0].trim()
+    return property && !/^(?:(?:min|max)-)?(?:height|block-size)$/.test(property) &&
+      !(segmented && property === '--item') && !(touchWidth && /^(?:min-width|min-inline-size)$/.test(property))
+  }).join('; ')
+  return { ...rule, body: style }
+}).filter(({ body, selector }) => body && !selector.includes(':focus-visible'))
 
 test('example pages copy the catalogue rules for the shared controls and components they use unchanged', () => {
-  const catalogue = new Set(perSelector(cssRules(read('components.html'))).map(key))
-  const exempt = new Set(sizingExemptions.map(({ page, ...rule }) => `${page} ${key(rule)}`))
+  const catalogue = new Set(copiedStyles(read('components.html')).map(key))
   for (const page of ['reference.html', 'docs.html', 'product.html']) {
-    const rules = perSelector(cssRules(read(page))).filter(({ selector }) => !selector.includes(':focus-visible'))
+    const rules = copiedStyles(read(page))
     for (const { name, pattern, pages } of families) {
       const copied = rules.filter(({ selector }) => pattern.test(selector))
       if (pages.includes(page)) assert.ok(copied.length > 0, `${page} has no ${name} rules`)
       const drifted = copied
-        .filter((rule) => !catalogue.has(key(rule)) && !exempt.has(`${page} ${key(rule)}`))
+        .filter((rule) => !catalogue.has(key(rule)))
         .map((rule) => `${key(rule)}${rule.list === rule.selector ? '' : `  (from the list "${rule.list}")`}`)
       assert.deepEqual(drifted, [], `${page} ${name} selectors that differ from components.html`)
     }
@@ -330,29 +336,6 @@ test('the state guard catches a rail page that drops the current-section recipe'
 
 test('example pages copy the state rules of every component variant their markup uses', () => {
   assert.deepEqual(['reference.html', 'docs.html', 'product.html'].flatMap((page) => missingStates(page, read(page))), [])
-})
-
-// At tablet width touch targets use --control-touch (components.md, rules for every control). A page that
-// shows a search field or a button grows it there, as the catalogue does.
-const touchNeeds = [
-  { uses: /\bclass="(?:[^"]* )?search(?: [^"]*)?"/, rule: '@media (max-width: 800px) .search { height: var(--control-touch); }' },
-  { uses: /<(?![^>]*\bdata-size=)[^>]*\bclass="(?:[^"]* )?btn(?: [^"]*)?"/, rule: '@media (max-width: 800px) .btn:not([data-specimen="size"] *) { min-height: var(--control-touch); }' },
-]
-const missingTouch = (page, html) => {
-  const have = new Set(perSelector(cssRules(html)).map(key))
-  return touchNeeds.filter(({ uses, rule }) => uses.test(html) && !have.has(rule)).map(({ rule }) => `${page}: ${rule}`)
-}
-
-test('the touch guard catches a page that keeps a search field or a button small at tablet width', () => {
-  const catalogue = read('components.html').replace(/^\s*\.search \{ height: var\(--control-touch\); \}\n/m, '')
-  assert.deepEqual(missingTouch('components.html', catalogue), [`components.html: ${touchNeeds[0].rule}`])
-  const page = read('reference.html').replace(/^\s*\.btn:not\(\[data-specimen="size"\] \*\), \.navlist a[^\n]*\n/m, '')
-  assert.deepEqual(missingTouch('reference.html', page), [`reference.html: ${touchNeeds[1].rule}`])
-})
-
-test('search fields and buttons use --control-touch at tablet width on every page', () => {
-  const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
-  assert.deepEqual(pages.flatMap((page) => missingTouch(page, read(page))), [])
 })
 
 // Viewport media queries use only the two named breakpoints, the desktop-only query, and the

@@ -58,6 +58,30 @@ for (const { path, name, find } of PAGES) {
       })
     }
 
+    test('links and icon actions with touch targets stay 44px tall at every width', async ({ page }) => {
+      const targets = [
+        '.page-head .strip a', '.projects > summary', '.site-links a', '.navlist.text-links a',
+        'button.copy', '.close', '.full',
+      ].join(', ')
+      for (const width of [1280, 800, 375]) {
+        await page.setViewportSize({ width, height: 900 })
+        await page.goto(path)
+        const heights = await page.locator(`:is(${targets}):visible`).evaluateAll((elements) => elements.map((element) => {
+          const label = element.getAttribute('aria-label') ?? element.textContent?.trim()
+          const box = element.getBoundingClientRect().height
+          // Token Copy keeps its visible tint on one line. Its transparent after box extends the hit area.
+          const after = getComputedStyle(element, '::after')
+          const hitArea = element.hasAttribute('data-copy-token') && after.content !== 'none'
+            ? Math.max(box, parseFloat(after.height))
+            : box
+          return { label, hitArea }
+        }))
+        expect(heights.length).toBeGreaterThanOrEqual(PAGES.length)
+        const mismatched = heights.find(({ hitArea }) => hitArea !== 44)
+        expect.soft(mismatched, `44px touch targets at ${width}px`).toBeUndefined()
+      }
+    })
+
     for (const colorScheme of ['light', 'dark'] as const) {
       test(`axe finds no violations in ${colorScheme}`, async ({ browser }) => {
         const context = await browser.newContext({ colorScheme, viewport: { width: 1280, height: 900 }, baseURL: test.info().project.use.baseURL })
