@@ -185,15 +185,16 @@
   }
 
   /* ---------- Segmented control ---------- */
-  /* An undivided sunk track; the indicator is the raised thumb, inset 2px inside the checked item, from the
-     position ui-sdk measures. Horizontal only. */
-  [data-slot="segmented-control"][data-orientation="horizontal"] { --item: var(--control-md); position: relative; display: inline-flex; flex: none; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-well); box-shadow: var(--shadow-sink); isolation: isolate; }
+  /* An undivided sunk track; the indicator is the raised thumb, inset 2px (--inset) inside the checked item, from
+     the position ui-sdk measures. Its corner is concentric with the track: the track radius minus the inset.
+     Horizontal only. */
+  [data-slot="segmented-control"][data-orientation="horizontal"] { --item: var(--control-md); --inset: 2px; position: relative; display: inline-flex; flex: none; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-well); box-shadow: var(--shadow-sink); isolation: isolate; }
   [data-slot="segmented-control"][data-orientation="horizontal"][data-size="sm"] { --item: var(--control-sm); font-size: var(--text-sm); }
   [data-slot="segmented-control"][data-orientation="horizontal"][data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
   [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"] { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; }
   [data-slot="segmented-control"][data-orientation="horizontal"][data-icon-only] > [data-slot="segmented-control-item"] { width: var(--item); padding: 0; }
   /* The hover thumb sits behind the label and under the indicator, inside the control's stacking context. */
-  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]::before { content: ""; position: absolute; inset: 2px; z-index: -2; border-radius: var(--radius-control); pointer-events: none; }
+  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]::before { content: ""; position: absolute; inset: var(--inset); z-index: -2; border-radius: calc(var(--radius-control) - var(--inset)); pointer-events: none; }
   @media (hover: hover) {
     [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]:hover:not([data-disabled], [data-checked]) { color: var(--color-text); }
     [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]:hover:not([data-disabled], [data-checked])::before { background: color-mix(in srgb, var(--color-control-thumb) 45%, transparent); }
@@ -203,7 +204,7 @@
   [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-disabled] { opacity: 0.58; cursor: not-allowed; }
   /* The thumb is the option's sibling, so a disabled checked option dims it too. */
   [data-slot="segmented-control"][data-orientation="horizontal"]:has(> [data-slot="segmented-control-item"][data-checked][data-disabled]) > [data-slot="segmented-control-indicator"] { opacity: 0.58; }
-  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-indicator"] { position: absolute; z-index: -1; top: calc(var(--segmented-control-indicator-top) + 2px); left: calc(var(--segmented-control-indicator-left) + 2px); width: calc(var(--segmented-control-indicator-width) - 4px); height: calc(var(--segmented-control-indicator-height) - 4px); border-radius: var(--radius-control); background: var(--color-control-thumb); box-shadow: var(--shadow-raise); pointer-events: none; }
+  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-indicator"] { position: absolute; z-index: -1; top: calc(var(--segmented-control-indicator-top) + var(--inset)); left: calc(var(--segmented-control-indicator-left) + var(--inset)); width: calc(var(--segmented-control-indicator-width) - 2 * var(--inset)); height: calc(var(--segmented-control-indicator-height) - 2 * var(--inset)); border-radius: calc(var(--radius-control) - var(--inset)); background: var(--color-control-thumb); box-shadow: var(--shadow-raise); pointer-events: none; }
 
   /* ---------- Tabs ---------- */
   /* The list scrolls, so it clips on every side: the padding keeps the selected tab's shadow whole. The indicator

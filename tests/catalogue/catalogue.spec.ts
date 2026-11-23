@@ -690,7 +690,7 @@ const below = (measured: { name: string; ratio: number; unmeasured?: string }[],
 // The slider track and the select picker are engine pseudo-elements that computed styles cannot reach;
 // the node literal-radius guard covers them.
 const shapeRoles: Record<string, string[]> = {
-  '--radius-control': ['.btn:not(.rail-summary, .menu-glyph)', '.quiet-action:not(.projects > summary)', '.segmented', '.segmented button', '.segmented button::before'],
+  '--radius-control': ['.btn:not(.rail-summary, .menu-glyph)', '.quiet-action:not(.projects > summary)', '.segmented', '.segmented button'],
   '--radius-pill': ['.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.progress', '.score .pips i', '.badge', '.navlist a[aria-current="location"]::before'],
   '--radius-inline': ['.check input:not([type="radio"])', '.tab', '.navlist a:not(.projects .navlist a)', '.group-toggle', '.crumbs a', '.site-name', '.key', '.rows [role="option"]'],
   // One-line controls that are not actions take the field corner: the select, the project-menu trigger,
@@ -698,18 +698,36 @@ const shapeRoles: Record<string, string[]> = {
   '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
   '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist', '.menu-list'],
 }
-// Rows that sit --space-1 inside a panel are concentric with it, as is a code block's source panel.
-const concentricRows = ['.select option', '.picker li', '.projects .navlist a', '.menu-list [role="menuitem"]', '.code:not(.example > .code) > pre']
+// Shapes that sit inside a rounded container are concentric with it: its radius minus the gap. Rows that sit
+// --space-1 inside a panel, and a code block's source panel; and a segmented thumb, --inset inside its track.
+// Each radius resolves inside its container, where a local gap such as --inset is set.
+const concentricShapes = [
+  { radius: 'calc(var(--radius-panel) - var(--space-1))', container: 'body', selectors: ['.select option', '.picker li', '.projects .navlist a', '.menu-list [role="menuitem"]', '.code:not(.example > .code) > pre'] },
+  { radius: 'calc(var(--radius-control) - var(--inset))', container: '.segmented', selectors: ['.segmented button::before'] },
+]
 const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
   const corners = (style: CSSStyleDeclaration) => [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].join(' ')
-  const probe = document.body.appendChild(document.createElement('i'))
-  probe.style.borderRadius = 'calc(var(--radius-panel) - var(--space-1))'
+  const problems = new Set<string>()
+  const resolve = (radius: string, container: string) => {
+    const probe = document.querySelector(container)?.appendChild(document.createElement('i'))
+    if (!probe) {
+      problems.add(`${radius}: no ${container} to resolve it in`)
+      return ''
+    }
+    probe.style.borderRadius = radius
+    const value = getComputedStyle(probe).borderTopLeftRadius
+    probe.remove()
+    // An unset gap makes the calc() invalid, which computes to 0px and would match a thumb with no corner.
+    if (value === '0px') problems.add(`${radius}: resolves to 0px in ${container}`)
+    return value
+  }
   const expected = [
     ...Object.entries(roles).flatMap(([token, list]) => list.map((selector) => [selector, getComputedStyle(document.documentElement).getPropertyValue(token).trim()])),
-    ...concentric.map((selector) => [selector, getComputedStyle(probe).borderTopLeftRadius]),
+    ...concentric.flatMap(({ radius, container, selectors }) => {
+      const value = resolve(radius, container)
+      return selectors.map((selector) => [selector, value])
+    }),
   ].map(([selector, value]) => ({ base: selector.replace(/::[\w-]+$/, ''), pseudo: selector.match(/::[\w-]+$/)?.[0] ?? null, selector, value }))
-  probe.remove()
-  const problems = new Set<string>()
   for (const { base, pseudo, selector, value } of expected) {
     const nodes = [...document.querySelectorAll(base)]
     if (nodes.length === 0) problems.add(`${selector}: no specimen`)
@@ -729,7 +747,7 @@ const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
     }
   }
   return [...problems]
-}, { roles: shapeRoles, concentric: concentricRows })
+}, { roles: shapeRoles, concentric: concentricShapes })
 
 // Every theme in tokens.json, the default first. Each one renders the recipes with its theme file loaded
 // after tokens.css on :root, as a consumer loads it.
@@ -838,7 +856,7 @@ test.describe('rendered recipes', () => {
     const problems = await shapeProblems(page)
     expect(problems).toContain('.tab: 10px 10px 10px 10px, not 6px')
     expect(problems).toContain('.key: 999px 6px 6px 6px, not 6px')
-    expect(problems).toContain('p.purpose: 999px 999px 999px 999px, with no role')
+    expect(problems).toContain('p.purpose: 10px 10px 10px 10px, with no role')
   })
 })
 

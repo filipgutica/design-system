@@ -207,15 +207,16 @@
   .toggle-text { display: grid; }
   .toggle-text small { color: var(--color-muted); font-size: var(--text-xs); }
 
-  /* Segmented control: a raised pill thumb on a sunk, undivided track. */
-  .segmented { --item: var(--control-md); --glide-lead: 260ms; --glide-trail: 300ms; display: inline-flex; flex: none; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-well); box-shadow: var(--shadow-sink); isolation: isolate; }
+  /* Segmented control: a raised thumb on a sunk, undivided track. */
+  .segmented { --item: var(--control-md); --inset: 2px; --glide-lead: 260ms; --glide-trail: 300ms; display: inline-flex; flex: none; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-well); box-shadow: var(--shadow-sink); isolation: isolate; }
   /* The fill alone marks the track. The transparent border keeps its size, and forced colors draw it. */
   .segmented[data-size="sm"] { --item: var(--control-sm); font-size: var(--text-sm); }
   .segmented[data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
   .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; }
   .segmented[data-icon-only] button { width: var(--item); padding: 0; }
-  /* The thumb is inset inside each full-size button, so it floats on the track and the hit area keeps its size. */
-  .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -2; border-radius: var(--radius-control); pointer-events: none; }
+  /* The thumb is inset inside each full-size button, so it floats on the track and the hit area keeps its size.
+     Its corner is concentric with the track: the track radius minus the inset. */
+  .segmented button::before { content: ""; position: absolute; inset: var(--inset); z-index: -2; border-radius: calc(var(--radius-control) - var(--inset)); pointer-events: none; }
   .segmented button.is-hover:not(:disabled, [aria-pressed="true"]) { color: var(--color-text); }
   @media (hover: hover) { .segmented button:hover:not(:disabled, [aria-pressed="true"]) { color: var(--color-text); } }
   .segmented button.is-hover:not(:disabled, [aria-pressed="true"])::before { background: color-mix(in srgb, var(--color-control-thumb) 45%, transparent); }

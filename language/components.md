@@ -47,7 +47,7 @@ A control's **States** line names each interactive state it has. In `components.
 
 Layer: Core.
 
-- **Anatomy.** A native `<button>` with a label and an optional 16px leading icon. A link that should look like a button is an `<a>` with the same classes and no underline. Medium weight, `-0.01em` tracking, line height 1.25, `--radius-control` (pill). Horizontal padding is 10px at `sm`, `--space-3` at `md`, and `--space-4` at `lg`.
+- **Anatomy.** A native `<button>` with a label and an optional 16px leading icon. A link that should look like a button is an `<a>` with the same classes and no underline. Medium weight, `-0.01em` tracking, line height 1.25, `--radius-control` (a 10px rounded rectangle, the field corner). Horizontal padding is 10px at `sm`, `--space-3` at `md`, and `--space-4` at `lg`.
 - **Variants.**
 
   | Variant | Rest | Hover | Pressed |
@@ -146,7 +146,7 @@ Layer: Core.
 
 Layer: Core.
 
-- **Anatomy.** A `role="group"` with an accessible name, containing one `<button aria-pressed>` for each option. The track is undivided: `--color-well` fill, `--shadow-sink`, a transparent 1px border, and `--radius-control`. Each button is the full control height (`--item`) with `--space-3` padding, and square when icon-only. At tablet width an unsized control sets `--item` to `--control-lg`, so its buttons grow to the touch size and icon-only options stay square. Its thumb is a `::before` layer inset 2px inside the button, behind the label.
+- **Anatomy.** A `role="group"` with an accessible name, containing one `<button aria-pressed>` for each option. The track is undivided: `--color-well` fill, `--shadow-sink`, a transparent 1px border, and `--radius-control`. Each button is the full control height (`--item`) with `--space-3` padding, and square when icon-only. At tablet width an unsized control sets `--item` to `--control-lg`, so its buttons grow to the touch size and icon-only options stay square. Its thumb is a `::before` layer inset 2px (`--inset`) inside the button, behind the label, with corners concentric with the track: `calc(var(--radius-control) - var(--inset))`.
 - **Tokens.** Labels are `--color-muted`. The pressed option's thumb is `--color-control-thumb` with `--shadow-raise` and no ring. Its label is `--color-segmented-current-text`: `--color-accent` where it reaches 4.5:1 on the thumb, on the page and on a surface, and otherwise the first of `--color-text`, black, and white that does. An icon-only option needs 3:1. Hover on an unpressed option shows the thumb at 45% and turns the label `--color-text`.
 - **States.** Rest, hover, pressed, focus-visible (an inset ring, so it hugs the thumb instead of crossing into the next option), and disabled.
 - **Do.** Use it for two to five short options that apply at once and change how the same content shows, such as a view mode or the System, Light, and Dark choice.

@@ -243,7 +243,7 @@ export const core = {
     {
       "tokens": {
         "radius-inline": "6px",
-        "radius-control": "999px",
+        "radius-control": "10px",
         "radius-panel": "16px",
         "radius-field": "10px",
         "radius-pill": "999px"

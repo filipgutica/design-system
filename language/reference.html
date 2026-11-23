@@ -120,15 +120,16 @@
 
   /* Segmented control: components.html#segmented-control, unchanged. The theme picker and the
      monitor filters use it. */
-  /* Segmented control: a raised pill thumb on a sunk, undivided track. */
-  .segmented { --item: var(--control-md); --glide-lead: 260ms; --glide-trail: 300ms; display: inline-flex; flex: none; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-well); box-shadow: var(--shadow-sink); isolation: isolate; }
+  /* Segmented control: a raised thumb on a sunk, undivided track. */
+  .segmented { --item: var(--control-md); --inset: 2px; --glide-lead: 260ms; --glide-trail: 300ms; display: inline-flex; flex: none; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-well); box-shadow: var(--shadow-sink); isolation: isolate; }
   /* The fill alone marks the track. The transparent border keeps its size, and forced colors draw it. */
   .segmented[data-size="sm"] { --item: var(--control-sm); font-size: var(--text-sm); }
   .segmented[data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
   .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; }
   .segmented[data-icon-only] button { width: var(--item); padding: 0; }
-  /* The thumb is inset inside each full-size button, so it floats on the track and the hit area keeps its size. */
-  .segmented button::before { content: ""; position: absolute; inset: 2px; z-index: -2; border-radius: var(--radius-control); pointer-events: none; }
+  /* The thumb is inset inside each full-size button, so it floats on the track and the hit area keeps its size.
+     Its corner is concentric with the track: the track radius minus the inset. */
+  .segmented button::before { content: ""; position: absolute; inset: var(--inset); z-index: -2; border-radius: calc(var(--radius-control) - var(--inset)); pointer-events: none; }
   .segmented button.is-hover:not(:disabled, [aria-pressed="true"]) { color: var(--color-text); }
   @media (hover: hover) { .segmented button:hover:not(:disabled, [aria-pressed="true"]) { color: var(--color-text); } }
   .segmented button.is-hover:not(:disabled, [aria-pressed="true"])::before { background: color-mix(in srgb, var(--color-control-thumb) 45%, transparent); }
@@ -375,7 +376,7 @@
   .swatch { display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: repeat(4, min-content) 1fr; gap: 0.125rem var(--space-3); align-items: start; font-size: var(--text-xs); }
   .swatch > :not(.chip) { grid-column: 2; }
   .swatch code { color: var(--color-text); }
-  .chip { grid-row: 1 / -1; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-control); font: var(--weight-semibold) var(--text-md) / 1 var(--font-ui); font-style: normal; }
+  .chip { grid-row: 1 / -1; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--color-border-subtle); border-radius: 50%; font: var(--weight-semibold) var(--text-md) / 1 var(--font-ui); font-style: normal; }
   .chip b { width: 16px; height: 16px; border-radius: var(--radius-inline); background: currentColor; }
   .ratio { color: var(--color-muted); }
 
@@ -713,11 +714,11 @@
 
         <section class="foundation" id="shape" aria-labelledby="shape-title">
           <h3 id="shape-title">Shape</h3>
-          <p class="note">Pill buttons, rounded fields and toggle cards, large-radius panels, and inline corners. Cards never take a pill.</p>
+          <p class="note">Rounded-rectangle buttons, fields, and toggle cards, pill state marks, large-radius panels, and inline corners. Cards never take a pill.</p>
           <ul class="specs">
             <li class="spec" data-token="--radius-inline"><div class="spec-meta"><code>--radius-inline</code><span class="value"></span><span class="use">Places and picked rows: navigation rows, tabs, list rows, breadcrumb links, checkboxes, and keyboard keys</span></div><i class="shape-box" style="border-radius:var(--radius-inline)"></i></li>
             <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Typed fields, controls whose label wraps, and one-line controls that are not actions: inputs, selects, textareas, toggle cards, pager links, the project-menu trigger, the labelled contents trigger and its no-JavaScript summary, and the skip link</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
-            <li class="spec" data-token="--radius-control"><div class="spec-meta"><code>--radius-control</code><span class="value"></span><span class="use">Pills that act, or set a value in place with every option shown: buttons other than the labelled contents trigger, quiet actions other than the project-menu trigger, segmented controls, and their thumbs</span></div><i class="shape-box" style="border-radius:var(--radius-control)"></i></li>
+            <li class="spec" data-token="--radius-control"><div class="spec-meta"><code>--radius-control</code><span class="value"></span><span class="use">Rounded rectangles that act, or set a value in place with every option shown: buttons other than the labelled contents trigger, quiet actions other than the project-menu trigger, and segmented controls; a segmented thumb takes this radius minus its inset</span></div><i class="shape-box" style="border-radius:var(--radius-control)"></i></li>
             <li class="spec" data-token="--radius-panel"><div class="spec-meta"><code>--radius-panel</code><span class="value"></span><span class="use">Containers: wells, plates, panels, radio cards, alerts, and floating layers</span></div><i class="shape-box" style="border-radius:var(--radius-panel)"></i></li>
             <li class="spec" data-token="--radius-pill"><div class="spec-meta"><code>--radius-pill</code><span class="value"></span><span class="use">Small state marks: status badges, switch tracks, slider and progress tracks, and score pips</span></div><i class="shape-box" style="border-radius:var(--radius-pill)"></i></li>
           </ul>
