@@ -72,10 +72,10 @@ for (const file of ['components.html', 'reference.html', 'product.html', 'docs.h
         const target = specimenSize ? controlHeights[specimenSize] : touch || control.alwaysTouch ? touchHeight : desktopHeight
         // The track owns the control height. Each option is inset 2px from its top and bottom.
         const expected = target - (option ? 4 : 0)
-        if (control.contentHeight || (touch && !specimenSize && !option)) {
+        if (control.contentHeight) {
           expect.soft(height, label).toBeGreaterThanOrEqual(expected)
         } else {
-          expect.soft(height, label).toBeCloseTo(expected, 1)
+          expect.soft(height, label).toBe(expected)
         }
         if (control.iconOption) expect.soft(control.width, label).toBeCloseTo(height, 1)
         if (file === 'reference.html' && touch && (option || control.consoleSizedButton)) {

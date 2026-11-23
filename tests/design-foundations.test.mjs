@@ -220,21 +220,26 @@ const perSelector = (rules) =>
   rules.flatMap(({ context, selector, body }) => selectors(selector).map((part) => ({ context, selector: part, list: selector, body })))
 const key = ({ context, selector, body }) => `${context} ${selector} { ${body} }`.trim()
 
-// Playwright checks control box sizes, including the console's minimum touch widths.
+// Playwright checks control box heights.
 // Keep the styling of inner marks and pseudo-elements in the copy check.
 const copiedStyles = (html) => perSelector(cssRules(html)).map((rule) => {
-  const { selector, context, body } = rule
+  const { selector, body } = rule
   if (!/^(?:a?\.btn|\.segmented|\.tab|\.navlist a|\.check)\b/.test(selector) ||
       selector.includes('::') || /^\.check\b.* input\b/.test(selector)) return rule
   const segmented = /^\.segmented\b/.test(selector)
-  const touchWidth = context === '@media (max-width: 800px)' && /^(?:a?\.btn|\.segmented button)\b/.test(selector)
   const style = body.split(';').map((declaration) => declaration.trim()).filter((declaration) => {
     const property = declaration.split(':', 1)[0].trim()
     return property && !/^(?:(?:min|max)-)?(?:height|block-size)$/.test(property) &&
-      !(segmented && property === '--item') && !(touchWidth && /^(?:min-width|min-inline-size)$/.test(property))
+      !(segmented && property === '--item')
   }).join('; ')
   return { ...rule, body: style }
 }).filter(({ body, selector }) => body && !selector.includes(':focus-visible'))
+
+// The console makes its sized buttons and segmented options at least as wide as they are tall.
+const referenceTouchWidths = new Set([
+  '@media (max-width: 800px) .btn[data-size] { min-width: var(--control-touch) }',
+  '@media (max-width: 800px) .segmented button { min-width: calc(var(--item) - 2 * var(--inset)) }',
+])
 
 test('example pages copy the catalogue rules for the shared controls and components they use unchanged', () => {
   const catalogue = new Set(copiedStyles(read('components.html')).map(key))
@@ -244,7 +249,10 @@ test('example pages copy the catalogue rules for the shared controls and compone
       const copied = rules.filter(({ selector }) => pattern.test(selector))
       if (pages.includes(page)) assert.ok(copied.length > 0, `${page} has no ${name} rules`)
       const drifted = copied
-        .filter((rule) => !catalogue.has(key(rule)))
+        .filter((rule) => {
+          const style = key(rule)
+          return !catalogue.has(style) && !(page === 'reference.html' && referenceTouchWidths.has(style))
+        })
         .map((rule) => `${key(rule)}${rule.list === rule.selector ? '' : `  (from the list "${rule.list}")`}`)
       assert.deepEqual(drifted, [], `${page} ${name} selectors that differ from components.html`)
     }
