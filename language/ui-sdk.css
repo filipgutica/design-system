@@ -157,7 +157,7 @@
      data-modality can still say pointer after an arrow key, so the browser's :focus-visible decides. */
   [data-slot="select-item"]:focus-visible { background: var(--color-row-hover); outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   [data-slot="select-item"][data-disabled] { opacity: 0.58; cursor: not-allowed; }
-  @media (pointer: coarse) { [data-slot="select-item"] { min-height: var(--control-lg); } }
+  @media (pointer: coarse) { [data-slot="select-item"] { min-height: var(--control-touch); } }
 
   /* ---------- Dialog ---------- */
   /* A centred panel on the overlay. ui-sdk's behaviour CSS resets the popover's position, so these set it.
@@ -174,7 +174,7 @@
   [data-slot="dialog-title"] { margin: 0; font-size: 1.125rem; font-weight: var(--weight-semibold); letter-spacing: -0.02em; }
   [data-slot="dialog-description"] { margin: var(--space-1) 0 0; color: var(--color-muted); }
   /* The header's close button, in a dialog or a drawer, is a quiet action. A Close rendered as a Button is drawn as that button. */
-  :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]) { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]) { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-touch); min-height: var(--control-touch); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
   @media (hover: hover) {
     :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]):hover { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
   }
@@ -307,8 +307,8 @@
   [data-slot="menu-content"][data-presentation="popover"]:not([data-nested]) > [data-slot="menu-item"] > [data-slot="menu-item-icon"] { display: inline-flex; flex: none; }
   [data-slot="menu-content"][data-presentation="popover"]:not([data-nested]) > [data-slot="menu-item"] > [data-slot="menu-item-icon"] > svg { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   @media (max-width: 800px) {
-    [data-slot="menu-trigger"]:not([role="menuitem"]) { width: var(--control-lg); height: var(--control-lg); }
-    [data-slot="menu-content"][data-presentation="popover"]:not([data-nested]) > [data-slot="menu-item"] { min-height: var(--control-lg); }
+    [data-slot="menu-trigger"]:not([role="menuitem"]) { width: var(--control-touch); height: var(--control-touch); }
+    [data-slot="menu-content"][data-presentation="popover"]:not([data-nested]) > [data-slot="menu-item"] { min-height: var(--control-touch); }
   }
   @media (forced-colors: active) {
     [data-slot="menu-content"][data-presentation="popover"]:not([data-nested]) > [data-slot="menu-item"]:is(:focus-visible, [data-highlighted]):not([data-disabled]) { forced-color-adjust: none; background: Highlight; color: HighlightText; }
@@ -333,16 +333,19 @@
   /* The card draws the ring, so the radio inside it does not. */
   [data-slot="card"] > [data-slot="radio"]:focus-visible { outline: none; }
 
-  /* Touch: at tablet width and below, unsized controls grow to --control-lg, as the catalogue's do. */
+  /* Touch: at tablet width and below, controls of every size grow to --control-touch. An application screen sets
+     its controls at sm, so growing only unsized ones would leave its touch targets at 28px. Each selector
+     uses :is(:not([data-size]), [data-size]): it matches every size with the specificity of a size rule, so it
+     wins by coming later. */
   @media (max-width: 800px) {
-    [data-slot="button"]:not([data-size]) { min-height: var(--control-lg); }
-    [data-slot="input"]:not([data-size]) { height: var(--control-lg); }
-    [data-slot="label"]:not([data-size]):has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-lg); }
-    [data-slot="toggle"]:not([data-size], [data-orientation]):has(> [data-slot="toggle-icon"]:empty) { min-height: var(--control-lg); }
-    [data-slot="select-trigger"]:not([data-size]) { height: var(--control-lg); }
-    [data-slot="segmented-control"][data-orientation="horizontal"]:not([data-size]) { --item: var(--control-lg); }
-    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"] { min-height: var(--control-lg); }
-    [data-slot="slider"][data-orientation="horizontal"]:not([data-size]) > [data-slot="slider-control"] { height: var(--control-lg); }
+    [data-slot="button"]:is(:not([data-size]), [data-size]) { min-height: var(--control-touch); }
+    [data-slot="input"]:is(:not([data-size]), [data-size]) { height: var(--control-touch); }
+    [data-slot="label"]:is(:not([data-size]), [data-size]):has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-touch); }
+    [data-slot="toggle"]:is(:not([data-size]), [data-size]):not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) { min-height: var(--control-touch); }
+    [data-slot="select-trigger"]:is(:not([data-size]), [data-size]) { height: var(--control-touch); }
+    [data-slot="segmented-control"][data-orientation="horizontal"]:is(:not([data-size]), [data-size]) { --item: var(--control-touch); }
+    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"] { min-height: var(--control-touch); }
+    [data-slot="slider"][data-orientation="horizontal"]:is(:not([data-size]), [data-size]) > [data-slot="slider-control"] { height: var(--control-touch); }
   }
 
   @media (forced-colors: active) {

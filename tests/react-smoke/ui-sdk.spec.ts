@@ -290,6 +290,17 @@ test.describe('ui-sdk parts match the catalogue at 375px', () => {
   }
 })
 
+// An application screen sets every control at sm, so its touch targets grow at tablet width only if sized
+// controls grow too: the catalogue comparison above checks unsized parts only.
+test('sized parts grow to --control-touch at 375px', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 })
+  await page.goto('/ui-sdk.html')
+  const touch = (await tokens(page, 'height: var(--control-touch)')).height
+  for (const id of ['input-sm', 'input-lg', 'checkbox-sm-label', 'checkbox-lg-label', 'segmented-sm', 'segmented-lg']) {
+    expect(await page.getByTestId(id).evaluate((element) => getComputedStyle(element).height), id).toBe(touch)
+  }
+})
+
 // Forced colours replace author colours with system ones, so these compare what the rules set there.
 test.describe('ui-sdk parts match the catalogue in forced colours', () => {
   test.use({ forcedColors: 'active' })

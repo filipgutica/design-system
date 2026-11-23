@@ -110,6 +110,7 @@ export type TokenName =
   | 'control-sm'
   | 'control-md'
   | 'control-lg'
+  | 'control-touch'
   | 'row'
   | 'measure'
   | 'page-max'

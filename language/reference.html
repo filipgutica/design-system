@@ -284,7 +284,7 @@
   .code-head b { font-weight: var(--weight-semibold); }
   .code-head .lang { color: var(--color-muted); }
   /* Copy is a quiet action; this sets its size and place. */
-  .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-lg); min-height: var(--control-lg); margin-left: auto; padding: var(--space-1) 0.375rem; color: inherit; }
+  .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-touch); min-height: var(--control-touch); margin-left: auto; padding: var(--space-1) 0.375rem; color: inherit; }
   /* Copy is muted at rest. The code block has its own palette, so on hover and while the tick shows it takes the block's text colour. */
   .code .copy { color: var(--color-muted); }
   .code .copy[data-copied] { color: var(--color-code-text); }
@@ -413,11 +413,11 @@
     .detail { position: static; }
   }
   @media (max-width: 800px) {
-    .btn[data-size], .row { min-height: var(--control-lg); min-width: var(--control-lg); }
-    .segmented, .segmented[data-size] { --item: var(--control-lg); }
+    .btn[data-size], .row { min-height: var(--control-touch); min-width: var(--control-touch); }
+    .segmented:not([inert] *) { --item: var(--control-touch); }
     .segmented button { min-width: calc(var(--item) - 2 * var(--inset)); }
-    .btn:not([data-size]), .navlist a, .tab { min-height: var(--control-lg); }
-    .search { height: var(--control-lg); }
+    .btn:not([inert] *), .navlist a, .tab { min-height: var(--control-touch); }
+    .search { height: var(--control-touch); }
     .shell { grid-template-columns: minmax(0, 1fr); height: auto; }
     main { overflow: visible; }
     .sidebar { flex-direction: row; flex-wrap: wrap; align-items: center; border-right: 0; border-bottom: 1px solid var(--color-border-subtle); padding: var(--space-2) var(--space-6); gap: var(--space-2); }
@@ -713,7 +713,8 @@
           <ul class="specs">
             <li class="spec" data-token="--control-sm"><div class="spec-meta"><code>--control-sm</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-sm)"></i></li>
             <li class="spec" data-token="--control-md"><div class="spec-meta"><code>--control-md</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-md)"></i></li>
-            <li class="spec" data-token="--control-lg"><div class="spec-meta"><code>--control-lg</code><span class="value"></span><span class="use">Touch controls</span></div><i class="height-bar" style="height:var(--control-lg)"></i></li>
+            <li class="spec" data-token="--control-lg"><div class="spec-meta"><code>--control-lg</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-lg)"></i></li>
+            <li class="spec" data-token="--control-touch"><div class="spec-meta"><code>--control-touch</code><span class="value"></span><span class="use">Touch targets: every control at tablet width, and docs-site links and icon actions</span></div><i class="height-bar" style="height:var(--control-touch)"></i></li>
           </ul>
         </section>
 

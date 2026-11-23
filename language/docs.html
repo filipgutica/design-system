@@ -12,7 +12,7 @@
 .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); min-height: var(--space-16); border-bottom: 1px solid var(--color-border-subtle); }
 .brand { color: var(--color-text); font-weight: var(--weight-semibold); }
 .header nav { display: flex; gap: var(--space-6); }
-.header a { display: inline-flex; align-items: center; min-height: var(--control-lg); font-size: var(--text-sm); }
+.header a { display: inline-flex; align-items: center; min-height: var(--control-touch); font-size: var(--text-sm); }
 .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
 .sidebar { position: sticky; top: var(--space-6); align-self: start; display: grid; gap: var(--space-1); padding-block: var(--space-6); }
 /* Navigation rows: components.html#navigation-list, unchanged. Only the rail's placement and spacing are local. */
@@ -42,7 +42,7 @@ p { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-
 /* Compact code block: components.html#code-block, unchanged. */
 .code { width: 100%; max-width: var(--measure); min-width: 0; overflow: hidden; padding: var(--space-1); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-panel); background: var(--color-surface-raised); color: var(--color-code-text); box-shadow: var(--shadow-surface); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 /* Copy is a quiet action; this sets its size and place. */
-.copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-lg); min-height: var(--control-lg); margin-left: auto; padding: var(--space-1) 0.375rem; color: inherit; }
+.copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-touch); min-height: var(--control-touch); margin-left: auto; padding: var(--space-1) 0.375rem; color: inherit; }
 /* Copy is muted at rest. The code block has its own palette, so on hover and while the tick shows it takes the block's text colour. */
 .code .copy { color: var(--color-muted); }
 .code .copy[data-copied] { color: var(--color-code-text); }
@@ -73,7 +73,7 @@ p { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-
 .definitions dt { font-family: var(--font-mono); font-size: var(--text-sm); }
 .definitions dd { margin: 0; color: var(--color-muted); }
 footer { padding-block: var(--space-6); border-top: 1px solid var(--color-border-subtle); color: var(--color-muted); font-size: var(--text-sm); }
-@media (max-width: 800px) { .navlist a { min-height: var(--control-lg); } .layout { grid-template-columns: minmax(0, 1fr); gap: 0; } .sidebar { position: static; display: flex; flex-wrap: wrap; gap: var(--space-2); padding-block: var(--space-3); border-bottom: 1px solid var(--color-border-subtle); } .sidebar a { padding-inline: var(--space-2); } main { padding-top: var(--space-6); } .definitions { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); } .definitions dd { margin-bottom: var(--space-3); } }
+@media (max-width: 800px) { .navlist a { min-height: var(--control-touch); } .layout { grid-template-columns: minmax(0, 1fr); gap: 0; } .sidebar { position: static; display: flex; flex-wrap: wrap; gap: var(--space-2); padding-block: var(--space-3); border-bottom: 1px solid var(--color-border-subtle); } .sidebar a { padding-inline: var(--space-2); } main { padding-top: var(--space-6); } .definitions { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); } .definitions dd { margin-bottom: var(--space-3); } }
 @media (max-width: 640px) { .frame { width: calc(100% - var(--space-8)); } main { gap: var(--space-8); } }
 </style>
 </head>

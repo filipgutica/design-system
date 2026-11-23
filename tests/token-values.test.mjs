@@ -32,6 +32,7 @@ const ADDED_SINCE_DS1 = [
   ...Array.from({ length: 16 }, (_, slot) => `--color-terminal-ansi-${slot}`),
   '--color-terminal-ansi-4-bg',
   '--radius-mark',
+  '--control-touch',
 ]
 const withoutAdded = (css) => css.replace(new RegExp(`^\\s*(?:${ADDED_SINCE_DS1.join('|')}):[^;]+;\\n`, 'gm'), '')
 
@@ -53,6 +54,8 @@ test('tokens.css keeps the DS-1 declarations except the inherited command aliase
 const DECIDED_SINCE_DS1 = {
   // 2026-11-22: compact controls; the small control is 28px tall.
   '--control-sm': ['2rem', '1.75rem'],
+  '--control-md': ['2.25rem', '2rem'],
+  '--control-lg': ['2.75rem', '2.25rem'],
   // 2026-11-22: actions became rounded rectangles, not pills, and then took one 8px corner with rows,
   // and fields, and 12px for containers (radius scale B).
   '--radius-inline': ['6px', '8px'],

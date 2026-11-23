@@ -102,7 +102,7 @@
     /* Inset: the picker scrolls. */
     .select option:focus-visible { background: var(--color-row-hover); outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
     .select option::checkmark { order: 1; margin-left: auto; color: var(--color-accent); }
-    @media (pointer: coarse) { .select option { min-height: var(--control-lg); } }
+    @media (pointer: coarse) { .select option { min-height: var(--control-touch); } }
   }
   :is(.input, .select, .textarea)[aria-invalid="true"] { border-color: var(--color-error); }
   /* Search: a field wrapper with a leading magnifier. The wrapper carries the field look and the width;
@@ -144,8 +144,8 @@
   /* The live specimen: an item row with the trigger at its end, so the menu opens over the row. */
   .overflow-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: 360px; min-height: var(--row); }
   @media (max-width: 800px) {
-    .overflow > .quiet-action { width: var(--control-lg); height: var(--control-lg); }
-    .menu-list [role="menuitem"] { min-height: var(--control-lg); }
+    .overflow > .quiet-action { width: var(--control-touch); height: var(--control-touch); }
+    .menu-list [role="menuitem"] { min-height: var(--control-touch); }
   }
   @media (forced-colors: active) {
     .menu-list [role="menuitem"]:is(:focus-visible, .is-highlight) { forced-color-adjust: none; background: Highlight; color: HighlightText; }
@@ -353,7 +353,7 @@
   .dialog-body { min-height: 0; overflow: auto; padding: var(--space-4); }
   .dialog-foot { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface); }
   /* The close button is a quiet action; this sets its size only. */
-  .close { flex: none; width: var(--control-lg); min-height: var(--control-lg); padding: 0; color: var(--color-muted); }
+  .close { flex: none; width: var(--control-touch); min-height: var(--control-touch); padding: 0; color: var(--color-muted); }
   .drawer { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(calc(var(--sidebar) + var(--space-12)), 100%); height: 260px; overflow: hidden; padding: 0; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
   dialog.drawer { position: fixed; inset: 0 auto 0 0; height: 100dvh; max-height: none; margin: 0; }
   dialog.drawer::backdrop { background: var(--color-overlay); }
@@ -436,7 +436,9 @@
 
   /* Section rail: sticky and full height. The find field and the footer stay put while the list scrolls,
      and the list's padding keeps the current row's shadow whole. */
-  .rail { position: sticky; top: 0; align-self: start; display: flex; flex-direction: column; gap: var(--space-3); height: 100dvh; padding-block: var(--space-6) var(--space-4); }
+  /* The rail's first item, Find (an md field), centres on the line of main's breadcrumb trail, which starts at
+     main's --space-8 top padding and is one --text-sm line tall. */
+  .rail { position: sticky; top: 0; align-self: start; display: flex; flex-direction: column; gap: var(--space-3); height: 100dvh; padding-block: calc(var(--space-8) + (var(--text-sm) * var(--leading) - var(--control-md)) / 2) var(--space-4); }
   .rail-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0.125rem; }
   .rail .navlist { width: auto; }
   .rail .navlist + .navlist { margin-top: var(--space-4); }
@@ -600,7 +602,7 @@
   @media (hover: hover) { .pane-resize:hover { background: color-mix(in srgb, var(--color-accent) 40%, transparent); } }
   /* Inset: the frame clips the handle's ends. */
   .pane-resize:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
-  .pane-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--control-lg); padding: 0 var(--space-2) 0 var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
+  .pane-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--control-touch); padding: 0 var(--space-2) 0 var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
   .pane-head h4 { display: flex; align-items: baseline; gap: var(--space-2); font-size: var(--text-md); letter-spacing: 0; }
   .pane-head h4 span { color: var(--color-muted); font-size: var(--text-sm); font-weight: var(--weight-regular); }
   .pane-body { flex: 1; padding: var(--space-5) var(--space-2) var(--space-3); }
@@ -623,7 +625,7 @@
   .code-head b { font-weight: var(--weight-semibold); }
   .code-head .lang { color: var(--color-muted); }
   /* Copy is a quiet action; this sets its size and place. */
-  .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-lg); min-height: var(--control-lg); margin-left: auto; padding: var(--space-1) 0.375rem; color: inherit; }
+  .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-touch); min-height: var(--control-touch); margin-left: auto; padding: var(--space-1) 0.375rem; color: inherit; }
   /* Copy is muted at rest. The code block has its own palette, so on hover and while the tick shows it takes the block's text colour. */
   .code .copy { color: var(--color-muted); }
   .code .copy[data-copied] { color: var(--color-code-text); }
@@ -677,9 +679,9 @@
   }
   .capture-head { display: flex; align-items: center; min-width: 0; }
   .capture .tablist { flex: 1; width: auto; padding-inline: var(--space-2); }
-  .capture .tab { min-height: var(--control-lg); font-family: var(--font-mono); font-size: var(--text-sm); }
+  .capture .tab { min-height: var(--control-touch); font-family: var(--font-mono); font-size: var(--text-sm); }
   /* Full size is a quiet action; this sets its size and place. */
-  .full { display: inline-flex; align-items: center; gap: 0.375rem; flex: none; min-height: var(--control-lg); padding: 0 var(--space-3); color: var(--color-muted); font-size: var(--text-sm); }
+  .full { display: inline-flex; align-items: center; gap: 0.375rem; flex: none; min-height: var(--control-touch); padding: 0 var(--space-3); color: var(--color-muted); font-size: var(--text-sm); }
   /* Inset: the panel clips its content. */
   .capture .full.quiet-action:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
   .capture .tabpanel { padding-top: 0; color: inherit; }
@@ -724,7 +726,7 @@
   .site-header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); min-height: var(--space-16); padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--color-text); background: var(--color-bg); width: 100%; }
   .projects { position: relative; }
   /* The trigger is a quiet action; this sets its size and type. */
-  .projects > summary { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--control-lg); padding-inline: var(--space-3); border-radius: var(--radius-field); font-family: var(--font-mono); font-weight: var(--weight-semibold); list-style: none; user-select: none; }
+  .projects > summary { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--control-touch); padding-inline: var(--space-3); border-radius: var(--radius-field); font-family: var(--font-mono); font-weight: var(--weight-semibold); list-style: none; user-select: none; }
   .projects > summary::-webkit-details-marker { display: none; }
   /* The ~/ mark is decorative: the empty alternative text keeps it out of the name. */
   .projects > summary::before { content: "~/" / ""; color: var(--color-project); }
@@ -738,7 +740,7 @@
   .projects .navlist a { border-radius: calc(var(--radius-panel) - var(--space-1)); font-family: var(--font-mono); }
   .site-end { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-6); margin-left: auto; }
   /* The site links are a navigation strip at the header's 44px. */
-  .site-links a { min-height: var(--control-lg); }
+  .site-links a { min-height: var(--control-touch); }
 
   /* Page type and helpers */
   .folio-h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); letter-spacing: var(--tracking-tight); }
@@ -853,7 +855,7 @@
     .page-head > .strip { justify-self: start; }
   }
   /* Header links are navigation rows at the site header's 44px. */
-  .page-head .strip a { min-height: var(--control-lg); }
+  .page-head .strip a { min-height: var(--control-touch); }
   .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
   /* One column that may shrink below its content, so a long title or specimen cannot widen the page.
      A short page, such as one left by a find with no matches, keeps its rows at the top. */
@@ -900,7 +902,7 @@
      where all of it does not fit, as at 320px, only the picker wraps. */
   .phone-head > .projects:has(~ .text-links) { margin-inline-end: auto; }
   .navlist.text-links { display: flex; gap: var(--space-3); width: auto; }
-  .navlist.text-links a { min-height: var(--control-lg); padding-inline: 0; }
+  .navlist.text-links a { min-height: var(--control-touch); padding-inline: 0; }
   @media (hover: hover) { .navlist.text-links a:hover { background: none; } }
   .navlist.text-links a[aria-current="page"] { background: none; box-shadow: none; color: var(--color-accent); }
   .navlist.text-links a:is(:focus-visible, .is-focus) { outline-offset: var(--focus-offset); }
@@ -944,7 +946,7 @@
        the start, and the name stays whole. Without the script the appearance control stays hidden, and the
        rail stays in place above the content. */
     .page-head { gap: var(--space-2) var(--space-3); padding-block: var(--space-2); }
-    .page-head > .site-name { min-height: var(--control-lg); white-space: nowrap; }
+    .page-head > .site-name { min-height: var(--control-touch); white-space: nowrap; }
     .page-head .strip { order: 3; flex-basis: 100%; margin-inline: -2px; container: pages / inline-size; }
     /* With the script, the trigger sits just below the header, before the breadcrumb; main's top padding follows it. */
     .section-trigger { margin-top: var(--space-2); }
@@ -955,25 +957,26 @@
     .skip[href="#contents"] { display: none; }
     .index-grid { columns: 1; }
     .row { grid-template-columns: minmax(0, 1fr); }
-    /* Touch: unsized controls grow to --control-lg. Size specimens keep their sizes. */
-    .btn:not([data-size]), .navlist a, .tab { min-height: var(--control-lg); }
-    /* An unsized segmented control grows its item size too, so icon-only options stay square. */
-    .segmented:not([data-size]) { --item: var(--control-lg); }
-    .input:not([data-size]), .select:not([data-size]), .range:not([data-size]) { height: var(--control-lg); }
-    .search { height: var(--control-lg); }
-    .check:not([data-size]), .switch:not([data-size]), .toggle:not([data-size]) { min-height: var(--control-lg); }
-    .copy-link { width: var(--control-lg); height: var(--control-lg); }
-    .chip { min-height: var(--control-lg); }
+    /* Touch: controls of every size grow to --control-touch. The inert size specimens keep their sizes.
+       :not([inert] *) has the specificity of a size rule, so these win by coming later. */
+    .btn:not([inert] *), .navlist a, .tab { min-height: var(--control-touch); }
+    /* A segmented control grows its item size too, so icon-only options stay square. */
+    .segmented:not([inert] *) { --item: var(--control-touch); }
+    .input:not([inert] *), .select:not([inert] *), .range:not([inert] *) { height: var(--control-touch); }
+    .search { height: var(--control-touch); }
+    .check:not([inert] *), .switch:not([inert] *), .toggle:not([inert] *) { min-height: var(--control-touch); }
+    .copy-link { width: var(--control-touch); height: var(--control-touch); }
+    .chip { min-height: var(--control-touch); }
     /* Touch: the hover toolbar never shows; a tap opens the thread, whose header holds More. */
     .msg-tools { display: none; }
-    .composer-box textarea { min-height: var(--control-lg); padding-block: calc((var(--control-lg) - 1lh) / 2); }
-    .composer-box .btn { width: var(--control-lg); min-height: var(--control-lg); }
+    .composer-box textarea { min-height: var(--control-touch); padding-block: calc((var(--control-touch) - 1lh) / 2); }
+    .composer-box .btn { width: var(--control-touch); min-height: var(--control-touch); }
     /* The thread pane takes the full width below the message list, and the handle hides. */
     .thread-demo { grid-template-columns: minmax(0, 1fr); }
     .thread-pane { border-left: 0; border-top: 1px solid var(--color-border-subtle); }
     .pane-resize { display: none; }
-    .crumbs a, .group-toggle { min-height: var(--control-lg); }
-    .intro > .crumbs > ol { margin-block: calc((1lh - var(--control-lg)) / 2) calc((var(--control-lg) - 1lh) / 2); }
+    .crumbs a, .group-toggle { min-height: var(--control-touch); }
+    .intro > .crumbs > ol { margin-block: calc((1lh - var(--control-touch)) / 2) calc((var(--control-touch) - 1lh) / 2); }
     .folio-display { font-size: var(--text-display-sm); }
   }
   /* On the narrowest phones the strip clips a link. Rows with 6px side padding keep at least 16px of it in

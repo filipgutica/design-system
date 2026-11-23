@@ -231,8 +231,9 @@ export const core = {
     {
       "tokens": {
         "control-sm": "1.75rem",
-        "control-md": "2.25rem",
-        "control-lg": "2.75rem",
+        "control-md": "2rem",
+        "control-lg": "2.25rem",
+        "control-touch": "2.75rem",
         "row": "2.25rem",
         "measure": "68ch",
         "page-max": "960px",

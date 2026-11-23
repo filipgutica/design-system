@@ -141,7 +141,7 @@ const FOUNDATIONS_CSS = `
   .token { display: grid; grid-template-columns: minmax(0, max-content) auto; justify-content: start; column-gap: var(--space-1); align-items: start; }
   .token .name { min-width: 0; overflow-wrap: anywhere; color: var(--color-text); }
   .token .copy { position: relative; grid-row: 1; grid-column: 2; align-self: center; justify-self: start; min-width: 0; min-height: 0; margin: 0; padding-block: 0; }
-  .token .copy::after { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, var(--control-lg)); height: var(--control-lg); translate: -50% -50%; }
+  .token .copy::after { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, var(--control-touch)); height: var(--control-touch); translate: -50% -50%; }
   .token .copy:focus-visible { outline-offset: calc(var(--focus-width) * -1); }
   .copy-result { font-size: var(--text-xs); }
   .was { grid-column: 1 / -1; color: var(--color-muted); font-size: var(--text-xs); }
