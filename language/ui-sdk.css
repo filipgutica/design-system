@@ -358,10 +358,10 @@
     :is([data-slot="switch"][data-checked], [data-slot="toggle"][data-pressed]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child) { border-color: Highlight; background: Highlight; }
     [data-slot="switch-thumb"][data-checked], [data-slot="toggle"][data-pressed]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child::after { background: HighlightText; }
     [data-slot="switch"]:focus-visible { outline-color: CanvasText; }
-    /* The checked segmented option draws Highlight behind HighlightText; both opt out, so its ring takes CanvasText. */
+    /* The checked segmented option draws Highlight behind HighlightText; both opt out, and its inset ring sits on the Highlight indicator, so it takes HighlightText. */
     [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-indicator"] { forced-color-adjust: none; background: Highlight; }
     [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked] { forced-color-adjust: none; color: HighlightText; }
-    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked]:focus-visible { outline-color: CanvasText; }
+    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked]:focus-visible { outline-color: HighlightText; }
     /* The fill drops, so the selected tab takes a system border; the padding absorbs it. */
     [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-indicator"] { display: none; }
     [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"][data-selected] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }

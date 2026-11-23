@@ -161,8 +161,8 @@
     .tab[aria-selected="true"]::before { content: none; }
     .segmented button[aria-pressed="true"] { forced-color-adjust: none; color: HighlightText; }
     .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
-    /* The pressed option opts out of adjustment, so its ring would keep the accent. The ring sits on the track, so it takes the track's text colour. */
-    .segmented button[aria-pressed="true"]:is(:focus-visible, .is-focus) { outline-color: CanvasText; }
+    /* The pressed option opts out of adjustment, so its ring would keep the accent. The inset ring sits on the option's Highlight fill, so it takes HighlightText. */
+    .segmented button[aria-pressed="true"]:is(:focus-visible, .is-focus) { outline-color: HighlightText; }
     /* The pressed option opts out of adjustment, so its count takes the label's system colour. */
     .filters .count { color: inherit; }
   }
@@ -414,7 +414,7 @@
   }
   @media (max-width: 800px) {
     .btn[data-size], .row { min-height: var(--control-lg); min-width: var(--control-lg); }
-    .segmented { --item: var(--control-lg); }
+    .segmented, .segmented[data-size] { --item: var(--control-lg); }
     .segmented button { min-width: calc(var(--item) - 2 * var(--inset)); }
     .btn:not([data-size]), .navlist a, .tab { min-height: var(--control-lg); }
     .search { height: var(--control-lg); }

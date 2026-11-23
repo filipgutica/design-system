@@ -952,9 +952,11 @@ test.describe('segmented control alignment', () => {
         const range = document.createRange()
         range.selectNodeContents(label)
         const text = range.getBoundingClientRect()
-        return { thumb: [box.top - outer.top, outer.bottom - box.bottom], label: [text.top - box.top, box.bottom - text.bottom] }
+        const next = option.nextElementSibling!.getBoundingClientRect()
+        return { thumb: [box.top - outer.top, outer.bottom - box.bottom], start: box.left - outer.left, between: next.left - box.right, label: [text.top - box.top, box.bottom - text.bottom] }
       })
-      expect(Math.abs(gaps.thumb[0] - gaps.thumb[1]), `thumb gaps ${gaps.thumb}`).toBeLessThan(0.5)
+      // The track insets its options 2px from its outer edge, with 2px between them.
+      for (const inset of [...gaps.thumb, gaps.start, gaps.between]) expect(inset, `insets ${JSON.stringify(gaps)}`).toBeCloseTo(2, 1)
       expect(Math.abs(gaps.label[0] - gaps.label[1]), `label gaps ${gaps.label}`).toBeLessThan(0.5)
     })
   }
@@ -984,7 +986,7 @@ test.describe('conversation keyboard', () => {
     expect(await buttons.evaluateAll((list) => list.map((b) => (b as HTMLElement).tabIndex))).toEqual([-1, -1, 0])
   })
 
-  test('the thread handle widens the pane with Left Arrow and stops at 40rem', async ({ page }) => {
+  test('the thread handle widens the pane with Left Arrow and stops where the channel keeps 16rem, or at 40rem', async ({ page }) => {
     await page.goto(url)
     const handle = page.locator('#thread-panel .thread-demo .pane-resize')
     const pane = page.locator('#thread-panel .thread-demo .thread-pane')
@@ -996,9 +998,15 @@ test.describe('conversation keyboard', () => {
     await expect(handle).toHaveAttribute('aria-valuenow', '27')
     expect(Math.round(await width())).toBe(27 * rem)
     for (let i = 0; i < 20; i += 1) await page.keyboard.press('ArrowLeft')
-    await expect(handle).toHaveAttribute('aria-valuenow', '40')
+    const frameRem = await page.locator('#thread-panel .thread-demo').evaluate((node) => node.getBoundingClientRect().width) / rem
+    const max = Math.max(20, Math.min(40, Math.floor(frameRem - 16)))
+    await expect(handle).toHaveAttribute('aria-valuemax', String(max))
+    await expect(handle).toHaveAttribute('aria-valuenow', String(max))
+    // The separator reports the width the pane really takes, and the channel keeps at least 16rem.
+    expect(Math.round(await width())).toBe(max * rem)
+    expect(frameRem * rem - (await width())).toBeGreaterThanOrEqual(16 * rem - 1)
     await page.keyboard.press('ArrowRight')
-    await expect(handle).toHaveAttribute('aria-valuenow', '39')
+    await expect(handle).toHaveAttribute('aria-valuenow', String(max - 1))
   })
 
   test('at tablet width the toolbar and the handle hide, and the pane takes the full width', async ({ page }) => {

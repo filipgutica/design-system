@@ -226,8 +226,9 @@ const key = ({ context, selector, body }) => `${context} ${selector} { ${body} }
 // including the sized buttons and segmented controls that the catalogue keeps at their size.
 const sizingExemptions = [
   { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.btn[data-size]', body: 'min-height: var(--control-lg); min-width: var(--control-lg);' },
-  // The console's sized segmented filters grow to the touch size too: the track takes --control-lg, and each option is at least square.
+  // The console's sized segmented filters grow to the touch size too: the track takes --control-lg, sized or not (the sized selector outranks a bare .segmented), and each option is at least square.
   { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.segmented', body: '--item: var(--control-lg);' },
+  { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.segmented[data-size]', body: '--item: var(--control-lg);' },
   { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.segmented button', body: 'min-width: calc(var(--item) - 2 * var(--inset));' },
 ]
 
@@ -419,13 +420,14 @@ test('pages take depth from tokens.css: no literal shadow outside a focus ring o
 
 // Focus is one accent ring for every role, written from tokens. An outline that draws is
 // var(--focus-width) solid var(--color-focus), offset var(--focus-offset) or inset by the width. An
-// outline-color is var(--color-focus) or CanvasText (for forced colors). --color-focus is the accent, or the
+// outline-color is var(--color-focus), or CanvasText or HighlightText (for forced colors: HighlightText for a ring
+// drawn on a Highlight fill). --color-focus is the accent, or the
 // dark-theme accent on a terminal capture. In forced colors a focused field, which has no ring elsewhere,
 // draws a Highlight outline 1px inside its edge. A per-role ring colour, set directly or by redefining
 // --color-focus, and a hand-written width or offset fail.
 const focusRules = [
   { property: /^outline$/, allowed: (value, forced) => /^(?:none|0)$/.test(value) || value === 'var(--focus-width) solid var(--color-focus)' || (forced && value === 'var(--focus-width) solid Highlight') },
-  { property: /^outline-color$/, allowed: (value) => value === 'var(--color-focus)' || value === 'CanvasText' },
+  { property: /^outline-color$/, allowed: (value) => ['var(--color-focus)', 'CanvasText', 'HighlightText'].includes(value) },
   { property: /^outline-offset$/, allowed: (value, forced) => ['var(--focus-offset)', 'calc(var(--focus-width) * -1)'].includes(value) || (forced && value === '-1px') },
   { property: /^--color-focus$/, allowed: (value) => value === 'var(--color-accent)' || value === 'var(--color-project-dark)' },
 ]

@@ -796,8 +796,8 @@
     .radio-card input:checked { forced-color-adjust: none; border-color: Highlight; background: Highlight; color: HighlightText; }
     .segmented button[aria-pressed="true"] { forced-color-adjust: none; color: HighlightText; }
     .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
-    /* The pressed option opts out of adjustment, so its ring would keep the accent. The ring sits on the track, so it takes the track's text colour. */
-    .segmented button[aria-pressed="true"]:is(:focus-visible, .is-focus) { outline-color: CanvasText; }
+    /* The pressed option opts out of adjustment, so its ring would keep the accent. The inset ring sits on the option's Highlight fill, so it takes HighlightText. */
+    .segmented button[aria-pressed="true"]:is(:focus-visible, .is-focus) { outline-color: HighlightText; }
     /* A checked box and the switch track opt out of adjustment too, so their ring would keep the author colour. */
     .check input:is(:focus-visible, .is-focus), .switch:is(:focus-visible, .is-focus) .switch-track { outline-color: CanvasText; }
     .switch-track, .toggle-track { forced-color-adjust: none; border-color: ButtonText; background: Canvas; }
@@ -1219,7 +1219,7 @@
     <p class="purpose">A small suggestion that fills in a composer or opens a screen.</p>
     <dl class="guidance"><dt>Do</dt><dd>Offer two to four next steps under an empty composer, each named for its result, such as “Review last night’s run”. A chip either fills in the composer or opens a screen.</dd><dt>Don’t</dt><dd>A chip for a status or a category, which is a badge, or a chip that sends a message on its own.</dd></dl>
     <div class="row"><h4>Suggestions</h4><div class="states">
-      <div class="state wide"><div class="chip-stage"><div class="composer"><label class="sr-only" for="chip-composer">Post to #global</label><div class="composer-box"><textarea id="chip-composer" rows="1" placeholder="Post to #global, or start with /todo" aria-describedby="chip-composer-hint"></textarea><button class="btn" type="button" data-size="sm" aria-label="Send"><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></button></div><p class="composer-hint" id="chip-composer-hint">Posts to the board. It doesn’t start a T3 Code thread.</p></div><ul class="chips" aria-label="Suggestions"><li><a class="chip" href="#chip"><svg class="icon" aria-hidden="true"><use href="#i-dark"/></svg>Review last night’s run</a></li><li><a class="chip" href="#chip"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Open todos in #wtree</a></li><li><a class="chip" href="#chip"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>Browse guidance</a></li></ul></div><span class="caption">Rest, live: a wrapping, centred row under an empty composer</span></div>
+      <div class="state wide"><div class="chip-stage"><div class="composer"><label class="sr-only" for="chip-composer">Post to #global</label><div class="composer-box"><textarea id="chip-composer" rows="1" placeholder="Post to #global, or start with /todo" aria-describedby="chip-composer-hint"></textarea><button class="btn" type="button" data-size="sm" aria-label="Send"><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></button></div><p class="composer-hint" id="chip-composer-hint">Posts to the board. It doesn’t start a T3 Code thread.</p></div><ul class="chips" aria-label="Suggestions"><li><a class="chip" href="#thread-panel"><svg class="icon" aria-hidden="true"><use href="#i-dark"/></svg>Review last night’s run</a></li><li><a class="chip" href="#message-group"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Open todos in #wtree</a></li><li><a class="chip" href="#find-field"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>Browse guidance</a></li></ul></div><span class="caption">Rest, live: a wrapping, centred row under an empty composer</span></div>
     </div></div>
     <div class="row"><h4>States</h4><div class="states">
       <div class="state" inert><a class="chip" href="#chip"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Open todos</a><span class="caption">Rest</span></div>
@@ -2202,12 +2202,16 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
     });
   });
 
-  // Thread panel: drag the handle, or focus it and use Left and Right Arrow, to set the pane from 20rem to 40rem.
+  // Thread panel: drag the handle, or focus it and use Left and Right Arrow, to set the pane from 20rem to 40rem,
+  // and never so wide that the channel beside it drops below 16rem. The separator reports the width the pane takes.
   document.querySelectorAll('.pane-resize[role="separator"]:not([inert] *)').forEach((handle) => {
     const frame = handle.closest('.thread-demo');
     const set = (rem) => {
-      const width = Math.min(40, Math.max(20, rem));
+      const frameRem = frame.getBoundingClientRect().width / parseFloat(getComputedStyle(root).fontSize);
+      const max = Math.max(20, Math.min(40, Math.floor(frameRem - 16)));
+      const width = Math.min(max, Math.max(20, rem));
       frame.style.setProperty('--pane', `${width}rem`);
+      handle.setAttribute('aria-valuemax', String(max));
       handle.setAttribute('aria-valuenow', String(Math.round(width)));
     };
     handle.addEventListener('keydown', (e) => {
