@@ -86,7 +86,7 @@
     "react-dom": "19.3.1",
     "semantic-release": "25.0.9",
     "typescript": "5.9.3",
-    "vite": "8.3.6"
+    "vite": "8.3.8"
   },
   "dependencies": {
     "jsonc-parser": "3.3.1"
