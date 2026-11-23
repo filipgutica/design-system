@@ -186,7 +186,8 @@ test.describe('desktop', () => {
   test('a resize keeps a jump whose smooth scroll is still on its way', async ({ page }) => {
     // The page scrolls smoothly under normal motion only where a site opts in, so the test opts in. The resize
     // fires after the hash change, which measures the jump again, and before the scroll arrives.
-    await page.setViewportSize({ width: 1280, height: 2100 })
+    // The viewport is tall enough that the page bottom clamps the jump, below the target's own landing.
+    await page.setViewportSize({ width: 1280, height: 2400 })
     await page.goto(url)
     const startY = await page.evaluate(async () => {
       document.documentElement.style.scrollBehavior = 'smooth'
@@ -205,7 +206,7 @@ test.describe('desktop', () => {
   test('many small resizes during a jump do not move its landing', async ({ page }) => {
     // Each 1px resize is within the tolerance alone. Measuring the landing again on each one would let it drift
     // 40px, and the jump would then hold the row after the reader scrolls away.
-    await page.setViewportSize({ width: 1280, height: 2100 })
+    await page.setViewportSize({ width: 1280, height: 2400 })
     await page.goto(url)
     await page.evaluate(async () => {
       document.documentElement.style.scrollBehavior = 'smooth'
@@ -215,7 +216,7 @@ test.describe('desktop', () => {
     })
     // A frame between resizes delivers each one as its own resize event; without it they coalesce into one.
     for (let shrink = 1; shrink <= 40; shrink++) {
-      await page.setViewportSize({ width: 1280, height: 2100 - shrink })
+      await page.setViewportSize({ width: 1280, height: 2400 - shrink })
       await page.evaluate(() => new Promise((done) => requestAnimationFrame(done)))
     }
     const settled = () => page.evaluate(async () => {
@@ -267,6 +268,16 @@ test.describe('reduced motion', () => {
 
 test.describe('tablet and phone', () => {
   test.use({ viewport: { width: 390, height: 844 } })
+
+  // Inert examples of a state grow like live controls; only a size specimen keeps its size.
+  test('state examples grow to the touch size, and size specimens keep theirs', async ({ page }) => {
+    await page.goto(url)
+    const height = (selector: string) => page.locator(selector).evaluate((element) => getComputedStyle(element).height)
+    expect(await height('#in-focus')).toBe('44px')
+    expect(await height('.btn.menu-glyph.is-active[data-size="lg"]')).toBe('44px')
+    expect(await height('#text-input-and-textarea .input[data-size="sm"]')).toBe('28px')
+    expect(await height('#sl-md')).toBe('32px')
+  })
 
   test('the trigger opens the drawer on the current row, and a link closes it and focuses the target', async ({ page }) => {
     await page.goto(`${url}#slider`)
@@ -690,20 +701,22 @@ const below = (measured: { name: string; ratio: number; unmeasured?: string }[],
 // The slider track and the select picker are engine pseudo-elements that computed styles cannot reach;
 // the node literal-radius guard covers them.
 const shapeRoles: Record<string, string[]> = {
-  '--radius-control': ['.btn:not(.rail-summary, .menu-glyph)', '.quiet-action:not(.projects > summary)', '.segmented', '.segmented button'],
+  '--radius-control': ['.btn:not(.rail-summary, .menu-glyph, .composer-box .btn)', '.quiet-action:not(.projects > summary, .msg-tools .quiet-action)', '.segmented', '.chip'],
   '--radius-pill': ['.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.progress', '.score .pips i', '.badge', '.navlist a[aria-current="location"]::before'],
-  '--radius-inline': ['.check input:not([type="radio"])', '.tab', '.navlist a:not(.projects .navlist a)', '.group-toggle', '.crumbs a', '.site-name', '.key', '.rows [role="option"]'],
+  '--radius-inline': ['.tab', '.navlist a:not(.projects .navlist a)', '.group-toggle', '.crumbs a', '.site-name', '.rows [role="option"]', '.msg', '.avatar', '.msg-tools .quiet-action', '.composer-box .btn', '.tool > summary'],
+  // Small marks inside text or a row: the checkbox, the keyboard key, and a mention.
+  '--radius-mark': ['.check input:not([type="radio"])', '.key', '.mention'],
   // One-line controls that are not actions take the field corner: the select, the project-menu trigger,
   // the labelled contents trigger at rest and pressed, its no-JavaScript summary, and the skip link.
   '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
-  '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist', '.menu-list'],
+  '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist', '.menu-list', '.msg-tools', '.composer-box', '.tool-body', '.thread-demo'],
 }
 // Shapes that sit inside a rounded container are concentric with it: its radius minus the gap. Rows that sit
-// --space-1 inside a panel, and a code block's source panel; and a segmented thumb, --inset inside its track.
+// --space-1 inside a panel, and a code block's source panel; and a segmented option and its thumb, --inset inside its track.
 // Each radius resolves inside its container, where a local gap such as --inset is set.
 const concentricShapes = [
   { radius: 'calc(var(--radius-panel) - var(--space-1))', container: 'body', selectors: ['.select option', '.picker li', '.projects .navlist a', '.menu-list [role="menuitem"]', '.code:not(.example > .code) > pre'] },
-  { radius: 'calc(var(--radius-control) - var(--inset))', container: '.segmented', selectors: ['.segmented button::before'] },
+  { radius: 'calc(var(--radius-control) - var(--inset))', container: '.segmented', selectors: ['.segmented button', '.segmented button::before'] },
 ]
 const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
   const corners = (style: CSSStyleDeclaration) => [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].join(' ')
@@ -852,11 +865,12 @@ test.describe('rendered recipes', () => {
 
   test('the shape check catches a role override, a corner longhand, and a radius with no role', async ({ page }) => {
     await page.goto(url)
-    await page.addStyleTag({ content: '.tab{border-radius:var(--radius-field)} .key { border-top-left-radius: var(--radius-pill) } .purpose { border-radius: var(--radius-control) }' })
+    // Control, inline, and field are all 8px, so the planted override takes a token of another value.
+    await page.addStyleTag({ content: '.tab{border-radius:var(--radius-panel)} .key { border-top-left-radius: var(--radius-pill) } .purpose { border-radius: var(--radius-control) }' })
     const problems = await shapeProblems(page)
-    expect(problems).toContain('.tab: 10px 10px 10px 10px, not 6px')
-    expect(problems).toContain('.key: 999px 6px 6px 6px, not 6px')
-    expect(problems).toContain('p.purpose: 10px 10px 10px 10px, with no role')
+    expect(problems).toContain('.tab: 12px 12px 12px 12px, not 8px')
+    expect(problems).toContain('.key: 999px 4px 4px 4px, not 4px')
+    expect(problems).toContain('p.purpose: 8px 8px 8px 8px, with no role')
   })
 })
 
@@ -894,7 +908,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
 // The code block is a frame that holds the header, with the source in a panel --space-1 inside it on the
 // other sides. A live example's source is flush with its frame and is left out.
-test('the code block source is a 12px panel 4px inside a 16px frame', async ({ page }) => {
+test('the code block source is an 8px panel 4px inside a 12px frame', async ({ page }) => {
   await page.goto(url)
   const blocks = await page.locator('.code:not(.example > .code)').evaluateAll((frames) => frames.map((frame) => {
     const pre = frame.querySelector(':scope > pre')!
@@ -916,7 +930,127 @@ test('the code block source is a 12px panel 4px inside a 16px frame', async ({ p
   expect(blocks.filter(({ head }) => head).length).toBeGreaterThanOrEqual(2)
   expect(blocks.filter(({ head }) => !head).length).toBeGreaterThanOrEqual(3)
   // Under a header the panel meets the header; without one it sits 4px below the frame's edge.
-  for (const block of blocks) expect(block).toEqual({ head: block.head, frame: '16px', panel: '12px', top: block.head ? 0 : 4, left: 4, bottom: 4, right: 4 })
+  for (const block of blocks) expect(block).toEqual({ head: block.head, frame: '12px', panel: '8px', top: block.head ? 0 : 4, left: 4, bottom: 4, right: 4 })
+})
+
+// A segmented control lines up with the buttons beside it: at each size its track is a same-size button's height,
+// and the pressed option, which is its own thumb, sits as far from the track's top edge as from its bottom edge.
+// Its label sits centred in the option too, measured in IBM Plex, which the catalogue does not load itself.
+test.describe('segmented control alignment', () => {
+  test.use({ viewport: { width: 1280, height: 900 } })
+
+  const sizes = [
+    { size: 'sm', track: '#segmented-control .segmented[data-size="sm"]', button: '#button .btn[data-size="sm"]' },
+    { size: 'md', track: '#segmented-control .segmented[aria-label="View"]', button: '#button .btn[data-size="md"]' },
+    { size: 'lg', track: '#segmented-control .segmented[data-size="lg"]', button: '#button .btn[data-size="lg"]' },
+  ]
+  for (const { size, track, button } of sizes) {
+    test(`${size}: the track is a button's height, and the pressed option and its label sit centred`, async ({ page }) => {
+      await page.goto(url)
+      await page.addStyleTag({ url: new URL('../../fonts/fonts.css', import.meta.url).href })
+      await page.evaluate(async () => {
+        await Promise.all(['400 1rem "IBM Plex Sans"', '500 1rem "IBM Plex Sans"'].map((font) => document.fonts.load(font)))
+        await document.fonts.ready
+      })
+      expect(await page.evaluate(() => [...document.fonts].some((face) => face.family.includes('IBM Plex Sans') && face.status === 'loaded'))).toBe(true)
+      const [trackHeight, buttonHeight] = await Promise.all([page.locator(track).first(), page.locator(button).first()]
+        .map((node) => node.evaluate((element) => element.getBoundingClientRect().height)))
+      expect(Math.abs(trackHeight - buttonHeight), `track ${trackHeight}px, button ${buttonHeight}px`).toBeLessThan(0.5)
+      const gaps = await page.locator(`${track} button[aria-pressed="true"]`).first().evaluate((option) => {
+        const [outer, box] = [option.parentElement!.getBoundingClientRect(), option.getBoundingClientRect()]
+        const label = [...option.childNodes].find((node) => node.nodeType === Node.TEXT_NODE && node.textContent!.trim())!
+        const range = document.createRange()
+        range.selectNodeContents(label)
+        const text = range.getBoundingClientRect()
+        const next = option.nextElementSibling!.getBoundingClientRect()
+        return { thumb: [box.top - outer.top, outer.bottom - box.bottom], start: box.left - outer.left, between: next.left - box.right, label: [text.top - box.top, box.bottom - text.bottom] }
+      })
+      // The track insets its options 2px from its outer edge, with 2px between them.
+      for (const inset of [...gaps.thumb, gaps.start, gaps.between]) expect(inset, `insets ${JSON.stringify(gaps)}`).toBeCloseTo(2, 1)
+      expect(Math.abs(gaps.label[0] - gaps.label[1]), `label gaps ${gaps.label}`).toBeLessThan(0.5)
+    })
+  }
+})
+
+// The hover toolbar is one Tab stop with arrow keys between its buttons; the thread panel's handle is a separator
+// that the arrow keys resize from 20rem to 40rem. Neither shows on a touch-width screen.
+test.describe('conversation keyboard', () => {
+  test.use({ viewport: { width: 1280, height: 900 } })
+
+  test('the hover toolbar shows on focus within, and Left and Right Arrow move a single Tab stop', async ({ page }) => {
+    await page.goto(url)
+    const bar = page.locator('#hover-toolbar .msg-tools').first()
+    const buttons = bar.locator('button[aria-label]:not([role="menuitem"])')
+    await expect(bar).toHaveCSS('opacity', '0')
+    await buttons.first().focus()
+    await expect(bar).toHaveCSS('opacity', '1')
+    expect(await buttons.evaluateAll((list) => list.map((b) => (b as HTMLElement).tabIndex))).toEqual([0, -1, -1])
+    await page.keyboard.press('ArrowRight')
+    await expect(buttons.nth(1)).toBeFocused()
+    await page.keyboard.press('End')
+    await expect(buttons.nth(2)).toBeFocused()
+    await page.keyboard.press('ArrowRight')
+    await expect(buttons.first()).toBeFocused()
+    await page.keyboard.press('ArrowLeft')
+    await expect(buttons.nth(2)).toBeFocused()
+    expect(await buttons.evaluateAll((list) => list.map((b) => (b as HTMLElement).tabIndex))).toEqual([-1, -1, 0])
+  })
+
+  test('the thread handle widens the pane with Left Arrow and stops where the channel keeps 16rem, or at 40rem', async ({ page }) => {
+    await page.goto(url)
+    const handle = page.locator('#thread-panel .thread-demo .pane-resize')
+    const pane = page.locator('#thread-panel .thread-demo .thread-pane')
+    const rem = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))
+    const width = () => pane.evaluate((node) => node.getBoundingClientRect().width)
+    expect(Math.round(await width())).toBe(26 * rem)
+    await handle.focus()
+    await page.keyboard.press('ArrowLeft')
+    await expect(handle).toHaveAttribute('aria-valuenow', '27')
+    expect(Math.round(await width())).toBe(27 * rem)
+    for (let i = 0; i < 20; i += 1) await page.keyboard.press('ArrowLeft')
+    const frameRem = await page.locator('#thread-panel .thread-demo').evaluate((node) => node.getBoundingClientRect().width) / rem
+    const max = Math.max(20, Math.min(40, Math.floor(frameRem - 16)))
+    await expect(handle).toHaveAttribute('aria-valuemax', String(max))
+    await expect(handle).toHaveAttribute('aria-valuenow', String(max))
+    // The separator reports the width the pane really takes, and the channel keeps at least 16rem.
+    expect(Math.round(await width())).toBe(max * rem)
+    expect(frameRem * rem - (await width())).toBeGreaterThanOrEqual(16 * rem - 1)
+    await page.keyboard.press('ArrowRight')
+    await expect(handle).toHaveAttribute('aria-valuenow', String(max - 1))
+  })
+
+  test('a desktop frame too narrow for both panes stacks them; a wide one keeps the channel at least 16rem', async ({ page }) => {
+    const layout = () => page.locator('#thread-panel .thread-demo').evaluate((frame) => {
+      const [stream, pane] = [frame.querySelector('.stream')!, frame.querySelector('.thread-pane')!].map((node) => node.getBoundingClientRect())
+      return { stacked: pane.top > stream.top, channel: stream.width, handle: getComputedStyle(frame.querySelector('.pane-resize')!).display }
+    })
+    const rem = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))
+    await page.setViewportSize({ width: 900, height: 900 })
+    await page.goto(url)
+    expect(await layout()).toMatchObject({ stacked: true, handle: 'none' })
+    await page.setViewportSize({ width: 1280, height: 900 })
+    const wide = await layout()
+    expect(wide.stacked).toBe(false)
+    expect(wide.channel).toBeGreaterThanOrEqual(16 * rem - 1)
+  })
+
+  test('touch screens never show the hover toolbar, at any width', async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 1200, height: 900 }, hasTouch: true })
+    const page = await context.newPage()
+    await page.goto(url)
+    await page.locator('#message-row .msg button').first().focus()
+    await expect(page.locator('#message-row .msg-tools').first()).toBeHidden()
+    await context.close()
+  })
+
+  test('at tablet width the toolbar and the handle hide, and the pane takes the full width', async ({ page }) => {
+    await page.setViewportSize({ width: 720, height: 900 })
+    await page.goto(url)
+    await expect(page.locator('#hover-toolbar .msg-tools').first()).toBeHidden()
+    await expect(page.locator('#thread-panel .thread-demo .pane-resize')).toBeHidden()
+    const [frame, pane] = await Promise.all(['.thread-demo', '.thread-demo .thread-pane'].map((selector) => page.locator(`#thread-panel ${selector}`).evaluate((node) => node.getBoundingClientRect().width)))
+    expect(Math.abs(frame - 2 - pane)).toBeLessThan(0.5)
+  })
 })
 
 // Quiet actions take a faint overlay of their own colour: 6% under a hovering pointer and 12% pressed.

@@ -278,7 +278,7 @@ for (const mode of ['light', 'dark'] as const) {
   })
 }
 
-// At tablet width unsized controls grow to --control-lg for touch.
+// At tablet width controls grow to --control-touch for touch.
 test.describe('ui-sdk parts match the catalogue at 375px', () => {
   test.use({ viewport: { width: 375, height: 800 } })
   for (const mode of ['light', 'dark']) {
@@ -287,6 +287,17 @@ test.describe('ui-sdk parts match the catalogue at 375px', () => {
   for (const name of ['primary button', 'input', 'checkbox row', 'switch row', 'toggle button', 'select', 'segmented option', 'icon-only segmented option', 'tab']) {
     const pair = pairs.find((candidate) => candidate.name === name)!
     test(name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
+  }
+})
+
+// An application screen sets every control at sm, so its touch targets grow at tablet width only if sized
+// controls grow too: the catalogue comparison above checks unsized parts only.
+test('sized parts grow to --control-touch at 375px', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 })
+  await page.goto('/ui-sdk.html')
+  const touch = (await tokens(page, 'height: var(--control-touch)')).height
+  for (const id of ['input-sm', 'input-lg', 'checkbox-sm-label', 'checkbox-lg-label', 'segmented-sm', 'segmented-lg']) {
+    expect(await page.getByTestId(id).evaluate((element) => getComputedStyle(element).height), id).toBe(touch)
   }
 })
 
@@ -431,18 +442,18 @@ const rect = (page: Page, testId: string, of: string) => page.getByTestId(testId
   return { indicator: box(element), target: box(element.parentElement!.querySelector(selector)!) }
 }, of)
 
-test('the segmented thumb sits 2px inside the checked option, with no glide on first render', async ({ page }) => {
+// The track insets its options 2px, so each option is its own thumb: the indicator covers the checked option exactly.
+test('the segmented thumb covers the checked option, with no glide on first render', async ({ page }) => {
   await page.goto('/ui-sdk.html')
   // A control that starts on its second option is already in place, with no animation.
   const first = await rect(page, 'segmented-second-indicator', '[data-checked]')
   expect(await page.getByTestId('segmented-second-indicator').evaluate((element) => element.getAnimations().length)).toBe(0)
-  const inset = ([left, top, width, height]: number[]) => [left + 2, top + 2, width - 4, height - 4]
-  expect(first.indicator).toEqual(inset(first.target))
+  expect(first.indicator).toEqual(first.target)
 
   await page.getByTestId('seg-grid').click()
   await settled(page)
   const after = await rect(page, 'segmented-indicator', '[data-checked]')
-  expect(after.indicator).toEqual(inset(after.target))
+  expect(after.indicator).toEqual(after.target)
 })
 
 test('the tab fill covers the selected tab, in a list that scrolls too', async ({ page }) => {

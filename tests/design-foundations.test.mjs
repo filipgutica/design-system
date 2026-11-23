@@ -222,11 +222,11 @@ const perSelector = (rules) =>
   rules.flatMap(({ context, selector, body }) => selectors(selector).map((part) => ({ context, selector: part, list: selector, body })))
 const key = ({ context, selector, body }) => `${context} ${selector} { ${body} }`.trim()
 
-// Page sizing rules that touch a shared control on purpose: touch targets grow at tablet width,
-// including the sized buttons and segmented controls that the catalogue keeps at their size.
+// Page sizing rules that touch a shared control on purpose: the console's sized buttons and rows are at
+// least square at tablet width, and each segmented option is at least square.
 const sizingExemptions = [
-  { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.btn[data-size]', body: 'min-height: var(--control-lg); min-width: var(--control-lg);' },
-  { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.segmented button', body: 'min-height: var(--control-lg); min-width: var(--control-lg);' },
+  { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.btn[data-size]', body: 'min-height: var(--control-touch); min-width: var(--control-touch);' },
+  { page: 'reference.html', context: '@media (max-width: 800px)', selector: '.segmented button', body: 'min-width: calc(var(--item) - 2 * var(--inset));' },
 ]
 
 test('example pages copy the catalogue rules for the shared controls and components they use unchanged', () => {
@@ -332,25 +332,25 @@ test('example pages copy the state rules of every component variant their markup
   assert.deepEqual(['reference.html', 'docs.html', 'product.html'].flatMap((page) => missingStates(page, read(page))), [])
 })
 
-// At tablet width touch targets use --control-lg (components.md, rules for every control). A page that
-// shows a search field or an unsized button grows it there, as the catalogue does.
+// At tablet width touch targets use --control-touch (components.md, rules for every control). A page that
+// shows a search field or a button grows it there, as the catalogue does.
 const touchNeeds = [
-  { uses: /\bclass="(?:[^"]* )?search(?: [^"]*)?"/, rule: '@media (max-width: 800px) .search { height: var(--control-lg); }' },
-  { uses: /<(?![^>]*\bdata-size=)[^>]*\bclass="(?:[^"]* )?btn(?: [^"]*)?"/, rule: '@media (max-width: 800px) .btn:not([data-size]) { min-height: var(--control-lg); }' },
+  { uses: /\bclass="(?:[^"]* )?search(?: [^"]*)?"/, rule: '@media (max-width: 800px) .search { height: var(--control-touch); }' },
+  { uses: /<(?![^>]*\bdata-size=)[^>]*\bclass="(?:[^"]* )?btn(?: [^"]*)?"/, rule: '@media (max-width: 800px) .btn:not([data-specimen="size"] *) { min-height: var(--control-touch); }' },
 ]
 const missingTouch = (page, html) => {
   const have = new Set(perSelector(cssRules(html)).map(key))
   return touchNeeds.filter(({ uses, rule }) => uses.test(html) && !have.has(rule)).map(({ rule }) => `${page}: ${rule}`)
 }
 
-test('the touch guard catches a page that keeps a search field or an unsized button small at tablet width', () => {
-  const catalogue = read('components.html').replace(/^\s*\.search \{ height: var\(--control-lg\); \}\n/m, '')
+test('the touch guard catches a page that keeps a search field or a button small at tablet width', () => {
+  const catalogue = read('components.html').replace(/^\s*\.search \{ height: var\(--control-touch\); \}\n/m, '')
   assert.deepEqual(missingTouch('components.html', catalogue), [`components.html: ${touchNeeds[0].rule}`])
-  const page = read('reference.html').replace(/^\s*\.btn:not\(\[data-size\]\), \.navlist a[^\n]*\n/m, '')
+  const page = read('reference.html').replace(/^\s*\.btn:not\(\[data-specimen="size"\] \*\), \.navlist a[^\n]*\n/m, '')
   assert.deepEqual(missingTouch('reference.html', page), [`reference.html: ${touchNeeds[1].rule}`])
 })
 
-test('search fields and unsized buttons use --control-lg at tablet width on every page', () => {
+test('search fields and buttons use --control-touch at tablet width on every page', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
   assert.deepEqual(pages.flatMap((page) => missingTouch(page, read(page))), [])
 })
@@ -417,13 +417,14 @@ test('pages take depth from tokens.css: no literal shadow outside a focus ring o
 
 // Focus is one accent ring for every role, written from tokens. An outline that draws is
 // var(--focus-width) solid var(--color-focus), offset var(--focus-offset) or inset by the width. An
-// outline-color is var(--color-focus) or CanvasText (for forced colors). --color-focus is the accent, or the
+// outline-color is var(--color-focus), or CanvasText or HighlightText (for forced colors: HighlightText for a ring
+// drawn on a Highlight fill). --color-focus is the accent, or the
 // dark-theme accent on a terminal capture. In forced colors a focused field, which has no ring elsewhere,
 // draws a Highlight outline 1px inside its edge. A per-role ring colour, set directly or by redefining
 // --color-focus, and a hand-written width or offset fail.
 const focusRules = [
   { property: /^outline$/, allowed: (value, forced) => /^(?:none|0)$/.test(value) || value === 'var(--focus-width) solid var(--color-focus)' || (forced && value === 'var(--focus-width) solid Highlight') },
-  { property: /^outline-color$/, allowed: (value) => value === 'var(--color-focus)' || value === 'CanvasText' },
+  { property: /^outline-color$/, allowed: (value) => ['var(--color-focus)', 'CanvasText', 'HighlightText'].includes(value) },
   { property: /^outline-offset$/, allowed: (value, forced) => ['var(--focus-offset)', 'calc(var(--focus-width) * -1)'].includes(value) || (forced && value === '-1px') },
   { property: /^--color-focus$/, allowed: (value) => value === 'var(--color-accent)' || value === 'var(--color-project-dark)' },
 ]

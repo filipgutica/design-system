@@ -23,9 +23,9 @@
   /* ---------- Button ---------- */
   /* No data-variant is the primary button; data-variant="secondary", "ghost", "danger", or "text"
      picks another, and data-size="sm" or "lg" another size. */
-  [data-slot="button"] { --depth: var(--shadow-raise); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--control-md); padding: 0 var(--space-3); border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-accent); color: var(--color-accent-text); box-shadow: var(--depth); font: var(--weight-medium) var(--text-md) / 1.25 var(--font-ui); letter-spacing: -0.01em; text-decoration: none; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
-  [data-slot="button"][data-size="sm"] { min-height: var(--control-sm); padding: 0 0.625rem; font-size: var(--text-sm); }
-  [data-slot="button"][data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-4); font-size: var(--text-lg); }
+  [data-slot="button"] { --depth: var(--shadow-raise); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--control-md); padding: 0 0.625rem; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-accent); color: var(--color-accent-text); box-shadow: var(--depth); font: var(--weight-medium) var(--text-md) / 1.25 var(--font-ui); letter-spacing: -0.01em; text-decoration: none; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  [data-slot="button"][data-size="sm"] { min-height: var(--control-sm); gap: 0.375rem; padding: 0 var(--space-2); font-size: var(--text-sm); }
+  [data-slot="button"][data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-3); font-size: var(--text-lg); }
   [data-slot="button"][data-variant="secondary"] { background: var(--color-control-thumb); color: var(--color-text); }
   [data-slot="button"][data-variant="ghost"] { --depth: none; background: transparent; color: var(--color-muted); }
   /* Danger rises like the other filled variants; its text mixes the hue toward --color-text, as status badges do. */
@@ -76,7 +76,7 @@
   [data-slot="label"][data-size="sm"]:has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-sm); font-size: var(--text-sm); }
   [data-slot="label"][data-size="lg"]:has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-lg); font-size: var(--text-lg); }
   [data-slot="label"]:has(> [data-disabled]:is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { opacity: 0.58; cursor: not-allowed; }
-  :is([data-slot="checkbox"], [data-slot="radio"]) { display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius-inline); background: var(--color-surface-raised); color: var(--color-accent-text); cursor: inherit; }
+  :is([data-slot="checkbox"], [data-slot="radio"]) { display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin: 0; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius-mark); background: var(--color-surface-raised); color: var(--color-accent-text); cursor: inherit; }
   [data-slot="label"][data-size="sm"] > :is([data-slot="checkbox"], [data-slot="radio"]) { width: 16px; height: 16px; }
   [data-slot="label"][data-size="lg"] > :is([data-slot="checkbox"], [data-slot="radio"]) { width: 20px; height: 20px; }
   [data-slot="radio"] { border-radius: 50%; }
@@ -157,7 +157,7 @@
      data-modality can still say pointer after an arrow key, so the browser's :focus-visible decides. */
   [data-slot="select-item"]:focus-visible { background: var(--color-row-hover); outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   [data-slot="select-item"][data-disabled] { opacity: 0.58; cursor: not-allowed; }
-  @media (pointer: coarse) { [data-slot="select-item"] { min-height: var(--control-lg); } }
+  @media (pointer: coarse) { [data-slot="select-item"] { min-height: var(--control-touch); } }
 
   /* ---------- Dialog ---------- */
   /* A centred panel on the overlay. ui-sdk's behaviour CSS resets the popover's position, so these set it.
@@ -174,7 +174,7 @@
   [data-slot="dialog-title"] { margin: 0; font-size: 1.125rem; font-weight: var(--weight-semibold); letter-spacing: -0.02em; }
   [data-slot="dialog-description"] { margin: var(--space-1) 0 0; color: var(--color-muted); }
   /* The header's close button, in a dialog or a drawer, is a quiet action. A Close rendered as a Button is drawn as that button. */
-  :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]) { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-lg); min-height: var(--control-lg); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]) { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-touch); min-height: var(--control-touch); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
   @media (hover: hover) {
     :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]):hover { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
   }
@@ -185,16 +185,18 @@
   }
 
   /* ---------- Segmented control ---------- */
-  /* An undivided sunk track; the indicator is the raised thumb, inset 2px (--inset) inside the checked item, from
-     the position ui-sdk measures. Its corner is concentric with the track: the track radius minus the inset.
-     Horizontal only. */
-  [data-slot="segmented-control"][data-orientation="horizontal"] { --item: var(--control-md); --inset: 2px; position: relative; display: inline-flex; flex: none; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-well); box-shadow: var(--shadow-sink); isolation: isolate; }
+  /* An undivided sunk track that insets its items 2px (--inset) from its outer edge, with 2px between them; the
+     indicator is the raised thumb, drawn over the checked item at the position ui-sdk measures. Its corner is
+     concentric with the track from the outer edge: the track radius minus the inset. Horizontal only. */
+  [data-slot="segmented-control"][data-orientation="horizontal"] { --item: var(--control-md); --inset: 2px; position: relative; display: inline-flex; flex: none; gap: var(--inset); padding: calc(var(--inset) - 1px); border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-well); box-shadow: var(--shadow-sink); isolation: isolate; }
   [data-slot="segmented-control"][data-orientation="horizontal"][data-size="sm"] { --item: var(--control-sm); font-size: var(--text-sm); }
+  [data-slot="segmented-control"][data-orientation="horizontal"][data-size="sm"] > [data-slot="segmented-control-item"] { padding: 0 var(--space-2); }
   [data-slot="segmented-control"][data-orientation="horizontal"][data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
-  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"] { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--item); padding: 0 var(--space-3); border: 0; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; }
-  [data-slot="segmented-control"][data-orientation="horizontal"][data-icon-only] > [data-slot="segmented-control-item"] { width: var(--item); padding: 0; }
+  /* Line height 1 comes after the font shorthand, which would reset it: the label then sits centred in the item. */
+  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"] { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: calc(var(--item) - 2 * var(--inset)); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-control) - var(--inset)); background: transparent; color: var(--color-muted); font: inherit; line-height: 1; cursor: pointer; }
+  [data-slot="segmented-control"][data-orientation="horizontal"][data-icon-only] > [data-slot="segmented-control-item"] { width: calc(var(--item) - 2 * var(--inset)); padding: 0; }
   /* The hover thumb sits behind the label and under the indicator, inside the control's stacking context. */
-  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]::before { content: ""; position: absolute; inset: var(--inset); z-index: -2; border-radius: calc(var(--radius-control) - var(--inset)); pointer-events: none; }
+  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]::before { content: ""; position: absolute; inset: 0; z-index: -2; border-radius: inherit; pointer-events: none; }
   @media (hover: hover) {
     [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]:hover:not([data-disabled], [data-checked]) { color: var(--color-text); }
     [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]:hover:not([data-disabled], [data-checked])::before { background: color-mix(in srgb, var(--color-control-thumb) 45%, transparent); }
@@ -204,7 +206,7 @@
   [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-disabled] { opacity: 0.58; cursor: not-allowed; }
   /* The thumb is the option's sibling, so a disabled checked option dims it too. */
   [data-slot="segmented-control"][data-orientation="horizontal"]:has(> [data-slot="segmented-control-item"][data-checked][data-disabled]) > [data-slot="segmented-control-indicator"] { opacity: 0.58; }
-  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-indicator"] { position: absolute; z-index: -1; top: calc(var(--segmented-control-indicator-top) + var(--inset)); left: calc(var(--segmented-control-indicator-left) + var(--inset)); width: calc(var(--segmented-control-indicator-width) - 2 * var(--inset)); height: calc(var(--segmented-control-indicator-height) - 2 * var(--inset)); border-radius: calc(var(--radius-control) - var(--inset)); background: var(--color-control-thumb); box-shadow: var(--shadow-raise); pointer-events: none; }
+  [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-indicator"] { position: absolute; z-index: -1; top: var(--segmented-control-indicator-top); left: var(--segmented-control-indicator-left); width: var(--segmented-control-indicator-width); height: var(--segmented-control-indicator-height); border-radius: calc(var(--radius-control) - var(--inset)); background: var(--color-control-thumb); box-shadow: var(--shadow-raise); pointer-events: none; }
 
   /* ---------- Tabs ---------- */
   /* The list scrolls, so it clips on every side: the padding keeps the selected tab's shadow whole. The indicator
@@ -305,8 +307,8 @@
   [data-slot="menu-content"][data-presentation="popover"]:not([data-nested]) > [data-slot="menu-item"] > [data-slot="menu-item-icon"] { display: inline-flex; flex: none; }
   [data-slot="menu-content"][data-presentation="popover"]:not([data-nested]) > [data-slot="menu-item"] > [data-slot="menu-item-icon"] > svg { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   @media (max-width: 800px) {
-    [data-slot="menu-trigger"]:not([role="menuitem"]) { width: var(--control-lg); height: var(--control-lg); }
-    [data-slot="menu-content"][data-presentation="popover"]:not([data-nested]) > [data-slot="menu-item"] { min-height: var(--control-lg); }
+    [data-slot="menu-trigger"]:not([role="menuitem"]) { width: var(--control-touch); height: var(--control-touch); }
+    [data-slot="menu-content"][data-presentation="popover"]:not([data-nested]) > [data-slot="menu-item"] { min-height: var(--control-touch); }
   }
   @media (forced-colors: active) {
     [data-slot="menu-content"][data-presentation="popover"]:not([data-nested]) > [data-slot="menu-item"]:is(:focus-visible, [data-highlighted]):not([data-disabled]) { forced-color-adjust: none; background: Highlight; color: HighlightText; }
@@ -331,16 +333,19 @@
   /* The card draws the ring, so the radio inside it does not. */
   [data-slot="card"] > [data-slot="radio"]:focus-visible { outline: none; }
 
-  /* Touch: at tablet width and below, unsized controls grow to --control-lg, as the catalogue's do. */
+  /* Touch: at tablet width and below, controls of every size grow to --control-touch. An application screen sets
+     its controls at sm, so growing only unsized ones would leave its touch targets at 28px. Each selector
+     uses :is(:not([data-size]), [data-size]): it matches every size with the specificity of a size rule, so it
+     wins by coming later. */
   @media (max-width: 800px) {
-    [data-slot="button"]:not([data-size]) { min-height: var(--control-lg); }
-    [data-slot="input"]:not([data-size]) { height: var(--control-lg); }
-    [data-slot="label"]:not([data-size]):has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-lg); }
-    [data-slot="toggle"]:not([data-size], [data-orientation]):has(> [data-slot="toggle-icon"]:empty) { min-height: var(--control-lg); }
-    [data-slot="select-trigger"]:not([data-size]) { height: var(--control-lg); }
-    [data-slot="segmented-control"][data-orientation="horizontal"]:not([data-size]) { --item: var(--control-lg); }
-    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"] { min-height: var(--control-lg); }
-    [data-slot="slider"][data-orientation="horizontal"]:not([data-size]) > [data-slot="slider-control"] { height: var(--control-lg); }
+    [data-slot="button"]:is(:not([data-size]), [data-size]) { min-height: var(--control-touch); }
+    [data-slot="input"]:is(:not([data-size]), [data-size]) { height: var(--control-touch); }
+    [data-slot="label"]:is(:not([data-size]), [data-size]):has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-touch); }
+    [data-slot="toggle"]:is(:not([data-size]), [data-size]):not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) { min-height: var(--control-touch); }
+    [data-slot="select-trigger"]:is(:not([data-size]), [data-size]) { height: var(--control-touch); }
+    [data-slot="segmented-control"][data-orientation="horizontal"]:is(:not([data-size]), [data-size]) { --item: var(--control-touch); }
+    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"] { min-height: var(--control-touch); }
+    [data-slot="slider"][data-orientation="horizontal"]:is(:not([data-size]), [data-size]) > [data-slot="slider-control"] { height: var(--control-touch); }
   }
 
   @media (forced-colors: active) {
@@ -356,10 +361,10 @@
     :is([data-slot="switch"][data-checked], [data-slot="toggle"][data-pressed]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child) { border-color: Highlight; background: Highlight; }
     [data-slot="switch-thumb"][data-checked], [data-slot="toggle"][data-pressed]:not([data-orientation]) > [data-slot="toggle-icon"]:empty:first-child::after { background: HighlightText; }
     [data-slot="switch"]:focus-visible { outline-color: CanvasText; }
-    /* The checked segmented option draws Highlight behind HighlightText; both opt out, so its ring takes CanvasText. */
+    /* The checked segmented option draws Highlight behind HighlightText; both opt out, and its inset ring sits on the Highlight indicator, so it takes HighlightText. */
     [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-indicator"] { forced-color-adjust: none; background: Highlight; }
     [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked] { forced-color-adjust: none; color: HighlightText; }
-    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked]:focus-visible { outline-color: CanvasText; }
+    [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked]:focus-visible { outline-color: HighlightText; }
     /* The fill drops, so the selected tab takes a system border; the padding absorbs it. */
     [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-indicator"] { display: none; }
     [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"][data-selected] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }
