@@ -274,7 +274,9 @@ test.describe('tablet and phone', () => {
     await page.goto(url)
     const height = (selector: string) => page.locator(selector).evaluate((element) => getComputedStyle(element).height)
     expect(await height('#in-focus')).toBe('44px')
+    expect(await height('.btn.menu-glyph.is-active[data-size="lg"]')).toBe('44px')
     expect(await height('#text-input-and-textarea .input[data-size="sm"]')).toBe('28px')
+    expect(await height('#sl-md')).toBe('32px')
   })
 
   test('the trigger opens the drawer on the current row, and a link closes it and focuses the target', async ({ page }) => {

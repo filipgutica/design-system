@@ -957,14 +957,14 @@
     .skip[href="#contents"] { display: none; }
     .index-grid { columns: 1; }
     .row { grid-template-columns: minmax(0, 1fr); }
-    /* Touch: controls of every size grow to --control-touch. Only the size specimens, sized controls inside an
-       inert example, keep their sizes; the inert state examples grow like live controls. */
-    .btn:not([inert] [data-size]), .navlist a, .tab { min-height: var(--control-touch); }
+    /* Touch: controls of every size grow to --control-touch, the inert state examples included. Only the size
+       specimens (data-specimen="size") keep their sizes. */
+    .btn:not([data-specimen="size"] *), .navlist a, .tab { min-height: var(--control-touch); }
     /* A segmented control grows its item size too, so icon-only options stay square. */
-    .segmented:not([inert] [data-size]) { --item: var(--control-touch); }
-    .input:not([inert] [data-size]), .select:not([inert] [data-size]), .range:not([inert] [data-size]) { height: var(--control-touch); }
+    .segmented:not([data-specimen="size"] *) { --item: var(--control-touch); }
+    .input:not([data-specimen="size"] *), .select:not([data-specimen="size"] *), .range:not([data-specimen="size"] *) { height: var(--control-touch); }
     .search { height: var(--control-touch); }
-    .check:not([inert] [data-size]), .switch:not([inert] [data-size]), .toggle:not([inert] [data-size]) { min-height: var(--control-touch); }
+    .check:not([data-specimen="size"] *), .switch:not([data-specimen="size"] *), .toggle:not([data-specimen="size"] *) { min-height: var(--control-touch); }
     .copy-link { width: var(--control-touch); height: var(--control-touch); }
     .chip { min-height: var(--control-touch); }
     /* Touch: the hover toolbar never shows; a tap opens the thread, whose header holds More. */
@@ -1173,11 +1173,11 @@
       <div class="state" inert><button class="btn text" type="button" disabled>Show details</button><span class="caption">Disabled</span></div>
     </div></div>
     <div class="row"><h4>Sizes</h4><div class="states">
-      <div class="state" inert><button class="btn" type="button" data-size="sm">Small</button><span class="caption">sm</span></div>
-      <div class="state" inert><button class="btn" type="button" data-size="md">Medium</button><span class="caption">md</span></div>
-      <div class="state" inert><button class="btn" type="button" data-size="lg">Large</button><span class="caption">lg</span></div>
-      <div class="state" inert><button class="btn secondary" type="button" data-size="sm">Small</button><span class="caption">sm</span></div>
-      <div class="state" inert><button class="btn secondary" type="button" data-size="lg">Large</button><span class="caption">lg</span></div>
+      <div class="state" inert data-specimen="size"><button class="btn" type="button" data-size="sm">Small</button><span class="caption">sm</span></div>
+      <div class="state" inert data-specimen="size"><button class="btn" type="button" data-size="md">Medium</button><span class="caption">md</span></div>
+      <div class="state" inert data-specimen="size"><button class="btn" type="button" data-size="lg">Large</button><span class="caption">lg</span></div>
+      <div class="state" inert data-specimen="size"><button class="btn secondary" type="button" data-size="sm">Small</button><span class="caption">sm</span></div>
+      <div class="state" inert data-specimen="size"><button class="btn secondary" type="button" data-size="lg">Large</button><span class="caption">lg</span></div>
     </div></div>
     <div class="row"><h4>Link</h4><div class="states">
       <div class="state"><a class="btn secondary" href="#quiet-action">Read the guide</a><span class="caption">Rest, live; no underline on hover</span></div>
@@ -1263,9 +1263,9 @@
       <div class="state" inert><div class="choices" role="radiogroup" aria-label="Digest, disabled"><label class="check"><input type="radio" name="digest-disabled" checked disabled>Daily</label><label class="check"><input type="radio" name="digest-disabled" disabled>Weekly</label></div><span class="caption">Disabled</span></div>
     </div></div>
     <div class="row"><h4>Sizes</h4><div class="states">
-      <div class="state" inert><label class="check" data-size="sm"><input type="checkbox" checked>Small</label><span class="caption">sm</span></div>
-      <div class="state" inert><label class="check" data-size="md"><input type="checkbox" checked>Medium</label><span class="caption">md</span></div>
-      <div class="state" inert><label class="check" data-size="lg"><input type="checkbox" checked>Large</label><span class="caption">lg</span></div>
+      <div class="state" inert data-specimen="size"><label class="check" data-size="sm"><input type="checkbox" checked>Small</label><span class="caption">sm</span></div>
+      <div class="state" inert data-specimen="size"><label class="check" data-size="md"><input type="checkbox" checked>Medium</label><span class="caption">md</span></div>
+      <div class="state" inert data-specimen="size"><label class="check" data-size="lg"><input type="checkbox" checked>Large</label><span class="caption">lg</span></div>
     </div></div>
   </section>
 
@@ -1294,9 +1294,9 @@
       <div class="state" inert><div class="switch-row"><button class="switch" id="sw-on-dis" type="button" role="switch" aria-checked="true" aria-labelledby="sw-on-dis-label" disabled><span class="switch-track" aria-hidden="true"></span></button><label id="sw-on-dis-label" for="sw-on-dis">Alerts</label></div><span class="caption">Disabled, on</span></div>
     </div></div>
     <div class="row"><h4>Sizes</h4><div class="states">
-      <div class="state" inert><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Small switch" data-size="sm"><span class="switch-track" aria-hidden="true"></span></button><span class="caption">sm</span></div>
-      <div class="state" inert><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Medium switch"><span class="switch-track" aria-hidden="true"></span></button><span class="caption">md</span></div>
-      <div class="state" inert><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Large switch" data-size="lg"><span class="switch-track" aria-hidden="true"></span></button><span class="caption">lg</span></div>
+      <div class="state" inert data-specimen="size"><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Small switch" data-size="sm"><span class="switch-track" aria-hidden="true"></span></button><span class="caption">sm</span></div>
+      <div class="state" inert data-specimen="size"><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Medium switch"><span class="switch-track" aria-hidden="true"></span></button><span class="caption">md</span></div>
+      <div class="state" inert data-specimen="size"><button class="switch" type="button" role="switch" aria-checked="true" aria-label="Large switch" data-size="lg"><span class="switch-track" aria-hidden="true"></span></button><span class="caption">lg</span></div>
     </div></div>
   </section>
 
@@ -1312,9 +1312,9 @@
       <div class="state" inert><button class="toggle" type="button" aria-pressed="false" disabled><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Wrap lines</span></button><span class="caption">Disabled</span></div>
     </div></div>
     <div class="row"><h4>Sizes</h4><div class="states">
-      <div class="state" inert><button class="toggle" data-size="sm" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Small</span></button><span class="caption">sm</span></div>
-      <div class="state" inert><button class="toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Medium</span></button><span class="caption">md</span></div>
-      <div class="state" inert><button class="toggle" data-size="lg" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Large</span></button><span class="caption">lg</span></div>
+      <div class="state" inert data-specimen="size"><button class="toggle" data-size="sm" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Small</span></button><span class="caption">sm</span></div>
+      <div class="state" inert data-specimen="size"><button class="toggle" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Medium</span></button><span class="caption">md</span></div>
+      <div class="state" inert data-specimen="size"><button class="toggle" data-size="lg" type="button" aria-pressed="true"><span class="toggle-track" aria-hidden="true"></span><span class="toggle-text">Large</span></button><span class="caption">lg</span></div>
     </div></div>
   </section>
 
@@ -1331,8 +1331,8 @@
     </div></div>
     <div class="row"><h4>Icon only and sizes</h4><div class="states">
       <div class="state"><div class="segmented" role="group" aria-label="Layout" data-icon-only data-live><button type="button" aria-pressed="true" aria-label="List" title="List"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg></button><button type="button" aria-pressed="false" aria-label="Grid" title="Grid"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg></button></div><span class="caption">Icon only, live</span></div>
-      <div class="state" inert><div class="segmented" role="group" aria-label="Small" data-size="sm"><button type="button" aria-pressed="true">Day</button><button type="button" aria-pressed="false">Week</button></div><span class="caption">sm</span></div>
-      <div class="state" inert><div class="segmented" role="group" aria-label="Large" data-size="lg"><button type="button" aria-pressed="true">Day</button><button type="button" aria-pressed="false">Week</button></div><span class="caption">lg</span></div>
+      <div class="state" inert data-specimen="size"><div class="segmented" role="group" aria-label="Small" data-size="sm"><button type="button" aria-pressed="true">Day</button><button type="button" aria-pressed="false">Week</button></div><span class="caption">sm</span></div>
+      <div class="state" inert data-specimen="size"><div class="segmented" role="group" aria-label="Large" data-size="lg"><button type="button" aria-pressed="true">Day</button><button type="button" aria-pressed="false">Week</button></div><span class="caption">lg</span></div>
     </div></div>
   </section>
 
@@ -1357,9 +1357,9 @@
       <div class="state" inert><label class="search is-focus"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" aria-label="Search monitors, focused" value="latency"></label><span class="caption">Focus visible</span></div>
     </div></div>
     <div class="row"><h4>Sizes</h4><div class="states">
-      <div class="state" inert><input class="input" data-size="sm" aria-label="Small input" placeholder="Small"><span class="caption">sm</span></div>
-      <div class="state" inert><input class="input" data-size="md" aria-label="Medium input" placeholder="Medium"><span class="caption">md</span></div>
-      <div class="state" inert><input class="input" data-size="lg" aria-label="Large input" placeholder="Large"><span class="caption">lg</span></div>
+      <div class="state" inert data-specimen="size"><input class="input" data-size="sm" aria-label="Small input" placeholder="Small"><span class="caption">sm</span></div>
+      <div class="state" inert data-specimen="size"><input class="input" data-size="md" aria-label="Medium input" placeholder="Medium"><span class="caption">md</span></div>
+      <div class="state" inert data-specimen="size"><input class="input" data-size="lg" aria-label="Large input" placeholder="Large"><span class="caption">lg</span></div>
     </div></div>
     <div class="row"><h4>Textarea</h4><div class="states">
       <div class="state"><div class="field"><label class="field-label" for="ta-rest">Note</label><textarea class="textarea" id="ta-rest" placeholder="What changed?"></textarea></div><span class="caption">Rest</span></div>
@@ -1380,9 +1380,9 @@
       <div class="state" inert><div class="field"><label class="field-label" for="se-invalid">Window</label><select class="select" id="se-invalid" aria-invalid="true" aria-errormessage="se-invalid-error"><option></option></select><p class="field-error" id="se-invalid-error">Choose a window.</p></div><span class="caption">Invalid</span></div>
     </div></div>
     <div class="row"><h4>Sizes</h4><div class="states">
-      <div class="state" inert><select class="select" data-size="sm" aria-label="Small select"><option>Small</option></select><span class="caption">sm</span></div>
-      <div class="state" inert><select class="select" data-size="md" aria-label="Medium select"><option>Medium</option></select><span class="caption">md</span></div>
-      <div class="state" inert><select class="select" data-size="lg" aria-label="Large select"><option>Large</option></select><span class="caption">lg</span></div>
+      <div class="state" inert data-specimen="size"><select class="select" data-size="sm" aria-label="Small select"><option>Small</option></select><span class="caption">sm</span></div>
+      <div class="state" inert data-specimen="size"><select class="select" data-size="md" aria-label="Medium select"><option>Medium</option></select><span class="caption">md</span></div>
+      <div class="state" inert data-specimen="size"><select class="select" data-size="lg" aria-label="Large select"><option>Large</option></select><span class="caption">lg</span></div>
     </div></div>
     <div class="row"><h4>Open picker</h4><div class="states">
       <div class="state" inert aria-hidden="true"><ul class="picker"><li>Last hour</li><li class="is-hover">Last 24 hours</li><li aria-selected="true">Last 7 days</li></ul><span class="caption">A static drawing: hover on one option, another checked</span></div>
@@ -1409,9 +1409,9 @@
       <div class="state" inert><div class="slider"><input class="range" id="sl-disabled" type="range" aria-label="Sample rate, disabled" min="0" max="100" value="60" style="--value:60%" disabled><output class="slider-value" for="sl-disabled" aria-live="off">60%</output></div><span class="caption">Disabled</span></div>
     </div></div>
     <div class="row"><h4>Sizes</h4><div class="states">
-      <div class="state" inert><div class="slider"><input class="range" id="sl-sm" data-size="sm" type="range" aria-label="Small slider" min="0" max="100" value="50"><output class="slider-value" for="sl-sm" aria-live="off">50%</output></div><span class="caption">sm</span></div>
-      <div class="state" inert><div class="slider"><input class="range" id="sl-md" type="range" aria-label="Medium slider" min="0" max="100" value="50"><output class="slider-value" for="sl-md" aria-live="off">50%</output></div><span class="caption">md</span></div>
-      <div class="state" inert><div class="slider"><input class="range" id="sl-lg" data-size="lg" type="range" aria-label="Large slider" min="0" max="100" value="50"><output class="slider-value" for="sl-lg" aria-live="off">50%</output></div><span class="caption">lg</span></div>
+      <div class="state" inert data-specimen="size"><div class="slider"><input class="range" id="sl-sm" data-size="sm" type="range" aria-label="Small slider" min="0" max="100" value="50"><output class="slider-value" for="sl-sm" aria-live="off">50%</output></div><span class="caption">sm</span></div>
+      <div class="state" inert data-specimen="size"><div class="slider"><input class="range" id="sl-md" type="range" aria-label="Medium slider" min="0" max="100" value="50"><output class="slider-value" for="sl-md" aria-live="off">50%</output></div><span class="caption">md</span></div>
+      <div class="state" inert data-specimen="size"><div class="slider"><input class="range" id="sl-lg" data-size="lg" type="range" aria-label="Large slider" min="0" max="100" value="50"><output class="slider-value" for="sl-lg" aria-live="off">50%</output></div><span class="caption">lg</span></div>
     </div></div>
   </section>
 

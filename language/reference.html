@@ -414,9 +414,9 @@
   }
   @media (max-width: 800px) {
     .btn[data-size], .row { min-height: var(--control-touch); min-width: var(--control-touch); }
-    .segmented:not([inert] [data-size]) { --item: var(--control-touch); }
+    .segmented:not([data-specimen="size"] *) { --item: var(--control-touch); }
     .segmented button { min-width: calc(var(--item) - 2 * var(--inset)); }
-    .btn:not([inert] [data-size]), .navlist a, .tab { min-height: var(--control-touch); }
+    .btn:not([data-specimen="size"] *), .navlist a, .tab { min-height: var(--control-touch); }
     .search { height: var(--control-touch); }
     .shell { grid-template-columns: minmax(0, 1fr); height: auto; }
     main { overflow: visible; }
