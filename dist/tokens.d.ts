@@ -122,6 +122,7 @@ export type TokenName =
   | 'radius-field'
   | 'radius-mark'
   | 'radius-pill'
+  | 'radius-circle'
   | 'shadow-raise'
   | 'shadow-surface'
   | 'shadow-sink'

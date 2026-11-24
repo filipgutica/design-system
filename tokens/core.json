@@ -425,11 +425,12 @@
       "comment": "Shape",
       "roles": {
         "radius-inline": "Places and picked rows: navigation rows, tabs, list rows, menu rows, and breadcrumb links",
-        "radius-control": "Rounded rectangles that act, or set a value in place with every option shown: buttons other than the labelled contents trigger, quiet actions other than the project-menu trigger, and segmented controls; a segmented option takes this radius minus the track's 2px inset",
+        "radius-control": "Rounded rectangles that act, or set a value in place with every option shown: buttons with a text label other than the labelled contents trigger, quiet actions other than the project-menu trigger, icon-only ones included, and text segmented controls; a segmented option takes this radius minus the track's 2px inset",
         "radius-panel": "Containers: wells, plates, panels, radio cards, alerts, and floating layers; a container whose rows sit 4px inside it, such as a menu, takes it around rows at --radius-inline",
         "radius-field": "Typed fields, controls whose label wraps, and one-line controls that are not actions: inputs, selects, textareas, toggle cards, pager links, the project-menu trigger, the labelled contents trigger and its no-JavaScript summary, and the skip link",
         "radius-mark": "Small marks inside text or a row: checkboxes, keyboard keys, and mentions",
-        "radius-pill": "Small state marks: status badges, switch tracks, slider and progress tracks, and score pips"
+        "radius-pill": "Small state marks: status badges, switch tracks, slider and progress tracks, and score pips; and the icon-only segmented track",
+        "radius-circle": "A lone icon that acts on its own fill: icon-only buttons (primary, secondary, and danger), on a square box"
       },
       "tokens": {
         "radius-inline": "8px",
@@ -437,7 +438,8 @@
         "radius-panel": "12px",
         "radius-field": "8px",
         "radius-mark": "4px",
-        "radius-pill": "999px"
+        "radius-pill": "999px",
+        "radius-circle": "999px"
       }
     },
     {
