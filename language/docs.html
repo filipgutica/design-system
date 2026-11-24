@@ -44,13 +44,13 @@ p { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-
 /* Copy is a quiet action; this sets its size and place. */
 .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-md); min-height: var(--control-md); margin-left: auto; padding: 0 0.375rem; color: inherit; }
 /* Copy is muted at rest. The code block has its own palette, so on hover and while the tick shows it takes the block's text colour. */
-.code .copy { color: var(--color-muted); }
-.code .copy[data-copied] { color: var(--color-code-text); }
-.code .copy.is-hover:where(:not(:disabled)) { color: var(--color-code-text); }
-@media (hover: hover) { .code .copy:hover:where(:not(:disabled)) { color: var(--color-code-text); } }
+.code :is(.copy, .wrap-toggle) { color: var(--color-muted); }
+.code :is(.copy[data-copied], .wrap-toggle[aria-pressed="true"]) { color: var(--color-code-text); }
+.code :is(.copy, .wrap-toggle).is-hover:where(:not(:disabled)) { color: var(--color-code-text); }
+@media (hover: hover) { .code :is(.copy, .wrap-toggle):hover:where(:not(:disabled)) { color: var(--color-code-text); } }
 /* Inset: the code block clips its content. */
 .code pre:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
-.code .copy.quiet-action:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
+.code :is(.copy, .wrap-toggle).quiet-action:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
 /* The source is an inset panel. It sits --space-1 inside the frame, so its corners are concentric with the frame's. */
 .code pre { margin: 0; padding: var(--space-4); overflow: auto; max-height: 32rem; border: 1px solid transparent; border-radius: calc(var(--radius-panel) - var(--space-1)); background: var(--color-code); font-size: var(--text-code); line-height: 1.65; tab-size: 2; }
 /* Each line is a baseline-aligned row, so a prompt or line number sits on the text's baseline. */

@@ -289,19 +289,31 @@
   .code-head .lang { color: var(--color-muted); }
   /* Copy is a quiet action; this sets its size and place. */
   .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-md); min-height: var(--control-md); margin-left: auto; padding: 0 0.375rem; color: inherit; }
-  /* Copy is muted at rest. The code block has its own palette, so on hover and while the tick shows it takes the block's text colour. */
-  .code .copy { color: var(--color-muted); }
-  .code .copy[data-copied] { color: var(--color-code-text); }
-  .code .copy.is-hover:where(:not(:disabled)) { color: var(--color-code-text); }
-  @media (hover: hover) { .code .copy:hover:where(:not(:disabled)) { color: var(--color-code-text); } }
+  /* Copy and Wrap lines are muted at rest. The code block has its own palette, so on hover, while the tick
+     shows, and while Wrap lines is on they take the block's text colour. */
+  .code :is(.copy, .wrap-toggle) { color: var(--color-muted); }
+  .code :is(.copy[data-copied], .wrap-toggle[aria-pressed="true"]) { color: var(--color-code-text); }
+  .code :is(.copy, .wrap-toggle).is-hover:where(:not(:disabled)) { color: var(--color-code-text); }
+  @media (hover: hover) { .code :is(.copy, .wrap-toggle):hover:where(:not(:disabled)) { color: var(--color-code-text); } }
+  /* The block's actions sit together at the end of the header, or in the corner beside the source. */
+  .code-actions { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; }
+  .code-actions > .copy { margin-left: 0; }
+  /* Wrap lines is an icon-only quiet action and a toggle: while on it keeps the open-menu tint. */
+  .wrap-toggle { flex: none; width: var(--control-md); min-height: var(--control-md); padding: 0; }
+  :where(.wrap-toggle[aria-pressed="true"]) { background: color-mix(in srgb, currentColor 6%, transparent); }
+  /* Forced colors: a Highlight border and icon mark it on, at rest and on hover. */
+  @media (forced-colors: active) { .code .wrap-toggle[aria-pressed="true"] { border-color: Highlight; } .wrap-toggle[aria-pressed="true"] .icon { color: Highlight; } }
   /* Inset: the code block clips its content. */
   .code pre:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
-  .code .copy.quiet-action:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
+  .code :is(.copy, .wrap-toggle).quiet-action:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }
   /* The source is an inset panel. It sits --space-1 inside the frame, so its corners are concentric with the frame's. */
   .code pre { margin: 0; padding: var(--space-4); overflow: auto; max-height: 32rem; border: 1px solid transparent; border-radius: calc(var(--radius-panel) - var(--space-1)); background: var(--color-code); font-size: var(--text-code); line-height: 1.65; tab-size: 2; }
   /* Each line is a baseline-aligned row, so a prompt or line number sits on the text's baseline. */
   .code .line { display: flex; align-items: baseline; min-height: 1.65em; }
   .code .line > span { white-space: pre; }
+  /* With Wrap lines on, each line breaks inside the panel, long words and URLs included, and nothing scrolls
+     sideways. The line number stays on the first visual line. */
+  .code[data-wrap] .line > span:not(.ln) { min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
   .code .ln { min-width: 2.5em; padding-right: 1em; flex: none; text-align: right; color: var(--color-muted); user-select: none; }
   .code .k { color: var(--color-syntax-keyword); } .code .s { color: var(--color-syntax-string); } .code .n { color: var(--color-syntax-number); } .code .c { color: var(--color-syntax-comment); }
   /* The panel fills the row beside Copy, so it sits --space-1 from the frame and from Copy on every side, and centres its line. */
@@ -427,6 +439,7 @@
     .btn:not([data-specimen="size"] *), .navlist a, .tab { min-height: var(--control-touch); }
     .search { height: var(--control-touch); }
     .copy { min-width: var(--control-touch); min-height: var(--control-touch); }
+    .wrap-toggle { width: var(--control-touch); min-height: var(--control-touch); }
     .check:not([data-specimen="size"] *) { min-height: var(--control-touch); }
     .shell { grid-template-columns: minmax(0, 1fr); height: auto; }
     main { overflow: visible; }
@@ -472,6 +485,7 @@
   <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></symbol>
   <symbol id="i-play" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z"/></symbol>
   <symbol id="i-arrow-up" viewBox="0 0 16 16"><path d="M8 13V3M4 7l4-4 4 4"/></symbol>
+  <symbol id="i-wrap" viewBox="0 0 16 16"><path d="M2.5 4h11M2.5 8h9a2 2 0 0 1 0 4H8.5M10 10.5 8.5 12l1.5 1.5M2.5 12h3"/></symbol>
   <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></symbol>
 </svg>
 
@@ -941,7 +955,7 @@
         <dt>Metric</dt><dd class="mono">${m.metric}</dd>
       </dl>
       <div class="code">
-        <div class="code-head"><b>Sample query</b><span class="lang">JSON</span><button class="quiet-action copy" type="button">${icon('i-copy')}<span>Copy</span></button></div>
+        <div class="code-head"><b>Sample query</b><span class="lang">JSON</span><div class="code-actions"><button class="quiet-action wrap-toggle" type="button" data-wrap-toggle aria-pressed="false" aria-label="Wrap lines" title="Wrap lines">${icon('i-wrap')}</button><button class="quiet-action copy" type="button">${icon('i-copy')}<span>Copy</span></button></div></div>
         <pre tabindex="0" role="region" aria-label="Sample query"><code>${code.split('\n').map((line) => `<span class="line"><span>${highlight(line)}</span></span>`).join('')}</code></pre>
       </div>
       <div class="cluster"><button class="btn secondary" type="button" data-size="sm">Open in explorer</button><button class="btn ghost" type="button" data-size="sm">Mute</button></div>`;
@@ -960,6 +974,13 @@
       use.setAttribute('href', '#i-tick');
       copy.dataset.copied = '';
       wait = setTimeout(restore, 1500);
+    });
+    // Wrap lines keeps its name; aria-pressed carries the state.
+    const wrap = detail.querySelector('.wrap-toggle');
+    wrap.addEventListener('click', () => {
+      const on = wrap.getAttribute('aria-pressed') !== 'true';
+      wrap.setAttribute('aria-pressed', String(on));
+      wrap.closest('.code').toggleAttribute('data-wrap', on);
     });
   };
 

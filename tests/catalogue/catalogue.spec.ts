@@ -19,7 +19,7 @@ const controlTargets = [
   '.segmented', '.segmented > button', '.tab', '.radio-card', 'textarea',
   '[role="option"]', '.navlist a', '.crumbs a', '.group-toggle', '.chip[href]',
   '.overflow > button:not(.msg-tools *)', '.menu-list [role="menuitem"]', '.copy-link', '.page-head > .site-name',
-  '.header a', '.actions > a:not(.btn)', 'button.copy', '.close', '.full', '.projects > summary',
+  '.header a', '.actions > a:not(.btn)', 'button.copy', '.close', '.full', '.projects > summary', '.wrap-toggle',
 ].join(', ')
 
 const renderedControls = (page: Page) => page.locator(`:is(${controlTargets}):visible`).evaluateAll((elements) => elements.map((element) => {
@@ -1178,12 +1178,85 @@ const stubClipboard = (page: Page) => page.addInitScript(() => {
   Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => { if ((window as unknown as { failCopy?: boolean }).failCopy) throw new Error('denied') } } })
 })
 
+test.describe('code wrap', () => {
+  test.use({ viewport: { width: 1280, height: 900 } })
+
+  test('Wrap lines wraps a code block, and Copy still copies its lines', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (text: string) => { (window as unknown as { copied: string[] }).copied.push(text) } } })
+      ;(window as unknown as { copied: string[] }).copied = []
+    })
+    await page.goto(url)
+    const source = [
+      "export const runbook = 'https://docs.example.com/runbooks/api-latency/p95-breach-escalation-and-rollback-steps'",
+      "export const message = 'API p95 latency stayed above the threshold for five minutes, so the on-call engineer is paged'",
+    ].join('\n')
+    const block = page.locator('#code-block .code:has(#code-wrap-src)')
+    const other = page.locator('#code-block .code:has(#code-src)')
+    const toggle = block.locator('.wrap-toggle')
+    const scrolls = () => block.locator('pre').evaluate((pre) => pre.scrollWidth > pre.clientWidth)
+    // Off by default: the long lines scroll sideways. The name stays; the state is aria-pressed.
+    await expect(toggle).toHaveAccessibleName('Wrap lines')
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    expect(await scrolls()).toBe(true)
+    await block.locator('.copy').click()
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    await expect(toggle).toHaveAccessibleName('Wrap lines')
+    expect(await scrolls()).toBe(false)
+    // The state is per block.
+    await expect(other).not.toHaveAttribute('data-wrap')
+    await expect(other.locator('.wrap-toggle')).toHaveAttribute('aria-pressed', 'false')
+    // Each line number stays on its line's first visual row.
+    const [number, text] = await block.locator('.line').first().evaluate((line) => [line.children[0], line.children[1]].map((part) => part.getBoundingClientRect().top))
+    expect(Math.abs(number - text)).toBeLessThan(2)
+    await block.locator('.copy').click()
+    await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    expect(await scrolls()).toBe(true)
+    expect(await page.evaluate(() => (window as unknown as { copied: string[] }).copied)).toEqual([source, source])
+  })
+
+  test('in forced colors Wrap lines on has a Highlight border and icon, at rest and on hover', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' })
+    await page.goto(url)
+    const toggle = page.locator('#code-block .code:has(#code-wrap-src) .wrap-toggle')
+    const colours = () => toggle.evaluate((button) => {
+      const highlight = document.createElement('i')
+      highlight.style.color = 'Highlight'
+      document.body.append(highlight)
+      const expected = getComputedStyle(highlight).color
+      highlight.remove()
+      return { expected, border: getComputedStyle(button).borderTopColor, icon: getComputedStyle(button.querySelector('.icon')!).color }
+    })
+    await toggle.click()
+    await page.mouse.move(0, 0)
+    const rest = await colours()
+    expect(rest.border).toBe(rest.expected)
+    expect(rest.icon).toBe(rest.expected)
+    await toggle.hover()
+    const hover = await colours()
+    expect(hover.border).toBe(hover.expected)
+    expect(hover.icon).toBe(hover.expected)
+  })
+
+  test('every code block with a header or an example has Wrap lines before Copy, and a compact block has none', async ({ page }) => {
+    await page.goto(url)
+    const blocks = await page.locator('.code').evaluateAll((codes) => codes.map((code) => ({
+      multi: Boolean(code.querySelector(':scope > .code-head') || code.parentElement?.matches('.example')),
+      order: [...code.querySelectorAll('.wrap-toggle, .copy')].map((button) => button.classList.contains('copy') ? 'copy' : 'wrap').join(' '),
+    })))
+    expect(blocks.length).toBeGreaterThan(3)
+    for (const { multi, order } of blocks) expect(order).toBe(multi ? 'wrap copy' : 'copy')
+  })
+})
+
 test.describe('quiet action fill', () => {
   test.use({ viewport: { width: 1280, height: 900 } })
 
   test('a hovering pointer adds a 6% fill, and a press 12%', async ({ page }) => {
     await page.goto(url)
-    const copy = page.locator('#code-block .code-head .copy')
+    const copy = page.locator('#code-block .code-head .copy[data-copy="code-src"]')
     const alpha = () => copy.evaluate((button) => getComputedStyle(button).backgroundColor).then(alphaOf)
     await copy.hover()
     await expect.poll(alpha).toBeCloseTo(0.06, 3)
@@ -1200,7 +1273,7 @@ test.describe('quiet action fill on a touch screen', () => {
     await stubClipboard(page)
     await page.goto(url)
     expect(await page.evaluate(() => matchMedia('(hover: hover)').matches)).toBe(false)
-    const copy = page.locator('#code-block .code-head .copy')
+    const copy = page.locator('#code-block .code-head .copy[data-copy="code-src"]')
     await copy.tap()
     await expect(copy.locator('use')).toHaveAttribute('href', '#i-tick')
     // A touch screen keeps :hover on the tapped button, so a hover fill would stay.
@@ -1219,7 +1292,7 @@ test.describe('copy feedback', () => {
   })
 
   test('Copy shows a tick for 1.5s, and a second click restarts the wait', async ({ page }) => {
-    const copy = page.locator('#code-block .code-head .copy')
+    const copy = page.locator('#code-block .code-head .copy[data-copy="code-src"]')
     const icon = copy.locator('use')
     // Muted at rest; the block's text colour while the tick shows.
     const colour = (selector: string) => page.locator(selector).first().evaluate((node) => getComputedStyle(node).color)
@@ -1256,7 +1329,7 @@ test.describe('copy feedback', () => {
   })
 
   test('a failed copy keeps the copy icon and says so', async ({ page }) => {
-    const copy = page.locator('#code-block .code-head .copy')
+    const copy = page.locator('#code-block .code-head .copy[data-copy="code-src"]')
     const icon = copy.locator('use')
     await page.evaluate(() => { (window as unknown as { failCopy: boolean }).failCopy = true })
     await copy.click()
@@ -1275,7 +1348,7 @@ test.describe('copy feedback', () => {
 
 // Two copies in flight finish 1s apart. Each finished copy restarts the wait, so the tick stays until 1.5s after the
 // last one, on the catalogue and on the reference page's own copy script.
-for (const [file, selector] of [['components.html', '#code-block .code-head .copy'], ['reference.html', '#detail .copy']]) {
+for (const [file, selector] of [['components.html', '#code-block .code-head .copy[data-copy="code-src"]'], ['reference.html', '#detail .copy']]) {
   test(`${file}: two copies in flight keep the tick until 1.5s after the last one finishes`, async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
     await page.clock.install()
