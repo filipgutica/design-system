@@ -38,12 +38,13 @@ const renderedControls = (page: Page) => page.locator(`:is(${controlTargets}):vi
     compact: element.matches('.search, .crumbs a, .group-toggle, .overflow > button, .copy-link, .page-head > .site-name, .composer-box textarea'),
     row: element.matches('[role="option"], .navlist a, .menu-list [role="menuitem"]'),
     alwaysTouch: element.matches('.header a, .actions > a:not(.btn), .page-head .strip a, .site-links a, .navlist.text-links a, button.copy, .close, .capture .tab, .full, .projects > summary'),
-    // Tabs, toggle cards and padded menu triggers can grow to fit their contents.
-    contentHeight: element.matches('.tab, .toggle, .btn.menu-glyph, .radio-card, textarea, .navlist a, .crumbs a'),
+    // Toggle cards and padded menu triggers can grow to fit their contents.
+    contentHeight: element.matches('.toggle, .btn.menu-glyph, .radio-card, textarea, .navlist a, .crumbs a'),
     textButton: element.matches('.btn.text'),
     chip: element.matches('.chip[href]'),
     option: element.matches('.segmented > button'),
     iconOption: element.matches('.segmented[data-icon-only] > button'),
+    iconButton: element.matches('.btn[data-icon-only]'),
     consoleSizedButton: element.matches('.btn[data-size]'),
   }
 }))
@@ -77,7 +78,8 @@ for (const file of ['components.html', 'reference.html', 'product.html', 'docs.h
         } else {
           expect.soft(height, label).toBe(expected)
         }
-        if (control.iconOption) expect.soft(control.width, label).toBeCloseTo(height, 1)
+        // A round control is a circle only on a square box, at every size and on touch.
+        if (control.iconOption || control.iconButton) expect.soft(control.width, label).toBeCloseTo(height, 1)
         if (file === 'reference.html' && touch && (option || control.consoleSizedButton)) {
           expect.soft(control.width, label).toBeGreaterThanOrEqual(expected)
         }
@@ -88,6 +90,25 @@ for (const file of ['components.html', 'reference.html', 'product.html', 'docs.h
       }
     })
   }
+}
+
+// A lone icon is a circle only on a button with its own fill. A see-through lone icon is a quiet action, a tile:
+// an icon-only ghost or text button would look like one at rest and hover in a different shape.
+for (const file of ['components.html', 'reference.html', 'product.html', 'docs.html']) {
+  test(`${file} marks every icon-only button, and none is ghost or text`, async ({ page }) => {
+    await page.goto(new URL(file, url).href)
+    const problems = await page.locator('.btn').evaluateAll((buttons) => buttons.flatMap((button) => {
+      const text = button.textContent?.trim() ?? ''
+      const iconOnly = button.hasAttribute('data-icon-only')
+      const name = button.getAttribute('aria-label') ?? text
+      if (!text && !iconOnly) return [`${name}: no text and no data-icon-only`]
+      if (iconOnly && text) return [`${name}: data-icon-only with text`]
+      if (iconOnly && !button.getAttribute('aria-label')) return ['an icon-only button with no aria-label']
+      if (iconOnly && button.matches('.ghost, .text')) return [`${name}: an icon-only ghost or text button`]
+      return []
+    }))
+    expect(problems).toEqual([])
+  })
 }
 
 test.describe('desktop', () => {
@@ -773,9 +794,11 @@ const below = (measured: { name: string; ratio: number; unmeasured?: string }[],
 // The slider track and the select picker are engine pseudo-elements that computed styles cannot reach;
 // the node literal-radius guard covers them.
 const shapeRoles: Record<string, string[]> = {
-  '--radius-control': ['.btn:not(.rail-summary, .menu-glyph, .composer-box .btn)', '.quiet-action:not(.projects > summary, .msg-tools .quiet-action)', '.segmented', '.chip'],
-  '--radius-pill': ['.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.progress', '.score .pips i', '.badge', '.navlist a[aria-current="location"]::before'],
-  '--radius-inline': ['.tab', '.navlist a:not(.projects .navlist a)', '.group-toggle', '.crumbs a', '.site-name', '.rows [role="option"]', '.msg', '.avatar', '.msg-tools .quiet-action', '.composer-box .btn', '.tool > summary'],
+  '--radius-control': ['.btn:not(.rail-summary, .menu-glyph, [data-icon-only])', '.quiet-action:not(.projects > summary, .msg-tools .quiet-action)', '.segmented:not([data-icon-only])', '.chip'],
+  // A lone icon that acts on its own fill: an icon-only button, on a square box.
+  '--radius-circle': ['.btn[data-icon-only]'],
+  '--radius-pill': ['.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.progress', '.score .pips i', '.badge', '.navlist a[aria-current="location"]::before', '.segmented[data-icon-only]'],
+  '--radius-inline': ['.tab', '.navlist a:not(.projects .navlist a)', '.group-toggle', '.crumbs a', '.site-name', '.rows [role="option"]', '.msg', '.avatar', '.msg-tools .quiet-action', '.tool > summary'],
   // Small marks inside text or a row: the checkbox, the keyboard key, and a mention.
   '--radius-mark': ['.check input:not([type="radio"])', '.key', '.mention'],
   // One-line controls that are not actions take the field corner: the select, the project-menu trigger,
@@ -788,7 +811,9 @@ const shapeRoles: Record<string, string[]> = {
 // Each radius resolves inside its container, where a local gap such as --inset is set.
 const concentricShapes = [
   { radius: 'calc(var(--radius-panel) - var(--space-1))', container: 'body', selectors: ['.select option', '.picker li', '.projects .navlist a', '.menu-list [role="menuitem"]', '.code:not(.example > .code) > pre'] },
-  { radius: 'calc(var(--radius-control) - var(--inset))', container: '.segmented', selectors: ['.segmented button', '.segmented button::before'] },
+  { radius: 'calc(var(--radius-control) - var(--inset))', container: '.segmented:not([data-icon-only])', selectors: ['.segmented:not([data-icon-only]) button', '.segmented:not([data-icon-only]) button::before'] },
+  // Icon-only: round options in a pill track. A px radius keeps the thumb a pill, not an ellipse, while it glides.
+  { radius: 'calc(var(--radius-pill) - var(--inset))', container: '.segmented[data-icon-only]', selectors: ['.segmented[data-icon-only] button', '.segmented[data-icon-only] button::before'] },
 ]
 const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
   const corners = (style: CSSStyleDeclaration) => [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].join(' ')
@@ -927,11 +952,11 @@ test.describe('rendered recipes', () => {
   })
 
   test('the DESIGN.md shape table names each role token with its value', async ({ page }) => {
-    const table = [...(await docText(page, 'DESIGN.md')).matchAll(/^\s*\| [^|]+ \| (Pill|\d+px) \| `(--radius-[\w-]+)` \|/gm)].map(([, shape, token]) => [token, shape])
+    const table = [...(await docText(page, 'DESIGN.md')).matchAll(/^\s*\| [^|]+ \| (Pill|Circle|\d+px) \| `(--radius-[\w-]+)` \|/gm)].map(([, shape, token]) => [token, shape])
     expect(table.map(([token]) => token).sort()).toEqual(Object.keys(shapeRoles).sort())
     await page.goto(url)
     const values = await page.evaluate((tokens) => tokens.map((token) => getComputedStyle(document.documentElement).getPropertyValue(token).trim()), table.map(([token]) => token))
-    expect(values).toEqual(table.map(([, shape]) => (shape === 'Pill' ? '999px' : shape)))
+    expect(values).toEqual(table.map(([, shape]) => (shape === 'Pill' || shape === 'Circle' ? '999px' : shape)))
   })
 
 

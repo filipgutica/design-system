@@ -108,7 +108,8 @@
 
   /* Tabs, for the Foundations specimens: components.html#tabs, unchanged. */
   .tablist { --glide-lead: 260ms; --glide-trail: 300ms; display: flex; width: max-content; max-width: 100%; overflow-x: auto; padding: var(--space-1); isolation: isolate; }
-  .tab { position: relative; flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-inline); background: transparent; color: var(--color-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-ui); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  /* A tab's box is the button's: the control height, the button's inline padding (--tab-pad), and line height 1. */
+  .tab { --tab-pad: 0.625rem; position: relative; flex: none; display: inline-flex; align-items: center; min-height: var(--tab-item, var(--control-md)); padding: 0 var(--tab-pad); border: 0; border-radius: var(--radius-inline); background: transparent; color: var(--color-muted); font: var(--weight-medium) var(--text-md) / 1 var(--font-ui); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
   .tab.is-hover:where(:not(:disabled)) { background: var(--color-row-hover); color: var(--color-text); }
   @media (hover: hover) { .tab:hover:where(:not(:disabled)) { background: var(--color-row-hover); color: var(--color-text); } }
   /* The selected tab takes the navigation row's lifted fill: one selected state for both. The fill is a
@@ -129,6 +130,9 @@
   /* Line height 1 comes after the font shorthand, which would reset it: the label then sits centred in the option. */
   .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: calc(var(--item) - 2 * var(--inset)); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-control) - var(--inset)); background: transparent; color: var(--color-muted); font: inherit; line-height: 1; cursor: pointer; }
   .segmented[data-icon-only] button { width: calc(var(--item) - 2 * var(--inset)); padding: 0; }
+  /* Icon-only: a pill track with round options, concentric with it. A px radius keeps the thumb a pill while it glides. */
+  .segmented[data-icon-only] { border-radius: var(--radius-pill); }
+  .segmented[data-icon-only] button { border-radius: calc(var(--radius-pill) - var(--inset)); }
   /* The track insets its options 2px from its outer edge (the 1px border and 1px of padding), with 2px between
      them, so each option is its thumb and the track is the control's height. The option's corner is the
      track radius minus that 2px, concentric from the outer edge. */
@@ -157,7 +161,7 @@
   :is(.toolbar, .sidebar) .segmented button { flex: none; }
   @media (forced-colors: active) {
     /* The lifted fill drops, so the selected tab takes a system border; the padding absorbs it. */
-    .tab[aria-selected="true"] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }
+    .tab[aria-selected="true"] { border: 2px solid Highlight; padding-inline: calc(var(--tab-pad) - 2px); }
     .tab[aria-selected="true"]::before { content: none; }
     .segmented button[aria-pressed="true"] { forced-color-adjust: none; color: HighlightText; }
     .segmented button[aria-pressed="true"]::before { forced-color-adjust: none; background: Highlight; }
@@ -386,6 +390,8 @@
   .bar { display: block; height: 12px; background: var(--color-accent); border-radius: var(--radius-inline); }
   .height-bar { display: block; width: 48px; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface-raised); }
   .shape-box { display: block; width: 96px; height: 56px; border: 1px solid var(--color-border); background: var(--color-surface-raised); }
+  /* A circle is a radius on a square box. */
+  .shape-box[data-square] { width: 56px; }
   .line-subtle { display: block; height: 0; border-top: 1px solid var(--color-border-subtle); }
   .line-border { display: block; height: 0; border-top: 1px solid var(--color-border); }
   /* The pip and current-row samples take their state from the navigation row rules above. */
@@ -725,10 +731,11 @@
           <ul class="specs">
             <li class="spec" data-token="--radius-inline"><div class="spec-meta"><code>--radius-inline</code><span class="value"></span><span class="use">Places and picked rows: navigation rows, tabs, list rows, menu rows, and breadcrumb links</span></div><i class="shape-box" style="border-radius:var(--radius-inline)"></i></li>
             <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Typed fields, controls whose label wraps, and one-line controls that are not actions: inputs, selects, textareas, toggle cards, pager links, the project-menu trigger, the labelled contents trigger and its no-JavaScript summary, and the skip link</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
-            <li class="spec" data-token="--radius-control"><div class="spec-meta"><code>--radius-control</code><span class="value"></span><span class="use">Rounded rectangles that act, or set a value in place with every option shown: buttons other than the labelled contents trigger, quiet actions other than the project-menu trigger, and segmented controls; a segmented option takes this radius minus the track's 2px inset</span></div><i class="shape-box" style="border-radius:var(--radius-control)"></i></li>
+            <li class="spec" data-token="--radius-control"><div class="spec-meta"><code>--radius-control</code><span class="value"></span><span class="use">Rounded rectangles that act, or set a value in place with every option shown: buttons with a text label other than the labelled contents trigger, quiet actions other than the project-menu trigger, icon-only ones included, and text segmented controls; a segmented option takes this radius minus the track's 2px inset</span></div><i class="shape-box" style="border-radius:var(--radius-control)"></i></li>
             <li class="spec" data-token="--radius-panel"><div class="spec-meta"><code>--radius-panel</code><span class="value"></span><span class="use">Containers: wells, plates, panels, radio cards, alerts, and floating layers; a container whose rows sit 4px inside it, such as a menu, takes it around rows at --radius-inline</span></div><i class="shape-box" style="border-radius:var(--radius-panel)"></i></li>
             <li class="spec" data-token="--radius-mark"><div class="spec-meta"><code>--radius-mark</code><span class="value"></span><span class="use">Small marks inside text or a row: checkboxes, keyboard keys, and mentions</span></div><i class="shape-box" style="border-radius:var(--radius-mark)"></i></li>
-            <li class="spec" data-token="--radius-pill"><div class="spec-meta"><code>--radius-pill</code><span class="value"></span><span class="use">Small state marks: status badges, switch tracks, slider and progress tracks, and score pips</span></div><i class="shape-box" style="border-radius:var(--radius-pill)"></i></li>
+            <li class="spec" data-token="--radius-pill"><div class="spec-meta"><code>--radius-pill</code><span class="value"></span><span class="use">Small state marks: status badges, switch tracks, slider and progress tracks, and score pips; and the icon-only segmented track</span></div><i class="shape-box" style="border-radius:var(--radius-pill)"></i></li>
+            <li class="spec" data-token="--radius-circle"><div class="spec-meta"><code>--radius-circle</code><span class="value"></span><span class="use">A lone icon that acts on its own fill: icon-only buttons (primary, secondary, and danger), on a square box</span></div><i class="shape-box" data-square style="border-radius:var(--radius-circle)"></i></li>
           </ul>
         </section>
 

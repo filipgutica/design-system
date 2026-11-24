@@ -204,7 +204,7 @@ const App = () => {
         <SegmentedControlItem value="board">Board</SegmentedControlItem>
       </SegmentedControl>
       <SegmentedControl data-testid="segmented-icon" data-icon-only aria-label="Layout" defaultValue="list">
-        <SegmentedControlIndicator />
+        <SegmentedControlIndicator data-testid="segmented-icon-indicator" />
         <SegmentedControlItem value="list" aria-label="List"><svg width="16" height="16" aria-hidden="true" /></SegmentedControlItem>
         <SegmentedControlItem data-testid="seg-icon-grid" value="grid" aria-label="Grid"><svg width="16" height="16" aria-hidden="true" /></SegmentedControlItem>
       </SegmentedControl>
@@ -276,6 +276,10 @@ const App = () => {
         <Button data-testid="pending" onClick={() => new Promise<void>(() => {})}>Deploy</Button>
         <Button data-testid="primary-sm" data-size="sm">Small</Button>
         <Button data-testid="primary-lg" data-size="lg">Large</Button>
+        <Button data-testid="icon-primary" data-icon-only aria-label="Send"><svg width="16" height="16" aria-hidden="true" /></Button>
+        <Button data-testid="icon-secondary" data-variant="secondary" data-icon-only aria-label="Add"><svg width="16" height="16" aria-hidden="true" /></Button>
+        <Button data-testid="icon-danger" data-variant="danger" data-icon-only aria-label="Remove"><svg width="16" height="16" aria-hidden="true" /></Button>
+        <Button data-testid="icon-sm" data-variant="secondary" data-size="sm" data-icon-only aria-label="Add, small"><svg width="16" height="16" aria-hidden="true" /></Button>
         <Button data-testid="link-button" data-variant="secondary" render={<a href="#guide" />}>Read the guide</Button>
       </div>
     </main>
