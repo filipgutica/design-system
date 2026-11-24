@@ -547,7 +547,7 @@ Layer: Core.
 - **States.** Rest, Wrap lines on, and focus-visible on Copy, on Wrap lines, and on the `<pre>` when it scrolls. Copy takes the quiet action states, shows the tick after a copy, and announces "Copied." or a failure.
 - **Do.** Use a code block for source with no live result. When the reader should see the result too, use the variant with a live example.
 - **Don't.** The same language label on every block of a page. Put useful setup context above the block instead.
-- **Keyboard and screen reader.** The `<pre>` is focusable when it scrolls. Tab order is Wrap lines, then Copy, then the `<pre>`. The focus rings on Wrap lines, Copy, and the `<pre>` are inset, because the block clips its content. The `<pre>` ring follows the panel's 8px corners.
+- **Keyboard and screen reader.** The `<pre>` is focusable when it scrolls. With a header, Tab order is Wrap lines, then Copy, then the `<pre>`; a compact block puts the `<pre>` before Copy. The focus rings on Wrap lines, Copy, and the `<pre>` are inset, because the block clips its content. The `<pre>` ring follows the panel's 8px corners.
 - **Motion.** None: the block is static, and Copy changes as a quiet action does.
 - **Forced colors.** The shadow drops, and the frame's border and the panel's transparent border draw as system edges. Syntax colours take the system text colour, so code reads as plain text.
 
