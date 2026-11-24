@@ -80,7 +80,7 @@ const themeSection = (theme, defaultTheme, values) => `  <section class="theme" 
   </section>`
 
 const command = ({ id, label, line }) => `<div class="code command compact"><pre tabindex="0" role="region" aria-label="${esc(label)}"><code id="${id}"><span class="line"><span>${esc(line)}</span></span></code></pre><button class="quiet-action copy" type="button" data-copy="${id}" aria-label="Copy ${esc(label.toLowerCase())}">${icon('copy')}</button></div>`
-const source = ({ id, file, lines }) => `<div class="code"><div class="code-head"><b>${esc(file)}</b><button class="quiet-action copy" type="button" data-copy="${id}">${icon('copy')}Copy</button></div><pre tabindex="0" role="region" aria-label="${esc(file)}"><code id="${id}">${lines.map((line) => `<span class="line"><span>${esc(line)}</span></span>`).join('')}</code></pre></div>`
+const source = ({ id, file, lines }) => `<div class="code"><div class="code-head"><b>${esc(file)}</b><div class="code-actions"><button class="quiet-action wrap-toggle" type="button" data-wrap-toggle aria-pressed="false" aria-label="Wrap lines" title="Wrap lines">${icon('wrap')}</button><button class="quiet-action copy" type="button" data-copy="${id}">${icon('copy')}Copy</button></div></div><pre tabindex="0" role="region" aria-label="${esc(file)}"><code id="${id}">${lines.map((line) => `<span class="line"><span>${esc(line)}</span></span>`).join('')}</code></pre></div>`
 
 const useSection = (packageName, example) => `  <section class="theme" id="use" aria-labelledby="use-title">
     <header class="layer-head"><h2 id="use-title">Use a theme</h2></header>

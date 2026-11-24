@@ -61,7 +61,7 @@ for (const { path, name, find } of PAGES) {
     test('links and icon actions keep their sizes and hit areas', async ({ page }) => {
       const targets = [
         '.page-head .strip a', '.projects > summary', '.site-links a', '.navlist.text-links a',
-        'button.copy', '.close', '.full',
+        'button.copy', '.close', '.full', '.wrap-toggle',
       ].join(', ')
       for (const width of [1280, 800, 375]) {
         await page.setViewportSize({ width, height: 900 })
