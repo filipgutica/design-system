@@ -76,6 +76,11 @@ const pairs: Pair[] = [
   { name: 'disabled button', specimen: `#button .btn${notVariant}[disabled]:not([aria-busy])`, part: 'disabled', props: control },
   { name: 'busy button', specimen: `#button .btn${notVariant}[aria-busy="true"]`, part: 'pending', props: [...control, 'cursor'], state: 'click' },
   { name: 'busy button spinner', specimen: `#button .btn${notVariant}[aria-busy="true"]`, part: 'pending', props: ['width', 'height', 'border-top-width', 'border-right-color', 'border-top-left-radius'], state: 'click', pseudo: '::before' },
+  // An icon-only button is a circle: a square box with the circle radius.
+  { name: 'icon-only primary button', specimen: `#button .btn${restButton}[data-icon-only]:not([aria-busy])`, part: 'icon-primary', props: [...control, 'width'] },
+  { name: 'icon-only secondary button', specimen: '#button .btn.secondary[data-icon-only]:not(.is-hover, .is-focus, .is-active, [data-size])', part: 'icon-secondary', props: [...control, 'width'] },
+  { name: 'icon-only danger button', specimen: '#button .btn.danger[data-icon-only]', part: 'icon-danger', props: [...control, 'width'] },
+  { name: 'small icon-only button', specimen: '#button .btn.secondary[data-icon-only][data-size="sm"]', part: 'icon-sm', props: [...control, 'width'] },
   ...['secondary', 'ghost', 'danger', 'text'].map((variant): Pair => (
     { name: `${variant} button`, specimen: restOf(variant), part: variant, props: control })),
   ...['secondary', 'ghost', 'danger'].map((variant): Pair => (
@@ -177,11 +182,15 @@ const pairs: Pair[] = [
   { name: 'disabled segmented option', specimen: '#segmented-control .segmented button[aria-pressed="false"]:disabled', part: 'seg-disabled', props: control },
   { name: 'disabled checked segmented option', specimen: '#segmented-control .segmented button[aria-pressed="true"]:disabled', part: 'seg-off-list', props: control },
   { name: 'disabled segmented thumb', specimen: '#segmented-control .segmented button[aria-pressed="true"]:disabled', part: 'segmented-off-indicator', props: ['opacity'] },
+  // Icon-only: round options and thumb in a pill track.
+  { name: 'icon-only segmented control', specimen: '#segmented-control .segmented[data-icon-only][data-live]', part: 'segmented-icon', props: [...box, 'padding-left'] },
+  { name: 'icon-only segmented thumb', specimen: '#segmented-control .segmented[data-icon-only][data-live] button[aria-pressed="true"]', specimenPseudo: '::before', part: 'segmented-icon-indicator', props: thumb },
   { name: 'icon-only segmented option', specimen: '#segmented-control .segmented[data-icon-only] button[aria-pressed="false"]', part: 'seg-icon-grid', props: [...control, 'width'] },
   { name: 'small segmented option', specimen: '#segmented-control .segmented[data-size="sm"] button[aria-pressed="true"]', part: 'seg-sm-item', props: control },
   { name: 'large segmented option', specimen: '#segmented-control .segmented[data-size="lg"] button[aria-pressed="true"]', part: 'seg-lg-item', props: control },
   { name: 'tab list', specimen: '#tabs .tablist', part: 'tabs-list', props: ['display', 'padding-top', 'padding-left', 'overflow-x', 'isolation'] },
   { name: 'tab', specimen: `#tabs .tab${restTab}`, part: 'tab-history', props: [...control, 'border-top-left-radius'] },
+  { name: 'small tab', specimen: '#tabs .tablist[data-size="sm"] .tab[aria-selected="true"]', part: 'tab-sm-overview', props: control },
   { name: 'tab on hover', specimen: '#tabs .tab.is-hover', part: 'tab-history', props: control, state: 'hover' },
   { name: 'selected tab', specimen: '#tabs .tab[aria-selected="true"]:not(.is-focus)', part: 'tab-overview', props: control },
   { name: 'selected tab fill', specimen: '#tabs .tab[aria-selected="true"]:not(.is-focus)', specimenPseudo: '::before', part: 'tabs-indicator', props: thumb },
@@ -284,7 +293,7 @@ test.describe('ui-sdk parts match the catalogue at 375px', () => {
   for (const mode of ['light', 'dark']) {
     for (const pair of menuPairs) test(`${pair.name} in ${mode}`, ({ page, context }) => compare({ page, context, mode, pair }))
   }
-  for (const name of ['primary button', 'input', 'checkbox row', 'switch row', 'toggle button', 'select', 'segmented option', 'icon-only segmented option', 'tab']) {
+  for (const name of ['primary button', 'input', 'checkbox row', 'switch row', 'toggle button', 'select', 'segmented option', 'icon-only segmented option', 'icon-only primary button', 'tab']) {
     const pair = pairs.find((candidate) => candidate.name === name)!
     test(name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
   }
@@ -296,9 +305,26 @@ test('sized parts grow to --control-touch at 375px', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 })
   await page.goto('/ui-sdk.html')
   const touch = (await tokens(page, 'height: var(--control-touch)')).height
-  for (const id of ['input-sm', 'input-lg', 'checkbox-sm-label', 'checkbox-lg-label', 'segmented-sm', 'segmented-lg']) {
+  for (const id of ['input-sm', 'input-lg', 'checkbox-sm-label', 'checkbox-lg-label', 'segmented-sm', 'segmented-lg', 'icon-sm', 'tab-sm-overview']) {
     expect(await page.getByTestId(id).evaluate((element) => getComputedStyle(element).height), id).toBe(touch)
   }
+  // A round button grows on both sides, so it stays a circle.
+  expect(await page.getByTestId('icon-sm').evaluate((element) => getComputedStyle(element).width)).toBe(touch)
+})
+
+// A flex row stretches its items to the tallest one; an icon-only button keeps its square box.
+test('an icon-only button stays square in a row with a taller sibling', async ({ page }) => {
+  await page.goto('/ui-sdk.html')
+  const box = await page.getByTestId('icon-primary').evaluate((button) => {
+    const row = document.createElement('div')
+    row.style.display = 'flex'
+    row.innerHTML = '<div style="height: 72px"></div>'
+    document.body.append(row)
+    row.append(button)
+    const { width, height } = button.getBoundingClientRect()
+    return { width, height }
+  })
+  expect(box.height).toBe(box.width)
 })
 
 // Forced colours replace author colours with system ones, so these compare what the rules set there.

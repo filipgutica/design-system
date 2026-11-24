@@ -179,6 +179,7 @@
   --radius-field: 8px;
   --radius-mark: 4px;
   --radius-pill: 999px;
+  --radius-circle: 999px;
 
   /* Elevation: DESIGN.md#depth assigns each tier. Idle controls and surfaces take no outer light
      highlight and no blur wider than 2px. */

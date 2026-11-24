@@ -26,6 +26,10 @@
   [data-slot="button"] { --depth: var(--shadow-raise); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--control-md); padding: 0 0.625rem; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-accent); color: var(--color-accent-text); box-shadow: var(--depth); font: var(--weight-medium) var(--text-md) / 1.25 var(--font-ui); letter-spacing: -0.01em; text-decoration: none; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
   [data-slot="button"][data-size="sm"] { min-height: var(--control-sm); gap: 0.375rem; padding: 0 var(--space-2); font-size: var(--text-sm); }
   [data-slot="button"][data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-3); font-size: var(--text-lg); }
+  /* An icon-only button is a circle: one 16px icon and no text, on a square box of the size's control height. */
+  [data-slot="button"][data-icon-only] { --size: var(--control-md); flex: none; width: var(--size); height: var(--size); min-height: var(--size); padding: 0; border-radius: var(--radius-circle); }
+  [data-slot="button"][data-icon-only][data-size="sm"] { --size: var(--control-sm); }
+  [data-slot="button"][data-icon-only][data-size="lg"] { --size: var(--control-lg); }
   [data-slot="button"][data-variant="secondary"] { background: var(--color-control-thumb); color: var(--color-text); }
   [data-slot="button"][data-variant="ghost"] { --depth: none; background: transparent; color: var(--color-muted); }
   /* Danger rises like the other filled variants; its text mixes the hue toward --color-text, as status badges do. */
@@ -48,6 +52,8 @@
   [data-slot="button"]:is([data-disabled], [data-pending]) { --depth: none; opacity: 0.58; cursor: not-allowed; }
   [data-slot="button"][aria-busy="true"] { cursor: wait; }
   [data-slot="button"][aria-busy="true"]::before { content: ""; flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: ui-sdk-spin 700ms linear infinite; }
+  /* An icon-only button has no room for both, so the spinner replaces its icon; the aria-label names it still. */
+  [data-slot="button"][data-icon-only][aria-busy="true"] > * { display: none; }
   @keyframes ui-sdk-spin { to { transform: rotate(360deg); } }
 
   /* ---------- Field wrapper, input, textarea, and select trigger ---------- */
@@ -195,6 +201,9 @@
   /* Line height 1 comes after the font shorthand, which would reset it: the label then sits centred in the item. */
   [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"] { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: calc(var(--item) - 2 * var(--inset)); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-control) - var(--inset)); background: transparent; color: var(--color-muted); font: inherit; line-height: 1; cursor: pointer; }
   [data-slot="segmented-control"][data-orientation="horizontal"][data-icon-only] > [data-slot="segmented-control-item"] { width: calc(var(--item) - 2 * var(--inset)); padding: 0; }
+  /* Icon-only: a pill track with round options and thumb, concentric with it. A px radius keeps the thumb a pill while it moves. */
+  [data-slot="segmented-control"][data-orientation="horizontal"][data-icon-only] { border-radius: var(--radius-pill); }
+  [data-slot="segmented-control"][data-orientation="horizontal"][data-icon-only] > :is([data-slot="segmented-control-item"], [data-slot="segmented-control-indicator"]) { border-radius: calc(var(--radius-pill) - var(--inset)); }
   /* The hover thumb sits behind the label and under the indicator, inside the control's stacking context. */
   [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"]::before { content: ""; position: absolute; inset: 0; z-index: -2; border-radius: inherit; pointer-events: none; }
   @media (hover: hover) {
@@ -213,7 +222,9 @@
      is the selected tab's lifted fill, from the position ui-sdk measures. Horizontal only. */
   /* The fill takes its left edge and width: ui-sdk measures --active-tab-right from the end of the scrolled content. */
   [data-slot="tabs-list"][data-orientation="horizontal"] { position: relative; display: flex; width: max-content; max-width: 100%; overflow-x: auto; padding: var(--space-1); isolation: isolate; }
-  [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"] { position: relative; flex: none; min-height: var(--control-md); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-inline); background: transparent; color: var(--color-muted); font: var(--weight-medium) var(--text-md) / var(--leading) var(--font-ui); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  /* A tab's box is the button's: the control height, the button's inline padding (--tab-pad), and line height 1. */
+  [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"] { --tab-pad: 0.625rem; position: relative; flex: none; display: inline-flex; align-items: center; min-height: var(--control-md); padding: 0 var(--tab-pad); border: 0; border-radius: var(--radius-inline); background: transparent; color: var(--color-muted); font: var(--weight-medium) var(--text-md) / 1 var(--font-ui); white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  [data-slot="tabs-list"][data-orientation="horizontal"][data-size="sm"] > [data-slot="tabs-tab"] { --tab-pad: var(--space-2); min-height: var(--control-sm); font-size: var(--text-sm); }
   @media (hover: hover) {
     [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"]:hover:not([data-disabled], [data-selected]) { background: var(--color-row-hover); color: var(--color-text); }
   }
@@ -339,12 +350,13 @@
      wins by coming later. */
   @media (max-width: 800px) {
     [data-slot="button"]:is(:not([data-size]), [data-size]) { min-height: var(--control-touch); }
+    [data-slot="button"][data-icon-only]:is(:not([data-size]), [data-size]) { --size: var(--control-touch); }
     [data-slot="input"]:is(:not([data-size]), [data-size]) { height: var(--control-touch); }
     [data-slot="label"]:is(:not([data-size]), [data-size]):has(> :is([data-slot="checkbox"], [data-slot="radio"], [data-slot="switch"])) { min-height: var(--control-touch); }
     [data-slot="toggle"]:is(:not([data-size]), [data-size]):not([data-orientation]):has(> [data-slot="toggle-icon"]:empty) { min-height: var(--control-touch); }
     [data-slot="select-trigger"]:is(:not([data-size]), [data-size]) { height: var(--control-touch); }
     [data-slot="segmented-control"][data-orientation="horizontal"]:is(:not([data-size]), [data-size]) { --item: var(--control-touch); }
-    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"] { min-height: var(--control-touch); }
+    [data-slot="tabs-list"][data-orientation="horizontal"]:is(:not([data-size]), [data-size]) > [data-slot="tabs-tab"] { min-height: var(--control-touch); }
     [data-slot="slider"][data-orientation="horizontal"]:is(:not([data-size]), [data-size]) > [data-slot="slider-control"] { height: var(--control-touch); }
   }
 
@@ -367,7 +379,7 @@
     [data-slot="segmented-control"][data-orientation="horizontal"] > [data-slot="segmented-control-item"][data-checked]:focus-visible { outline-color: HighlightText; }
     /* The fill drops, so the selected tab takes a system border; the padding absorbs it. */
     [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-indicator"] { display: none; }
-    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"][data-selected] { border: 2px solid Highlight; padding: calc(var(--space-2) - 2px) calc(var(--space-3) - 2px); }
+    [data-slot="tabs-list"][data-orientation="horizontal"] > [data-slot="tabs-tab"][data-selected] { border: 2px solid Highlight; padding-inline: calc(var(--tab-pad) - 2px); }
     /* Value marks: only the mark opts out of adjustment and redraws in the system highlight. */
     :is([data-slot="slider"][data-orientation="horizontal"] [data-slot="slider-indicator"], [data-slot="progress"]:not([data-indeterminate]) [data-slot="progress-indicator"]) { forced-color-adjust: none; background: Highlight; }
   }

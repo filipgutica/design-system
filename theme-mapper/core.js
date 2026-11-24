@@ -248,7 +248,8 @@ export const core = {
         "radius-panel": "12px",
         "radius-field": "8px",
         "radius-mark": "4px",
-        "radius-pill": "999px"
+        "radius-pill": "999px",
+        "radius-circle": "999px"
       }
     },
     {

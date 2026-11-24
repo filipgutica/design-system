@@ -33,6 +33,7 @@ const ADDED_SINCE_DS1 = [
   '--color-terminal-ansi-4-bg',
   '--radius-mark',
   '--control-touch',
+  '--radius-circle',
 ]
 const withoutAdded = (css) => css.replace(new RegExp(`^\\s*(?:${ADDED_SINCE_DS1.join('|')}):[^;]+;\\n`, 'gm'), '')
 
