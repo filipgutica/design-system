@@ -399,7 +399,7 @@
         "control-sm": "Small control height: every control in an application screen",
         "control-md": "Default control height: documentation and product pages",
         "control-lg": "Large control height, for a size variant only",
-        "control-touch": "Touch targets: every control at tablet width, and docs-site links and icon actions",
+        "control-touch": "Touch targets: every control, link, and quiet action at tablet width",
         "row": "Navigation and list rows",
         "measure": "Bounds reading text",
         "page-max": "Documentation frame",
