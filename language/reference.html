@@ -301,7 +301,8 @@
   /* Wrap lines is an icon-only quiet action and a toggle: while on it keeps the open-menu tint. */
   .wrap-toggle { flex: none; width: var(--control-md); min-height: var(--control-md); padding: 0; }
   :where(.wrap-toggle[aria-pressed="true"]) { background: color-mix(in srgb, currentColor 6%, transparent); }
-  @media (forced-colors: active) { .wrap-toggle[aria-pressed="true"] { border-color: Highlight; color: Highlight; } }
+  /* Forced colors: a Highlight border and icon mark it on, at rest and on hover. */
+  @media (forced-colors: active) { .code .wrap-toggle[aria-pressed="true"] { border-color: Highlight; } .wrap-toggle[aria-pressed="true"] .icon { color: Highlight; } }
   /* Inset: the code block clips its content. */
   .code pre:is(:focus-visible, .is-focus) { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
   .code :is(.copy, .wrap-toggle).quiet-action:is(:focus-visible, .is-focus) { outline-offset: calc(var(--focus-width) * -1); }

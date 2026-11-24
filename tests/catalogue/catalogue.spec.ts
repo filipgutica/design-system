@@ -1187,26 +1187,57 @@ test.describe('code wrap', () => {
       ;(window as unknown as { copied: string[] }).copied = []
     })
     await page.goto(url)
+    const source = [
+      "export const runbook = 'https://docs.example.com/runbooks/api-latency/p95-breach-escalation-and-rollback-steps'",
+      "export const message = 'API p95 latency stayed above the threshold for five minutes, so the on-call engineer is paged'",
+    ].join('\n')
     const block = page.locator('#code-block .code:has(#code-wrap-src)')
+    const other = page.locator('#code-block .code:has(#code-src)')
     const toggle = block.locator('.wrap-toggle')
     const scrolls = () => block.locator('pre').evaluate((pre) => pre.scrollWidth > pre.clientWidth)
-    // The name stays; the state is aria-pressed.
+    // Off by default: the long lines scroll sideways. The name stays; the state is aria-pressed.
     await expect(toggle).toHaveAccessibleName('Wrap lines')
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    expect(await scrolls()).toBe(true)
+    await block.locator('.copy').click()
+    await toggle.click()
     await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    await expect(toggle).toHaveAccessibleName('Wrap lines')
     expect(await scrolls()).toBe(false)
+    // The state is per block.
+    await expect(other).not.toHaveAttribute('data-wrap')
+    await expect(other.locator('.wrap-toggle')).toHaveAttribute('aria-pressed', 'false')
     // Each line number stays on its line's first visual row.
     const [number, text] = await block.locator('.line').first().evaluate((line) => [line.children[0], line.children[1]].map((part) => part.getBoundingClientRect().top))
     expect(Math.abs(number - text)).toBeLessThan(2)
     await block.locator('.copy').click()
     await toggle.click()
     await expect(toggle).toHaveAttribute('aria-pressed', 'false')
-    await expect(toggle).toHaveAccessibleName('Wrap lines')
     expect(await scrolls()).toBe(true)
-    await block.locator('.copy').click()
-    const copied = await page.evaluate(() => (window as unknown as { copied: string[] }).copied)
-    expect(copied).toHaveLength(2)
-    expect(copied[0]).toBe(copied[1])
-    expect(copied[0].split('\n')).toHaveLength(2)
+    expect(await page.evaluate(() => (window as unknown as { copied: string[] }).copied)).toEqual([source, source])
+  })
+
+  test('in forced colors Wrap lines on has a Highlight border and icon, at rest and on hover', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' })
+    await page.goto(url)
+    const toggle = page.locator('#code-block .code:has(#code-wrap-src) .wrap-toggle')
+    const colours = () => toggle.evaluate((button) => {
+      const highlight = document.createElement('i')
+      highlight.style.color = 'Highlight'
+      document.body.append(highlight)
+      const expected = getComputedStyle(highlight).color
+      highlight.remove()
+      return { expected, border: getComputedStyle(button).borderTopColor, icon: getComputedStyle(button.querySelector('.icon')!).color }
+    })
+    await toggle.click()
+    await page.mouse.move(0, 0)
+    const rest = await colours()
+    expect(rest.border).toBe(rest.expected)
+    expect(rest.icon).toBe(rest.expected)
+    await toggle.hover()
+    const hover = await colours()
+    expect(hover.border).toBe(hover.expected)
+    expect(hover.icon).toBe(hover.expected)
   })
 
   test('every code block with a header or an example has Wrap lines before Copy, and a compact block has none', async ({ page }) => {
