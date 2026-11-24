@@ -39,7 +39,7 @@ const renderedControls = (page: Page) => page.locator(`:is(${controlTargets}):vi
     // Header links are navigation rows at the control height, not the row height.
     row: element.matches('[role="option"], .navlist a, .menu-list [role="menuitem"]') && !element.matches('.page-head .strip a, .site-links a'),
     // The phone header samples show the touch size at every width.
-    alwaysTouch: element.matches('.navlist.text-links a, .phone-head .projects > summary'),
+    alwaysTouch: element.matches('.navlist.text-links a, .phone-head .projects > summary, .phone-head > .strip a'),
     // Toggle cards and padded menu triggers can grow to fit their contents.
     contentHeight: element.matches('.toggle, .btn.menu-glyph, .radio-card, textarea, .navlist a, .crumbs a'),
     textButton: element.matches('.btn.text'),

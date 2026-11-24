@@ -76,6 +76,10 @@ for (const { path, name, find } of PAGES) {
               const { height } = element.getBoundingClientRect()
               return height === expected ? undefined : { label, height, expected }
             }
+            // Token Copy's hit area is a transparent ::after: 32px on desktop and 44px at tablet width.
+            const area = getComputedStyle(element, '::after')
+            const areaHeight = checkTouchEdges ? touchHeight : controlHeight
+            if (area.height !== `${areaHeight}px` || parseFloat(area.width) < areaHeight) return { label, area: `${area.width}x${area.height}`, expected: areaHeight }
             // Token Copy's hit area extends beyond its visible button. On desktop, check
             // that neighbouring targets never intercept hits inside the visible button.
             element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' })
