@@ -180,7 +180,7 @@
   [data-slot="dialog-title"] { margin: 0; font-size: 1.125rem; font-weight: var(--weight-semibold); letter-spacing: -0.02em; }
   [data-slot="dialog-description"] { margin: var(--space-1) 0 0; color: var(--color-muted); }
   /* The header's close button, in a dialog or a drawer, is a quiet action. A Close rendered as a Button is drawn as that button. */
-  :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]) { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-touch); min-height: var(--control-touch); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]) { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--control-md); min-height: var(--control-md); padding: 0; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; color: var(--color-muted); font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
   @media (hover: hover) {
     :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]):hover { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
   }
@@ -358,6 +358,7 @@
     [data-slot="segmented-control"][data-orientation="horizontal"]:is(:not([data-size]), [data-size]) { --item: var(--control-touch); }
     [data-slot="tabs-list"][data-orientation="horizontal"]:is(:not([data-size]), [data-size]) > [data-slot="tabs-tab"] { min-height: var(--control-touch); }
     [data-slot="slider"][data-orientation="horizontal"]:is(:not([data-size]), [data-size]) > [data-slot="slider-control"] { height: var(--control-touch); }
+    :is([data-slot="dialog-content"], [data-slot="drawer-content"]) > header > :is([data-slot="dialog-close"], [data-slot="drawer-close"]) { width: var(--control-touch); min-height: var(--control-touch); }
   }
 
   @media (forced-colors: active) {

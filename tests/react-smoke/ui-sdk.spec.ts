@@ -293,7 +293,7 @@ test.describe('ui-sdk parts match the catalogue at 375px', () => {
   for (const mode of ['light', 'dark']) {
     for (const pair of menuPairs) test(`${pair.name} in ${mode}`, ({ page, context }) => compare({ page, context, mode, pair }))
   }
-  for (const name of ['primary button', 'input', 'checkbox row', 'switch row', 'toggle button', 'select', 'segmented option', 'icon-only segmented option', 'icon-only primary button', 'tab']) {
+  for (const name of ['primary button', 'input', 'checkbox row', 'switch row', 'toggle button', 'select', 'segmented option', 'icon-only segmented option', 'icon-only primary button', 'tab', 'dialog close button', 'drawer close button']) {
     const pair = pairs.find((candidate) => candidate.name === name)!
     test(name, ({ page, context }) => compare({ page, context, mode: 'light', pair }))
   }

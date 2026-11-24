@@ -58,7 +58,7 @@ for (const { path, name, find } of PAGES) {
       })
     }
 
-    test('links and icon actions with touch targets keep their required hit areas', async ({ page }) => {
+    test('links and icon actions keep their sizes and hit areas', async ({ page }) => {
       const targets = [
         '.page-head .strip a', '.projects > summary', '.site-links a', '.navlist.text-links a',
         'button.copy', '.close', '.full',
@@ -66,14 +66,20 @@ for (const { path, name, find } of PAGES) {
       for (const width of [1280, 800, 375]) {
         await page.setViewportSize({ width, height: 900 })
         await page.goto(path)
-        const { count, mismatch } = await page.locator(`:is(${targets}):visible`).evaluateAll((elements, { touchHeight, checkTouchEdges }) => ({
+        const { count, mismatch } = await page.locator(`:is(${targets}):visible`).evaluateAll((elements, { touchHeight, controlHeight, checkTouchEdges }) => ({
           count: elements.length,
           mismatch: elements.map((element) => {
             const label = element.getAttribute('aria-label') ?? element.textContent?.trim()
             if (!element.hasAttribute('data-copy-token')) {
+              // 32px on desktop and 44px at tablet width; the phone header samples are 44px at every width.
+              const expected = checkTouchEdges || element.matches('.phone-head *') ? touchHeight : controlHeight
               const { height } = element.getBoundingClientRect()
-              return height === touchHeight ? undefined : { label, height }
+              return height === expected ? undefined : { label, height, expected }
             }
+            // Token Copy's hit area is a transparent ::after: 32px on desktop and 44px at tablet width.
+            const area = getComputedStyle(element, '::after')
+            const areaHeight = checkTouchEdges ? touchHeight : controlHeight
+            if (area.height !== `${areaHeight}px` || parseFloat(area.width) < areaHeight) return { label, area: `${area.width}x${area.height}`, expected: areaHeight }
             // Token Copy's hit area extends beyond its visible button. On desktop, check
             // that neighbouring targets never intercept hits inside the visible button.
             element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' })
@@ -86,9 +92,9 @@ for (const { path, name, find } of PAGES) {
             const hitsBottom = element.contains(document.elementFromPoint(x, centerY + inset))
             return hitsTop && hitsCenter && hitsBottom ? undefined : { label, hitsTop, hitsCenter, hitsBottom }
           }).find(Boolean),
-        }), { touchHeight: 44, checkTouchEdges: width <= 800 })
+        }), { touchHeight: 44, controlHeight: 32, checkTouchEdges: width <= 800 })
         expect(count).toBeGreaterThanOrEqual(PAGES.length)
-        expect.soft(mismatch, `44px touch targets at ${width}px`).toBeUndefined()
+        expect.soft(mismatch, `link and icon action heights at ${width}px`).toBeUndefined()
       }
     })
 

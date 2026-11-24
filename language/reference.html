@@ -288,7 +288,7 @@
   .code-head b { font-weight: var(--weight-semibold); }
   .code-head .lang { color: var(--color-muted); }
   /* Copy is a quiet action; this sets its size and place. */
-  .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-touch); min-height: var(--control-touch); margin-left: auto; padding: var(--space-1) 0.375rem; color: inherit; }
+  .copy { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; min-width: var(--control-md); min-height: var(--control-md); margin-left: auto; padding: 0 0.375rem; color: inherit; }
   /* Copy is muted at rest. The code block has its own palette, so on hover and while the tick shows it takes the block's text colour. */
   .code .copy { color: var(--color-muted); }
   .code .copy[data-copied] { color: var(--color-code-text); }
@@ -307,6 +307,8 @@
   /* The panel fills the row beside Copy, so it sits --space-1 from the frame and from Copy on every side, and centres its line. */
   .code.compact { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-1); }
   .code.compact pre { align-content: center; padding: var(--space-2) var(--space-3); }
+  /* Copy keeps its control height and centres on the panel's line. */
+  .code.compact > .copy { align-self: center; }
 
   /* Command plate: components.html#command-plate, unchanged. */
   /* The prompt is drawn by CSS, so copied and spoken text omit it. */
@@ -424,6 +426,7 @@
     .segmented button { min-width: calc(var(--item) - 2 * var(--inset)); }
     .btn:not([data-specimen="size"] *), .navlist a, .tab { min-height: var(--control-touch); }
     .search { height: var(--control-touch); }
+    .copy { min-width: var(--control-touch); min-height: var(--control-touch); }
     .check:not([data-specimen="size"] *) { min-height: var(--control-touch); }
     .shell { grid-template-columns: minmax(0, 1fr); height: auto; }
     main { overflow: visible; }
@@ -721,7 +724,7 @@
             <li class="spec" data-token="--control-sm"><div class="spec-meta"><code>--control-sm</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-sm)"></i></li>
             <li class="spec" data-token="--control-md"><div class="spec-meta"><code>--control-md</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-md)"></i></li>
             <li class="spec" data-token="--control-lg"><div class="spec-meta"><code>--control-lg</code><span class="value"></span></div><i class="height-bar" style="height:var(--control-lg)"></i></li>
-            <li class="spec" data-token="--control-touch"><div class="spec-meta"><code>--control-touch</code><span class="value"></span><span class="use">Touch targets: every control at tablet width, and docs-site links and icon actions</span></div><i class="height-bar" style="height:var(--control-touch)"></i></li>
+            <li class="spec" data-token="--control-touch"><div class="spec-meta"><code>--control-touch</code><span class="value"></span><span class="use">Touch targets: every control, navigation row, and quiet action at tablet width</span></div><i class="height-bar" style="height:var(--control-touch)"></i></li>
           </ul>
         </section>
 

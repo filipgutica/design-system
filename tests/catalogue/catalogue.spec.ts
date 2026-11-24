@@ -36,8 +36,10 @@ const renderedControls = (page: Page) => page.locator(`:is(${controlTargets}):vi
     width,
     // Search and a few standalone compact actions use the small height on desktop.
     compact: element.matches('.search, .crumbs a, .group-toggle, .overflow > button, .copy-link, .page-head > .site-name, .composer-box textarea'),
-    row: element.matches('[role="option"], .navlist a, .menu-list [role="menuitem"]'),
-    alwaysTouch: element.matches('.header a, .actions > a:not(.btn), .page-head .strip a, .site-links a, .navlist.text-links a, button.copy, .close, .capture .tab, .full, .projects > summary'),
+    // Header links are navigation rows at the control height, not the row height.
+    row: element.matches('[role="option"], .navlist a, .menu-list [role="menuitem"]') && !element.matches('.page-head .strip a, .site-links a'),
+    // The phone header samples show the touch size at every width.
+    alwaysTouch: element.matches('.navlist.text-links a, .phone-head .projects > summary, .phone-head > .strip a'),
     // Toggle cards and padded menu triggers can grow to fit their contents.
     contentHeight: element.matches('.toggle, .btn.menu-glyph, .radio-card, textarea, .navlist a, .crumbs a'),
     textButton: element.matches('.btn.text'),
