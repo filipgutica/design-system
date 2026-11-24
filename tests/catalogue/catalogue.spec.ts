@@ -111,6 +111,21 @@ for (const file of ['components.html', 'reference.html', 'product.html', 'docs.h
   })
 }
 
+// A flex row stretches its items to the tallest one; an icon-only button keeps its square box.
+test('an icon-only button stays a circle in a row with a taller sibling', async ({ page }) => {
+  await page.goto(url)
+  const box = await page.locator('#button .btn[data-icon-only][aria-label="Send"]').first().evaluate((button) => {
+    const row = document.createElement('div')
+    row.style.display = 'flex'
+    row.innerHTML = '<div style="height: 72px"></div>'
+    document.querySelector('main')!.append(row)
+    row.append(button)
+    const { width, height } = button.getBoundingClientRect()
+    return { width, height }
+  })
+  expect(box).toEqual({ width: 32, height: 32 })
+})
+
 test.describe('desktop', () => {
   test.use({ viewport: { width: 1280, height: 900 } })
 

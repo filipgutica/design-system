@@ -32,7 +32,7 @@
   .btn[data-size="sm"] { min-height: var(--control-sm); gap: 0.375rem; padding: 0 var(--space-2); font-size: var(--text-sm); }
   .btn[data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-3); font-size: var(--text-lg); }
   /* An icon-only button is a circle: one 16px icon and no text, on a square box of the size's control height. */
-  .btn[data-icon-only] { --size: var(--control-md); flex: none; width: var(--size); min-height: var(--size); padding: 0; border-radius: var(--radius-circle); }
+  .btn[data-icon-only] { --size: var(--control-md); flex: none; width: var(--size); height: var(--size); min-height: var(--size); padding: 0; border-radius: var(--radius-circle); }
   .btn[data-icon-only][data-size="sm"] { --size: var(--control-sm); }
   .btn[data-icon-only][data-size="lg"] { --size: var(--control-lg); }
   .btn.is-hover:not(:disabled) { background: var(--color-button-hover); }
@@ -63,7 +63,7 @@
   .btn[aria-busy="true"]::before { content: ""; flex: none; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 700ms linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   /* An icon-only button has no room for both, so the spinner replaces its icon; the aria-label names it still. */
-  .btn[data-icon-only][aria-busy="true"] > .icon { display: none; }
+  .btn[data-icon-only][aria-busy="true"] > * { display: none; }
   /* Reduced motion slows the spinner instead of stopping it: the tokens.css base holds that exception. */
 
   /* Quiet action: an icon or short text action inside a component, such as Copy, Full size, a dialog or
@@ -580,8 +580,8 @@
   .tool-body { margin-top: var(--space-1); padding: var(--space-2) var(--space-3); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface); font-size: var(--text-sm); }
   .tool-body ul { display: grid; gap: 0.125rem; margin: 0; padding-inline-start: var(--space-4); }
 
-  /* Composer: one field with an inline send button 4px inside it, so the button's corners are the box's 12px
-     minus 4px. The box takes the field look and focus; the textarea inside it draws nothing. */
+  /* Composer: one field with an inline round send button 6px inside its outer edge, clear of the box's 12px
+     corner. The box takes the field look and focus; the textarea inside it draws nothing. */
   .composer { display: grid; gap: var(--space-1); width: 100%; }
   .composer-box { display: flex; align-items: flex-end; gap: var(--space-2); padding: 0.3125rem; padding-inline-start: var(--space-3); border: 1px solid var(--color-field-edge); border-radius: var(--radius-panel); background: var(--color-field-bg); box-shadow: var(--shadow-field); }
   /* The padding centres one line in --control-sm; each further line adds a line, up to 10rem. */

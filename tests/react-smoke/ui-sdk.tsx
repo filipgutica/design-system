@@ -219,6 +219,13 @@ const App = () => {
         <TabsPanel data-testid="tabs-panel" value="overview">p95 latency is steady.</TabsPanel>
         <TabsPanel value="history">No incidents this week.</TabsPanel>
       </Tabs>
+      <Tabs defaultValue="overview">
+        <TabsList data-testid="tabs-sm" data-size="sm" aria-label="Monitor, small">
+          <TabsIndicator />
+          <TabsTab data-testid="tab-sm-overview" value="overview">Overview</TabsTab>
+          <TabsTab value="history">History</TabsTab>
+        </TabsList>
+      </Tabs>
       <div style={{ width: '14rem' }}>
         <Tabs defaultValue="t1">
           <TabsList data-testid="tabs-scroll" aria-label="Regions">

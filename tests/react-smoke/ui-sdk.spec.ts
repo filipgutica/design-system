@@ -190,6 +190,7 @@ const pairs: Pair[] = [
   { name: 'large segmented option', specimen: '#segmented-control .segmented[data-size="lg"] button[aria-pressed="true"]', part: 'seg-lg-item', props: control },
   { name: 'tab list', specimen: '#tabs .tablist', part: 'tabs-list', props: ['display', 'padding-top', 'padding-left', 'overflow-x', 'isolation'] },
   { name: 'tab', specimen: `#tabs .tab${restTab}`, part: 'tab-history', props: [...control, 'border-top-left-radius'] },
+  { name: 'small tab', specimen: '#tabs .tablist[data-size="sm"] .tab[aria-selected="true"]', part: 'tab-sm-overview', props: control },
   { name: 'tab on hover', specimen: '#tabs .tab.is-hover', part: 'tab-history', props: control, state: 'hover' },
   { name: 'selected tab', specimen: '#tabs .tab[aria-selected="true"]:not(.is-focus)', part: 'tab-overview', props: control },
   { name: 'selected tab fill', specimen: '#tabs .tab[aria-selected="true"]:not(.is-focus)', specimenPseudo: '::before', part: 'tabs-indicator', props: thumb },
@@ -304,9 +305,26 @@ test('sized parts grow to --control-touch at 375px', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 })
   await page.goto('/ui-sdk.html')
   const touch = (await tokens(page, 'height: var(--control-touch)')).height
-  for (const id of ['input-sm', 'input-lg', 'checkbox-sm-label', 'checkbox-lg-label', 'segmented-sm', 'segmented-lg', 'icon-sm']) {
+  for (const id of ['input-sm', 'input-lg', 'checkbox-sm-label', 'checkbox-lg-label', 'segmented-sm', 'segmented-lg', 'icon-sm', 'tab-sm-overview']) {
     expect(await page.getByTestId(id).evaluate((element) => getComputedStyle(element).height), id).toBe(touch)
   }
+  // A round button grows on both sides, so it stays a circle.
+  expect(await page.getByTestId('icon-sm').evaluate((element) => getComputedStyle(element).width)).toBe(touch)
+})
+
+// A flex row stretches its items to the tallest one; an icon-only button keeps its square box.
+test('an icon-only button stays square in a row with a taller sibling', async ({ page }) => {
+  await page.goto('/ui-sdk.html')
+  const box = await page.getByTestId('icon-primary').evaluate((button) => {
+    const row = document.createElement('div')
+    row.style.display = 'flex'
+    row.innerHTML = '<div style="height: 72px"></div>'
+    document.body.append(row)
+    row.append(button)
+    const { width, height } = button.getBoundingClientRect()
+    return { width, height }
+  })
+  expect(box.height).toBe(box.width)
 })
 
 // Forced colours replace author colours with system ones, so these compare what the rules set there.
