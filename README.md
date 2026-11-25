@@ -12,10 +12,10 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | --- | --- |
 | `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the experimental `ui-sdk.css` component styles for ui-sdk, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
 | `skills/design-system/`, `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/` | The agent plugin: the skill that points agents at `language/`, and the Claude and Codex plugin and marketplace manifests. The repository root is the plugin root |
-| `tokens/core.json`, `tokens/themes/*.tokens.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file is a W3C Design Tokens file (2025.10) that holds only its name, a note, its hue pair, and optional fonts, base radius, and neutrals |
+| `tokens/core.json`, `tokens/themes/*.tokens.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file is a W3C Design Tokens file (2025.10) that holds only its name, a note, its hue pair, and optional fonts, base radius, neutrals, and text on the hue; see [Theme files](#theme-files) |
 | `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css`, `dist/`, and the theme mapper's `core.js`; generates and checks declarations from JSDoc for `theme-mapper/` and `open-vsx/` |
 | `open-vsx/` | Experimental JSONC theme-file parser and Open VSX client, with resolved includes and unaltered colours and syntax rules |
-| `theme-mapper/` | The theme engine the token build shares, and the experimental theme mapper built on it |
+| `theme-mapper/` | The theme engine and theme builder the token build shares, and the experimental theme mapper built on them |
 | `scripts/build-site.mjs` | The site build: writes `site/` for GitHub Pages from `components.html`, the tokens, and `package.json` |
 | `dist/` | Generated theme files, JSON, and JavaScript |
 | `fonts/` | Inter and JetBrains Mono latin `woff2` files, `fonts.css`, and their OFL licences |
@@ -43,9 +43,26 @@ npm install @filipgutica/design-system
 | `@filipgutica/design-system/theme-inputs.json` | The tokens a theme may set, without their dashes: `names`, and the same names by kind in `groups` (`hue`, `textOnHue`, `fonts`, `radius`, `neutrals`, `syntax`). Every other token is core. A component library's test can read it and fail when one of its themes sets any other token. |
 | `@filipgutica/design-system/language/*` | The spec, catalogue, and example pages. |
 | `@filipgutica/design-system/theme-mapper` | Experimental: the API may change until a component library uses it. `mapVsCodeTheme(theme)` maps a VS Code colour theme onto theme inputs for its one mode, by selecting the theme's own colours, keeps the syntax colours its `tokenColors` set, and lists each check it still fails as a `theme` or `core` problem. `checkTheme(inputs)` runs the contrast checks every shipped theme passes on any theme's inputs (`{ hue: { light, dark }, fonts?, radius?, neutrals?, textOnHue? }`; colours are `#rrggbb`, `white`, `black`, or a token reference such as `{color-bg}`, for example `textOnHue: { light: { 'color-accent-text': '#ffffff' } }`) and returns each check's lowest ratio per mode with `ok`. `themeVariables(mapped)` returns the CSS custom properties to set inline on `<html>`, with `data-theme` forced to the theme's mode. Typed, with no framework and no runtime dependencies. |
+| `@filipgutica/design-system/theme-builder` | `themeCss(file, { source? })` turns a [theme file](#theme-files), parsed from JSON, into the CSS to load after `tokens.css`: the same CSS the package's `themes/*.css` come from, so a consumer does not copy `tokens.css`'s selectors. `source` names the file in the CSS's first comment line. It throws `ThemeFileError`, whose `problems` lists each problem; `parseTheme(file)` returns `{ problems, inputs }` without throwing. Typed, with no framework and no runtime dependencies. |
 | `@filipgutica/design-system/open-vsx` | Experimental: the API may change in a minor release. `parseVsCodeTheme({ source, fileName })` parses a JSONC theme file and normalises its name. `createOpenVsxThemeService({ fetchImpl })` accepts an optional fetch implementation, searches Open VSX, and imports a verified package, resolving includes into `{ name, type?, colors, tokenColors? }` for `mapVsCodeTheme`. The parser throws `ThemeValidationError` with `malformed-json` or `invalid-shape`; the client returns success or error results. Uses native ZIP decompression and `jsonc-parser`; picker UI, persistence, and applying a theme belong to component libraries. |
 
 In a React app, import `tokens.css` and `fonts.css` once in the entry and write `var(--color-text)` in styles, or `cssVar('color-text')` in TypeScript. `tests/react-smoke/` is a working example.
+
+## Theme files
+
+A theme file is a W3C Design Tokens file (Format and Color modules 2025.10) that holds only a theme's inputs. `tokens/themes/*.tokens.json` are examples, and `@filipgutica/design-system/theme-builder` turns one into CSS.
+
+| Key | Type | What it sets |
+| --- | --- | --- |
+| `$description` | string | A note about the theme. Required |
+| `$extensions["io.github.filipgutica.design-system"].name` | string | The theme's name. Required |
+| `light.color-project`, `dark.color-project` | color | The hue in each mode: `--color-project` and `--color-project-dark`. Required |
+| `light` and `dark` neutrals | color | `color-bg`, `color-surface`, `color-surface-raised`, `color-surface-muted`, `color-row-hover`, `color-border-subtle`, `color-border`, `color-text`, and `color-muted`, as a whole set in both modes. Optional |
+| `light` and `dark` text on the hue | color | `color-accent-text` (the primary button label), `color-nav-current-text`, and `color-segmented-current-text`, in either mode, for a hue that cannot carry the default at 4.5:1. Optional; without them the build picks the first readable candidate for the last two, and `checkTheme` from `./theme-mapper` checks the result |
+| `font-ui`, `font-mono` | fontFamily | The two font stacks: a name or a list of names. Optional |
+| `radius-base` | dimension | The base corner, `{ "value": 8, "unit": "px" }`, in px or rem, 0 or more. Every corner but the pill and the circle follows it. Optional |
+
+Colours are opaque sRGB, `{ "colorSpace": "srgb", "components": [r, g, b] }` with each channel from 0 to 1, and an optional `hex` that must agree. A token's `$type` is its own, else its group's, else the file's. Any other key is a problem.
 
 ## Install for agents
 

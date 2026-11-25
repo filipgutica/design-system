@@ -1,6 +1,6 @@
 // Theme files are W3C Design Tokens files (2025.10); parseTheme turns one into the build's inputs.
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import test from 'node:test'
 import { THEME_EXTENSION, parseTheme } from '../scripts/build-tokens.mjs'
 
@@ -76,4 +76,41 @@ test('a theme radius sets every corner that follows it, and leaves the pill and 
   const { light } = resolveData(applyTheme(core, { hue: { light: '#2b59d6', dark: '#8aa8ff' }, radius: '6px' }))
   assert.deepEqual(['radius-base', 'radius-inline', 'radius-control', 'radius-field', 'radius-mark', 'radius-panel', 'radius-pill', 'radius-circle'].map((name) => light[name]),
     ['6px', '6px', '6px', '6px', 'calc(6px * 0.5)', 'calc(6px * 1.5)', '999px', '999px'])
+})
+
+test('a theme file may set the text on the hue per mode, as srgb colours', () => {
+  const light = hueOnly()
+  light.light['color-accent-text'] = { $value: colour('#ffffff') }
+  light.dark['color-nav-current-text'] = { $value: colour('#000000') }
+  assert.deepEqual(parseTheme(light), { problems: [], inputs: {
+    name: 'Test', note: 'A test theme.', hue: { light: '#2b59d6', dark: '#8aa8ff' },
+    textOnHue: { light: { 'color-accent-text': '#ffffff' }, dark: { 'color-nav-current-text': '#000000' } },
+  } })
+  const named = hueOnly()
+  named.light['color-accent-text'] = { $value: 'white' }
+  assert.deepEqual(parseTheme(named).problems, ['light.color-accent-text is not an srgb colour'])
+})
+
+// The theme-builder entry is the build's own theme CSS: it writes each shipped theme file byte for byte.
+test('the theme-builder entry writes each shipped theme file as the build does', async () => {
+  const { themeCss } = await import('@filipgutica/design-system/theme-builder')
+  const ids = readdirSync(new URL('../tokens/themes/', import.meta.url)).map((file) => file.replace(/\.tokens\.json$/, ''))
+  assert.ok(ids.length >= 8)
+  for (const id of ids) {
+    const shipped = readFileSync(new URL(`../dist/themes/${id}.css`, import.meta.url), 'utf8')
+    assert.equal(themeCss(read(id), { source: `tokens/themes/${id}.tokens.json` }), shipped, id)
+  }
+})
+
+test('the theme builder sets text on the hue in the modes the file names, and stops on a problem', async () => {
+  const { ThemeFileError, themeCss } = await import('@filipgutica/design-system/theme-builder')
+  const file = hueOnly()
+  file.light['color-accent-text'] = { $value: colour('#ffffff') }
+  const css = themeCss(file)
+  assert.match(css, /^:root \{\n(?:  .+\n)*  --color-accent-text: #ffffff;\n/m)
+  // The dark modes keep the default text on the hue.
+  assert.match(css, /^:root\[data-theme="dark"\] \{\n(?:  .+\n)*  --color-accent-text: var\(--color-bg\);\n/m)
+  assert.match(css, /^\/\* Generated from a theme file by the theme builder/)
+  delete file.dark['color-project']
+  assert.throws(() => themeCss(file), (error) => error instanceof ThemeFileError && error.problems.includes('no dark.color-project'))
 })

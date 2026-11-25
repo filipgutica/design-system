@@ -18,6 +18,7 @@ export const EXPORT_USES = {
   './theme-inputs.json': 'The tokens a theme may set, by kind, so a component library can test that its themes set no core token',
   './open-vsx': 'Experimental. <code>parseVsCodeTheme()</code> and <code>createOpenVsxThemeService()</code>: JSONC theme files and verified Open VSX imports, with includes resolved for the mapper',
   './theme-mapper': 'Experimental. <code>mapVsCodeTheme()</code> and <code>themeVariables()</code>: a VS Code colour theme as theme inputs, for a theme picker; <code>checkTheme()</code>: the contrast checks every shipped theme passes',
+  './theme-builder': '<code>themeCss()</code>: a theme file (W3C Design Tokens) as the CSS to load after <code>tokens.css</code>, the same CSS the shipped themes come from; <code>parseTheme()</code> lists a file’s problems',
   './fonts.css': 'Inter and JetBrains Mono, self-hosted',
   './fonts/*': 'The font files',
   './language/*': 'The spec, decisions, catalogue, and templates',

@@ -1,4 +1,4 @@
-// Generated from tokens/core.json by scripts/build-tokens.mjs. Do not edit.
+// Generated from tokens/core.json and the default theme by scripts/build-tokens.mjs. Do not edit.
 /** The core tokens: every theme's base. @type {import('./engine.js').TokenSource} */
 export const core = {
   "groups": [
@@ -290,4 +290,12 @@ export const core = {
       }
     }
   ]
+}
+
+/** The default theme's inputs, which tokens.css carries. @type {import('./engine.js').ThemeInputs} */
+export const defaultTheme = {
+  "hue": {
+    "light": "#4b45d1",
+    "dark": "#a5a1ff"
+  }
 }
