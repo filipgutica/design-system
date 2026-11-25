@@ -12,7 +12,7 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | --- | --- |
 | `language/` | The payload: `DESIGN.md`, `components.md`, `decisions.md`, `visualizations.md`, `tokens.css`, the experimental `ui-sdk.css` component styles for ui-sdk, the catalogue (`components.html`), example pages, visualization helpers, and the Graphite Indigo editor theme |
 | `skills/design-system/`, `.claude-plugin/`, `.codex-plugin/`, `.agents/plugins/` | The agent plugin: the skill that points agents at `language/`, and the Claude and Codex plugin and marketplace manifests. The repository root is the plugin root |
-| `tokens/core.json`, `tokens/themes/*.tokens.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file is a W3C Design Tokens file (2025.10) that holds only its name, a note, its hue pair, and optional fonts and neutrals |
+| `tokens/core.json`, `tokens/themes/*.tokens.json` | The token values, the only place a value lives, and each token's role. Core holds every token; each theme file is a W3C Design Tokens file (2025.10) that holds only its name, a note, its hue pair, and optional fonts, base radius, and neutrals |
 | `scripts/build-tokens.mjs` | The token generator: writes `language/tokens.css`, `dist/`, and the theme mapper's `core.js`; generates and checks declarations from JSDoc for `theme-mapper/` and `open-vsx/` |
 | `open-vsx/` | Experimental JSONC theme-file parser and Open VSX client, with resolved includes and unaltered colours and syntax rules |
 | `theme-mapper/` | The theme engine the token build shares, and the experimental theme mapper built on it |
@@ -35,7 +35,7 @@ npm install @filipgutica/design-system
 | --- | --- |
 | `@filipgutica/design-system/tokens.css` | The tokens. Dark mode follows `prefers-color-scheme`; set `data-theme="light"` or `"dark"` on `<html>` to override it. |
 | `@filipgutica/design-system/ui-sdk.css` | Experimental: draws [ui-sdk](https://ui-sdk.dev)'s headless Button, Field, Input, Textarea, Checkbox, and Radio as the component specs do, checked against `@ui-sdk/*` 0.1.0-beta.5. Load it after `tokens.css`, without ui-sdk's `web.css`; [DESIGN.md](language/DESIGN.md#ui-sdk-experimental) gives the layer order and the supported components. |
-| `@filipgutica/design-system/themes/*.css` | A theme's inputs (hue pair, and any fonts or neutrals): `graphite-indigo` (the default, already in `tokens.css`); the family sites' hues `lagoon` (annoterm), `copper` (devps), `iris` (filip-stack), `lapis` (Workbench), and `fern` (wtree); or the open palettes `catppuccin` and `github`. Load one after `tokens.css`, on `:root`. |
+| `@filipgutica/design-system/themes/*.css` | A theme's inputs (hue pair, and any fonts, base radius, or neutrals): `graphite-indigo` (the default, already in `tokens.css`); the family sites' hues `lagoon` (annoterm), `copper` (devps), `iris` (filip-stack), `lapis` (Workbench), and `fern` (wtree); or the open palettes `catppuccin` and `github`. Load one after `tokens.css`, on `:root`. |
 | `@filipgutica/design-system/themes/*.tokens.json` | Each theme's source as a W3C Design Tokens file (2025.10), for design-token tools such as Style Dictionary and Tokens Studio. |
 | `@filipgutica/design-system/fonts.css` | IBM Plex Sans and Mono. |
 | `@filipgutica/design-system` | `tokens` (resolved values per theme and mode) and `cssVar(name)`, with types. |

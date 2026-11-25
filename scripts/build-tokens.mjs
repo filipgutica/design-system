@@ -1,7 +1,7 @@
 // Emits every token file from tokens/core.json and the theme files in tokens/themes/, the only places
 // token values live. A theme file is a W3C Design Tokens file holding only its inputs: its name, a note
-// for the Themes page, its hue pair, and optionally its two font stacks and its neutrals (NEUTRALS, for
-// light and dark); parseTheme reads it. Every other token is core. The text on the selected fills is the first candidate in TEXT_CANDIDATES that reaches
+// for the Themes page, its hue pair, and optionally its two font stacks, its base radius, and its neutrals
+// (NEUTRALS, for light and dark); parseTheme reads it. Every other token is core. The text on the selected fills is the first candidate in TEXT_CANDIDATES that reaches
 // 4.5:1 in each mode, as their roles in core.json say.
 //
 //   node scripts/build-tokens.mjs           write every output
@@ -30,11 +30,12 @@ const SOURCE = `tokens/core.json and tokens/themes/${DEFAULT_THEME}${THEME_FILE}
 
 // A theme file is a W3C Design Tokens file (Format and Color modules 2025.10) holding only the theme's
 // inputs: a group per mode with the hue (`color-project`) and optionally the whole set of neutrals, and
-// optionally the two font stacks. The file's $description is the note for the Themes page; its name is in
+// optionally the two font stacks and the base radius. The file's $description is the note for the Themes page; its name is in
 // $extensions under this namespace.
 export const THEME_EXTENSION = 'io.github.filipgutica.design-system'
 const MODES = ['light', 'dark']
 const FONTS = { 'font-ui': 'ui', 'font-mono': 'mono' }
+const RADIUS = 'radius-base'
 
 // A colour token's value as #rrggbb, or the problem with it: the build takes opaque sRGB only, and a hex
 // fallback, when given, must agree with the components.
@@ -59,12 +60,17 @@ const isFontFamily = (value) => [value].flat().length > 0
   && [value].flat().every((name) => typeof name === 'string' && name && !/[\u0000-\u001f]/.test(name))
 
 const isObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value)
+// A dimension value ({ value, unit }) as a CSS length. The base radius takes px or rem, and no negative size.
+const isLength = (value) => isObject(value) && Object.keys(value).length === 2 && ['px', 'rem'].includes(value.unit)
+  && typeof value.value === 'number' && Number.isFinite(value.value) && value.value >= 0
+const cssLength = ({ value, unit }) => `${value}${unit}`
+
 // Properties the build ignores: they describe a token or group and change no value. Any other $ property,
 // such as $value on a group, $extends, or $ref, is a problem rather than silently skipped.
 const METADATA = ['$description', '$extensions', '$deprecated']
 const typeOf = (...layers) => layers.find((layer) => '$type' in layer)?.$type
 
-// A theme file's inputs, in the shape the build uses ({ name, note, hue, fonts?, neutrals? }), and its
+// A theme file's inputs, in the shape the build uses ({ name, note, hue, fonts?, radius?, neutrals? }), and its
 // problems: no name or note, a key a theme cannot set, a token of the wrong type, a colour the build
 // cannot take, a missing hue, or neutrals that are not the whole set in both modes. A token's $type is its
 // own, else its group's, else the file's.
@@ -74,7 +80,7 @@ export const parseTheme = (file) => {
   const name = file.$extensions?.[THEME_EXTENSION]?.name
   if (typeof name !== 'string' || !name) problems.push(`no $extensions["${THEME_EXTENSION}"].name`)
   if (typeof file.$description !== 'string' || !file.$description) problems.push('no $description')
-  for (const key of Object.keys(file)) if (![...METADATA, '$type', ...MODES, ...Object.keys(FONTS)].includes(key)) problems.push(`${key} is not a theme input`)
+  for (const key of Object.keys(file)) if (![...METADATA, '$type', ...MODES, ...Object.keys(FONTS), RADIUS].includes(key)) problems.push(`${key} is not a theme input`)
 
   const groups = Object.fromEntries(MODES.map((mode) => [mode, isObject(file[mode]) ? file[mode] : {}]))
   const colours = Object.fromEntries(MODES.map((mode) => {
@@ -112,12 +118,21 @@ export const parseTheme = (file) => {
     else fonts[font] = fontStack(file[token].$value)
   }
 
+  let radius
+  if (RADIUS in file) {
+    if (!isObject(file[RADIUS]) || !('$value' in file[RADIUS])) problems.push(`${RADIUS} is not a token`)
+    else if (typeOf(file[RADIUS], file) !== 'dimension') problems.push(`${RADIUS} is not a dimension token`)
+    else if (!isLength(file[RADIUS].$value)) problems.push(`${RADIUS} is not a px or rem length of 0 or more`)
+    else radius = cssLength(file[RADIUS].$value)
+  }
+
   const pick = (token) => Object.fromEntries(MODES.map((mode) => [mode, colours[mode][token]]))
   const inputs = {
     name,
     note: file.$description,
     hue: pick('color-project'),
     ...(Object.keys(fonts).length > 0 && { fonts }),
+    ...(radius !== undefined && { radius }),
     ...(hasNeutrals && { neutrals: Object.fromEntries(MODES.map((mode) => [mode, Object.fromEntries(NEUTRALS.map((token) => [token, colours[mode][token]]))])) }),
   }
   return { problems, inputs }
@@ -178,7 +193,7 @@ const standaloneHeader = `/*
  * DESIGN.md names these tokens; it never repeats their values.
  *
  * Two layers. The identity block at the top of :root is the theme's own: its hue
- * pair and fonts. This file carries the default theme. Another theme keeps this file
+ * pair, fonts, and base radius. This file carries the default theme. Another theme keeps this file
  * unchanged and loads its themes/<id>.css after it, on :root; that file may also set
  * the theme's neutrals. A new project can set the identity lines on :root in its own
  * stylesheet the same way. The dark blocks switch --color-project to

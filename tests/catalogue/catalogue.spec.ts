@@ -849,7 +849,11 @@ const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
     return value
   }
   const expected = [
-    ...Object.entries(roles).flatMap(([token, list]) => list.map((selector) => [selector, getComputedStyle(document.documentElement).getPropertyValue(token).trim()])),
+    // A role token can be a calc() of --radius-base, so it resolves through a probe as a length, as the corners do.
+    ...Object.entries(roles).flatMap(([token, list]) => {
+      const value = resolve(`var(${token})`, 'body')
+      return list.map((selector) => [selector, value])
+    }),
     ...concentric.flatMap(({ radius, container, selectors }) => {
       const value = resolve(radius, container)
       return selectors.map((selector) => [selector, value])
@@ -972,7 +976,14 @@ test.describe('rendered recipes', () => {
     const table = [...(await docText(page, 'DESIGN.md')).matchAll(/^\s*\| [^|]+ \| (Pill|Circle|\d+px) \| `(--radius-[\w-]+)` \|/gm)].map(([, shape, token]) => [token, shape])
     expect(table.map(([token]) => token).sort()).toEqual(Object.keys(shapeRoles).sort())
     await page.goto(url)
-    const values = await page.evaluate((tokens) => tokens.map((token) => getComputedStyle(document.documentElement).getPropertyValue(token).trim()), table.map(([token]) => token))
+    // Resolved as a length on a probe: a role token can be a calc() of --radius-base.
+    const values = await page.evaluate((tokens) => tokens.map((token) => {
+      const probe = document.body.appendChild(document.createElement('i'))
+      probe.style.borderRadius = `var(${token})`
+      const value = getComputedStyle(probe).borderTopLeftRadius
+      probe.remove()
+      return value
+    }), table.map(([token]) => token))
     expect(values).toEqual(table.map(([, shape]) => (shape === 'Pill' || shape === 'Circle' ? '999px' : shape)))
   })
 

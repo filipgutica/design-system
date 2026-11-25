@@ -8,7 +8,8 @@ export const core = {
         "color-project": null,
         "color-project-dark": null,
         "font-ui": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
-        "font-mono": "\"IBM Plex Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace"
+        "font-mono": "\"IBM Plex Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",
+        "radius-base": "8px"
       }
     },
     {
@@ -243,11 +244,11 @@ export const core = {
     },
     {
       "tokens": {
-        "radius-inline": "8px",
-        "radius-control": "8px",
-        "radius-panel": "12px",
-        "radius-field": "8px",
-        "radius-mark": "4px",
+        "radius-inline": "{radius-base}",
+        "radius-control": "{radius-base}",
+        "radius-panel": "calc({radius-base} * 1.5)",
+        "radius-field": "{radius-base}",
+        "radius-mark": "calc({radius-base} * 0.5)",
         "radius-pill": "999px",
         "radius-circle": "999px"
       }

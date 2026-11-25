@@ -5,6 +5,7 @@ export type TokenName =
   | 'color-project-dark'
   | 'font-ui'
   | 'font-mono'
+  | 'radius-base'
   | 'color-bg'
   | 'color-surface'
   | 'color-surface-raised'

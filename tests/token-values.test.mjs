@@ -34,6 +34,7 @@ const ADDED_SINCE_DS1 = [
   '--radius-mark',
   '--control-touch',
   '--radius-circle',
+  '--radius-base',
 ]
 const withoutAdded = (css) => css.replace(new RegExp(`^\\s*(?:${ADDED_SINCE_DS1.join('|')}):[^;]+;\\n`, 'gm'), '')
 
@@ -59,23 +60,26 @@ test('tokens.css keeps the DS-1 declarations except the inherited command aliase
   assert.deepEqual(namesOf(blocksOf(generatedTokens, STANDALONE)), namesOf(expected))
 })
 
-// Owner decisions after DS-1 that change a size or shape value, with the date each was made.
-// Listed in tokens.css order.
+// Owner decisions after DS-1 that change a size or shape value, with the date each was made: the DS-1 text,
+// the text now, and the value it resolves to when that differs from the text. Listed in tokens.css order.
 const DECIDED_SINCE_DS1 = {
   // 2026-11-22: compact controls; the small control is 28px tall.
   '--control-sm': ['2rem', '1.75rem'],
   '--control-md': ['2.25rem', '2rem'],
   '--control-lg': ['2.75rem', '2.25rem'],
   // 2026-11-22: actions became rounded rectangles, not pills, and then took one 8px corner with rows,
-  // and fields, and 12px for containers (radius scale B).
-  '--radius-inline': ['6px', '8px'],
-  '--radius-control': ['999px', '8px'],
-  '--radius-panel': ['16px', '12px'],
-  '--radius-field': ['10px', '8px'],
+  // and fields, and 12px for containers (radius scale B). 2026-11-24: each follows --radius-base (8px).
+  '--radius-inline': ['6px', 'var(--radius-base)', '8px'],
+  '--radius-control': ['999px', 'var(--radius-base)', '8px'],
+  '--radius-panel': ['16px', 'calc(var(--radius-base) * 1.5)', 'calc(8px * 1.5)'],
+  '--radius-field': ['10px', 'var(--radius-base)', '8px'],
 }
 
 test('tokens.css preserves DS-1 values except the command aliases, which follow the code well in every mode, and the decided shapes and sizes', () => {
-  const generated = standaloneModes(generatedTokens)
+  // Resolved through every token, the added ones included, then compared on the DS-1 names.
+  const full = standaloneModes(read('language/tokens.css'))
+  const generated = Object.fromEntries(Object.entries(standaloneModes(generatedTokens))
+    .map(([mode, values]) => [mode, Object.fromEntries(Object.keys(values).map((name) => [name, full[mode][name]]))]))
   const expected = standaloneModes(handTokens)
   for (const mode of Object.keys(generated)) {
     assert.equal(generated[mode]['--color-command-bg'], generated[mode]['--color-code'])
@@ -83,7 +87,7 @@ test('tokens.css preserves DS-1 values except the command aliases, which follow 
     // Owner decision 2026-11-15: commands use the code well and its subtle edge.
     expected[mode]['--color-command-bg'] = expected[mode]['--color-code']
     expected[mode]['--color-command-border'] = expected[mode]['--color-border-subtle']
-    for (const [name, [, value]] of Object.entries(DECIDED_SINCE_DS1)) expected[mode][name] = value
+    for (const [name, [, text, resolved = text]] of Object.entries(DECIDED_SINCE_DS1)) expected[mode][name] = resolved
   }
   assert.deepEqual(generated, expected)
 })

@@ -12,10 +12,12 @@
  */
 /** @typedef {{ light: string, dark: string }} ModePair */
 /**
- * One theme's inputs, for light and for dark. Fonts and neutrals stay core unless the theme names its own.
+ * One theme's inputs, for light and for dark. Fonts, the base radius, and neutrals stay core unless the theme
+ * names its own.
  * @typedef {object} ThemeInputs
  * @property {ModePair} hue The hue, `--color-project` in light and `--color-project-dark`.
  * @property {{ ui?: string, mono?: string }} [fonts] The two font stacks.
+ * @property {string} [radius] The base radius, `--radius-base`, as a CSS length.
  * @property {{ light: Record<string, string>, dark: Record<string, string> }} [neutrals] Every NEUTRALS token, per mode.
  * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [syntax] Syntax colours by SYNTAX_ROLES
  *   role, per mode. A role a theme leaves out stays core.
@@ -188,8 +190,8 @@ const withReadableText = (data) => {
 }
 
 /**
- * The core tokens with one theme's inputs filled in. Core leaves the hue pair empty; its font stacks and
- * neutrals stay unless the theme names its own. Then each selected-fill text token takes its readable value.
+ * The core tokens with one theme's inputs filled in. Core leaves the hue pair empty; its font stacks, base
+ * radius, and neutrals stay unless the theme names its own. Then each selected-fill text token takes its readable value.
  * @template {TokenSource} Data
  * @param {Data} core
  * @param {ThemeInputs} theme
@@ -205,6 +207,7 @@ export const applyTheme = (core, theme) => {
   identity['color-project-dark'] = theme.hue.dark
   if (theme.fonts?.ui) identity['font-ui'] = theme.fonts.ui
   if (theme.fonts?.mono) identity['font-mono'] = theme.fonts.mono
+  if (theme.radius) identity['radius-base'] = theme.radius
   const { neutrals } = theme
   if (neutrals) for (const name of NEUTRALS) groupOf(data, name).tokens[name] = [neutrals.light[name], neutrals.dark[name]]
   for (const role of SYNTAX_ROLES) {

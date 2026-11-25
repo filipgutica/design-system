@@ -5,7 +5,7 @@
  * DESIGN.md names these tokens; it never repeats their values.
  *
  * Two layers. The identity block at the top of :root is the theme's own: its hue
- * pair and fonts. This file carries the default theme. Another theme keeps this file
+ * pair, fonts, and base radius. This file carries the default theme. Another theme keeps this file
  * unchanged and loads its themes/<id>.css after it, on :root; that file may also set
  * the theme's neutrals. A new project can set the identity lines on :root in its own
  * stylesheet the same way. The dark blocks switch --color-project to
@@ -26,12 +26,14 @@
 :root {
   color-scheme: light;
 
-  /* Identity layer: a project swaps these four lines. --color-project is the light-theme hue;
-     --color-project-dark is the dark-theme hue, also used on terminal captures in both themes. */
+  /* Identity layer: a project swaps these five lines. --color-project is the light-theme hue;
+     --color-project-dark is the dark-theme hue, also used on terminal captures in both themes.
+     --radius-base sets every corner but the pill and the circle. */
   --color-project: #4b45d1;
   --color-project-dark: #a5a1ff;
   --font-ui: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --radius-base: 8px;
 
   /* Core roles: only the identity lines above feed them. Neutral paper and graphite surfaces. */
   --color-bg: #f4f5f6;
@@ -173,11 +175,11 @@
   --sidebar-width: 224px;
 
   /* Shape */
-  --radius-inline: 8px;
-  --radius-control: 8px;
-  --radius-panel: 12px;
-  --radius-field: 8px;
-  --radius-mark: 4px;
+  --radius-inline: var(--radius-base);
+  --radius-control: var(--radius-base);
+  --radius-panel: calc(var(--radius-base) * 1.5);
+  --radius-field: var(--radius-base);
+  --radius-mark: calc(var(--radius-base) * 0.5);
   --radius-pill: 999px;
   --radius-circle: 999px;
 

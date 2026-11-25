@@ -8,6 +8,7 @@
   --color-project-dark: #3fb950;
   --font-ui: "Mona Sans VF", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Backtick Fix", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --radius-base: 8px;
   --color-bg: #ffffff;
   --color-surface: #f6f8fa;
   --color-surface-raised: #ffffff;
