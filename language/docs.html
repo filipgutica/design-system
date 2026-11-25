@@ -8,12 +8,12 @@
 <style>
 .icon { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.frame { width: min(calc(var(--page-max) + var(--sidebar)), calc(100% - var(--space-12))); margin-inline: auto; }
+.frame { width: min(calc(var(--page-max) + var(--sidebar-width)), calc(100% - var(--space-12))); margin-inline: auto; }
 .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); min-height: var(--space-16); border-bottom: 1px solid var(--color-border-subtle); }
 .brand { color: var(--color-text); font-weight: var(--weight-semibold); }
 .header nav { display: flex; gap: var(--space-6); }
 .header a { display: inline-flex; align-items: center; min-height: var(--control-md); font-size: var(--text-sm); }
-.layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
+.layout { display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); gap: var(--space-8); }
 .sidebar { position: sticky; top: var(--space-6); align-self: start; display: grid; gap: var(--space-1); padding-block: var(--space-6); }
 /* Navigation rows: components.html#navigation-list, unchanged. Only the rail's placement and spacing are local. */
 .navlist a { position: relative; display: flex; align-items: center; min-height: var(--row); padding-inline: var(--space-3); border-radius: var(--radius-inline); color: var(--color-muted); font-size: var(--text-sm); text-decoration: none; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }

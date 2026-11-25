@@ -238,7 +238,7 @@ export const core = {
         "measure": "68ch",
         "page-max": "960px",
         "page-wide": "1120px",
-        "sidebar": "224px"
+        "sidebar-width": "224px"
       }
     },
     {

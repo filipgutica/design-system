@@ -115,7 +115,7 @@ export type TokenName =
   | 'measure'
   | 'page-max'
   | 'page-wide'
-  | 'sidebar'
+  | 'sidebar-width'
   | 'radius-inline'
   | 'radius-control'
   | 'radius-panel'

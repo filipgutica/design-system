@@ -12,7 +12,7 @@
   /* Other page formats use docs.html and product.html. This specimen shows an app. */
   /* App shell */
   /* The main pane scrolls; the sidebar stays full height. */
-  .shell { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); height: 100dvh; }
+  .shell { display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); height: 100dvh; }
   .sidebar { border-right: 1px solid var(--color-border-subtle); background: var(--color-surface); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-4); min-height: 0; }
   .workspace { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2); font-weight: var(--weight-semibold); }
   .workspace .mark { width: 20px; height: 20px; border-radius: var(--radius-inline); background: var(--color-text); color: var(--color-bg); display: grid; place-items: center; font-size: var(--text-xs); }
@@ -426,7 +426,7 @@
 
 
   .mobile-only { display: none; }
-  /* The detail column collapses at main's own width (876px is a 1100px viewport minus --sidebar), not at a third viewport breakpoint. */
+  /* The detail column collapses at main's own width (876px is a 1100px viewport minus --sidebar-width), not at a third viewport breakpoint. */
   main { container-type: inline-size; }
   @container (max-width: 876px) {
     .content { grid-template-columns: 1fr; }
@@ -729,7 +729,7 @@
             <li class="spec" data-token="--measure"><div class="spec-meta"><code>--measure</code><span class="value"></span></div><span class="use">Bounds reading text</span></li>
             <li class="spec" data-token="--page-max"><div class="spec-meta"><code>--page-max</code><span class="value"></span></div><span class="use">Documentation frame</span></li>
             <li class="spec" data-token="--page-wide"><div class="spec-meta"><code>--page-wide</code><span class="value"></span></div><span class="use">Product page frame</span></li>
-            <li class="spec" data-token="--sidebar"><div class="spec-meta"><code>--sidebar</code><span class="value"></span></div><span class="use">This page's sidebar</span></li>
+            <li class="spec" data-token="--sidebar-width"><div class="spec-meta"><code>--sidebar-width</code><span class="value"></span></div><span class="use">This page's sidebar</span></li>
             <li class="spec" data-token="--row"><div class="spec-meta"><code>--row</code><span class="value"></span><span class="use">Navigation and list rows</span></div><i class="height-bar" style="height:var(--row)"></i></li>
           </ul>
 

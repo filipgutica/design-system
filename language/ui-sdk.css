@@ -271,7 +271,7 @@
      The content holds a <header> (the title, then the close button) and a body that scrolls on its own.
      A top or bottom sheet is unsupported. */
   [data-slot="drawer-backdrop"] { position: fixed; inset: 0; background: var(--color-overlay); }
-  [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) { display: flex; flex-direction: column; width: min(calc(var(--sidebar) + var(--space-12)), calc(100vw - var(--space-12))); height: 100%; overflow: hidden; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
+  [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) { display: flex; flex-direction: column; width: min(calc(var(--sidebar-width) + var(--space-12)), calc(100vw - var(--space-12))); height: 100%; overflow: hidden; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
   [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) > header { display: flex; flex: none; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
   [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) > :not(header) { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: var(--space-4); }
   [data-slot="drawer-content"]:is([data-side="left"], [data-side="right"]) > header > [data-slot="drawer-title"] { margin: 0; font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }

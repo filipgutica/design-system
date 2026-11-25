@@ -365,7 +365,7 @@
   .dialog-foot { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface); }
   /* The close button is a quiet action; this sets its size only. */
   .close { flex: none; width: var(--control-md); min-height: var(--control-md); padding: 0; color: var(--color-muted); }
-  .drawer { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(calc(var(--sidebar) + var(--space-12)), 100%); height: 260px; overflow: hidden; padding: 0; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
+  .drawer { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(calc(var(--sidebar-width) + var(--space-12)), 100%); height: 260px; overflow: hidden; padding: 0; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
   dialog.drawer { position: fixed; inset: 0 auto 0 0; height: 100dvh; max-height: none; margin: 0; }
   dialog.drawer::backdrop { background: var(--color-overlay); }
   /* The page behind an open drawer does not scroll, through the slide out too. Hiding the root's overflow keeps the
@@ -866,7 +866,7 @@
   /* ---------- Catalogue page ---------- */
   /* One scroll offset for every in-page jump; sections set no scroll-margin-top. The location tracker reads the same value. */
   html { scroll-padding-top: var(--space-4); }
-  .frame { width: min(calc(var(--page-max) + var(--sidebar)), calc(100% - var(--space-12))); margin-inline: auto; }
+  .frame { width: min(calc(var(--page-max) + var(--sidebar-width)), calc(100% - var(--space-12))); margin-inline: auto; }
   /* Header: the identity, the design system's pages as a navigation strip, and the appearance control.
      On the site the identity is the project switcher. This package copy has no project registry, so it
      shows the site name as text, in the switcher's type, with a ~/ mark one character wide before it. */
@@ -880,7 +880,7 @@
   }
   /* Header links are navigation rows at the control height; they grow to --control-touch at tablet width. */
   .page-head .strip a { min-height: var(--control-md); }
-  .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
+  .layout { display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); gap: var(--space-8); }
   /* One column that may shrink below its content, so a long title or specimen cannot widen the page.
      A short page, such as one left by a find with no matches, keeps its rows at the top. */
   main { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: var(--space-12); min-width: 0; padding-block: var(--space-8) var(--space-16); }

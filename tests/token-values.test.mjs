@@ -37,7 +37,16 @@ const ADDED_SINCE_DS1 = [
 ]
 const withoutAdded = (css) => css.replace(new RegExp(`^\\s*(?:${ADDED_SINCE_DS1.join('|')}):[^;]+;\\n`, 'gm'), '')
 
-const handTokens = renameTokens({ text: read('tests/fixtures/ds-1-tokens.css'), table: readRenameTable(read('language/decisions.md')) })
+// Tokens renamed after the 2.0.0 rename, with the date each was decided. The DS-1 copy takes these names too.
+const RENAMED_SINCE_DS1 = new Map([
+  // 2026-11-24: --sidebar is a colour in shadcn-based apps, so the width took a name that cannot clash.
+  ['--sidebar', '--sidebar-width'],
+])
+
+const handTokens = renameTokens({
+  text: renameTokens({ text: read('tests/fixtures/ds-1-tokens.css'), table: readRenameTable(read('language/decisions.md')) }),
+  table: RENAMED_SINCE_DS1,
+})
 const generatedTokens = withoutAdded(read('language/tokens.css'))
 
 test('tokens.css keeps the DS-1 declarations except the inherited command aliases', () => {

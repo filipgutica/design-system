@@ -170,7 +170,7 @@
   --measure: 68ch;
   --page-max: 960px;
   --page-wide: 1120px;
-  --sidebar: 224px;
+  --sidebar-width: 224px;
 
   /* Shape */
   --radius-inline: 8px;
