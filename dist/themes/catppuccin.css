@@ -1,7 +1,7 @@
 /* Generated from tokens/themes/catppuccin.tokens.json by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.
- * The Catppuccin theme for tokens.css. Load after tokens.css, on :root only: the tokens that follow the
- * theme resolve on :root, so a theme scoped to an element below it changes its inputs there, but the
- * accent, focus ring, and selection keep the default theme's colours. */
+ * The Catppuccin theme for tokens.css. Load after tokens.css, in its cascade layer or a later one, on :root
+ * only: the tokens that follow the theme resolve on :root, so a theme scoped to an element below it changes
+ * its inputs there, but the accent, focus ring, and selection keep the default theme's colours. */
 
 :root {
   --color-project: #8839ef;
@@ -62,7 +62,6 @@
 }
 
 :root [data-theme="light"] {
-  --color-project: #8839ef;
   --color-bg: #eff1f5;
   --color-surface: #e6e9ef;
   --color-surface-raised: #eff1f5;

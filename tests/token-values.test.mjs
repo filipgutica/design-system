@@ -56,6 +56,9 @@ test('tokens.css keeps the DS-1 declarations except the inherited command aliase
   for (const selector of STANDALONE.slice(1)) {
     delete expected[selector]['--color-command-bg']
     delete expected[selector]['--color-command-border']
+    // Owner decision 2026-11-25: the dark rules switch the accent, not the theme input, so a theme is one :root rule.
+    delete expected[selector]['--color-project']
+    expected[selector]['--color-accent'] = 'var(--color-project-dark)'
   }
   assert.deepEqual(namesOf(blocksOf(generatedTokens, STANDALONE)), namesOf(expected))
 })
@@ -102,6 +105,9 @@ test('tokens.css preserves DS-1 values except the command aliases, which follow 
     expected[mode]['--color-command-bg'] = expected[mode]['--color-code']
     expected[mode]['--color-command-border'] = expected[mode]['--color-border-subtle']
     for (const [name, [, text, resolved = text]] of Object.entries({ ...IDENTITY_SINCE_DS1, ...DECIDED_SINCE_DS1 })) expected[mode][name] = resolved
+    // Owner decision 2026-11-25: --color-project is the light hue in every mode; the accent, and everything
+    // that follows it, still takes --color-project-dark in dark.
+    expected[mode]['--color-project'] = expected.light['--color-project']
   }
   assert.deepEqual(generated, expected)
 })
@@ -120,10 +126,13 @@ test('tokens.css keeps the DS-1 declaration text except documented reference, co
     ':root --color-command-bg: color-mix(in srgb, var(--color-project) 25%, #101010) -> var(--color-code)',
     ':root --color-command-border: transparent -> var(--color-border-subtle)',
     ...Object.entries(DECIDED_SINCE_DS1).map(([name, [from, to]]) => `:root ${name}: ${from} -> ${to}`),
+    // Owner decision 2026-11-25: the dark rules switch --color-accent to --color-project-dark instead.
+    ':root:not([data-theme="light"]) --color-project: var(--color-project-dark) -> undefined',
     ':root:not([data-theme="light"]) --color-command-bg: color-mix(in srgb, var(--color-project) 16%, black) -> undefined',
     ':root:not([data-theme="light"]) --color-command-border: color-mix(in srgb, var(--color-project) 28%, black) -> undefined',
     // The dark lift is the always-dark lift, so it names that token instead of repeating its value.
     ':root:not([data-theme="light"]) --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%) -> var(--shadow-nav-current-dark)',
+    ':root[data-theme="dark"] --color-project: var(--color-project-dark) -> undefined',
     ':root[data-theme="dark"] --color-command-bg: color-mix(in srgb, var(--color-project) 16%, black) -> undefined',
     ':root[data-theme="dark"] --color-command-border: color-mix(in srgb, var(--color-project) 28%, black) -> undefined',
     ':root[data-theme="dark"] --shadow-nav-current: 0 1px 2px rgb(0 0 0 / 25%) -> var(--shadow-nav-current-dark)',

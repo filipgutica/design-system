@@ -8,8 +8,9 @@
  * pair, fonts, and base radius. This file carries the default theme. Another theme keeps this file
  * unchanged and loads its themes/<id>.css after it, on :root; that file may also set
  * the theme's neutrals. A new project can set the identity lines on :root in its own
- * stylesheet the same way. The dark blocks switch --color-project to
- * --color-project-dark, so the override needs no dark rule. Check --color-accent-text,
+ * stylesheet the same way. The dark blocks switch --color-accent to
+ * --color-project-dark, so the hue pair needs no dark rule: one :root rule works after this file,
+ * in its cascade layer or in a later one. Check --color-accent-text,
  * --color-nav-current-text, and --color-segmented-current-text at 4.5:1 on the new hue
  * and override them when they fall short. A theme file sets the last two for you; its
  * hue must carry --color-accent-text itself, which the contrast tests check.
@@ -25,16 +26,17 @@
  * "light" on any element below <html>, or a .dark class on <html> or below it,
  * themes that subtree; the subtree blocks at the end redeclare what each mode
  * changes, and the subtree takes its mode's text colour. data-theme="light" wins over
- * .dark on one element. A theme written by hand repeats its light values on
- * :root [data-theme="light"] and its dark values on the dark subtree block's selectors,
- * so they hold in a subtree too. A theme file does this for you.
+ * .dark on one element. A theme written by hand that sets neutrals or text on the hue repeats
+ * those light values on :root [data-theme="light"] and the dark ones on the dark subtree block's
+ * selectors, so they hold in a subtree too; the hue pair needs no repeat. A theme file does this for you.
  */
 
 :root {
   color-scheme: light;
 
   /* Identity layer: a project swaps these five lines. --color-project is the light-theme hue;
-     --color-project-dark is the dark-theme hue, also used on terminal captures in both themes.
+     --color-project-dark is the dark-theme hue, also used on terminal captures in both themes. Neither changes
+     with the mode: --color-accent takes one or the other.
      --radius-base sets every corner but the pill and the circle. */
   --color-project: #4b45d1;
   --color-project-dark: #a5a1ff;
@@ -210,7 +212,6 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --color-project: var(--color-project-dark);
     --color-bg: #0d1012;
     --color-surface: #13171a;
     --color-surface-raised: #181d21;
@@ -226,6 +227,7 @@
     --color-text: #e6e9eb;
     --color-muted: #9aa3ab;
     --color-overlay: rgb(0 0 0 / 62%);
+    --color-accent: var(--color-project-dark);
     --color-link: #67c1df;
     --color-success: #4cc38a;
     --color-warning: #e2a54b;
@@ -250,7 +252,6 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --color-project: var(--color-project-dark);
   --color-bg: #0d1012;
   --color-surface: #13171a;
   --color-surface-raised: #181d21;
@@ -266,6 +267,7 @@
   --color-text: #e6e9eb;
   --color-muted: #9aa3ab;
   --color-overlay: rgb(0 0 0 / 62%);
+  --color-accent: var(--color-project-dark);
   --color-link: #67c1df;
   --color-success: #4cc38a;
   --color-warning: #e2a54b;
@@ -294,7 +296,6 @@
 
 :root.dark:not(:where([data-theme="light"])), :root [data-theme="dark"], :root .dark:not(:where([data-theme="light"])) {
   color-scheme: dark;
-  --color-project: var(--color-project-dark);
   --color-bg: #0d1012;
   --color-surface: #13171a;
   --color-surface-raised: #181d21;
@@ -314,7 +315,7 @@
   --color-text: #e6e9eb;
   --color-muted: #9aa3ab;
   --color-overlay: rgb(0 0 0 / 62%);
-  --color-accent: var(--color-project);
+  --color-accent: var(--color-project-dark);
   --color-accent-text: var(--color-bg);
   --color-accent-hover: var(--color-text);
   --color-button-hover: color-mix(in srgb, var(--color-accent) 85%, var(--color-text));
@@ -355,7 +356,6 @@
 
 :root [data-theme="light"] {
   color-scheme: light;
-  --color-project: #4b45d1;
   --color-bg: #f4f5f6;
   --color-surface: #e9ebed;
   --color-surface-raised: #fbfbfc;

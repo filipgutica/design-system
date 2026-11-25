@@ -200,8 +200,9 @@ const standaloneHeader = `/*
  * pair, fonts, and base radius. This file carries the default theme. Another theme keeps this file
  * unchanged and loads its themes/<id>.css after it, on :root; that file may also set
  * the theme's neutrals. A new project can set the identity lines on :root in its own
- * stylesheet the same way. The dark blocks switch --color-project to
- * --color-project-dark, so the override needs no dark rule. Check --color-accent-text,
+ * stylesheet the same way. The dark blocks switch --color-accent to
+ * --color-project-dark, so the hue pair needs no dark rule: one :root rule works after this file,
+ * in its cascade layer or in a later one. Check --color-accent-text,
  * --color-nav-current-text, and --color-segmented-current-text at 4.5:1 on the new hue
  * and override them when they fall short. A theme file sets the last two for you; its
  * hue must carry --color-accent-text itself, which the contrast tests check.
@@ -217,9 +218,9 @@ const standaloneHeader = `/*
  * "light" on any element below <html>, or a .dark class on <html> or below it,
  * themes that subtree; the subtree blocks at the end redeclare what each mode
  * changes, and the subtree takes its mode's text colour. data-theme="light" wins over
- * .dark on one element. A theme written by hand repeats its light values on
- * :root [data-theme="light"] and its dark values on the dark subtree block's selectors,
- * so they hold in a subtree too. A theme file does this for you.
+ * .dark on one element. A theme written by hand that sets neutrals or text on the hue repeats
+ * those light values on :root [data-theme="light"] and the dark ones on the dark subtree block's
+ * selectors, so they hold in a subtree too; the hue pair needs no repeat. A theme file does this for you.
  */
 `
 
@@ -342,9 +343,9 @@ export const renderStandaloneTokens = (data) => {
 // What one theme changes from tokens.css, to load after it on :root: its identity inputs, then every other
 // token whose light value differs. tokens.css's dark blocks outrank a bare :root, so the theme's dark
 // blocks, with the same selectors, set each token whose dark value would otherwise come out wrong.
-// A hue-only theme needs none: tokens.css's dark blocks already switch to --color-project-dark.
+// A hue-only theme needs none: tokens.css's dark blocks already switch the accent to --color-project-dark.
 // Its subtree blocks, after those, set each token whose value in that mode differs from what tokens.css's
-// subtree blocks declare, such as the light hue and the neutrals.
+// subtree blocks declare, such as the neutrals.
 export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
   const resolve = standaloneResolver(data)
   const resolveDefault = standaloneResolver(defaultTheme.data)
@@ -361,9 +362,9 @@ export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
     .map((token) => [`--${token}`, resolve(token, mode)])
   return [
     `/* Generated from tokens/themes/${id}${THEME_FILE} by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
-    ` * The ${name} theme for tokens.css. Load after tokens.css, on :root only: the tokens that follow the`,
-    ' * theme resolve on :root, so a theme scoped to an element below it changes its inputs there, but the',
-    " * accent, focus ring, and selection keep the default theme's colours. */",
+    ` * The ${name} theme for tokens.css. Load after tokens.css, in its cascade layer or a later one, on :root`,
+    ' * only: the tokens that follow the theme resolve on :root, so a theme scoped to an element below it changes',
+    " * its inputs there, but the accent, focus ring, and selection keep the default theme's colours. */",
     '',
     ':root {',
     ...block('  ', root.map((token) => [`--${token}`, resolve(token, LIGHT)])),

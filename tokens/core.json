@@ -4,11 +4,11 @@
       "id": "identity-inputs",
       "title": "Identity inputs",
       "note": "The five lines a theme sets on `:root`: the hue for light and dark, from its file in `tokens/themes/`, the two font stacks, and the base radius. Every other token follows from them.",
-      "comment": "Identity layer: a project swaps these five lines. --color-project is the light-theme hue;\n--color-project-dark is the dark-theme hue, also used on terminal captures in both themes.\n--radius-base sets every corner but the pill and the circle.",
+      "comment": "Identity layer: a project swaps these five lines. --color-project is the light-theme hue;\n--color-project-dark is the dark-theme hue, also used on terminal captures in both themes. Neither changes\nwith the mode: --color-accent takes one or the other.\n--radius-base sets every corner but the pill and the circle.",
       "identity": true,
       "roles": {
-        "color-project": "The project hue; `--color-accent` follows it",
-        "color-project-dark": "The dark-theme hue and the terminal capture accent",
+        "color-project": "The light-theme hue; `--color-accent` takes it in light",
+        "color-project-dark": "The dark-theme hue, which `--color-accent` takes in dark, and the terminal capture accent",
         "font-ui": "Prose, every heading, labels, and controls",
         "font-mono": "Code, identifiers, keys, and terminal captures, and the identity layer's small marks: the ~/name header, metadata, step numbers, and the footer",
         "radius-base": "The base corner: rows, actions, and fields take it, small marks half of it, and containers one and a half times it"
@@ -140,7 +140,7 @@
         "focus-offset": "The gap between a control and its ring"
       },
       "tokens": {
-        "color-accent": "{color-project}",
+        "color-accent": ["{color-project}", "{color-project-dark}"],
         "color-accent-text": "{color-bg}",
         "color-accent-hover": "{color-text}",
         "color-button-hover": "color-mix(in srgb, {color-accent} 85%, {color-text})",

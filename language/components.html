@@ -753,7 +753,7 @@
   .projects > summary { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--control-md); padding-inline: var(--space-3); border-radius: var(--radius-field); font-family: var(--font-mono); font-weight: var(--weight-semibold); list-style: none; user-select: none; }
   .projects > summary::-webkit-details-marker { display: none; }
   /* The ~/ mark is decorative: the empty alternative text keeps it out of the name. */
-  .projects > summary::before { content: "~/" / ""; color: var(--color-project); }
+  .projects > summary::before { content: "~/" / ""; color: var(--color-accent); }
   /* The open menu keeps the hover tint. :where keeps it below the quiet action's press. */
   :where(.projects[open]) > summary { background: color-mix(in srgb, currentColor 6%, transparent); }
   .projects .icon { transition: transform var(--duration-fast) var(--ease-out); }

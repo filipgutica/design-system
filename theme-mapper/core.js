@@ -82,7 +82,10 @@ export const core = {
     },
     {
       "tokens": {
-        "color-accent": "{color-project}",
+        "color-accent": [
+          "{color-project}",
+          "{color-project-dark}"
+        ],
         "color-accent-text": "{color-bg}",
         "color-accent-hover": "{color-text}",
         "color-button-hover": "color-mix(in srgb, {color-accent} 85%, {color-text})",
