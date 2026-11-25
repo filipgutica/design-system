@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test'
-import { fileURLToPath } from 'node:url'
 
 // The base rules tokens.css ships on its own, with no component styles: the tablet touch sizes and the pointer cursor.
-const tokens = fileURLToPath(new URL('../../language/tokens.css', import.meta.url))
+const tokens = decodeURIComponent(new URL('../../language/tokens.css', import.meta.url).pathname)
 
 test.describe('tokens.css base', () => {
   for (const { width, sizes } of [{ width: 801, sizes: [28, 32, 36] }, { width: 800, sizes: [44, 44, 44] }]) {
@@ -29,6 +28,8 @@ test.describe('tokens.css base', () => {
       <div id="option" role="option" aria-disabled="true">Option</div>
       <input id="editable-combobox" role="combobox">
       <input id="range" type="range">
+      <input id="file" type="file">
+      <div id="editable-div-combobox" role="combobox" contenteditable="true">Pick</div>
       <input id="text">
       <label id="wrapping"><input type="checkbox">Notify</label>
       <label id="wrapping-disabled"><input type="checkbox" disabled>Notify</label>
@@ -38,10 +39,13 @@ test.describe('tokens.css base', () => {
     await page.addStyleTag({ path: tokens })
     // A component's own cursor, written with any specificity, wins over the weightless base.
     await page.addStyleTag({ content: '@layer components { .busy { cursor: wait; } }' })
-    const cursors = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('[id]')].map((node) => [node.id, getComputedStyle(node).cursor])))
+    const cursors = await page.evaluate(() => Object.fromEntries([
+      ...[...document.querySelectorAll('[id]')].map((node) => [node.id, getComputedStyle(node).cursor]),
+      ['file chooser', getComputedStyle(document.getElementById('file')!, '::file-selector-button').cursor],
+    ]))
     expect(cursors).toEqual({
       button: 'pointer', disabled: 'default', 'aria-disabled': 'default', 'data-disabled': 'default', busy: 'wait',
-      select: 'pointer', summary: 'pointer', tab: 'pointer', option: 'auto', 'editable-combobox': 'text', range: 'pointer', text: 'text',
+      select: 'pointer', summary: 'pointer', tab: 'pointer', option: 'auto', 'editable-combobox': 'text', 'editable-div-combobox': 'auto', range: 'pointer', file: 'pointer', 'file chooser': 'pointer', text: 'text',
       wrapping: 'pointer', 'wrapping-disabled': 'default', switch: 'pointer', following: 'pointer', 'following-disabled': 'default', plain: 'default',
     })
   })
