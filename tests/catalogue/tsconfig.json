@@ -16,6 +16,7 @@
   "include": [
     "catalogue.spec.ts",
     "theme-mapper.spec.ts",
-    "subtree-themes.spec.ts"
+    "subtree-themes.spec.ts",
+    "base.spec.ts"
   ]
 }

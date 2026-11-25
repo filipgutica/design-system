@@ -104,7 +104,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
   | Name | Media query | What changes |
   | --- | --- | --- |
-  | Tablet | `@media (max-width: 800px)` | Multi-column layouts become one content column. Touch controls use `--control-touch`. |
+  | Tablet | `@media (max-width: 800px)` | Multi-column layouts become one content column. Touch controls use `--control-touch`: `tokens.css` sets `--control-sm`, `--control-md`, and `--control-lg` to it. |
   | Phone | `@media (max-width: 640px)` | Side gutters drop from `--space-6` to `--space-4`, and section gaps take their phone step. |
 
   Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. One documented exception: the tool-home hero splits at `@media (min-width: 1024px)`, with the title across the top, the lede on the left, and the install block and facts on the right. Below 1024px it stacks in source order. Pages add no viewport breakpoint beyond the table and the hero split. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.

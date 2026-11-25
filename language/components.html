@@ -1000,6 +1000,9 @@
     .row { grid-template-columns: minmax(0, 1fr); }
     /* Touch: controls of every size grow to --control-touch, the inert state examples included. Only the size
        specimens (data-specimen="size") keep their sizes. */
+    /* tokens.css sets --control-sm, --control-md, and --control-lg to --control-touch here; a size specimen keeps the
+       desktop values, 28px, 32px, and 36px. */
+    [data-specimen="size"] { --control-sm: 1.75rem; --control-md: 2rem; --control-lg: 2.25rem; }
     .btn:not([data-specimen="size"] *), .navlist a, .rows [role="option"], .tab:not([data-specimen="size"] *) { min-height: var(--control-touch); }
     /* An icon-only button grows on both sides, so it stays a circle. */
     .btn[data-icon-only]:not([data-specimen="size"] *) { --size: var(--control-touch); }
