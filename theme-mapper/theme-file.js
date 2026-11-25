@@ -69,10 +69,15 @@ const isFontFamily = (value) => [value].flat().length > 0
   && [value].flat().every((name) => typeof name === 'string' && name !== '' && !/[\u0000-\u001f]/.test(name))
 // A fontFamily value as a CSS font stack. A name that is a CSS identifier stays bare, so generic families
 // and keywords such as sans-serif and -apple-system keep their meaning; any other name, such as one with
-// a space or one that starts with a digit, is a quoted string with its quotes and backslashes escaped.
+// a space or one that starts with a digit, is a quoted string with its quotes and backslashes escaped, and its
+// braces as code points, which the token engine would otherwise read as a reference. A CSS-wide keyword, or
+// `default`, would make the whole list invalid, so it is quoted too.
+const CSS_WIDE = ['initial', 'inherit', 'unset', 'revert', 'revert-layer', 'default']
 /** @param {string | string[]} value */
 const fontStack = (value) => [value].flat()
-  .map((name) => (/^-?[A-Za-z_][\w-]*$/.test(name) ? name : `"${name.replace(/[\\"]/g, '\\$&')}"`)).join(', ')
+  .map((name) => (/^-?[A-Za-z_][\w-]*$/.test(name) && !CSS_WIDE.includes(name.toLowerCase())
+    ? name
+    : `"${name.replace(/[\\"]/g, '\\$&').replaceAll('{', '\\7b ').replaceAll('}', '\\7d ')}"`)).join(', ')
 
 /**
  * A dimension value ({ value, unit }) as a CSS length. The base radius takes px or rem, and no negative size.
@@ -144,7 +149,9 @@ export const parseTheme = (file) => {
   for (const [token, font] of FONTS) {
     if (!(token in file)) continue
     const entry = file[token]
+    const unsupported = isObject(entry) ? Object.keys(entry).filter((key) => ![...METADATA, '$type', '$value'].includes(key)) : []
     if (!isObject(entry) || !('$value' in entry)) problems.push(`${token} is not a token`)
+    else if (unsupported.length > 0) problems.push(`${token} has ${unsupported.join(', ')}, which a theme file does not support`)
     else if (typeOf(entry, file) !== 'fontFamily') problems.push(`${token} is not a fontFamily token`)
     else if (!isFontFamily(entry.$value)) problems.push(`${token} is not a font name or a list of them`)
     else fonts[font] = fontStack(entry.$value)

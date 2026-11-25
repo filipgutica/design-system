@@ -25,6 +25,9 @@ test('a theme file gives its name, note, hue, font stacks, base radius, and neut
   const named = hueOnly()
   named['font-ui'] = { $type: 'fontFamily', $value: ['ACME "Display"', 'back\\slash', '123', 'sans-serif'] }
   assert.equal(parseTheme(named).inputs.fonts.ui, '"ACME \\"Display\\"", "back\\\\slash", "123", sans-serif')
+  // Braces are code points, not token references, and a CSS-wide keyword is a name, so the list stays valid.
+  named['font-ui'] = { $type: 'fontFamily', $value: ['Acme {font-mono}', 'initial', 'Default', 'monospace'] }
+  assert.equal(parseTheme(named).inputs.fonts.ui, '"Acme \\7b font-mono\\7d ", "initial", "Default", monospace')
   // The base radius is a Design Tokens dimension, written as a CSS length.
   const rounded = hueOnly()
   rounded['radius-base'] = { $type: 'dimension', $value: { value: 0.375, unit: 'rem' } }
@@ -57,6 +60,7 @@ test('a theme file the build cannot take stops with its problem', () => {
   assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'dimension', $value: { value: 8, unit: 'em' } } }), ['radius-base is not a px or rem length of 0 or more'])
   assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'dimension', $value: { value: -2, unit: 'px' } } }), ['radius-base is not a px or rem length of 0 or more'])
   assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'number', $value: 8 } }), ['radius-base is not a dimension token'])
+  assert.deepEqual(problemsWith((file) => { file['font-ui'] = { $type: 'fontFamily', $value: 'Acme', $ref: '#/font-mono' } }), ['font-ui has $ref, which a theme file does not support'])
   assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'dimension', $value: { value: 1, unit: 'rem' }, $ref: '#/other' } }), ['radius-base has $ref, which a theme file does not support'])
   // Structure the build does not resolve is a problem, not silently skipped.
   assert.deepEqual(problemsWith((file) => { file.light.$value = colour('#000000') }), ['light.$value is not supported in a theme file'])
@@ -115,6 +119,8 @@ test('the theme builder sets text on the hue in the modes the file names, and st
   // The dark modes keep the default text on the hue.
   assert.match(css, /^:root\[data-theme="dark"\] \{\n(?:  .+\n)*  --color-accent-text: var\(--color-bg\);\n/m)
   assert.match(css, /^\/\* Generated from a theme file by the theme builder/)
+  // A brace in a font name reaches the CSS as a code point.
+  assert.match(themeCss({ ...file, 'font-ui': { $type: 'fontFamily', $value: 'Acme {Display}' } }), /--font-ui: "Acme \\7b Display\\7d ";/)
   // A name or source cannot end the comment the CSS starts with.
   file.$extensions[THEME_EXTENSION].name = 'Odd */ :root { --color-bg: red } /*'
   assert.equal(themeCss(file, { source: 'a */ b' }).split('*/').length, 2)
