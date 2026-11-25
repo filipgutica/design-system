@@ -351,41 +351,58 @@
   .figure figcaption { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-sm); }
   .figure figcaption b { color: var(--color-text); font-weight: var(--weight-medium); }
 
-  /* Dialog and drawer. The catalogue shows them in place; real ones are native dialogs opened with showModal(). */
+  /* Dialog, drawer, and slideout. The catalogue shows them in place; real ones are native dialogs opened with showModal(). */
   .dialog { display: grid; width: min(512px, 100%); max-height: min(672px, calc(100dvh - var(--space-8))); overflow: hidden; padding: 0; border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
   /* The component sets display, so a closed native dialog needs its hidden state back. */
   dialog:not([open]) { display: none; }
   dialog.dialog { margin: auto; }
   dialog.dialog::backdrop { background: var(--color-overlay); }
-  .dialog-head, .dialog-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); padding: var(--space-4); }
+  .dialog-head, .dialog-foot, .slideout-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); padding: var(--space-4); }
   .dialog-head { border-bottom: 1px solid var(--color-border-subtle); }
   .dialog-head h4 { font-size: 1.125rem; font-weight: var(--weight-semibold); letter-spacing: -0.02em; }
   .dialog-head p { margin-top: var(--space-1); color: var(--color-muted); }
   .dialog-body { min-height: 0; overflow: auto; padding: var(--space-4); }
-  .dialog-foot { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface); }
+  :is(.dialog-foot, .slideout-foot) { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface); }
   /* The close button is a quiet action; this sets its size only. */
   .close { flex: none; width: var(--control-md); min-height: var(--control-md); padding: 0; color: var(--color-muted); }
   .drawer { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(calc(var(--sidebar-width) + var(--space-12)), 100%); height: 260px; overflow: hidden; padding: 0; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
   dialog.drawer { position: fixed; inset: 0 auto 0 0; height: 100dvh; max-height: none; margin: 0; }
-  dialog.drawer::backdrop { background: var(--color-overlay); }
-  /* The page behind an open drawer does not scroll, through the slide out too. Hiding the root's overflow keeps the
+  dialog:is(.drawer, .slideout)::backdrop { background: var(--color-overlay); }
+  /* Slideout: the drawer's layer from the edge the page names, the trailing edge by default, or the top or bottom.
+     --slide-from is where it slides from and back to. */
+  .slideout { --slide-from: translateX(100%); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: min(75%, 384px); height: 300px; overflow: hidden; padding: 0; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
+  .slideout:dir(rtl) { --slide-from: translateX(-100%); }
+  dialog.slideout { position: fixed; inset-block: 0; inset-inline: auto 0; height: 100dvh; max-height: none; margin: 0; }
+  dialog.slideout:is([data-edge="top"], [data-edge="bottom"]) { inset-inline: 0; width: auto; max-width: none; height: auto; max-height: 75dvh; }
+  dialog.slideout[data-edge="top"] { --slide-from: translateY(-100%); inset-block: 0 auto; }
+  dialog.slideout[data-edge="bottom"] { --slide-from: translateY(100%); inset-block: auto 0; }
+  /* The page behind an open drawer or slideout does not scroll, through the slide out too. Hiding the root's overflow keeps the
      reader's position. The gutter is reserved all the time, so a classic scrollbar that hides does not reflow the page. */
   :root { scrollbar-gutter: stable; }
-  :root:has(dialog.drawer[open]) { overflow: hidden; }
+  :root:has(dialog:is(.drawer, .slideout)[open]) { overflow: hidden; }
   @media (prefers-reduced-motion: no-preference) {
     dialog.drawer[open] { animation: drawer-in var(--duration) var(--ease-out); }
     dialog.drawer[open]::backdrop { animation: fade-in var(--duration) var(--ease-out); }
     /* The script sets data-closing, waits for the slide out, then closes the dialog. */
     dialog.drawer[data-closing] { animation: drawer-out var(--duration-fast) var(--ease-out) forwards; }
     dialog.drawer[data-closing]::backdrop { animation: fade-out var(--duration-fast) var(--ease-out) forwards; }
+    dialog.slideout[open] { animation: slideout-in var(--duration) var(--ease-out); }
+    dialog.slideout[open]::backdrop { animation: fade-in var(--duration) var(--ease-out); }
+    dialog.slideout[data-closing] { animation: slideout-out var(--duration-fast) var(--ease-out) forwards; }
+    dialog.slideout[data-closing]::backdrop { animation: fade-out var(--duration-fast) var(--ease-out) forwards; }
   }
   @keyframes drawer-in { from { transform: translateX(-100%); } }
   @keyframes drawer-out { to { transform: translateX(-100%); } }
+  @keyframes slideout-in { from { transform: var(--slide-from); } }
+  @keyframes slideout-out { to { transform: var(--slide-from); } }
+  /* The specimen's filter group: checkboxes under a field label. */
+  .filters { display: grid; gap: var(--space-1); margin: 0; padding: 0; border: 0; }
+  .filters legend { margin-bottom: var(--space-1); padding: 0; }
   @keyframes fade-in { from { opacity: 0; } }
   @keyframes fade-out { to { opacity: 0; } }
-  .drawer-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
-  .drawer-head h4 { font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }
-  .drawer-body { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: var(--space-4); }
+  :is(.drawer-head, .slideout-head) { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border-subtle); }
+  :is(.drawer-head, .slideout-head) h4 { font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }
+  :is(.drawer-body, .slideout-body) { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: var(--space-4); }
 
   /* Navigation list */
   .navlist { display: grid; gap: 0.125rem; width: min(100%, 240px); }
@@ -800,7 +817,7 @@
      glow, over the control's own raise or sink. The tokens.css base draws it on links; these rules pin
      it and move it to the visible part of composite controls. */
   :is(.btn, .quiet-action, .check input, .segmented button, .toggle, .crumbs a, .chip, .tool > summary):is(:focus-visible, .is-focus),
-  :is(.dialog, .drawer):focus-visible,
+  :is(.dialog, .drawer, .slideout):focus-visible,
   .switch:is(:focus-visible, .is-focus) .switch-track,
   .radio-card:has(input:is(:focus-visible, .is-focus)) { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
   /* Inside a segmented control, the ring hugs the thumb instead of crossing into the next option. */
@@ -1017,6 +1034,8 @@
   @media (max-width: 640px) {
     /* Phones: a dialog becomes a bottom sheet with rounded top corners. */
     dialog.dialog { width: 100%; max-width: none; margin: auto 0 0; border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
+    /* The slideout's actions stack in source order, so the primary action, last, sits nearest the thumb. */
+    .slideout-foot { flex-direction: column; align-items: stretch; }
     dialog.viewer { max-height: calc(100dvh - var(--space-4)); }
     /* A trail of three or more crumbs shows only the parent, as a back link; a two-crumb trail fits in full. */
     .crumbs ol:has(> li:nth-child(3)) > li:not(:nth-last-child(2)) { display: none; }
@@ -1109,7 +1128,7 @@
     </div>
     <div class="navlist" role="group" aria-labelledby="rail-containers">
       <span class="group-label" id="rail-containers">Containers and overlays</span>
-      <a href="#surface-and-card" data-terms="surface and card containers and overlays panels and cards for parallel, comparable content. panel box tile">Surface and card</a><a href="#figure" data-terms="figure containers and overlays an image or diagram with a caption. image screenshot caption">Figure</a><a href="#dialog" data-terms="dialog containers and overlays a modal task that needs an answer before the page continues. modal popup sheet confirm">Dialog</a><a href="#drawer" data-terms="drawer containers and overlays a side panel, such as phone navigation. sheet off-canvas sidebar menu">Drawer</a>
+      <a href="#surface-and-card" data-terms="surface and card containers and overlays panels and cards for parallel, comparable content. panel box tile">Surface and card</a><a href="#figure" data-terms="figure containers and overlays an image or diagram with a caption. image screenshot caption">Figure</a><a href="#dialog" data-terms="dialog containers and overlays a modal task that needs an answer before the page continues. modal popup sheet confirm">Dialog</a><a href="#drawer" data-terms="drawer containers and overlays navigation in a panel from the leading edge, such as phone navigation. off-canvas sidebar menu">Drawer</a><a href="#slideout" data-terms="slideout containers and overlays a modal panel from an edge for filters and secondary detail. sheet side panel flyout filters">Slideout</a>
     </div>
     <div class="navlist" role="group" aria-labelledby="rail-navigation">
       <span class="group-label" id="rail-navigation">Navigation</span>
@@ -1152,7 +1171,7 @@
       <div><h3><a href="#group-selection">Selection</a></h3><ul><li><a href="#checkbox-and-radio">Checkbox and radio</a><span>Pick several options, or one from a short list.</span></li><li><a href="#radio-card-group">Radio card group</a><span>Pick one option that needs a description.</span></li><li><a href="#switch">Switch</a><span>Turn a setting on or off at once.</span></li><li><a href="#toggle-button">Toggle button</a><span>A labelled card that latches on, with a switch inside.</span></li><li><a href="#segmented-control">Segmented control</a><span>Two to five short options that apply at once.</span></li></ul></div>
       <div><h3><a href="#group-inputs">Inputs</a></h3><ul><li><a href="#text-input-and-textarea">Text input and textarea</a><span>Type a short value or a longer note.</span></li><li><a href="#select">Select</a><span>Choose from a longer list.</span></li><li><a href="#field-wrapper">Field wrapper</a><span>Label, description, and error text around a field.</span></li><li><a href="#slider">Slider</a><span>Set a value in a range.</span></li></ul></div>
       <div><h3><a href="#group-feedback">Feedback and status</a></h3><ul><li><a href="#progress">Progress</a><span>Show how far a task has got.</span></li><li><a href="#score">Score</a><span>Show a value out of a maximum.</span></li><li><a href="#badge">Badge</a><span>A short status label.</span></li><li><a href="#alert">Alert</a><span>A real caveat or status message in the page.</span></li></ul></div>
-      <div><h3><a href="#group-containers">Containers and overlays</a></h3><ul><li><a href="#surface-and-card">Surface and card</a><span>Panels and cards for parallel, comparable content.</span></li><li><a href="#figure">Figure</a><span>An image or diagram with a caption.</span></li><li><a href="#dialog">Dialog</a><span>A modal task that needs an answer before the page continues.</span></li><li><a href="#drawer">Drawer</a><span>A side panel, such as phone navigation.</span></li></ul></div>
+      <div><h3><a href="#group-containers">Containers and overlays</a></h3><ul><li><a href="#surface-and-card">Surface and card</a><span>Panels and cards for parallel, comparable content.</span></li><li><a href="#figure">Figure</a><span>An image or diagram with a caption.</span></li><li><a href="#dialog">Dialog</a><span>A modal task that needs an answer before the page continues.</span></li><li><a href="#drawer">Drawer</a><span>Navigation in a panel from the leading edge, such as phone navigation.</span></li><li><a href="#slideout">Slideout</a><span>A modal panel from an edge for filters and secondary detail.</span></li></ul></div>
       <div><h3><a href="#group-navigation">Navigation</a></h3><ul><li><a href="#navigation-list">Navigation list</a><span>Rows of links with current page and current location.</span></li><li><a href="#section-rail">Section rail</a><span>A sticky list of sections that moves into a drawer on phones.</span></li><li><a href="#find-field">Find field</a><span>Filter a navigation list as you type.</span></li><li><a href="#breadcrumbs">Breadcrumbs</a><span>The path from the site to this page.</span></li><li><a href="#pager">Pager</a><span>Previous and next pages in a sequence.</span></li><li><a href="#tabs">Tabs</a><span>Switch panels about one object, without leaving the page.</span></li><li><a href="#skip-link">Skip link</a><span>Jump past the header to the content.</span></li><li><a href="#keyboard-key">Keyboard key</a><span>Show a key or shortcut in text.</span></li></ul></div>
       <div><h3><a href="#group-conversation">Conversation</a></h3><ul><li><a href="#message-row">Message row</a><span>One message: avatar, author, time, and body, with no bubble.</span></li><li><a href="#message-group">Message group</a><span>Consecutive messages by one author under one avatar.</span></li><li><a href="#hover-toolbar">Hover toolbar</a><span>Quick actions on a message, shown on hover or focus.</span></li><li><a href="#thread-panel">Thread panel</a><span>A resizable side pane with a message and its replies.</span></li><li><a href="#composer">Composer</a><span>One growing field with an inline send button.</span></li><li><a href="#tool-call-disclosure">Tool-call disclosure</a><span>A collapsed one-line summary of tool output or a handoff note.</span></li><li><a href="#mention">Mention</a><span>An inline @name in a message.</span></li></ul></div>
       <div><h3><a href="#group-code">Code and examples</a></h3><ul><li><a href="#code-block">Code block</a><span>Source code with an optional header and Copy, and a live example above it.</span></li></ul></div>
@@ -1553,13 +1572,25 @@
 
   <section class="component" id="drawer" data-layer="Core" aria-labelledby="drawer-title">
     <header><h3 id="drawer-title">Drawer</h3><span class="badge">Core</span><a href="components.md#drawer">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="drawer" aria-label="Copy link to Drawer" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
-    <p class="purpose">A side panel, such as phone navigation.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use a drawer for navigation or supporting detail that slides in from the side its trigger sits on, such as phone navigation, and open it from a named button.</dd><dt>Don’t</dt><dd>The page’s main task inside a drawer. The drawer holds navigation or detail; the task stays on the page.</dd></dl>
+    <p class="purpose">Navigation in a panel from the leading edge, such as phone navigation.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a drawer for navigation that does not fit on the page, such as phone navigation or a section rail at tablet width, and open it from a named button.</dd><dt>Don’t</dt><dd>Filters, settings, or detail in a drawer: they go in a slideout. The page’s main task stays on the page.</dd></dl>
     <div class="row"><h4>Live</h4><div class="states">
       <div class="state"><button class="btn secondary menu-glyph" type="button" data-size="lg" data-open="live-drawer">Contents</button><span class="caption">Rest, live: a page’s contents trigger opens a side drawer</span></div>
     </div></div>
     <div class="row"><h4>In place</h4><div class="states">
       <div class="state wide" inert><div class="drawer" role="dialog" aria-labelledby="drw-static-title"><div class="drawer-head"><h4 id="drw-static-title">Contents</h4><button class="quiet-action close" type="button" aria-label="Close drawer"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="drawer-body"><nav class="navlist" aria-label="Contents, static"><a href="#button" aria-current="location">Button</a><a href="#select">Select</a><a href="#switch">Switch</a></nav></div></div><span class="caption">Open, pinned; Button is the current section</span></div>
+    </div></div>
+  </section>
+
+  <section class="component" id="slideout" data-layer="Core" aria-labelledby="slideout-title">
+    <header><h3 id="slideout-title">Slideout</h3><span class="badge">Core</span><a href="components.md#slideout">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="slideout" aria-label="Copy link to Slideout" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
+    <p class="purpose">A modal panel from an edge for filters and secondary detail.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a slideout for filters, settings, or the detail of a selected item that the reader opens beside the page and closes to go on, and open it from a named button, such as Filters.</dd><dt>Don’t</dt><dd>Navigation in a slideout: that is the drawer’s job. The page’s main task stays on the page, and a short task that needs an answer is a dialog.</dd></dl>
+    <div class="row"><h4>Live</h4><div class="states">
+      <div class="state"><button class="btn secondary" type="button" data-open="live-slideout">Filters</button><span class="caption">Opens from the trailing edge</span></div>
+    </div></div>
+    <div class="row"><h4>In place</h4><div class="states">
+      <div class="state wide" inert><div class="slideout" role="dialog" aria-labelledby="so-static-title"><div class="slideout-head"><h4 id="so-static-title">Filters</h4><button class="quiet-action close" type="button" aria-label="Close filters"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="slideout-body"><fieldset class="filters"><legend class="field-label">Status</legend><label class="check"><input type="checkbox" checked>Alerting</label><label class="check"><input type="checkbox" checked>Warning</label><label class="check"><input type="checkbox">Healthy</label></fieldset></div><div class="slideout-foot"><button class="btn secondary" type="button">Reset</button><button class="btn" type="button">Apply</button></div></div><span class="caption">Open, pinned: header, body, and footer</span></div>
     </div></div>
   </section>
 
@@ -1922,6 +1953,11 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
   <div class="drawer-head"><h4 id="live-drawer-title">Contents</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close drawer"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
   <div class="drawer-body"><nav class="navlist" aria-label="Contents"><a href="#button">Button</a><a href="#segmented-control">Segmented control</a><a href="#navigation-list" aria-current="location">Navigation list</a></nav></div>
 </dialog>
+<dialog class="slideout" id="live-slideout" aria-labelledby="live-slideout-title">
+  <div class="slideout-head"><h4 id="live-slideout-title">Filters</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close filters"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
+  <form class="slideout-body" id="live-filters"><fieldset class="filters"><legend class="field-label">Status</legend><label class="check"><input type="checkbox" checked>Alerting</label><label class="check"><input type="checkbox" checked>Warning</label><label class="check"><input type="checkbox">Healthy</label></fieldset></form>
+  <form class="slideout-foot" method="dialog"><button class="btn secondary" type="reset" form="live-filters">Reset</button><button class="btn" type="submit">Apply</button></form>
+</dialog>
 <dialog class="drawer" id="nav-drawer" aria-labelledby="nav-drawer-title">
   <div class="drawer-head"><h4 id="nav-drawer-title">Components</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close drawer"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
   <div class="drawer-body" id="nav-drawer-body"></div>
@@ -2158,17 +2194,19 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
     dialog.addEventListener('click', (e) => { if (pressedOutside && e.target === dialog && outside(e)) close(); });
   };
   document.querySelectorAll('dialog.dialog').forEach((dialog) => closeOnBackdrop(dialog, () => dialog.close()));
-  // Following an in-page link closes the drawer, then focus moves to the destination instead of the trigger.
-  // Every close path slides the drawer out first. Under reduced motion there is no animation, so it closes at once.
-  // A slide that is cancelled, such as by turning on reduced motion mid-slide, still closes the drawer.
-  document.querySelectorAll('dialog.drawer').forEach((drawer) => {
+  // Every close path slides a drawer or slideout out first. Under reduced motion there is no animation, so it closes
+  // at once. A slide that is cancelled, such as by turning on reduced motion mid-slide, still closes it.
+  // Following an in-page link closes a drawer, then focus moves to the destination instead of the trigger; a
+  // slideout always returns focus to its trigger.
+  document.querySelectorAll('dialog.drawer, dialog.slideout').forEach((drawer) => {
+    const slide = drawer.classList.contains('drawer') ? 'drawer-out' : 'slideout-out';
     let destination = null;
     const slideOut = () => {
       if ('closing' in drawer.dataset) return;
       drawer.dataset.closing = '';
-      if (getComputedStyle(drawer).animationName !== 'drawer-out') { drawer.close(); return; }
+      if (getComputedStyle(drawer).animationName !== slide) { drawer.close(); return; }
       const finish = (e) => {
-        if (e.target !== drawer || e.pseudoElement || e.animationName !== 'drawer-out') return;
+        if (e.target !== drawer || e.pseudoElement || e.animationName !== slide) return;
         drawer.removeEventListener('animationend', finish);
         drawer.removeEventListener('animationcancel', finish);
         drawer.close();
@@ -2177,9 +2215,9 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
       drawer.addEventListener('animationcancel', finish);
     };
     drawer.addEventListener('cancel', (e) => { e.preventDefault(); slideOut(); });
-    drawer.querySelector('form[method="dialog"]')?.addEventListener('submit', (e) => { e.preventDefault(); slideOut(); });
+    drawer.querySelectorAll('form[method="dialog"]').forEach((form) => form.addEventListener('submit', (e) => { e.preventDefault(); slideOut(); }));
     closeOnBackdrop(drawer, slideOut);
-    drawer.addEventListener('click', (e) => {
+    if (slide === 'drawer-out') drawer.addEventListener('click', (e) => {
       const link = e.target.closest('a[href^="#"]');
       if (!link || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
       destination = document.getElementById(link.hash.slice(1));
