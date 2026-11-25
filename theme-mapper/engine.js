@@ -238,7 +238,7 @@ export const applyTheme = (core, theme) => {
   const data = JSON.parse(JSON.stringify(core))
   const identity = data.groups.find(({ identity: isIdentity }) => isIdentity)?.tokens
   if (!identity) throw new Error('The token source has no identity group')
-  identity['color-project'] = [theme.hue.light, '{color-project-dark}']
+  identity['color-project'] = theme.hue.light
   identity['color-project-dark'] = theme.hue.dark
   if (theme.fonts?.ui) identity['font-ui'] = theme.fonts.ui
   if (theme.fonts?.mono) identity['font-mono'] = theme.fonts.mono

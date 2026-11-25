@@ -138,7 +138,7 @@ export const tokens = {
         "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
       },
       "dark": {
-        "color-project": "#a5a1ff",
+        "color-project": "#4b45d1",
         "color-project-dark": "#a5a1ff",
         "font-ui": "\"Inter\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
         "font-mono": "\"JetBrains Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",
@@ -410,7 +410,7 @@ export const tokens = {
         "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
       },
       "dark": {
-        "color-project": "#cba6f7",
+        "color-project": "#8839ef",
         "color-project-dark": "#cba6f7",
         "font-ui": "\"Inter\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
         "font-mono": "\"JetBrains Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",
@@ -682,7 +682,7 @@ export const tokens = {
         "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
       },
       "dark": {
-        "color-project": "#f39a62",
+        "color-project": "#b04003",
         "color-project-dark": "#f39a62",
         "font-ui": "\"Inter\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
         "font-mono": "\"JetBrains Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",
@@ -954,7 +954,7 @@ export const tokens = {
         "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
       },
       "dark": {
-        "color-project": "#7fd083",
+        "color-project": "#27752a",
         "color-project-dark": "#7fd083",
         "font-ui": "\"Inter\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
         "font-mono": "\"JetBrains Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",
@@ -1226,7 +1226,7 @@ export const tokens = {
         "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
       },
       "dark": {
-        "color-project": "#3fb950",
+        "color-project": "#1f883d",
         "color-project-dark": "#3fb950",
         "font-ui": "\"Mona Sans VF\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Noto Sans Backtick Fix\", \"Noto Sans\", Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
         "font-mono": "ui-monospace, SFMono-Regular, \"SF Mono\", Menlo, Consolas, \"Liberation Mono\", monospace",
@@ -1498,7 +1498,7 @@ export const tokens = {
         "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
       },
       "dark": {
-        "color-project": "#b49cff",
+        "color-project": "#6d3fd6",
         "color-project-dark": "#b49cff",
         "font-ui": "\"Inter\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
         "font-mono": "\"JetBrains Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",
@@ -1770,7 +1770,7 @@ export const tokens = {
         "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
       },
       "dark": {
-        "color-project": "#5cc8b8",
+        "color-project": "#087266",
         "color-project-dark": "#5cc8b8",
         "font-ui": "\"Inter\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
         "font-mono": "\"JetBrains Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",
@@ -2042,7 +2042,7 @@ export const tokens = {
         "ease-out": "cubic-bezier(0.2, 0.8, 0.2, 1)"
       },
       "dark": {
-        "color-project": "#8aa8ff",
+        "color-project": "#2b59d6",
         "color-project-dark": "#8aa8ff",
         "font-ui": "\"Inter\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
         "font-mono": "\"JetBrains Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",

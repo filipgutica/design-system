@@ -125,7 +125,7 @@ const CSS = `
   .hue code { font-size: var(--text-xs); }
   /* The fill takes the theme's hue; the outline stays the page's, so both chips draw the same edge. */
   .chip { display: grid; flex: none; width: 1.5rem; height: 1.5rem; overflow: hidden; border-radius: var(--radius-inline); }
-  .chip > i { grid-area: 1 / 1; background: var(--color-project); }
+  .chip > i { grid-area: 1 / 1; background: var(--color-accent); }
   .swatches { display: inline-flex; }
   .swatches .chip:not(:first-child) { margin-inline-start: -0.375rem; }
   .theme-pick { max-width: 20rem; }

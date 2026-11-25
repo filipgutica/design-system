@@ -1,4 +1,4 @@
-// Generated from tokens/core.json by scripts/build-tokens.mjs. Do not edit.
+// Generated from tokens/core.json and the default theme by scripts/build-tokens.mjs. Do not edit.
 /** The core tokens: every theme's base. @type {import('./engine.js').TokenSource} */
 export const core = {
   "groups": [
@@ -82,7 +82,10 @@ export const core = {
     },
     {
       "tokens": {
-        "color-accent": "{color-project}",
+        "color-accent": [
+          "{color-project}",
+          "{color-project-dark}"
+        ],
         "color-accent-text": "{color-bg}",
         "color-accent-hover": "{color-text}",
         "color-button-hover": "color-mix(in srgb, {color-accent} 85%, {color-text})",
@@ -287,4 +290,12 @@ export const core = {
       }
     }
   ]
+}
+
+/** The default theme's inputs, which tokens.css carries. @type {import('./engine.js').ThemeInputs} */
+export const defaultTheme = {
+  "hue": {
+    "light": "#4b45d1",
+    "dark": "#a5a1ff"
+  }
 }

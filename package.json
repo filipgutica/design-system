@@ -21,6 +21,10 @@
       "types": "./theme-mapper/index.d.ts",
       "default": "./theme-mapper/index.js"
     },
+    "./theme-builder": {
+      "types": "./theme-mapper/theme-builder.d.ts",
+      "default": "./theme-mapper/theme-builder.js"
+    },
     "./open-vsx": {
       "types": "./open-vsx/index.d.ts",
       "default": "./open-vsx/index.js"

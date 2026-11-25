@@ -17,6 +17,7 @@
     "catalogue.spec.ts",
     "theme-mapper.spec.ts",
     "subtree-themes.spec.ts",
+    "theme-placement.spec.ts",
     "base.spec.ts"
   ]
 }
