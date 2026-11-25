@@ -165,6 +165,32 @@ const TEXT_ON_FILL = {
 export const TEXT_ON_FILL_TOKENS = Object.keys(TEXT_ON_FILL)
 const TEXT_CANDIDATES = ['{color-accent}', '{color-text}', 'black', 'white']
 
+/**
+ * The tokens a theme may set, by kind, without their leading dashes. Every other token is core, and a theme
+ * never overrides it: the identity group's hue pair, fonts, and base radius; the text on the hue's fills,
+ * which a theme sets when its hue cannot carry the default; the neutrals, as a whole set; and the syntax
+ * colours, which an imported theme sets.
+ * @param {TokenSource} data
+ * @returns {{ hue: string[], textOnHue: string[], fonts: string[], radius: string[], neutrals: string[], syntax: string[] }}
+ */
+export const themeInputNames = (data) => {
+  const identity = Object.keys(data.groups.find(({ identity: isIdentity }) => isIdentity)?.tokens ?? {})
+  /** @param {string} prefix */
+  const take = (prefix) => identity.filter((name) => name.startsWith(prefix))
+  const inputs = {
+    hue: take('color-'),
+    textOnHue: ['color-accent-text', ...TEXT_ON_FILL_TOKENS],
+    fonts: take('font-'),
+    radius: take('radius-'),
+    neutrals: [...NEUTRALS],
+    syntax: SYNTAX_ROLES.map((role) => `color-syntax-${role}`),
+  }
+  const sorted = Object.values(inputs).flat()
+  const unsorted = identity.filter((name) => !sorted.includes(name))
+  if (unsorted.length > 0) throw new Error(`Identity tokens with no input kind: ${unsorted.join(', ')}`)
+  return inputs
+}
+
 // Sets each TEXT_ON_FILL token to its first candidate that reaches 4.5:1, per mode. When none does, the
 // accent stays, so the contrast tests fail on it rather than on a silently chosen colour.
 /**

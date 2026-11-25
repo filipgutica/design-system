@@ -11,7 +11,8 @@
 // dist/themes/<id>.css sets what one theme changes from it, to load after it. Dark mode follows
 // prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it.
 // dist/tokens.json and dist/tokens.js carry the values of every theme, resolved, for code, and
-// dist/themes/<id>.tokens.json is each theme file as written, for design-token tools.
+// dist/themes/<id>.tokens.json is each theme file as written, for design-token tools, and
+// dist/theme-inputs.json lists the tokens a theme may set.
 // theme-mapper/core.js carries the core tokens for the theme engine, and theme-mapper/*.d.ts its types,
 // generated from the JSDoc in theme-mapper/*.js, which the same step typechecks.
 // open-vsx/*.d.ts is generated and checked separately, with the web APIs its client needs.
@@ -22,7 +23,7 @@
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { DARK, LIGHT, NEUTRALS, applyTheme, flatTokens, reference, resolveData, valueFor } from '../theme-mapper/engine.js'
+import { DARK, LIGHT, NEUTRALS, applyTheme, flatTokens, reference, resolveData, themeInputNames, valueFor } from '../theme-mapper/engine.js'
 
 export const DEFAULT_THEME = 'graphite-indigo'
 export const THEME_FILE = '.tokens.json'
@@ -324,6 +325,17 @@ export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
   ].join('\n')
 }
 
+// The names a theme may set, for a component library's test that it sets no core token. Generated, so it follows
+// the engine.
+export const renderThemeInputs = ({ data }) => {
+  const groups = themeInputNames(data)
+  return `${JSON.stringify({
+    $description: 'The tokens a theme may set, without their leading dashes, by kind. Every other token in tokens.css is core: a theme or a component library never overrides it. Generated from tokens/core.json by scripts/build-tokens.mjs. Do not edit.',
+    names: Object.values(groups).flat(),
+    groups,
+  }, null, 2)}\n`
+}
+
 // Standalone token values of every theme with every reference substituted, as getComputedStyle reports them.
 export const resolvedTokens = (themes) => ({ themes: Object.fromEntries(themes.map(({ id, data }) => [id, resolveData(data)])) })
 
@@ -408,6 +420,7 @@ export const outputs = (themes) => {
     ['dist/tokens.json', `${JSON.stringify(resolvedTokens(themes), null, 2)}\n`],
     ['dist/tokens.js', renderTokensJs(themes)],
     ['dist/tokens.d.ts', renderTokensDts(defaultTheme, themes)],
+    ['dist/theme-inputs.json', renderThemeInputs(defaultTheme)],
   ]
 }
 

@@ -50,6 +50,14 @@ export const SYNTAX_ROLES: string[];
 export const SURFACES: string[];
 /** The selected-fill text tokens, which take their readable value from the theme. */
 export const TEXT_ON_FILL_TOKENS: string[];
+export function themeInputNames(data: TokenSource): {
+    hue: string[];
+    textOnHue: string[];
+    fonts: string[];
+    radius: string[];
+    neutrals: string[];
+    syntax: string[];
+};
 export function applyTheme<Data extends TokenSource>(core: Data, theme: ThemeInputs): Data;
 /**
  * The contrast checks each theme must pass, in both modes.
