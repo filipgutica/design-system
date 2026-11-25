@@ -130,8 +130,7 @@ export const Panel = ({ children }: { children: React.ReactNode }) => (
 const OVERVIEW_CSS = `
   .title-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
   .doc-section { display: grid; gap: var(--space-4); padding-top: var(--space-6); border-top: 1px solid var(--color-border-subtle); }
-  .doc-section > h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); }
-  .doc-section > h2::before { content: "## " / ""; color: var(--color-accent); }
+  .doc-section > h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-ui); }
   .doc-section > h3 { margin-top: var(--space-2); font-size: var(--text-lg); }
   .doc-section > p { max-width: var(--measure); font-size: var(--text-reading); line-height: var(--leading); }
   .paths { width: 100%; border-collapse: collapse; font-size: var(--text-md); }

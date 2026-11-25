@@ -9,9 +9,9 @@ Each section has these parts: anatomy, states, then Do and Don't, keyboard and s
 | Layer | What it holds | A new project |
 | --- | --- | --- |
 | Core | Tokens, depth, controls and their states, focus, motion, accessibility, forced colors | Adopts it as is |
-| Identity | The terminal folio look: the `~/name` header, the project registry, mono display headings, `##` section marks, terminal plates, captures, and the mono section rail | Replaces it with its own |
+| Identity | The terminal folio look: the `~/name` header, the project registry, terminal plates, captures, and the section rail | Replaces it with its own |
 
-The identity layer reads only the identity tokens (`--color-project`, `--color-project-dark`, `--font-ui`, `--font-mono`) and the terminal tokens. A core component never depends on an identity component.
+The identity layer reads only the identity tokens (`--color-project`, `--color-project-dark`, `--font-ui`, `--font-mono`, `--radius-base`) and the terminal tokens. A core component never depends on an identity component.
 
 ## Groups
 
@@ -611,7 +611,7 @@ Layer: Identity.
 Layer: Identity.
 
 - **Anatomy.** Type and layout helpers for identity pages: headings, steps, definitions, facts, a command list, and the footer, each below.
-- **Headings.** Documentation, CLI tool, article, and product page titles (`--text-3xl`) use `--font-mono`; application titles use `--font-ui` at `--text-2xl` or smaller. On documentation, CLI tool, article, and product pages, a page-level section heading (h2) uses `--font-mono` at `--text-xl` (a product page may set it larger, up to `--text-3xl`), starts with a `## ` mark in `--color-accent`, drawn with `content: "## " / ""`, and has a `--color-border-subtle` rule above the section. Application and inline-visualization section headings use `--font-ui`, semibold, at `--text-xl` or smaller, with no mark and no rule; h3 and lower never take the mark. A product page or tool home may use a mono `--text-display` title (`--text-display-sm` on phones).
+- **Headings.** Every page title and section heading uses `--font-ui`, semibold, with no mark before it. Documentation, CLI tool, article, and product page titles use `--text-3xl`; application titles use `--text-2xl` or smaller. On documentation, CLI tool, article, and product pages, a page-level section heading (h2) uses `--text-xl` (a product page may set it larger, up to `--text-3xl`) and has a `--color-border-subtle` rule above the section. Application and inline-visualization section headings use `--text-xl` or smaller, with no rule. A product page or tool home may use a `--text-display` title (`--text-display-sm` on phones).
 - **Steps.** An ordered list in which each step hangs from a mono number in `--color-accent` on a ruled leading column, with an h3 title per step.
 - **Definitions.** A definition list of terms and short meanings: medium-weight terms and muted meanings in two columns, one column on phones. Flags such as `--all` do not break.
 - **Facts.** A mono definition list of short labels and values, such as a repository path. Values wrap anywhere.
@@ -619,7 +619,7 @@ Layer: Identity.
 - **Footer.** Mono, with an attribution link at the start and project links at the end.
 - **States.** None: the helpers are static type. The command list's Copy takes the quiet action states.
 - **Do.** Use steps for a sequence the reader follows in order, definitions for terms with short meanings, and facts for short labels and values.
-- **Don't.** The `##` mark on an application screen, or on h3 and lower.
-- **Keyboard and screen reader.** Headings keep their outline levels, and the `## ` mark has empty alternative text, so it is not read. Steps are an ordered list; definitions and facts are definition lists.
+- **Don't.** Mono, or a mark such as `##`, on a heading.
+- **Keyboard and screen reader.** Headings keep their outline levels. Steps are an ordered list; definitions and facts are definition lists.
 - **Motion.** None: the helpers are static.
 - **Forced colors.** No change: text, rules, and marks take the system colours.

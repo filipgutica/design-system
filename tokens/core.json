@@ -9,8 +9,8 @@
       "roles": {
         "color-project": "The project hue; `--color-accent` follows it",
         "color-project-dark": "The dark-theme hue and the terminal capture accent",
-        "font-ui": "Prose, h3 and below, application section headings, labels, and controls",
-        "font-mono": "Identity, documentation and product page titles and section headings, navigation rails, metadata, captions, code, identifiers, and keys",
+        "font-ui": "Prose, every heading, labels, and controls",
+        "font-mono": "Code, identifiers, keys, and terminal captures, and the identity layer's small marks: the ~/name header, metadata, step numbers, and the footer",
         "radius-base": "The base corner: rows, actions, and fields take it, small marks half of it, and containers one and a half times it"
       },
       "tokens": {
@@ -326,11 +326,11 @@
         "text-sm": "Secondary text and figure captions",
         "text-md": "Controls and dense application content",
         "text-lg": "Subheadings (h3 and below) and large controls",
-        "text-xl": "Documentation section heading, in mono",
+        "text-xl": "Documentation section heading",
         "text-2xl": "Largest application title",
-        "text-3xl": "Documentation title, in mono",
+        "text-3xl": "Documentation title",
         "text-reading": "Paragraphs and article text, with `--leading` and `--measure`",
-        "text-display": "Product page and tool home title, in mono",
+        "text-display": "Product page and tool home title",
         "text-display-sm": "The display title on phones",
         "leading-tight": "Headings, from the `tokens.css` base",
         "leading": "Body and reading text",

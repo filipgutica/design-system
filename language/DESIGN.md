@@ -17,7 +17,7 @@ The language has a reusable core and a replaceable identity layer.
 | Layer | What it holds | A new project |
 | --- | --- | --- |
 | Core | Tokens, depth, controls and their states, focus, motion, accessibility, and forced colors | Adopts it as is |
-| Identity | The terminal folio look of the personal sites: the `~/name` header, the project registry, mono display headings, `##` section marks, and terminal plates | Replaces it with its own |
+| Identity | The terminal folio look of the personal sites: the `~/name` header, the project registry, and terminal plates | Replaces it with its own |
 
 A new project keeps `tokens.css` unchanged and sets the identity inputs (`--color-project`, `--color-project-dark`, `--font-ui`, `--font-mono`, `--radius-base`, and `--color-accent-text`, `--color-nav-current-text`, and `--color-segmented-current-text` when the hue cannot carry them at 4.5:1) on `:root` in its own stylesheet, or loads a theme file. A theme file sets the last two for it; its hue must carry `--color-accent-text` itself, which the contrast tests check for every shipped theme. [Component specs](components.md) mark each component Core or Identity, and [decisions](decisions.md) record why each choice was made and which options were rejected. Read both before you build or change a component.
 
@@ -75,7 +75,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
 ### Typography
 
-- Use `--font-ui` for prose, h3 and below, labels, and controls, and `--font-mono` for code, identifiers, and keys. The identity layer decides where else mono appears.
+- Use `--font-ui` for prose, every heading, labels, and controls, and `--font-mono` for code, identifiers, keys, and terminal captures. The identity layer decides where else mono appears, never on a heading.
 - Controls and dense application content use `--text-md`; secondary text uses `--text-sm`. Paragraphs and substantial article text use `--text-reading` with `--leading`. Bound reading text with `--measure` and introductory copy to a slightly shorter line.
 - Documentation titles use `--text-3xl`; section headings use `--text-xl` and sit above their content. Application titles use `--text-2xl` or smaller, and application section headings use `--font-ui` at `--text-xl` or smaller.
 - Use `--weight-regular`, `--weight-medium`, and `--weight-semibold`. Keep the source text's case; never transform it. Sentence case and restrained tracking make hierarchy easier to scan.
@@ -304,9 +304,9 @@ Measure each screen you build or revise. Count its words, boxes, and controls wi
 
 The personal sites are terminal tools that read Markdown and paths, so their identity comes from that world. A new project replaces this section with its own identity and keeps the core.
 
-- **Mono identity.** `--font-mono` (JetBrains Mono) sets identity, the page titles and section headings of documentation, CLI tool, article, and product pages, navigation rails, metadata, captions, and the footer. `fonts.css` self-hosts Inter and JetBrains Mono; without it, the tokens fall back to the system stack.
-- **Headings.** Documentation, CLI tool, article, and product page titles are mono; application titles are `--font-ui`. Page-level section headings (h2) on documentation, CLI tool, article, and product pages are mono, start with a `##` mark in `--color-accent` (decorative, so screen readers skip it), and have a `--color-border-subtle` rule above the section. Application and inline-visualization section headings, and every h3 or lower, are plain `--font-ui` with no mark. Product pages and tool homes may use a mono `--text-display` title, stepping down to `--text-display-sm` on phones; keep a short heading measure, place supporting copy and the primary action nearby, and let the first product image enter the initial desktop viewport.
-- **Hue marks.** The hue also draws the `~/` header mark, the `##` mark on documentation, CLI tool, article, and product section headings, step numbers, and the `$` prompt.
+- **Mono identity.** `--font-mono` (JetBrains Mono) sets code, identifiers, keys, and terminal captures, and the folio's small marks: the `~/name` header and the project menu, metadata facts, step numbers, and the footer. Titles and section headings never use it. `fonts.css` self-hosts Inter and JetBrains Mono; without it, the tokens fall back to the system stack.
+- **Headings.** Every page title and section heading is `--font-ui`, semibold, with no mark before it. Page-level section headings (h2) on documentation, CLI tool, article, and product pages have a `--color-border-subtle` rule above the section; application and inline-visualization section headings, and every h3 or lower, have none. Product pages and tool homes may use a `--text-display` title, stepping down to `--text-display-sm` on phones; keep a short heading measure, place supporting copy and the primary action nearby, and let the first product image enter the initial desktop viewport.
+- **Hue marks.** The hue also draws the `~/` header mark, step numbers, and the `$` prompt.
 - **Header.** Personal product sites share a compact static header: a mono `~/name` identity with the `~/` in `--color-accent`, a project switcher, useful page links, appearance controls, and a solid `--color-text` rule below. Use the shared project registry for names, order, and destinations; the design-system site's header starts with the same switcher. The identity is the same on every page, and the links sit at the same x on every page; the page's path goes in [breadcrumbs](components.md#breadcrumbs) above its title. Keep a gallery's existing application navigation structure.
 - **Appearance.** Personal pages share the built-in System/Light/Dark choice, through the header's picker. An explicitly selected custom gallery theme overrides that choice until the reader selects a built-in appearance. Preserve installed themes.
 - **Terminal plates.** Commands use the normal code block and its source well (`--color-code`) in light and dark. A shell command gets a `$` prompt in `--color-accent`, drawn by CSS so it never enters copied or accessible text. Short commands use a headerless compact row with an accessible Copy control. Terminal captures keep the neutral `--color-terminal` plate, with a mono status-line caption below the screen; tabs on a capture switch to mono.
@@ -318,7 +318,7 @@ The personal sites are terminal tools that read Markdown and paths, so their ide
 - Multiple cards around ordinary prose, ornamental grids, glows, gradients, pill-shaped cards, and hover lifts.
 - Tinted wells or panels used for decoration.
 - Display typography on dense tool screens, or tiny application typography on a product landing page.
-- The `##` mark on every section of an application screen, where it repeats down the page and competes with the data.
+- A mark such as `##` before a heading, which repeats down the page and competes with the content.
 - Large blank gaps that push the action or evidence away from the introduction.
 - Centered long paragraphs, excessively faint text, and horizontal page overflow.
 - Theme controls added automatically to inline charts and explainers.

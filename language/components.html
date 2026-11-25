@@ -767,9 +767,8 @@
   .site-links a { min-height: var(--control-md); }
 
   /* Page type and helpers */
-  .folio-h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); letter-spacing: var(--tracking-tight); }
-  .folio-h2::before { content: "## " / ""; color: var(--color-accent); }
-  .folio-display { font: var(--weight-semibold) var(--text-display) / 1.08 var(--font-mono); letter-spacing: var(--tracking-tight); overflow-wrap: anywhere; }
+  .section-title { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-ui); letter-spacing: var(--tracking-tight); }
+  .display-title { font: var(--weight-semibold) var(--text-display) / 1.08 var(--font-ui); letter-spacing: var(--tracking-tight); overflow-wrap: anywhere; }
   .steps { display: grid; gap: var(--space-5); max-width: var(--measure); margin: 0; padding: 0; list-style: none; counter-reset: step; }
   .steps li { position: relative; display: grid; gap: var(--space-1); padding-left: var(--space-12); counter-increment: step; }
   .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: var(--space-8); font: var(--weight-semibold) var(--text-lg) / var(--leading-tight) var(--font-mono); color: var(--color-accent); text-align: right; }
@@ -885,11 +884,10 @@
      A short page, such as one left by a find with no matches, keeps its rows at the top. */
   main { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: var(--space-12); min-width: 0; padding-block: var(--space-8) var(--space-16); }
   .intro { display: grid; gap: var(--space-3); }
-  .intro h1 { font: var(--weight-semibold) var(--text-3xl) / 1.08 var(--font-mono); letter-spacing: var(--tracking-tight); overflow-wrap: anywhere; }
+  .intro h1 { font: var(--weight-semibold) var(--text-3xl) / 1.08 var(--font-ui); letter-spacing: var(--tracking-tight); overflow-wrap: anywhere; }
   .intro p { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-reading); }
   .layer-head { display: grid; gap: var(--space-2); padding-top: var(--space-6); border-top: 1px solid var(--color-border-subtle); }
-  :is(.layer-head, .index) > h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); }
-  :is(.layer-head, .index) > h2::before { content: "## " / ""; color: var(--color-accent); }
+  :is(.layer-head, .index) > h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-ui); }
   .layer-head p { max-width: var(--measure); color: var(--color-muted); }
   .component { display: grid; gap: var(--space-3); min-width: 0; }
   .component > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-3); }
@@ -1009,7 +1007,7 @@
     .pane-resize { display: none; }
     .crumbs a, .group-toggle { min-height: var(--control-touch); }
     .intro > .crumbs > ol { margin-block: calc((1lh - var(--control-touch)) / 2) calc((var(--control-touch) - 1lh) / 2); }
-    .folio-display { font-size: var(--text-display-sm); }
+    .display-title { font-size: var(--text-display-sm); }
   }
   /* On the narrowest phones the strip clips a link. Rows with 4px side padding keep at least 16px of it in
      view under the 24px fade, so the clip shows. The strip queries its own width, since only the strip changes. */
@@ -1851,11 +1849,11 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
 
   <section class="component" id="page-type-and-helpers" data-layer="Identity" aria-labelledby="page-type-title">
     <header><h3 id="page-type-title">Page type and helpers</h3><span class="badge">Identity</span><a href="components.md#page-type-and-helpers">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="page-type-and-helpers" aria-label="Copy link to Page type and helpers" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
-    <p class="purpose">Mono headings, steps, definitions, facts, and the footer.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use steps for a sequence the reader follows in order, definitions for terms with short meanings, and facts for short labels and values.</dd><dt>Don’t</dt><dd>The <code>##</code> mark on an application screen, or on h3 and lower.</dd></dl>
+    <p class="purpose">Headings, steps, definitions, facts, and the footer.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use steps for a sequence the reader follows in order, definitions for terms with short meanings, and facts for short labels and values.</dd><dt>Don’t</dt><dd>Mono, or a mark such as <code>##</code>, on a heading.</dd></dl>
     <div class="row"><h4>Headings</h4><div class="states">
-      <div class="state wide"><p class="folio-display">~/annoterm</p><span class="caption">Display title, mono</span></div>
-      <div class="state wide"><p class="folio-h2">Install</p><span class="caption">Section heading with its <code>##</code> mark</span></div>
+      <div class="state wide"><p class="display-title">Annotate the terminal</p><span class="caption">Display title</span></div>
+      <div class="state wide"><p class="section-title">Install</p><span class="caption">Section heading</span></div>
     </div></div>
     <div class="row"><h4>Steps</h4><div class="states">
       <div class="state wide"><ol class="steps"><li><h4>Install the CLI</h4><p>Homebrew installs the launcher.</p></li><li><h4>Apply host config</h4><p>It copies the guidance and the design system.</p></li></ol><span class="caption">Rest: two steps</span></div>
