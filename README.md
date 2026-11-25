@@ -18,7 +18,7 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | `theme-mapper/` | The theme engine the token build shares, and the experimental theme mapper built on it |
 | `scripts/build-site.mjs` | The site build: writes `site/` for GitHub Pages from `components.html`, the tokens, and `package.json` |
 | `dist/` | Generated theme files, JSON, and JavaScript |
-| `fonts/` | Inter and JetBrains Mono latin `woff2` files, `fonts.css`, and their OFL licences |
+| `fonts/` | Inter and JetBrains Mono latin and latin-ext `woff2` files, `fonts.css`, `SOURCE.json` (the packages and file hashes they come from), and their OFL licences |
 | `tests/` | Guard tests for the payload, the tokens, and the site build, the React smoke test, and behaviour tests for the catalogue and the built site |
 
 To change a value, edit the JSON and run `pnpm tokens:build`. `pnpm tokens:check` fails when a generated file is stale or a token has no role.
