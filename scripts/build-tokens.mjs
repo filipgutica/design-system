@@ -26,10 +26,7 @@ import { basename, dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { DARK, LIGHT, applyTheme, resolveData, themeInputNames } from '../theme-mapper/engine.js'
 import { block, darkOverrides, renderThemeCss, standaloneNames, standaloneResolver, subtreeBlocks, subtreeNames } from '../theme-mapper/css.js'
-import { THEME_EXTENSION, parseTheme } from '../theme-mapper/theme-file.js'
-
-// theme-mapper/theme-file.js reads the theme files; the package's theme-builder entry re-exports it.
-export { THEME_EXTENSION, parseTheme }
+import { parseTheme } from '../theme-mapper/theme-file.js'
 
 export const DEFAULT_THEME = 'graphite-indigo'
 export const THEME_FILE = '.tokens.json'

@@ -31,7 +31,6 @@ export class ThemeFileError extends Error {
  */
 export const themeCss = (file, { source = 'a theme file' } = {}) => {
   const { problems, inputs } = parseTheme(file)
-  const { name, hue } = inputs
-  if (problems.length > 0 || name === undefined || hue === undefined) throw new ThemeFileError(problems)
-  return renderThemeCss({ name, data: applyTheme(core, { ...inputs, hue }), source }, applyTheme(core, defaultTheme))
+  if (inputs === undefined) throw new ThemeFileError(problems)
+  return renderThemeCss({ name: inputs.name, data: applyTheme(core, inputs), source }, applyTheme(core, defaultTheme))
 }

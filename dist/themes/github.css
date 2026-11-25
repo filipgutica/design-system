@@ -54,6 +54,7 @@
   --color-surface: #151b23;
   --color-surface-raised: #151b23;
   --color-surface-muted: #212830;
+  --color-nav-current-text: var(--color-accent);
   --color-row-hover: #262c36;
   --color-border-subtle: #3d444d;
   --color-border: #656c76;

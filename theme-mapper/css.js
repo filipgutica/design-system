@@ -84,11 +84,13 @@ export const subtreeBlocks = (blocks, { scheme = false } = {}) => /** @type {con
 
 /**
  * What one theme changes from tokens.css, to load after it on :root: its identity inputs, then every other
- * token whose light value differs. tokens.css's dark blocks outrank a bare :root, so the theme's dark
- * blocks, with the same selectors, set each token whose dark value would otherwise come out wrong.
- * A hue-only theme needs none: tokens.css's dark blocks already switch the accent to --color-project-dark.
- * Its subtree blocks, after those, set each token whose value in that mode differs from what tokens.css's
- * subtree blocks declare, such as the neutrals.
+ * token whose light value differs. In tokens.css's cascade layer, tokens.css's dark rules outrank the theme's
+ * bare :root; in a later layer, the theme's :root outranks them. So the theme's dark blocks, with the same
+ * selectors, set each token whose dark value would come out wrong in either placement. A hue-only theme needs
+ * none: tokens.css's dark blocks already switch the accent to --color-project-dark. Its subtree blocks, after
+ * those, set each token whose value in that mode differs from what tokens.css's subtree blocks declare, such as
+ * the neutrals, and, because the dark one also matches :root.dark, each token the theme's :root would get wrong
+ * there.
  * @param {{ name: string, data: TokenSource, source: string }} theme `source` names the theme file in the first comment line.
  * @param {TokenSource} defaultData The default theme's tokens, which tokens.css carries.
  */
@@ -98,11 +100,18 @@ export const renderThemeCss = ({ name, data, source }, defaultData) => {
   const names = standaloneNames(data)
   const identity = data.groups.filter(({ identity: isIdentity }) => isIdentity).flatMap(({ tokens }) => Object.keys(tokens))
   const root = [...identity, ...names.filter((token) => !identity.includes(token) && resolve(token, LIGHT) !== resolveDefault(token, LIGHT))]
+  const rootLight = new Map(root.map((token) => [token, resolve(token, LIGHT)]))
   const defaultDark = new Map(darkOverrides(names, resolveDefault))
-  /** @param {string} token */
-  const seenInDark = (token) => defaultDark.get(token) ?? (root.includes(token) ? resolve(token, LIGHT) : resolveDefault(token, LIGHT))
+  /**
+   * The token's value on a dark :root without the theme's dark blocks: in tokens.css's layer, then in a later one.
+   * @param {string} token
+   */
+  const seenInDark = (token) => [
+    defaultDark.get(token) ?? rootLight.get(token) ?? resolveDefault(token, LIGHT),
+    rootLight.get(token) ?? defaultDark.get(token) ?? resolveDefault(token, LIGHT),
+  ]
   /** @type {Declarations} */
-  const dark = names.filter((token) => resolve(token, DARK) !== seenInDark(token)).map((token) => [`--${token}`, resolve(token, DARK)])
+  const dark = names.filter((token) => seenInDark(token).some((seen) => seen !== resolve(token, DARK))).map((token) => [`--${token}`, resolve(token, DARK)])
   const defaultSubtree = new Set(subtreeNames(defaultData))
   const subtree = new Set([...defaultSubtree, ...subtreeNames(data)])
   /**
@@ -110,11 +119,14 @@ export const renderThemeCss = ({ name, data, source }, defaultData) => {
    * @returns {Declarations}
    */
   const subtreeIn = (mode) => names
-    .filter((token) => subtree.has(token) && !(defaultSubtree.has(token) && resolve(token, mode) === resolveDefault(token, mode)))
+    .filter((token) => subtree.has(token) && !(defaultSubtree.has(token) && resolve(token, mode) === resolveDefault(token, mode)
+      && (mode === LIGHT || (rootLight.get(token) ?? resolve(token, DARK)) === resolve(token, DARK))))
     .map((token) => [`--${token}`, resolve(token, mode)])
+  /** @param {string} text */
+  const commentSafe = (text) => text.replaceAll('*/', '*\\/')
   return [
-    `/* Generated from ${source} by the theme builder in @filipgutica/design-system. Do not edit.`,
-    ` * The ${name} theme for tokens.css. Load after tokens.css, in its cascade layer or a later one, on :root`,
+    `/* Generated from ${commentSafe(source)} by the theme builder in @filipgutica/design-system. Do not edit.`,
+    ` * The ${commentSafe(name)} theme for tokens.css. Load after tokens.css, in its cascade layer or a later one, on :root`,
     ' * only: the tokens that follow the theme resolve on :root, so a theme scoped to an element below it changes',
     " * its inputs there, but the accent, focus ring, and selection keep the default theme's colours. */",
     '',

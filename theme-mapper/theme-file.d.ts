@@ -16,7 +16,7 @@
 export const THEME_EXTENSION: "io.github.filipgutica.design-system";
 export function parseTheme(file: unknown): {
     problems: string[];
-    inputs: Partial<ThemeFile>;
+    inputs?: ThemeFile;
 };
 export type ModePair = import("./engine.js").ModePair;
 export type JsonObject = {

@@ -56,7 +56,8 @@ const srgbHex = (value) => {
   }
   if (alpha !== 1) return [undefined, 'is not opaque']
   const derived = `#${components.map((c) => Math.round(c * 255).toString(16).padStart(2, '0')).join('')}`
-  if (hex !== undefined && String(hex).toLowerCase() !== derived) return [undefined, `has hex ${hex}, but its components are ${derived}`]
+  if (hex !== undefined && typeof hex !== 'string') return [undefined, 'has a hex that is not a string']
+  if (hex !== undefined && hex.toLowerCase() !== derived) return [undefined, `has hex ${hex}, but its components are ${derived}`]
   return [derived]
 }
 
@@ -86,13 +87,13 @@ const typeOf = (...layers) => layers.find((layer) => '$type' in layer)?.$type
 
 /**
  * A theme file's inputs and its problems: no name or note, a key a theme cannot set, a token of the wrong type, a
- * colour the build cannot take, a missing hue, or neutrals that are not the whole set in both modes. The inputs
- * are complete only when there is no problem.
+ * colour the build cannot take, a missing hue, or neutrals that are not the whole set in both modes. `inputs` is
+ * there only when there is no problem.
  * @param {unknown} file The theme file's parsed JSON.
- * @returns {{ problems: string[], inputs: Partial<ThemeFile> }}
+ * @returns {{ problems: string[], inputs?: ThemeFile }}
  */
 export const parseTheme = (file) => {
-  if (!isObject(file)) return { problems: ['is not a JSON object'], inputs: {} }
+  if (!isObject(file)) return { problems: ['is not a JSON object'] }
   /** @type {string[]} */
   const problems = []
   const extension = isObject(file.$extensions) ? file.$extensions[THEME_EXTENSION] : undefined
@@ -168,12 +169,14 @@ export const parseTheme = (file) => {
   })
   const textOnHue = modeValues(TEXT_ON_HUE_TOKENS)
   const hasTextOnHue = Object.keys(textOnHue.light).length + Object.keys(textOnHue.dark).length > 0
+  const hue = { light: colours.light['color-project'], dark: colours.dark['color-project'] }
+  if (problems.length > 0 || name === undefined || note === undefined || hue.light === undefined || hue.dark === undefined) return { problems }
   return {
     problems,
     inputs: {
       name,
       note,
-      hue: { light: colours.light['color-project'], dark: colours.dark['color-project'] },
+      hue: { light: hue.light, dark: hue.dark },
       ...(Object.keys(fonts).length > 0 && { fonts }),
       ...(radius !== undefined && { radius }),
       ...(hasNeutrals && { neutrals: modeValues(NEUTRALS) }),
