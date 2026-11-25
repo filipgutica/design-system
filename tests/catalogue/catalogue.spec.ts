@@ -622,6 +622,97 @@ test.describe('tablet and phone', () => {
   })
 })
 
+// The slideout: the drawer's layer from the trailing edge, for filters and detail, with a footer that stacks on phones.
+test.describe('slideout', () => {
+  const openSlideout = async (page: Page) => {
+    await page.goto(url)
+    const button = page.locator('[data-open="live-slideout"]')
+    const slideout = page.locator('#live-slideout')
+    await button.click()
+    await expect(slideout).toBeVisible()
+    // The slide in has finished, so the box is where it rests.
+    await slideout.evaluate((el) => Promise.all(el.getAnimations().map((animation) => animation.finished)))
+    return { button, slideout }
+  }
+
+  for (const width of [1280, 390]) {
+    test.describe(`at ${width}px`, () => {
+      test.use({ viewport: { width, height: 800 } })
+
+      test('it sits on the trailing edge, full height, 75% wide up to 384px, and the page behind does not scroll', async ({ page }) => {
+        const { slideout } = await openSlideout(page)
+        const box = (await slideout.boundingBox())!
+        expect(box.x + box.width).toBe(width)
+        // 75% of the viewport, less the scrollbar gutter the page reserves, up to 384px.
+        const viewport = await page.evaluate(() => {
+          const probe = document.body.appendChild(Object.assign(document.createElement('i'), { style: 'position: fixed; inset: 0' }))
+          const { width: fixedWidth } = probe.getBoundingClientRect()
+          probe.remove()
+          return fixedWidth
+        })
+        expect(box.width).toBeCloseTo(Math.min(0.75 * viewport, 384), 1)
+        expect(box.y).toBe(0)
+        expect(box.height).toBe(800)
+        expect(await page.evaluate(() => getComputedStyle(document.documentElement).overflow)).toBe('hidden')
+      })
+    })
+  }
+
+  test('Escape and each footer action slide it out and return focus to the trigger', async ({ page }) => {
+    const { button, slideout } = await openSlideout(page)
+    await page.keyboard.press('Escape')
+    await expect(slideout).toBeHidden()
+    await expect(button).toBeFocused()
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).overflow)).not.toBe('hidden')
+    for (const name of ['Reset', 'Apply', 'Close filters']) {
+      await button.click()
+      await slideout.getByRole('button', { name }).click()
+      await expect(slideout).toBeHidden()
+      await expect(button).toBeFocused()
+    }
+  })
+
+  test.describe('on a phone', () => {
+    test.use({ viewport: { width: 390, height: 844 } })
+
+    test('the footer actions stack at full width, with the primary action last', async ({ page }) => {
+      const { slideout } = await openSlideout(page)
+      const foot = (await slideout.locator('.slideout-foot').boundingBox())!
+      const [reset, apply] = await Promise.all(['Reset', 'Apply'].map(async (name) => (await slideout.getByRole('button', { name }).boundingBox())!))
+      expect(apply.y).toBeGreaterThan(reset.y + reset.height - 1)
+      for (const action of [reset, apply]) expect(action.width).toBeGreaterThan(foot.width - 2 * 16 - 3)
+    })
+  })
+
+  test.describe('outside it', { tag: '@webkit' }, () => {
+    test.use({ viewport: { width: 390, height: 844 }, hasTouch: true })
+    const outside = { x: 20, y: 400 }
+
+    test('a tap or click outside closes it and focuses the trigger, and a press that starts inside keeps it open', async ({ page }) => {
+      const { button, slideout } = await openSlideout(page)
+      const title = slideout.locator('#live-slideout-title')
+      const open = () => slideout.evaluate((dialog: HTMLDialogElement) => dialog.open && !('closing' in dialog.dataset))
+      await title.tap()
+      expect(await open()).toBe(true)
+      // A drag from inside the slideout that ends outside it.
+      const { x, y, width, height } = (await title.boundingBox())!
+      await page.mouse.move(x + width / 2, y + height / 2)
+      await page.mouse.down()
+      await page.mouse.move(outside.x, outside.y)
+      await page.mouse.up()
+      expect(await open()).toBe(true)
+      await page.touchscreen.tap(outside.x, outside.y)
+      await expect(slideout).toBeHidden()
+      await expect(button).toBeFocused()
+      await button.click()
+      await expect(slideout).toBeVisible()
+      await page.mouse.click(outside.x, outside.y)
+      await expect(slideout).toBeHidden()
+      await expect(button).toBeFocused()
+    })
+  })
+})
+
 // The backdrop belongs to the dialog element, so a press on it is a press on the dialog outside the dialog's box.
 // The dialogs are centred with a margin at both widths, so the top left corner is outside them.
 test.describe('outside a dialog', { tag: '@webkit' }, () => {

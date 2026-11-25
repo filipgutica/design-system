@@ -23,7 +23,7 @@ The sections follow the catalogue's purpose groups, in this order. Each componen
 | Selection | Checkbox and radio, radio card group, switch, toggle button, segmented control |
 | Inputs | Text input and textarea, select, field wrapper, slider |
 | Feedback and status | Progress, score, badge, alert |
-| Containers and overlays | Surface and card, figure, dialog, drawer |
+| Containers and overlays | Surface and card, figure, dialog, drawer, slideout |
 | Navigation | Navigation list, section rail, find field, breadcrumbs, pager, tabs, skip link, keyboard key |
 | Conversation | Message row, message group, hover toolbar, thread panel, composer, tool-call disclosure, mention |
 | Code and examples | Code block |
@@ -308,7 +308,7 @@ Layer: Core.
 - **Don't.** A dialog that opens without the reader asking, such as on page load, or one that holds a long form. A long form gets its own page.
 - **Keyboard and screen reader.** `role="dialog"`, `aria-modal="true"`, named by its title. Focus moves in on open and is trapped. Escape closes it, and focus returns to the trigger. A native `<dialog>` opened with `showModal()` provides most of this.
 - **Backdrop.** A tap or click on the backdrop, outside the dialog, closes it, the same way Escape does, and focus returns to the trigger. Only a press that starts outside counts: a drag that starts inside the dialog and ends outside leaves it open. Safari does not support `closedby="any"`, so a script closes it.
-- **Motion.** None: it opens and closes at once. Only the drawer slides, because it enters from an edge.
+- **Motion.** None: it opens and closes at once. Only the drawer and the slideout slide, because they enter from an edge.
 - **Forced colors.** The shadow drops and the transparent border draws as the system edge, so the dialog keeps its outline over the page.
 
 ### Viewer
@@ -326,15 +326,32 @@ Layer: Core.
 
 Layer: Core.
 
-- **Anatomy.** A dialog fixed to the edge its trigger sits on, full height, `min(--sidebar-width + 48px, 100vw - 48px)` wide, with a header (title and close button) and a body that scrolls on its own. It is a floating layer with square corners: `--color-surface-raised`, a transparent 1px border, and `--shadow-dialog`. The close button is a [quiet action](#quiet-action). The family's navigation triggers sit at the start, so navigation drawers open from the left.
-- **Navigation drawer.** A drawer that holds navigation opens on the current row, scrolled to the centre of the body. A keyboard open moves focus to that row; a tap moves focus to the body, so no ring shows and no on-screen keyboard opens. An open with the `/` shortcut moves focus to the [find field](#find-field), which stays pinned at the top of the body while the list scrolls under it.
+- **Anatomy.** Navigation in a dialog fixed to the leading edge (the left in a left-to-right page), full height, `min(--sidebar-width + 48px, 100vw - 48px)` wide, with a header (title and close button) and a body that scrolls on its own. It is a floating layer with square corners: `--color-surface-raised`, a transparent 1px border, and `--shadow-dialog`. The close button is a [quiet action](#quiet-action). The family's navigation triggers sit at the start, so the drawer opens from the start too.
+- **Current row.** The drawer opens on the current row, scrolled to the centre of the body. A keyboard open moves focus to that row; a tap moves focus to the body, so no ring shows and no on-screen keyboard opens. An open with the `/` shortcut moves focus to the [find field](#find-field), which stays pinned at the top of the body while the list scrolls under it.
 - **States.** Closed, open, and closing: `data-closing` keeps it open while it slides out.
-- **Do.** Use a drawer for navigation or supporting detail that slides in from the side its trigger sits on, such as phone navigation, and open it from a named button.
-- **Don't.** The page's main task inside a drawer. The drawer holds navigation or detail; the task stays on the page.
+- **Do.** Use a drawer for navigation that does not fit on the page, such as phone navigation or a section rail at tablet width, and open it from a named button.
+- **Don't.** Filters, settings, or detail in a drawer: they go in a slideout. The page's main task stays on the page.
 - **Keyboard and screen reader.** As for the dialog. Following an in-page link inside the drawer closes it and moves focus to the link's destination (given `tabindex="-1"` if it is not focusable), not back to the trigger. Modified clicks (a new tab or window) leave it open.
 - **Backdrop.** A tap or click on the backdrop, outside the drawer, closes it, the same way Escape does, and focus returns to the trigger. Only a press that starts outside counts: a drag that starts inside the drawer and ends outside leaves it open. Safari does not support `closedby="any"`, so a script closes it.
 - **Page behind.** While the drawer is open, until it has slid out, the page behind it does not scroll: the root takes `overflow: hidden`, which keeps the reader's position. The page reserves the scrollbar gutter all the time (`scrollbar-gutter: stable` on the root), so hiding a classic scrollbar does not reflow it.
 - **Motion.** It slides in over `--duration` and out over `--duration-fast`, with `--ease-out`, while the overlay fades. Reduced motion shows and hides it at once.
+- **Forced colors.** As for the dialog: the shadow drops and the edge draws in the system colour.
+
+## Slideout
+
+Layer: Core.
+
+- **Anatomy.** A modal panel that slides in from an edge and holds filters or secondary detail. It is the [drawer](#drawer)'s floating layer, with square corners, on the `--color-overlay` backdrop. It has a header (the drawer's title type and a close button, a [quiet action](#quiet-action)), a body that scrolls on its own, and an optional footer on `--color-surface` with its actions at the end, as the [dialog](#dialog)'s footer. Rules between the parts are `--color-border-subtle`.
+- **Edge.** The page names the edge. The default is the trailing edge (the right in a left-to-right page); the top and the bottom are allowed. The leading edge belongs to the navigation drawer. A side slideout is full height and `min(75%, 384px)` wide; a top or bottom slideout is full width and as tall as its content, up to 75% of the dynamic viewport height.
+- **States.** Closed, open, and closing: `data-closing` keeps it open while it slides out.
+- **Do.** Use a slideout for filters, settings, or the detail of a selected item that the reader opens beside the page and closes to go on, and open it from a named button, such as Filters.
+- **Don't.** Navigation in a slideout: that is the drawer's job. The page's main task stays on the page, and a short task that needs an answer is a dialog.
+- **Keyboard and screen reader.** As for the dialog. Every close returns focus to the trigger; a link inside it is not the drawer's in-page exception.
+- **Backdrop.** As for the drawer: a tap or click on the backdrop closes it, the same way Escape does, and a drag that starts inside and ends outside leaves it open.
+- **Page behind.** As for the drawer: the page behind it does not scroll until it has slid out.
+- **Phones.** At `max-width: 640px` the footer's actions stack at full width in source order, so the primary action, last, sits nearest the thumb. A side slideout keeps its 75% width, so the page still shows beside it.
+- **Touch.** At tablet width (`max-width: 800px`) the close button and the footer's actions grow to `--control-touch`, as every control does.
+- **Motion.** As for the drawer, from its own edge: it slides in over `--duration` and out over `--duration-fast`, with `--ease-out`, while the overlay fades. Reduced motion shows and hides it at once.
 - **Forced colors.** As for the dialog: the shadow drops and the edge draws in the system colour.
 
 ## Navigation list
