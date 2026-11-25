@@ -24,7 +24,9 @@
  * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [textOnHue] The text on the hue's
  *   fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. Each value is `#rrggbb`, `white`,
  *   `black`, or a token reference such as `{color-bg}`; for example `{ light: { 'color-accent-text': '#ffffff' } }`.
- *   A token a theme leaves out takes its readable value.
+ *   A token a theme leaves out keeps its default: `color-accent-text` stays `{color-bg}`, which a pale hue can fail,
+ *   and the selected-fill text tokens take the first candidate that reaches 4.5:1, or the accent when none does.
+ *   Run checkTheme on the result.
  */
 /**
  * Every token's resolved value in light and in dark, as getComputedStyle reports it.
