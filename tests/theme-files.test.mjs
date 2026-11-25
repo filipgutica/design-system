@@ -26,8 +26,8 @@ test('a theme file gives its name, note, hue, font stacks, base radius, and neut
   named['font-ui'] = { $type: 'fontFamily', $value: ['ACME "Display"', 'back\\slash', '123', 'sans-serif'] }
   assert.equal(parseTheme(named).inputs.fonts.ui, '"ACME \\"Display\\"", "back\\\\slash", "123", sans-serif')
   // Braces are code points, not token references, and a CSS-wide keyword is a name, so the list stays valid.
-  named['font-ui'] = { $type: 'fontFamily', $value: ['Acme {font-mono}', 'initial', 'Default', 'monospace'] }
-  assert.equal(parseTheme(named).inputs.fonts.ui, '"Acme \\7b font-mono\\7d ", "initial", "Default", monospace')
+  named['font-ui'] = { $type: 'fontFamily', $value: ['Acme {font-mono}', 'initial', 'Default', 'ReVeRt-RuLe', 'monospace'] }
+  assert.equal(parseTheme(named).inputs.fonts.ui, '"Acme \\7b font-mono\\7d ", "initial", "Default", "ReVeRt-RuLe", monospace')
   // The base radius is a Design Tokens dimension, written as a CSS length.
   const rounded = hueOnly()
   rounded['radius-base'] = { $type: 'dimension', $value: { value: 0.375, unit: 'rem' } }

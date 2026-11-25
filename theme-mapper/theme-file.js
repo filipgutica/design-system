@@ -72,7 +72,7 @@ const isFontFamily = (value) => [value].flat().length > 0
 // a space or one that starts with a digit, is a quoted string with its quotes and backslashes escaped, and its
 // braces as code points, which the token engine would otherwise read as a reference. A CSS-wide keyword, or
 // `default`, would make the whole list invalid, so it is quoted too.
-const CSS_WIDE = ['initial', 'inherit', 'unset', 'revert', 'revert-layer', 'default']
+const CSS_WIDE = ['initial', 'inherit', 'unset', 'revert', 'revert-layer', 'revert-rule', 'default']
 /** @param {string | string[]} value */
 const fontStack = (value) => [value].flat()
   .map((name) => (/^-?[A-Za-z_][\w-]*$/.test(name) && !CSS_WIDE.includes(name.toLowerCase())
