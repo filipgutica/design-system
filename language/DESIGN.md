@@ -104,7 +104,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
   | Name | Media query | What changes |
   | --- | --- | --- |
-  | Tablet | `@media (max-width: 800px)` | Multi-column layouts become one content column. Touch controls use `--control-touch`. |
+  | Tablet | `@media (max-width: 800px)` | Multi-column layouts become one content column. Touch controls use `--control-touch`: `tokens.css` sets `--control-sm`, `--control-md`, and `--control-lg` to it. |
   | Phone | `@media (max-width: 640px)` | Side gutters drop from `--space-6` to `--space-4`, and section gaps take their phone step. |
 
   Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. One documented exception: the tool-home hero splits at `@media (min-width: 1024px)`, with the title across the top, the lede on the left, and the install block and facts on the right. Below 1024px it stacks in source order. Pages add no viewport breakpoint beyond the table and the hero split. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.
@@ -167,7 +167,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 [`components.md`](components.md) specifies each component and [`components.html`](components.html) shows its states. These composition rules apply across them:
 
 - Build each control from the owning library's component or class, and style a link that acts as a button with the button's classes. A page adds layout only: size, spacing, and position. A local copy of a control drifts from the library, even when it uses the same tokens.
-- A page's own element rules, such as its heading, paragraph, and image type, go in `@layer base`, so a component's rules outrank them. An unlayered `h2` rule outranks every layered rule and restyles the title of a dialog, drawer, or viewer as a page heading.
+- A page's own element rules, such as its heading, paragraph, and image type, go in `@layer base`, so a component's rules outrank them. An unlayered `h2` rule outranks every layered rule and restyles the title of a dialog, drawer, slideout, or viewer as a page heading.
 - One clearly primary action per visible decision group, filled with the hue. Other actions are secondary, ghost, or text buttons.
 - Use a segmented control for two to five short options that apply at once, a select for longer lists, and radio cards for options that need descriptions.
 - Callouts carry a real caveat, not decorative emphasis.
@@ -196,7 +196,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
   - [Tabs](components.md#tabs): `Tabs` with a horizontal `TabsList` (its `TabsIndicator` first, then the `TabsTab`s) and a `TabsPanel` for each tab. The list scrolls when it overflows.
   - [Slider](components.md#slider): a horizontal `Slider` with `SliderValue` and `SliderControl` > `SliderTrack` > `SliderIndicator` and `SliderThumb`, inside a `Field` for its label. `data-size="sm"` or `"lg"` goes on the `Slider`.
   - [Progress](components.md#progress): `Progress` with a value, `ProgressLabel`, `ProgressValue`, and `ProgressTrack` > `ProgressIndicator`.
-  - [Drawer](components.md#drawer): `Drawer` with `side="left"` or `"right"`, `DrawerBackdrop`, and `DrawerContent` holding a `<header>` (`DrawerTitle`, then an icon `DrawerClose` with an `aria-label`) and the body in one element.
+  - [Drawer](components.md#drawer): `Drawer` with `side="left"` or `"right"`, `DrawerBackdrop`, and `DrawerContent` holding a `<header>` (`DrawerTitle`, then an icon `DrawerClose` with an `aria-label`) and the body in one element. It draws the navigation drawer on either side; the [slideout](components.md#slideout)'s width and footer are unsupported.
   - [Overflow menu](components.md#overflow-menu): `Menu`, `MenuTrigger`, `MenuContent`, `MenuItem`, `MenuSeparator`, and `MenuItemIcon`. Supply the More SVG as the trigger's child and an item-specific `aria-label`; use `align="end"` on `MenuContent` (its default 4px offset matches `--space-1`). Render each `MenuItem` as a button with `render={<button type="button" />}`; for disabled items, pass both `disabled` and `render={<button type="button" disabled />}` so the native button and ui-sdk agree. `destructive` on the last item draws the danger text through ui-sdk's `data-destructive`; separate it with `MenuSeparator`. `data-open`, `data-highlighted`, and `data-disabled` come from ui-sdk, not the app. `MenuItemIcon` wraps an app-supplied 16px SVG.
     - Beta.5 keyboard limitation: ui-sdk highlights disabled items instead of skipping them. With a native disabled button, focus stays on the preceding item and Down Arrow stops there; Up Arrow, Home, and End still reach the items after it. Use the plain-HTML recipe when disabled-item skipping is required; this stylesheet cannot correct ui-sdk's navigation.
 - At tablet width and below, the menu trigger and items, buttons, inputs, select triggers, toggle buttons, segmented tracks, tabs, sliders, and choice and switch rows grow to `--control-touch` (44px) for touch, at every size; segmented options sit inside the track's 2px inset, so they are 40px. The catalogue's size specimens keep their sizes.

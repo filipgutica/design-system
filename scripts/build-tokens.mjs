@@ -106,7 +106,14 @@ const standaloneHeader = `/*
  */
 `
 
-const standaloneBase = `/* Minimal base. Component styles live in components.html. The base sits in a layer, so any
+const standaloneBase = `/* Touch: at tablet width, controls of every size grow to --control-touch (components.md, Rules for every
+   control), so a component sized from --control-sm, --control-md, or --control-lg needs no touch rule of its own.
+   A size specimen that must keep its size sets the three back on itself. */
+@media (max-width: 800px) {
+  :root { --control-sm: var(--control-touch); --control-md: var(--control-touch); --control-lg: var(--control-touch); }
+}
+
+/* Minimal base. Component styles live in components.html. The base sits in a layer, so any
    page or component rule outranks it whatever its specificity. A layered !important outranks an
    unlayered one, so reduced-motion exceptions belong here too. */
 /* The page's own background and text colour stay outside the layer. A host that wraps the page in
@@ -131,6 +138,14 @@ body { background: var(--color-bg); color: var(--color-text); }
   a:hover { text-decoration: underline; }
   p a, dd a { text-decoration: underline; text-underline-offset: 0.18em; }
   :focus-visible { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
+  /* Enabled controls, and a label that wraps or follows an enabled choice, show the pointer. :where() keeps it
+     weightless, so a component's cursor, such as a busy button's wait, wins. Disabled controls keep the
+     not-allowed cursor their component sets (components.md, Disabled). An editable combobox keeps the text cursor. */
+  :where(button, select, summary, [role="button"], [role="tab"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"], [role="switch"], [role="checkbox"], [role="radio"], [role="combobox"]:read-only:not(input, textarea), input:is([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"])):where(:not(:disabled, [aria-disabled="true"], [data-disabled])),
+  :where(label:has(:is(input:is([type="checkbox"], [type="radio"]), [role="switch"], [role="checkbox"], [role="radio"]):not(:disabled, [aria-disabled="true"], [data-disabled]))),
+  :where(:is(input:is([type="checkbox"], [type="radio"]), [role="switch"], [role="checkbox"], [role="radio"]):not(:disabled, [aria-disabled="true"], [data-disabled]) + label) { cursor: pointer; }
+  /* The file input's chooser button is its own box, so it takes the input's cursor. */
+  :where(input[type="file"]:not(:disabled, [aria-disabled="true"], [data-disabled]))::file-selector-button { cursor: inherit; }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; scroll-behavior: auto !important; }
     /* A busy spinner slows instead of stopping, so the busy state stays visible. */

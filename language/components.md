@@ -23,7 +23,7 @@ The sections follow the catalogue's purpose groups, in this order. Each componen
 | Selection | Checkbox and radio, radio card group, switch, toggle button, segmented control |
 | Inputs | Text input and textarea, select, field wrapper, slider |
 | Feedback and status | Progress, score, badge, alert |
-| Containers and overlays | Surface and card, figure, dialog, drawer |
+| Containers and overlays | Surface and card, figure, dialog, drawer, slideout |
 | Navigation | Navigation list, section rail, find field, breadcrumbs, pager, tabs, skip link, keyboard key |
 | Conversation | Message row, message group, hover toolbar, thread panel, composer, tool-call disclosure, mention |
 | Code and examples | Code block |
@@ -33,13 +33,14 @@ A control's **States** line names each interactive state it has. In `components.
 
 ## Rules for every control
 
-- **Sizes.** `sm`, `md`, and `lg` use `--control-sm`, `--control-md`, and `--control-lg` for height (28px, 32px, and 36px, Astryx's scale), with `--text-sm`, `--text-md`, and `--text-lg`. A control with no size is `md`. An application screen sets every control at `sm`, its main action included ([density](DESIGN.md#layout-and-spacing)). At tablet width (`max-width: 800px`) controls of every size grow to `--control-touch` (44px); only the catalogue's size specimens keep their sizes.
+- **Sizes.** `sm`, `md`, and `lg` use `--control-sm`, `--control-md`, and `--control-lg` for height (28px, 32px, and 36px, Astryx's scale), with `--text-sm`, `--text-md`, and `--text-lg`. A control with no size is `md`. An application screen sets every control at `sm`, its main action included ([density](DESIGN.md#layout-and-spacing)). At tablet width (`max-width: 800px`) controls of every size grow to `--control-touch` (44px): `tokens.css` sets `--control-sm`, `--control-md`, and `--control-lg` to it there, so a control sized from them needs no touch rule. Only the catalogue's size specimens keep their sizes; each sets the three back on itself.
 - **Borders.** Every control keeps a 1px border, transparent unless its section says otherwise, so forced colors can draw an edge.
 - **Depth.** Each control takes its shadow from the [depth tiers](DESIGN.md#depth).
 - **Hover.** Hover fills apply only where the pointer can hover. Put every `:hover` rule that sets a background, shadow, border colour, or text colour in `@media (hover: hover)`, because a touch screen keeps `:hover` on the last element tapped. The pressed tint stays outside the query: it shows only while a finger is down.
 - **Press.** Only a button has a pressed state; see [Button](#button). A [quiet action](#quiet-action) tints on press without sinking. Other controls have no `:active` treatment: they show their latched state as their section says.
 - **Focus.** One ring for every role but fields: `outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset)` (2px, 3px), with no halo or glow. `--color-focus` is the accent (`--color-accent`), which reaches 3:1 on `--color-bg`, `--color-surface`, and `--color-surface-raised` in both themes. It sits around primary, danger, and selected controls too. Do not give a role its own ring colour; where a variant must recolour the ring, set only `outline-color`. The ring is drawn over the control's own raise or sink shadow, which does not change. It goes on the visible part of a composite control: the switch track, the radio card, and the slider thumb. A terminal capture sets `--color-focus: var(--color-project-dark)`, the dark-theme accent, which reaches 3:1 on the capture in both page themes. In forced colors, a control that opts out of adjustment (a checked box, the switch track) sets `outline-color: CanvasText`; a pressed segmented option, whose inset ring sits on its own `Highlight` fill, sets `HighlightText`. Inside a scrolling or clipping parent, the ring is inset (`outline-offset: calc(var(--focus-width) * -1)`), and a comment names the reason. Only `:focus-visible` shows a ring; pointer hover never does.
 - **Field focus.** Fields (input, select, textarea, and the search wrapper) draw no ring. On `:focus-visible` (the search wrapper uses `:has(input:focus-visible)`) the 1px edge turns `--color-accent`, and `--shadow-field-focus` (`inset 0 0 0 2px`, the accent at 18% over transparent) draws a muted accent line inside it, with `outline: none`. The fill does not change in either theme. An invalid field keeps its `--color-error` edge while focused, and its inset line is `--shadow-field-focus-invalid` (`--color-error` at 18%). Forced colors drop the inset line, so a focused field there draws `outline: var(--focus-width) solid Highlight; outline-offset: -1px`.
+- **Cursor.** An enabled control shows `cursor: pointer`, and so does a label that wraps or follows an enabled checkbox, radio, or switch. The `tokens.css` base sets it with no specificity, so a component's own cursor, such as a busy button's `wait` or a slider's `grabbing`, wins. A label right after an enabled choice counts as that choice's label, so write a choice's label after it or around it. An editable combobox (an `input`, `textarea`, or `contenteditable` one) keeps the text cursor.
 - **Disabled.** Opacity 0.58, `cursor: not-allowed`, and no hover or press. Buttons drop their shadow. Fields drop theirs and fill with the `--color-well` well (the grey well in light; the same as rest in dark). Other controls keep theirs. Use the native `disabled` attribute. A link styled as a button has no disabled state: use `<button disabled>`.
 - **Invalid.** Fields only: `aria-invalid="true"` and a `--color-error` border (not in forced colors; see [field focus](#rules-for-every-control)). Other controls show an invalid state through the [field wrapper](#field-wrapper)'s error text. Link the error text with `aria-describedby` or `aria-errormessage`.
 - **Motion.** Hover and press transitions use `--duration-fast` with `--ease-out`. State changes such as a switch knob use `--duration`. Under `prefers-reduced-motion: reduce`, transitions are instant.
@@ -308,7 +309,7 @@ Layer: Core.
 - **Don't.** A dialog that opens without the reader asking, such as on page load, or one that holds a long form. A long form gets its own page.
 - **Keyboard and screen reader.** `role="dialog"`, `aria-modal="true"`, named by its title. Focus moves in on open and is trapped. Escape closes it, and focus returns to the trigger. A native `<dialog>` opened with `showModal()` provides most of this.
 - **Backdrop.** A tap or click on the backdrop, outside the dialog, closes it, the same way Escape does, and focus returns to the trigger. Only a press that starts outside counts: a drag that starts inside the dialog and ends outside leaves it open. Safari does not support `closedby="any"`, so a script closes it.
-- **Motion.** None: it opens and closes at once. Only the drawer slides, because it enters from an edge.
+- **Motion.** None: it opens and closes at once. Only the drawer and the slideout slide, because they enter from an edge.
 - **Forced colors.** The shadow drops and the transparent border draws as the system edge, so the dialog keeps its outline over the page.
 
 ### Viewer
@@ -326,15 +327,32 @@ Layer: Core.
 
 Layer: Core.
 
-- **Anatomy.** A dialog fixed to the edge its trigger sits on, full height, `min(--sidebar-width + 48px, 100vw - 48px)` wide, with a header (title and close button) and a body that scrolls on its own. It is a floating layer with square corners: `--color-surface-raised`, a transparent 1px border, and `--shadow-dialog`. The close button is a [quiet action](#quiet-action). The family's navigation triggers sit at the start, so navigation drawers open from the left.
-- **Navigation drawer.** A drawer that holds navigation opens on the current row, scrolled to the centre of the body. A keyboard open moves focus to that row; a tap moves focus to the body, so no ring shows and no on-screen keyboard opens. An open with the `/` shortcut moves focus to the [find field](#find-field), which stays pinned at the top of the body while the list scrolls under it.
+- **Anatomy.** Navigation in a dialog fixed to the leading edge (the left in a left-to-right page), full height, `min(--sidebar-width + 48px, 100vw - 48px)` wide, with a header (title and close button) and a body that scrolls on its own. It is a floating layer with square corners: `--color-surface-raised`, a transparent 1px border, and `--shadow-dialog`. The close button is a [quiet action](#quiet-action). The family's navigation triggers sit at the start, so the drawer opens from the start too.
+- **Current row.** The drawer opens on the current row, scrolled to the centre of the body. A keyboard open moves focus to that row; a tap moves focus to the body, so no ring shows and no on-screen keyboard opens. An open with the `/` shortcut moves focus to the [find field](#find-field), which stays pinned at the top of the body while the list scrolls under it.
 - **States.** Closed, open, and closing: `data-closing` keeps it open while it slides out.
-- **Do.** Use a drawer for navigation or supporting detail that slides in from the side its trigger sits on, such as phone navigation, and open it from a named button.
-- **Don't.** The page's main task inside a drawer. The drawer holds navigation or detail; the task stays on the page.
+- **Do.** Use a drawer for navigation that does not fit on the page, such as phone navigation or a section rail at tablet width, and open it from a named button.
+- **Don't.** Filters, settings, or detail in a drawer: they go in a slideout. The page's main task stays on the page.
 - **Keyboard and screen reader.** As for the dialog. Following an in-page link inside the drawer closes it and moves focus to the link's destination (given `tabindex="-1"` if it is not focusable), not back to the trigger. Modified clicks (a new tab or window) leave it open.
 - **Backdrop.** A tap or click on the backdrop, outside the drawer, closes it, the same way Escape does, and focus returns to the trigger. Only a press that starts outside counts: a drag that starts inside the drawer and ends outside leaves it open. Safari does not support `closedby="any"`, so a script closes it.
 - **Page behind.** While the drawer is open, until it has slid out, the page behind it does not scroll: the root takes `overflow: hidden`, which keeps the reader's position. The page reserves the scrollbar gutter all the time (`scrollbar-gutter: stable` on the root), so hiding a classic scrollbar does not reflow it.
 - **Motion.** It slides in over `--duration` and out over `--duration-fast`, with `--ease-out`, while the overlay fades. Reduced motion shows and hides it at once.
+- **Forced colors.** As for the dialog: the shadow drops and the edge draws in the system colour.
+
+## Slideout
+
+Layer: Core.
+
+- **Anatomy.** A modal panel that slides in from an edge and holds filters or secondary detail. It is the [drawer](#drawer)'s floating layer, with square corners, on the `--color-overlay` backdrop. It has a header (the drawer's title type and a close button, a [quiet action](#quiet-action)), a body that scrolls on its own, and an optional footer on `--color-surface` with its actions at the end, as the [dialog](#dialog)'s footer. Rules between the parts are `--color-border-subtle`.
+- **Edge.** The page names the edge. The default is the trailing edge (the right in a left-to-right page); the top and the bottom are allowed. The leading edge belongs to the navigation drawer. A side slideout is full height and `min(75%, 384px)` wide; a top or bottom slideout is full width and as tall as its content, up to 75% of the dynamic viewport height.
+- **States.** Closed, open, and closing: `data-closing` keeps it open while it slides out.
+- **Do.** Use a slideout for filters, settings, or the detail of a selected item that the reader opens beside the page and closes to go on, and open it from a named button, such as Filters.
+- **Don't.** Navigation in a slideout: that is the drawer's job. The page's main task stays on the page, and a short task that needs an answer is a dialog.
+- **Keyboard and screen reader.** As for the dialog. Every close returns focus to the trigger; a link inside it is not the drawer's in-page exception.
+- **Backdrop.** As for the drawer: a tap or click on the backdrop closes it, the same way Escape does, and a drag that starts inside and ends outside leaves it open.
+- **Page behind.** As for the drawer: the page behind it does not scroll until it has slid out.
+- **Phones.** At `max-width: 640px` the footer's actions stack at full width in source order, so the primary action, last, sits nearest the thumb. A side slideout keeps its 75% width, so the page still shows beside it.
+- **Touch.** At tablet width (`max-width: 800px`) the close button and the footer's actions grow to `--control-touch`, as every control does.
+- **Motion.** As for the drawer, from its own edge: it slides in over `--duration` and out over `--duration-fast`, with `--ease-out`, while the overlay fades. Reduced motion shows and hides it at once.
 - **Forced colors.** As for the dialog: the shadow drops and the edge draws in the system colour.
 
 ## Navigation list

@@ -28,3 +28,17 @@ test('the Inter and JetBrains Mono faces load from fonts.css', async ({ page }) 
 
   expect(loaded).toEqual(expect.arrayContaining(['Inter 400', 'Inter 600', 'JetBrains Mono 400']))
 })
+
+// Latin-ext text, such as Polish or Czech names, keeps both faces: the page loads the latin-ext files for it.
+test('latin-ext text loads the Inter and JetBrains Mono latin-ext faces', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByTestId('heading')).toBeVisible()
+  const loaded = await page.evaluate(async () => {
+    const sample = document.body.appendChild(document.createElement('p'))
+    sample.innerHTML = 'Łódź <code>Dvořák</code>'
+    await document.fonts.ready
+    return [...document.fonts].filter((face) => face.status === 'loaded' && face.unicodeRange.startsWith('U+100-')).map((face) => `${face.family} ${face.weight}`)
+  })
+
+  expect(loaded).toEqual(expect.arrayContaining(['Inter 400', 'JetBrains Mono 400']))
+})
