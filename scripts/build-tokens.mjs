@@ -122,7 +122,9 @@ export const parseTheme = (file) => {
 
   let radius
   if (RADIUS in file) {
+    const unsupported = isObject(file[RADIUS]) ? Object.keys(file[RADIUS]).filter((key) => ![...METADATA, '$type', '$value'].includes(key)) : []
     if (!isObject(file[RADIUS]) || !('$value' in file[RADIUS])) problems.push(`${RADIUS} is not a token`)
+    else if (unsupported.length > 0) problems.push(`${RADIUS} has ${unsupported.join(', ')}, which a theme file does not support`)
     else if (typeOf(file[RADIUS], file) !== 'dimension') problems.push(`${RADIUS} is not a dimension token`)
     else if (!isLength(file[RADIUS].$value)) problems.push(`${RADIUS} is not a px or rem length of 0 or more`)
     else radius = cssLength(file[RADIUS].$value)
@@ -214,10 +216,10 @@ const standaloneHeader = `/*
  * data-theme="light" is set. data-theme="dark" forces dark. data-theme="dark" or
  * "light" on any element below <html>, or a .dark class on <html> or below it,
  * themes that subtree; the subtree blocks at the end redeclare what each mode
- * changes. A theme written by hand sets its light values on
- * :root, :root [data-theme="light"] and its dark values on :root[data-theme="dark"],
- * :root.dark, :root [data-theme="dark"], :root .dark and in the prefers-color-scheme
- * dark block, so they hold in a subtree too. A theme file does this for you.
+ * changes, and the subtree takes its mode's text colour. data-theme="light" wins over
+ * .dark on one element. A theme written by hand repeats its light values on
+ * :root [data-theme="light"] and its dark values on the dark subtree block's selectors,
+ * so they hold in a subtree too. A theme file does this for you.
  */
 `
 
@@ -231,6 +233,8 @@ body { background: var(--color-bg); color: var(--color-text); }
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  /* A subtree theme takes its mode's text colour, as the body does; the page paints its background. */
+  :where(:root.dark, :root [data-theme], :root .dark) { color: var(--color-text); }
   body {
     margin: 0;
     font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-ui);
@@ -263,9 +267,10 @@ const standaloneNames = (data) => Object.keys(flatTokens(data))
 // below it, theme that element's subtree. A custom property resolves on the element that declares it, so a
 // subtree block declares every token whose value differs between the modes and every token that refers to
 // one, directly or through others; tokens that are the same in both modes inherit. Each selector carries a
-// :root, so it outranks a theme's or a page's bare :root inputs, as the root dark rules do.
+// :root, so it outranks a theme's or a page's bare :root inputs, as the root dark rules do. On an element with
+// both, data-theme="light" wins over .dark; :not(:where()) keeps that exclusion from adding specificity.
 const SUBTREE = {
-  dark: [':root.dark', ':root [data-theme="dark"]', ':root .dark'],
+  dark: [':root.dark:not(:where([data-theme="light"]))', ':root [data-theme="dark"]', ':root .dark:not(:where([data-theme="light"]))'],
   light: [':root [data-theme="light"]'],
 }
 

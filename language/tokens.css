@@ -24,10 +24,10 @@
  * data-theme="light" is set. data-theme="dark" forces dark. data-theme="dark" or
  * "light" on any element below <html>, or a .dark class on <html> or below it,
  * themes that subtree; the subtree blocks at the end redeclare what each mode
- * changes. A theme written by hand sets its light values on
- * :root, :root [data-theme="light"] and its dark values on :root[data-theme="dark"],
- * :root.dark, :root [data-theme="dark"], :root .dark and in the prefers-color-scheme
- * dark block, so they hold in a subtree too. A theme file does this for you.
+ * changes, and the subtree takes its mode's text colour. data-theme="light" wins over
+ * .dark on one element. A theme written by hand repeats its light values on
+ * :root [data-theme="light"] and its dark values on the dark subtree block's selectors,
+ * so they hold in a subtree too. A theme file does this for you.
  */
 
 :root {
@@ -292,7 +292,7 @@
    one that does, so the tokens derived from them resolve again inside the subtree. The element paints its own
    background, such as background: var(--color-bg). */
 
-:root.dark, :root [data-theme="dark"], :root .dark {
+:root.dark:not(:where([data-theme="light"])), :root [data-theme="dark"], :root .dark:not(:where([data-theme="light"])) {
   color-scheme: dark;
   --color-project: var(--color-project-dark);
   --color-bg: #0d1012;
@@ -424,6 +424,8 @@ body { background: var(--color-bg); color: var(--color-text); }
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  /* A subtree theme takes its mode's text colour, as the body does; the page paints its background. */
+  :where(:root.dark, :root [data-theme], :root .dark) { color: var(--color-text); }
   body {
     margin: 0;
     font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-ui);

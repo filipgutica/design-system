@@ -25,34 +25,44 @@ const open = async (page: Page, theme: string | null, scheme: Mode, body: string
   await page.goto(`${origin}page.html`)
 }
 
-const valuesOn = (page: Page, selector: string) => page.evaluate(({ selector, names }) => {
-  const style = getComputedStyle(document.querySelector(selector)!)
-  return Object.fromEntries(names.map((name) => [name, style.getPropertyValue(name).trim()]))
+// Every token on the element, and the colour of the text inside it, which a page does not set itself.
+const ink = '<p class="ink">Text</p>'
+const valuesOn = (page: Page, selector: string): Promise<Record<string, string>> => page.evaluate(({ selector, names }) => {
+  const element = document.querySelector(selector)!
+  const style = getComputedStyle(element)
+  return { ...Object.fromEntries(names.map((name) => [name, style.getPropertyValue(name).trim()])), ink: getComputedStyle(element.querySelector('.ink')!).color }
 }, { selector, names })
+const subtree = (attributes: string) => `<div id="t" ${attributes}>${ink}</div>`
 
 for (const theme of themes) {
   test.describe(`subtree themes: ${theme ?? 'default'}`, () => {
     for (const mode of ['light', 'dark'] as const) {
       test(`${mode}: a nested subtree computes every token as a whole ${mode} page does`, async ({ page }) => {
-        await open(page, theme, other(mode), '', ` data-theme="${mode}"`)
-        const whole = await valuesOn(page, 'html')
+        await open(page, theme, other(mode), ink, ` data-theme="${mode}"`)
+        const whole = await valuesOn(page, 'body')
         expect(whole['--color-bg']).not.toBe('')
 
         // Inside a page in the other mode, set by data-theme and by the system preference.
         for (const html of [` data-theme="${other(mode)}"`, '']) {
-          await open(page, theme, other(mode), `<div id="t" data-theme="${mode}"></div>`, html)
+          await open(page, theme, other(mode), subtree(`data-theme="${mode}"`), html)
           expect(await valuesOn(page, '#t'), `data-theme="${mode}" in <html${html}>`).toEqual(whole)
         }
         // Two levels: back to this mode inside a subtree in the other mode.
-        await open(page, theme, mode, `<div data-theme="${other(mode)}"><div id="t" data-theme="${mode}"></div></div>`, ` data-theme="${mode}"`)
+        await open(page, theme, mode, `<div data-theme="${other(mode)}">${subtree(`data-theme="${mode}"`)}</div>`, ` data-theme="${mode}"`)
         expect(await valuesOn(page, '#t'), 'two levels deep').toEqual(whole)
 
         if (mode === 'dark') {
           // shadcn's class: on <html> in a light system, and on an element in a light page.
-          await open(page, theme, 'light', '', ' class="dark"')
-          expect(await valuesOn(page, 'html'), '<html class="dark">').toEqual(whole)
-          await open(page, theme, 'light', '<div id="t" class="dark"></div>', ' data-theme="light"')
+          await open(page, theme, 'light', ink, ' class="dark"')
+          expect(await valuesOn(page, 'body'), '<html class="dark">').toEqual(whole)
+          await open(page, theme, 'light', subtree('class="dark"'), ' data-theme="light"')
           expect(await valuesOn(page, '#t'), 'class="dark" in a light page').toEqual(whole)
+        } else {
+          // data-theme="light" wins over .dark on the same element, in a dark page and on <html>.
+          await open(page, theme, 'dark', subtree('class="dark" data-theme="light"'), ' data-theme="dark"')
+          expect(await valuesOn(page, '#t'), 'class="dark" data-theme="light"').toEqual(whole)
+          await open(page, theme, 'dark', ink, ' class="dark" data-theme="light"')
+          expect(await valuesOn(page, 'body'), '<html class="dark" data-theme="light">').toEqual(whole)
         }
       })
     }
@@ -60,8 +70,8 @@ for (const theme of themes) {
 }
 
 test('an element in the page\'s own mode keeps the page values, and no data-theme changes nothing', async ({ page }) => {
-  await open(page, null, 'light', '<div id="same" data-theme="light"></div><div id="plain"></div>')
-  const whole = await valuesOn(page, 'html')
+  await open(page, null, 'light', `${ink}<div id="same" data-theme="light">${ink}</div><div id="plain">${ink}</div>`)
+  const whole = await valuesOn(page, 'body')
   expect(await valuesOn(page, '#same')).toEqual(whole)
   expect(await valuesOn(page, '#plain')).toEqual(whole)
 })

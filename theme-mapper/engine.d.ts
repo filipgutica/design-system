@@ -17,6 +17,9 @@
  * @property {{ light: Record<string, string>, dark: Record<string, string> }} [neutrals] Every NEUTRALS token, per mode.
  * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [syntax] Syntax colours by SYNTAX_ROLES
  *   role, per mode. A role a theme leaves out stays core.
+ * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [textOnHue] The text on the hue's
+ *   fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. A token a theme leaves out takes its
+ *   readable value.
  */
 /**
  * Every token's resolved value in light and in dark, as getComputedStyle reports it.
@@ -50,6 +53,8 @@ export const SYNTAX_ROLES: string[];
 export const SURFACES: string[];
 /** The selected-fill text tokens, which take their readable value from the theme. */
 export const TEXT_ON_FILL_TOKENS: string[];
+/** The text on the hue's fills, which a theme may set: the primary label and the selected-fill text. */
+export const TEXT_ON_HUE_TOKENS: string[];
 export function themeInputNames(data: TokenSource): {
     hue: string[];
     textOnHue: string[];
@@ -116,6 +121,15 @@ export type ThemeInputs = {
      * role, per mode. A role a theme leaves out stays core.
      */
     syntax?: {
+        light?: Record<string, string>;
+        dark?: Record<string, string>;
+    } | undefined;
+    /**
+     * The text on the hue's
+     * fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. A token a theme leaves out takes its
+     * readable value.
+     */
+    textOnHue?: {
         light?: Record<string, string>;
         dark?: Record<string, string>;
     } | undefined;

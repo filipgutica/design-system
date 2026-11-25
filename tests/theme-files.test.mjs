@@ -55,6 +55,7 @@ test('a theme file the build cannot take stops with its problem', () => {
   assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'dimension', $value: { value: 8, unit: 'em' } } }), ['radius-base is not a px or rem length of 0 or more'])
   assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'dimension', $value: { value: -2, unit: 'px' } } }), ['radius-base is not a px or rem length of 0 or more'])
   assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'number', $value: 8 } }), ['radius-base is not a dimension token'])
+  assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'dimension', $value: { value: 1, unit: 'rem' }, $ref: '#/other' } }), ['radius-base has $ref, which a theme file does not support'])
   // Structure the build does not resolve is a problem, not silently skipped.
   assert.deepEqual(problemsWith((file) => { file.light.$value = colour('#000000') }), ['light.$value is not supported in a theme file'])
   assert.deepEqual(problemsWith((file) => { file.light.$extends = '{dark}' }), ['light.$extends is not supported in a theme file'])

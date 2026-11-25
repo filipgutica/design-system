@@ -49,7 +49,7 @@
   --color-muted: #a6adc8;
 }
 
-:root.dark, :root [data-theme="dark"], :root .dark {
+:root.dark:not(:where([data-theme="light"])), :root [data-theme="dark"], :root .dark:not(:where([data-theme="light"])) {
   --color-bg: #11111b;
   --color-surface: #181825;
   --color-surface-raised: #1e1e2e;

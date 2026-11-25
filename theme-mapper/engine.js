@@ -21,6 +21,9 @@
  * @property {{ light: Record<string, string>, dark: Record<string, string> }} [neutrals] Every NEUTRALS token, per mode.
  * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [syntax] Syntax colours by SYNTAX_ROLES
  *   role, per mode. A role a theme leaves out stays core.
+ * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [textOnHue] The text on the hue's
+ *   fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. A token a theme leaves out takes its
+ *   readable value.
  */
 /**
  * Every token's resolved value in light and in dark, as getComputedStyle reports it.
@@ -164,6 +167,8 @@ const TEXT_ON_FILL = {
 /** The selected-fill text tokens, which take their readable value from the theme. */
 export const TEXT_ON_FILL_TOKENS = Object.keys(TEXT_ON_FILL)
 const TEXT_CANDIDATES = ['{color-accent}', '{color-text}', 'black', 'white']
+/** The text on the hue's fills, which a theme may set: the primary label and the selected-fill text. */
+export const TEXT_ON_HUE_TOKENS = ['color-accent-text', ...TEXT_ON_FILL_TOKENS]
 
 /**
  * The tokens a theme may set, by kind, without their leading dashes. Every other token is core, and a theme
@@ -179,7 +184,7 @@ export const themeInputNames = (data) => {
   const take = (prefix) => identity.filter((name) => name.startsWith(prefix))
   const inputs = {
     hue: take('color-'),
-    textOnHue: ['color-accent-text', ...TEXT_ON_FILL_TOKENS],
+    textOnHue: [...TEXT_ON_HUE_TOKENS],
     fonts: take('font-'),
     radius: take('radius-'),
     neutrals: [...NEUTRALS],
@@ -217,7 +222,8 @@ const withReadableText = (data) => {
 
 /**
  * The core tokens with one theme's inputs filled in. Core leaves the hue pair empty; its font stacks, base
- * radius, and neutrals stay unless the theme names its own. Then each selected-fill text token takes its readable value.
+ * radius, and neutrals stay unless the theme names its own. Then each selected-fill text token takes its readable value,
+ * and any text on the hue the theme sets replaces it.
  * @template {TokenSource} Data
  * @param {Data} core
  * @param {ThemeInputs} theme
@@ -243,7 +249,14 @@ export const applyTheme = (core, theme) => {
     const { tokens } = groupOf(data, name)
     tokens[name] = [light ?? valueFor(tokens, name, LIGHT), dark ?? valueFor(tokens, name, DARK)]
   }
-  return withReadableText(data)
+  withReadableText(data)
+  for (const name of TEXT_ON_HUE_TOKENS) {
+    const [light, dark] = [theme.textOnHue?.light?.[name], theme.textOnHue?.dark?.[name]]
+    if (light === undefined && dark === undefined) continue
+    const { tokens } = groupOf(data, name)
+    tokens[name] = [light ?? valueFor(tokens, name, LIGHT), dark ?? valueFor(tokens, name, DARK)]
+  }
+  return data
 }
 
 // The contrast checks, as data: each pair is an ink and the fill below it, as language/components.html draws

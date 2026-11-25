@@ -41,4 +41,8 @@ test('checkTheme passes a shipped theme and reports the check a weak hue fails',
   const pale = checkTheme({ hue: { light: '#d8d6ff', dark: hue.dark } }).find(({ id }) => id === 'focus')
   assert.equal(pale.ok, false)
   assert.ok(pale.light < pale.min && pale.dark >= pale.min, JSON.stringify(pale))
+  // A theme's own text on the hue is checked as set: the hue as its own primary label fails.
+  const primary = checkTheme({ hue, textOnHue: { light: { 'color-accent-text': hue.light } } }).find(({ id }) => id === 'primary')
+  assert.equal(primary.ok, false)
+  assert.ok(primary.light < 1.5, JSON.stringify(primary))
 })
