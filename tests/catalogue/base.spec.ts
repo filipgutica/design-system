@@ -30,6 +30,8 @@ test.describe('tokens.css base', () => {
       <input id="range" type="range">
       <input id="file" type="file">
       <div id="editable-div-combobox" role="combobox" contenteditable="true">Pick</div>
+      <div id="not-editable-div-combobox" role="combobox" contenteditable="false" tabindex="0">Pick</div>
+      <div contenteditable="true"><span id="inherited-editable-combobox" role="combobox">Pick</span></div>
       <input id="text">
       <label id="wrapping"><input type="checkbox">Notify</label>
       <label id="wrapping-disabled"><input type="checkbox" disabled>Notify</label>
@@ -45,7 +47,7 @@ test.describe('tokens.css base', () => {
     ]))
     expect(cursors).toEqual({
       button: 'pointer', disabled: 'default', 'aria-disabled': 'default', 'data-disabled': 'default', busy: 'wait',
-      select: 'pointer', summary: 'pointer', tab: 'pointer', option: 'auto', 'editable-combobox': 'text', 'editable-div-combobox': 'auto', range: 'pointer', file: 'pointer', 'file chooser': 'pointer', text: 'text',
+      select: 'pointer', summary: 'pointer', tab: 'pointer', option: 'auto', 'editable-combobox': 'text', 'editable-div-combobox': 'auto', 'not-editable-div-combobox': 'pointer', 'inherited-editable-combobox': 'auto', range: 'pointer', file: 'pointer', 'file chooser': 'pointer', text: 'text',
       wrapping: 'pointer', 'wrapping-disabled': 'default', switch: 'pointer', following: 'pointer', 'following-disabled': 'default', plain: 'default',
     })
   })

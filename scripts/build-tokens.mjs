@@ -258,7 +258,7 @@ body { background: var(--color-bg); color: var(--color-text); }
   /* Enabled controls, and a label that wraps or follows an enabled choice, show the pointer. :where() keeps it
      weightless, so a component's cursor, such as a busy button's wait, wins. Disabled controls keep the
      not-allowed cursor their component sets (components.md, Disabled). An editable combobox keeps the text cursor. */
-  :where(button, select, summary, [role="button"], [role="tab"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"], [role="switch"], [role="checkbox"], [role="radio"], [role="combobox"]:not(input, textarea, [contenteditable]), input:is([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"])):where(:not(:disabled, [aria-disabled="true"], [data-disabled])),
+  :where(button, select, summary, [role="button"], [role="tab"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"], [role="switch"], [role="checkbox"], [role="radio"], [role="combobox"]:read-only:not(input, textarea), input:is([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"])):where(:not(:disabled, [aria-disabled="true"], [data-disabled])),
   :where(label:has(:is(input:is([type="checkbox"], [type="radio"]), [role="switch"], [role="checkbox"], [role="radio"]):not(:disabled, [aria-disabled="true"], [data-disabled]))),
   :where(:is(input:is([type="checkbox"], [type="radio"]), [role="switch"], [role="checkbox"], [role="radio"]):not(:disabled, [aria-disabled="true"], [data-disabled]) + label) { cursor: pointer; }
   /* The file input's chooser button is its own box, so it takes the input's cursor. */
