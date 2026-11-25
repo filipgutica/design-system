@@ -234,7 +234,7 @@ body { background: var(--color-bg); color: var(--color-text); }
   *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
   /* A subtree theme takes its mode's text colour, as the body does; the page paints its background. */
-  :where(:root.dark, :root [data-theme], :root .dark) { color: var(--color-text); }
+  :where(:root.dark, :root [data-theme="dark"], :root [data-theme="light"], :root .dark) { color: var(--color-text); }
   body {
     margin: 0;
     font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-ui);

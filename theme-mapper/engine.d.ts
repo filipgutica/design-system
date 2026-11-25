@@ -18,8 +18,9 @@
  * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [syntax] Syntax colours by SYNTAX_ROLES
  *   role, per mode. A role a theme leaves out stays core.
  * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [textOnHue] The text on the hue's
- *   fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. A token a theme leaves out takes its
- *   readable value.
+ *   fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. Each value is `#rrggbb`, `white`,
+ *   `black`, or a token reference such as `{color-bg}`; for example `{ light: { 'color-accent-text': '#ffffff' } }`.
+ *   A token a theme leaves out takes its readable value.
  */
 /**
  * Every token's resolved value in light and in dark, as getComputedStyle reports it.
@@ -126,8 +127,9 @@ export type ThemeInputs = {
     } | undefined;
     /**
      * The text on the hue's
-     * fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. A token a theme leaves out takes its
-     * readable value.
+     * fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. Each value is `#rrggbb`, `white`,
+     * `black`, or a token reference such as `{color-bg}`; for example `{ light: { 'color-accent-text': '#ffffff' } }`.
+     * A token a theme leaves out takes its readable value.
      */
     textOnHue?: {
         light?: Record<string, string>;

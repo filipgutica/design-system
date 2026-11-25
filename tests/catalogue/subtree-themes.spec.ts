@@ -75,3 +75,8 @@ test('an element in the page\'s own mode keeps the page values, and no data-them
   expect(await valuesOn(page, '#same')).toEqual(whole)
   expect(await valuesOn(page, '#plain')).toEqual(whole)
 })
+
+test('a data-theme value other than light or dark leaves the text colour to the page', async ({ page }) => {
+  await open(page, null, 'light', '<div style="color: rgb(255, 255, 255)"><div id="t" data-theme="system"><p class="ink">Text</p></div></div>')
+  expect((await valuesOn(page, '#t')).ink).toBe('rgb(255, 255, 255)')
+})
