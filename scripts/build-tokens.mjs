@@ -203,7 +203,8 @@ const standaloneHeader = `/*
  * --color-nav-current-text, and --color-segmented-current-text at 4.5:1 on the new hue
  * and override them when they fall short. A theme file sets the last two for you; its
  * hue must carry --color-accent-text itself, which the contrast tests check.
- * The terminal plate tokens also belong to the identity layer; every other line is core.
+ * The terminal plate tokens draw the identity layer's captures but stay core: a theme
+ * does not set them. dist/theme-inputs.json lists every token a theme may set.
  *
  * Standalone HTML: import or inline this file.
  * Inline visuals: inherit the host font and theme variables; see DESIGN.md.
@@ -213,8 +214,10 @@ const standaloneHeader = `/*
  * data-theme="light" is set. data-theme="dark" forces dark. data-theme="dark" or
  * "light" on any element below <html>, or a .dark class on <html> or below it,
  * themes that subtree; the subtree blocks at the end redeclare what each mode
- * changes. A project that sets its own hue on :root also sets --color-project on
- * :root [data-theme="light"], which a theme file does for you.
+ * changes. A theme written by hand sets its light values on
+ * :root, :root [data-theme="light"] and its dark values on :root[data-theme="dark"],
+ * :root.dark, :root [data-theme="dark"], :root .dark and in the prefers-color-scheme
+ * dark block, so they hold in a subtree too. A theme file does this for you.
  */
 `
 
