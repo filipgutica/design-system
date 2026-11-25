@@ -33,7 +33,7 @@ npm install @filipgutica/design-system
 
 | Import | What it is |
 | --- | --- |
-| `@filipgutica/design-system/tokens.css` | The tokens. Dark mode follows `prefers-color-scheme`; set `data-theme="light"` or `"dark"` on `<html>` to override it. |
+| `@filipgutica/design-system/tokens.css` | The tokens. Dark mode follows `prefers-color-scheme`; set `data-theme="light"` or `"dark"` on `<html>` to override it. `data-theme="light"` or `"dark"` on any element below `<html>`, or a `.dark` class on `<html>` or below it, themes that subtree: every token that changes with the mode resolves again inside it. |
 | `@filipgutica/design-system/ui-sdk.css` | Experimental: draws [ui-sdk](https://ui-sdk.dev)'s headless Button, Field, Input, Textarea, Checkbox, and Radio as the component specs do, checked against `@ui-sdk/*` 0.1.0-beta.5. Load it after `tokens.css`, without ui-sdk's `web.css`; [DESIGN.md](language/DESIGN.md#ui-sdk-experimental) gives the layer order and the supported components. |
 | `@filipgutica/design-system/themes/*.css` | A theme's inputs (hue pair, and any fonts, base radius, or neutrals): `graphite-indigo` (the default, already in `tokens.css`); the family sites' hues `lagoon` (annoterm), `copper` (devps), `iris` (filip-stack), `lapis` (Workbench), and `fern` (wtree); or the open palettes `catppuccin` and `github`. Load one after `tokens.css`, on `:root`. |
 | `@filipgutica/design-system/themes/*.tokens.json` | Each theme's source as a W3C Design Tokens file (2025.10), for design-token tools such as Style Dictionary and Tokens Studio. |

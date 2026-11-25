@@ -10,3 +10,7 @@
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   --radius-base: 8px;
 }
+
+:root [data-theme="light"] {
+  --color-project: #087266;
+}

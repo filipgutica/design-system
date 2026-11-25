@@ -9,7 +9,8 @@
 //
 // The CSS has one variable per token. language/tokens.css carries the default theme; each
 // dist/themes/<id>.css sets what one theme changes from it, to load after it. Dark mode follows
-// prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it.
+// prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it. data-theme on an element
+// below <html>, or a .dark class, themes that subtree.
 // dist/tokens.json and dist/tokens.js carry the values of every theme, resolved, for code, and
 // dist/themes/<id>.tokens.json is each theme file as written, for design-token tools, and
 // dist/theme-inputs.json lists the tokens a theme may set.
@@ -209,7 +210,11 @@ const standaloneHeader = `/*
  * Repos: map these names onto the repository's own token system.
  *
  * Theme states: bare :root is light. prefers-color-scheme picks dark unless
- * data-theme="light" is set. data-theme="dark" forces dark.
+ * data-theme="light" is set. data-theme="dark" forces dark. data-theme="dark" or
+ * "light" on any element below <html>, or a .dark class on <html> or below it,
+ * themes that subtree; the subtree blocks at the end redeclare what each mode
+ * changes. A project that sets its own hue on :root also sets --color-project on
+ * :root [data-theme="light"], which a theme file does for you.
  */
 `
 
@@ -251,9 +256,45 @@ const standaloneResolver = (data) => {
 
 const standaloneNames = (data) => Object.keys(flatTokens(data))
 
+// Subtree themes: data-theme="dark" or "light" on any element below <html>, and a .dark class on <html> or
+// below it, theme that element's subtree. A custom property resolves on the element that declares it, so a
+// subtree block declares every token whose value differs between the modes and every token that refers to
+// one, directly or through others; tokens that are the same in both modes inherit. Each selector carries a
+// :root, so it outranks a theme's or a page's bare :root inputs, as the root dark rules do.
+const SUBTREE = {
+  dark: [':root.dark', ':root [data-theme="dark"]', ':root .dark'],
+  light: [':root [data-theme="light"]'],
+}
+
+const subtreeNames = (data) => {
+  const tokens = flatTokens(data)
+  const memo = new Map()
+  const followsMode = (name) => {
+    if (!memo.has(name)) {
+      memo.set(name, false)
+      const [light, dark] = [LIGHT, DARK].map((mode) => valueFor(tokens, name, mode))
+      memo.set(name, light !== dark || [...`${light} ${dark}`.matchAll(reference)].some(([, target]) => followsMode(target)))
+    }
+    return memo.get(name)
+  }
+  return Object.keys(tokens).filter(followsMode)
+}
+
+const subtreeBlocks = (blocks, { scheme = false } = {}) => Object.entries(blocks)
+  .filter(([, declarations]) => declarations.length > 0)
+  .flatMap(([mode, declarations]) => [
+    '',
+    `${SUBTREE[mode].join(', ')} {`,
+    ...(scheme ? [`  color-scheme: ${mode};`] : []),
+    ...block('  ', declarations),
+    '}',
+  ])
+
 export const renderStandaloneTokens = (data) => {
   const resolve = standaloneResolver(data)
   const dark = darkOverrides(standaloneNames(data), resolve).map(([name, value]) => [`--${name}`, value])
+  const subtree = subtreeNames(data)
+  const subtreeIn = (mode) => subtree.map((name) => [`--${name}`, resolve(name, mode)])
 
   const groups = data.groups.map(({ comment: groupComment, notes = {}, tokens }) => [
     '',
@@ -283,6 +324,9 @@ export const renderStandaloneTokens = (data) => {
     ...block('  ', dark),
     '}',
     '',
+    comment('', 'Subtree themes: data-theme="dark" or "light" on an element below <html>, or a .dark class on <html> or\nbelow it, themes that subtree. Each block redeclares every token that differs between the modes or follows\none that does, so the tokens derived from them resolve again inside the subtree. The element paints its own\nbackground, such as background: var(--color-bg).'),
+    ...subtreeBlocks({ dark: subtreeIn(DARK), light: subtreeIn(LIGHT) }, { scheme: true }),
+    '',
     standaloneBase,
   ].join('\n')
 }
@@ -291,6 +335,8 @@ export const renderStandaloneTokens = (data) => {
 // token whose light value differs. tokens.css's dark blocks outrank a bare :root, so the theme's dark
 // blocks, with the same selectors, set each token whose dark value would otherwise come out wrong.
 // A hue-only theme needs none: tokens.css's dark blocks already switch to --color-project-dark.
+// Its subtree blocks, after those, set each token whose value in that mode differs from what tokens.css's
+// subtree blocks declare, such as the light hue and the neutrals.
 export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
   const resolve = standaloneResolver(data)
   const resolveDefault = standaloneResolver(defaultTheme.data)
@@ -300,6 +346,11 @@ export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
   const defaultDark = new Map(darkOverrides(names, resolveDefault))
   const seenInDark = (token) => defaultDark.get(token) ?? (root.includes(token) ? resolve(token, LIGHT) : resolveDefault(token, LIGHT))
   const dark = names.filter((token) => resolve(token, DARK) !== seenInDark(token)).map((token) => [`--${token}`, resolve(token, DARK)])
+  const defaultSubtree = new Set(subtreeNames(defaultTheme.data))
+  const subtree = new Set([...defaultSubtree, ...subtreeNames(data)])
+  const subtreeIn = (mode) => names
+    .filter((token) => subtree.has(token) && !(defaultSubtree.has(token) && resolve(token, mode) === resolveDefault(token, mode)))
+    .map((token) => [`--${token}`, resolve(token, mode)])
   return [
     `/* Generated from tokens/themes/${id}${THEME_FILE} by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
     ` * The ${name} theme for tokens.css. Load after tokens.css, on :root only: the tokens that follow the`,
@@ -321,6 +372,7 @@ export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
       ...block('  ', dark),
       '}',
     ]),
+    ...subtreeBlocks({ dark: subtreeIn(DARK), light: subtreeIn(LIGHT) }),
     '',
   ].join('\n')
 }

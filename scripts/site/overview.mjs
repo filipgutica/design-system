@@ -59,7 +59,7 @@ export const overviewPage = ({ pkg, version }) => {
 @import "${pkg.name}/tokens.css";
 
 .panel { background: var(--color-surface-raised); border-radius: var(--radius-panel); }` })}
-    <p>Without a bundler, link <code>fonts/fonts.css</code> and <code>language/tokens.css</code> from the package folder. Pages follow the reader’s system theme; set <code>data-theme="light"</code> or <code>"dark"</code> on <code>&lt;html&gt;</code> to choose one.</p>
+    <p>Without a bundler, link <code>fonts/fonts.css</code> and <code>language/tokens.css</code> from the package folder. Pages follow the reader’s system theme; set <code>data-theme="light"</code> or <code>"dark"</code> on <code>&lt;html&gt;</code> to choose one, or on any element below it, or a <code>.dark</code> class, to theme that part of the page.</p>
     <p>Copy component markup and styles from <a href="components.html">Components</a>.</p>
   </section>
 
