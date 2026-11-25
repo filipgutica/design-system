@@ -372,12 +372,10 @@
      --slide-from is where it slides from and back to. */
   .slideout { --slide-from: translateX(100%); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: min(75%, 384px); height: 300px; overflow: hidden; padding: 0; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
   .slideout:dir(rtl) { --slide-from: translateX(-100%); }
-  /* The page reserves the scrollbar gutter, which stays empty while the open slideout locks the page behind. The
-     trailing edge reaches over it (100% - 100vw is minus the gutter's width), so no strip of page shows past the panel. */
-  dialog.slideout { --gutter: calc(100% - 100vw); position: fixed; inset: 0 var(--gutter) 0 auto; height: 100dvh; max-height: none; margin: 0; }
-  dialog.slideout:is([data-edge="top"], [data-edge="bottom"]) { width: auto; max-width: none; height: auto; max-height: 75dvh; }
-  dialog.slideout[data-edge="top"] { --slide-from: translateY(-100%); inset: 0 var(--gutter) auto 0; }
-  dialog.slideout[data-edge="bottom"] { --slide-from: translateY(100%); inset: auto var(--gutter) 0 0; }
+  dialog.slideout { position: fixed; inset-block: 0; inset-inline: auto 0; height: 100dvh; max-height: none; margin: 0; }
+  dialog.slideout:is([data-edge="top"], [data-edge="bottom"]) { inset-inline: 0; width: auto; max-width: none; height: auto; max-height: 75dvh; }
+  dialog.slideout[data-edge="top"] { --slide-from: translateY(-100%); inset-block: 0 auto; }
+  dialog.slideout[data-edge="bottom"] { --slide-from: translateY(100%); inset-block: auto 0; }
   /* The page behind an open drawer or slideout does not scroll, through the slide out too. Hiding the root's overflow keeps the
      reader's position. The gutter is reserved all the time, so a classic scrollbar that hides does not reflow the page. */
   :root { scrollbar-gutter: stable; }
@@ -1957,8 +1955,8 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
 </dialog>
 <dialog class="slideout" id="live-slideout" aria-labelledby="live-slideout-title">
   <div class="slideout-head"><h4 id="live-slideout-title">Filters</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close filters"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>
-  <div class="slideout-body"><fieldset class="filters"><legend class="field-label">Status</legend><label class="check"><input type="checkbox" checked>Alerting</label><label class="check"><input type="checkbox" checked>Warning</label><label class="check"><input type="checkbox">Healthy</label></fieldset></div>
-  <form class="slideout-foot" method="dialog"><button class="btn secondary" type="submit">Reset</button><button class="btn" type="submit">Apply</button></form>
+  <form class="slideout-body" id="live-filters"><fieldset class="filters"><legend class="field-label">Status</legend><label class="check"><input type="checkbox" checked>Alerting</label><label class="check"><input type="checkbox" checked>Warning</label><label class="check"><input type="checkbox">Healthy</label></fieldset></form>
+  <form class="slideout-foot" method="dialog"><button class="btn secondary" type="reset" form="live-filters">Reset</button><button class="btn" type="submit">Apply</button></form>
 </dialog>
 <dialog class="drawer" id="nav-drawer" aria-labelledby="nav-drawer-title">
   <div class="drawer-head"><h4 id="nav-drawer-title">Components</h4><form method="dialog"><button class="quiet-action close" type="submit" aria-label="Close drawer"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></form></div>

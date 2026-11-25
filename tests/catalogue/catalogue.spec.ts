@@ -642,14 +642,14 @@ test.describe('slideout', () => {
       test('it sits on the trailing edge, full height, 75% wide up to 384px, and the page behind does not scroll', async ({ page }) => {
         const { slideout } = await openSlideout(page)
         const box = (await slideout.boundingBox())!
-        expect(box.x + box.width).toBe(width)
-        // 75% of the viewport, less the scrollbar gutter the page reserves, up to 384px.
+        // The fixed layer's box: the viewport, less any scrollbar gutter the page reserves.
         const viewport = await page.evaluate(() => {
           const probe = document.body.appendChild(Object.assign(document.createElement('i'), { style: 'position: fixed; inset: 0' }))
-          const { width: fixedWidth } = probe.getBoundingClientRect()
+          const { right } = probe.getBoundingClientRect()
           probe.remove()
-          return fixedWidth
+          return right
         })
+        expect(box.x + box.width).toBe(viewport)
         expect(box.width).toBeCloseTo(Math.min(0.75 * viewport, 384), 1)
         expect(box.y).toBe(0)
         expect(box.height).toBe(800)
@@ -664,12 +664,30 @@ test.describe('slideout', () => {
     await expect(slideout).toBeHidden()
     await expect(button).toBeFocused()
     expect(await page.evaluate(() => getComputedStyle(document.documentElement).overflow)).not.toBe('hidden')
-    for (const name of ['Reset', 'Apply', 'Close filters']) {
+    for (const name of ['Apply', 'Close filters']) {
       await button.click()
       await slideout.getByRole('button', { name }).click()
       await expect(slideout).toBeHidden()
       await expect(button).toBeFocused()
     }
+  })
+
+  test('Reset clears the filters and keeps it open', async ({ page }) => {
+    const { slideout } = await openSlideout(page)
+    const healthy = slideout.getByRole('checkbox', { name: 'Healthy' })
+    await healthy.check()
+    await slideout.getByRole('button', { name: 'Reset' }).click()
+    await expect(healthy).not.toBeChecked()
+    await expect(slideout).toBeVisible()
+  })
+
+  test('in a right-to-left page it rests on the trailing edge, the left', async ({ page }) => {
+    await page.goto(url)
+    await page.evaluate(() => { document.documentElement.dir = 'rtl' })
+    await page.locator('[data-open="live-slideout"]').click()
+    const slideout = page.locator('#live-slideout')
+    await slideout.evaluate((el) => Promise.all(el.getAnimations().map((animation) => animation.finished)))
+    expect((await slideout.boundingBox())!.x).toBe(0)
   })
 
   test.describe('on a phone', () => {
