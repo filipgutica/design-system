@@ -18,7 +18,7 @@ Filip's design language for any framework: the spec, the tokens, the component c
 | `theme-mapper/` | The theme engine the token build shares, and the experimental theme mapper built on it |
 | `scripts/build-site.mjs` | The site build: writes `site/` for GitHub Pages from `components.html`, the tokens, and `package.json` |
 | `dist/` | Generated theme files, JSON, and JavaScript |
-| `fonts/` | IBM Plex latin `woff2` files, `fonts.css`, and their OFL licences |
+| `fonts/` | Inter and JetBrains Mono latin `woff2` files, `fonts.css`, and their OFL licences |
 | `tests/` | Guard tests for the payload, the tokens, and the site build, the React smoke test, and behaviour tests for the catalogue and the built site |
 
 To change a value, edit the JSON and run `pnpm tokens:build`. `pnpm tokens:check` fails when a generated file is stale or a token has no role.
@@ -37,7 +37,7 @@ npm install @filipgutica/design-system
 | `@filipgutica/design-system/ui-sdk.css` | Experimental: draws [ui-sdk](https://ui-sdk.dev)'s headless Button, Field, Input, Textarea, Checkbox, and Radio as the component specs do, checked against `@ui-sdk/*` 0.1.0-beta.5. Load it after `tokens.css`, without ui-sdk's `web.css`; [DESIGN.md](language/DESIGN.md#ui-sdk-experimental) gives the layer order and the supported components. |
 | `@filipgutica/design-system/themes/*.css` | A theme's inputs (hue pair, and any fonts, base radius, or neutrals): `graphite-indigo` (the default, already in `tokens.css`); the family sites' hues `lagoon` (annoterm), `copper` (devps), `iris` (filip-stack), `lapis` (Workbench), and `fern` (wtree); or the open palettes `catppuccin` and `github`. Load one after `tokens.css`, on `:root`. |
 | `@filipgutica/design-system/themes/*.tokens.json` | Each theme's source as a W3C Design Tokens file (2025.10), for design-token tools such as Style Dictionary and Tokens Studio. |
-| `@filipgutica/design-system/fonts.css` | IBM Plex Sans and Mono. |
+| `@filipgutica/design-system/fonts.css` | Inter and JetBrains Mono, the default theme's fonts. |
 | `@filipgutica/design-system` | `tokens` (resolved values per theme and mode) and `cssVar(name)`, with types. |
 | `@filipgutica/design-system/tokens.json` | The resolved values as JSON. |
 | `@filipgutica/design-system/language/*` | The spec, catalogue, and example pages. |
@@ -90,4 +90,4 @@ Commits follow Conventional Commits, and CI checks them with commitlint. Do not 
 
 ## License
 
-MIT. The IBM Plex fonts in `fonts/` are under the SIL Open Font License; see the `OFL-*.txt` files beside them. The editor theme in `language/editor-themes/graphite-indigo/` derives from Visual Studio Code's default themes; see its `LICENSE` and `THIRD_PARTY_NOTICES.md`. The Catppuccin and GitHub themes take their colours from those projects' MIT palettes; see `dist/themes/THIRD_PARTY_NOTICES.md` and the licenses beside it.
+MIT. The Inter and JetBrains Mono fonts in `fonts/` are under the SIL Open Font License; see the `OFL-*.txt` files beside them. The editor theme in `language/editor-themes/graphite-indigo/` derives from Visual Studio Code's default themes; see its `LICENSE` and `THIRD_PARTY_NOTICES.md`. The Catppuccin and GitHub themes take their colours from those projects' MIT palettes; see `dist/themes/THIRD_PARTY_NOTICES.md` and the licenses beside it.

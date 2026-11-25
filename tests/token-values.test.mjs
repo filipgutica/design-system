@@ -60,6 +60,20 @@ test('tokens.css keeps the DS-1 declarations except the inherited command aliase
   assert.deepEqual(namesOf(blocksOf(generatedTokens, STANDALONE)), namesOf(expected))
 })
 
+// Owner decisions after DS-1 that change an identity input, with the date each was made. They sit at the top of
+// tokens.css, before the command aliases.
+const IDENTITY_SINCE_DS1 = {
+  // 2026-11-24: Inter and JetBrains Mono replace IBM Plex; the fallbacks stay.
+  '--font-ui': [
+    '"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif',
+    '"Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif',
+  ],
+  '--font-mono': [
+    '"IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace',
+    '"JetBrains Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace',
+  ],
+}
+
 // Owner decisions after DS-1 that change a size or shape value, with the date each was made: the DS-1 text,
 // the text now, and the value it resolves to when that differs from the text. Listed in tokens.css order.
 const DECIDED_SINCE_DS1 = {
@@ -87,7 +101,7 @@ test('tokens.css preserves DS-1 values except the command aliases, which follow 
     // Owner decision 2026-11-15: commands use the code well and its subtle edge.
     expected[mode]['--color-command-bg'] = expected[mode]['--color-code']
     expected[mode]['--color-command-border'] = expected[mode]['--color-border-subtle']
-    for (const [name, [, text, resolved = text]] of Object.entries(DECIDED_SINCE_DS1)) expected[mode][name] = resolved
+    for (const [name, [, text, resolved = text]] of Object.entries({ ...IDENTITY_SINCE_DS1, ...DECIDED_SINCE_DS1 })) expected[mode][name] = resolved
   }
   assert.deepEqual(generated, expected)
 })
@@ -101,6 +115,7 @@ test('tokens.css keeps the DS-1 declaration text except documented reference, co
       .map(([name, value]) => `${selector} ${name}: ${value} -> ${generated[selector][name]}`))
 
   assert.deepEqual(changed, [
+    ...Object.entries(IDENTITY_SINCE_DS1).map(([name, [from, to]]) => `:root ${name}: ${from} -> ${to}`),
     // Owner decision 2026-11-15: command tokens are code-well aliases, inherited by both dark rules.
     ':root --color-command-bg: color-mix(in srgb, var(--color-project) 25%, #101010) -> var(--color-code)',
     ':root --color-command-border: transparent -> var(--color-border-subtle)',

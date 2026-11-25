@@ -1060,7 +1060,7 @@ test('the code block source is an 8px panel 4px inside a 12px frame', async ({ p
 
 // A segmented control lines up with the buttons beside it: at each size its track is a same-size button's height,
 // and the pressed option, which is its own thumb, sits as far from the track's top edge as from its bottom edge.
-// Its label sits centred in the option too, measured in IBM Plex, which the catalogue does not load itself.
+// Its label sits centred in the option too, measured in Inter, which the catalogue does not load itself.
 test.describe('segmented control alignment', () => {
   test.use({ viewport: { width: 1280, height: 900 } })
 
@@ -1074,10 +1074,10 @@ test.describe('segmented control alignment', () => {
       await page.goto(url)
       await page.addStyleTag({ url: new URL('../../fonts/fonts.css', import.meta.url).href })
       await page.evaluate(async () => {
-        await Promise.all(['400 1rem "IBM Plex Sans"', '500 1rem "IBM Plex Sans"'].map((font) => document.fonts.load(font)))
+        await Promise.all(['400 1rem "Inter"', '500 1rem "Inter"'].map((font) => document.fonts.load(font)))
         await document.fonts.ready
       })
-      expect(await page.evaluate(() => [...document.fonts].some((face) => face.family.includes('IBM Plex Sans') && face.status === 'loaded'))).toBe(true)
+      expect(await page.evaluate(() => [...document.fonts].some((face) => face.family.includes('Inter') && face.status === 'loaded'))).toBe(true)
       const [trackHeight, buttonHeight] = await Promise.all([page.locator(track).first(), page.locator(button).first()]
         .map((node) => node.evaluate((element) => element.getBoundingClientRect().height)))
       expect(Math.abs(trackHeight - buttonHeight), `track ${trackHeight}px, button ${buttonHeight}px`).toBeLessThan(0.5)

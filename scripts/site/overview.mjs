@@ -17,7 +17,7 @@ export const EXPORT_USES = {
   './tokens.json': 'Every value per theme and mode, for tools and generators',
   './open-vsx': 'Experimental. <code>parseVsCodeTheme()</code> and <code>createOpenVsxThemeService()</code>: JSONC theme files and verified Open VSX imports, with includes resolved for the mapper',
   './theme-mapper': 'Experimental. <code>mapVsCodeTheme()</code> and <code>themeVariables()</code>: a VS Code colour theme as theme inputs, for a theme picker',
-  './fonts.css': 'IBM Plex Sans and Mono, self-hosted',
+  './fonts.css': 'Inter and JetBrains Mono, self-hosted',
   './fonts/*': 'The font files',
   './language/*': 'The spec, decisions, catalogue, and templates',
   './package.json': 'Package metadata',

@@ -128,7 +128,7 @@
   .segmented[data-size="sm"] button { padding: 0 var(--space-2); }
   .segmented[data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
   /* Line height 1 comes after the font shorthand, which would reset it: the label then sits centred in the option. */
-  .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: calc(var(--item) - 2 * var(--inset)); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-control) - var(--inset)); background: transparent; color: var(--color-muted); font: inherit; line-height: 1; cursor: pointer; }
+  .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: calc(var(--item) - 2 * var(--inset)); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-control) - var(--inset)); background: transparent; color: var(--color-muted); font: inherit; line-height: normal; cursor: pointer; }
   .segmented[data-icon-only] button { width: calc(var(--item) - 2 * var(--inset)); padding: 0; }
   /* Icon-only: a pill track with round options, concentric with it. A px radius keeps the thumb a pill while it glides. */
   .segmented[data-icon-only] { border-radius: var(--radius-pill); }
@@ -560,7 +560,7 @@
 
         <section class="foundation" id="typography" aria-labelledby="typography-title">
           <h3 id="typography-title">Typography</h3>
-          <p class="note">Mono carries identity and structure; sans carries prose and controls. <code>fonts.css</code> self-hosts IBM Plex. A standalone page without the font installed, such as this one, shows the system fallback.</p>
+          <p class="note">Mono carries identity and structure; sans carries prose and controls. <code>fonts.css</code> self-hosts Inter and JetBrains Mono. A standalone page without the font installed, such as this one, shows the system fallback.</p>
 
           <h4>Families</h4>
           <ul class="specs">

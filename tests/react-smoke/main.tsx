@@ -13,7 +13,7 @@ cssVar('text')
 const App = () => (
   <main style={{ color: text, background: cssVar('color-surface'), padding: cssVar('space-4') }}>
     <h1 data-testid="heading">Design system</h1>
-    <p>{Object.keys(tokens.themes['graphite-indigo'].light).length} tokens</p>
+    <p>{Object.keys(tokens.themes['graphite-indigo'].light).length} tokens, read with <code>{text}</code></p>
   </main>
 )
 

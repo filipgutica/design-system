@@ -18,7 +18,7 @@ for (const mode of ['light', 'dark'] as const) {
   })
 }
 
-test('the IBM Plex faces load from fonts.css', async ({ page }) => {
+test('the Inter and JetBrains Mono faces load from fonts.css', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByTestId('heading')).toBeVisible()
   const loaded = await page.evaluate(async () => {
@@ -26,5 +26,5 @@ test('the IBM Plex faces load from fonts.css', async ({ page }) => {
     return [...document.fonts].filter((face) => face.status === 'loaded').map((face) => `${face.family} ${face.weight}`)
   })
 
-  expect(loaded).toEqual(expect.arrayContaining(['IBM Plex Sans 400', 'IBM Plex Sans 600']))
+  expect(loaded).toEqual(expect.arrayContaining(['Inter 400', 'Inter 600', 'JetBrains Mono 400']))
 })
