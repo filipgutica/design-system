@@ -8,13 +8,21 @@
  */
 /** @typedef {{ light: string, dark: string }} ModePair */
 /**
- * One theme's inputs, for light and for dark. Fonts and neutrals stay core unless the theme names its own.
+ * One theme's inputs, for light and for dark. Fonts, the base radius, and neutrals stay core unless the theme
+ * names its own.
  * @typedef {object} ThemeInputs
  * @property {ModePair} hue The hue, `--color-project` in light and `--color-project-dark`.
  * @property {{ ui?: string, mono?: string }} [fonts] The two font stacks.
+ * @property {string} [radius] The base radius, `--radius-base`, as a CSS length.
  * @property {{ light: Record<string, string>, dark: Record<string, string> }} [neutrals] Every NEUTRALS token, per mode.
  * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [syntax] Syntax colours by SYNTAX_ROLES
  *   role, per mode. A role a theme leaves out stays core.
+ * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [textOnHue] The text on the hue's
+ *   fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. Each value is `#rrggbb`, `white`,
+ *   `black`, or a token reference such as `{color-bg}`; for example `{ light: { 'color-accent-text': '#ffffff' } }`.
+ *   A token a theme leaves out keeps its default: `color-accent-text` stays `{color-bg}`, which a pale hue can fail,
+ *   and the selected-fill text tokens take the first candidate that reaches 4.5:1, or the accent when none does.
+ *   Run checkTheme on the result.
  */
 /**
  * Every token's resolved value in light and in dark, as getComputedStyle reports it.
@@ -48,6 +56,16 @@ export const SYNTAX_ROLES: string[];
 export const SURFACES: string[];
 /** The selected-fill text tokens, which take their readable value from the theme. */
 export const TEXT_ON_FILL_TOKENS: string[];
+/** The text on the hue's fills, which a theme may set: the primary label and the selected-fill text. */
+export const TEXT_ON_HUE_TOKENS: string[];
+export function themeInputNames(data: TokenSource): {
+    hue: string[];
+    textOnHue: string[];
+    fonts: string[];
+    radius: string[];
+    neutrals: string[];
+    syntax: string[];
+};
 export function applyTheme<Data extends TokenSource>(core: Data, theme: ThemeInputs): Data;
 /**
  * The contrast checks each theme must pass, in both modes.
@@ -75,7 +93,8 @@ export type ModePair = {
     dark: string;
 };
 /**
- * One theme's inputs, for light and for dark. Fonts and neutrals stay core unless the theme names its own.
+ * One theme's inputs, for light and for dark. Fonts, the base radius, and neutrals stay core unless the theme
+ * names its own.
  */
 export type ThemeInputs = {
     /**
@@ -90,6 +109,10 @@ export type ThemeInputs = {
         mono?: string;
     } | undefined;
     /**
+     * The base radius, `--radius-base`, as a CSS length.
+     */
+    radius?: string | undefined;
+    /**
      * Every NEUTRALS token, per mode.
      */
     neutrals?: {
@@ -101,6 +124,18 @@ export type ThemeInputs = {
      * role, per mode. A role a theme leaves out stays core.
      */
     syntax?: {
+        light?: Record<string, string>;
+        dark?: Record<string, string>;
+    } | undefined;
+    /**
+     * The text on the hue's
+     * fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. Each value is `#rrggbb`, `white`,
+     * `black`, or a token reference such as `{color-bg}`; for example `{ light: { 'color-accent-text': '#ffffff' } }`.
+     * A token a theme leaves out keeps its default: `color-accent-text` stays `{color-bg}`, which a pale hue can fail,
+     * and the selected-fill text tokens take the first candidate that reaches 4.5:1, or the accent when none does.
+     * Run checkTheme on the result.
+     */
+    textOnHue?: {
         light?: Record<string, string>;
         dark?: Record<string, string>;
     } | undefined;

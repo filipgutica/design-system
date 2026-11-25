@@ -3,20 +3,22 @@
     {
       "id": "identity-inputs",
       "title": "Identity inputs",
-      "note": "The four lines a theme sets on `:root`: the hue for light and dark, from its file in `tokens/themes/`, and the two font stacks. Every other token follows from them.",
-      "comment": "Identity layer: a project swaps these four lines. --color-project is the light-theme hue;\n--color-project-dark is the dark-theme hue, also used on terminal captures in both themes.",
+      "note": "The five lines a theme sets on `:root`: the hue for light and dark, from its file in `tokens/themes/`, the two font stacks, and the base radius. Every other token follows from them.",
+      "comment": "Identity layer: a project swaps these five lines. --color-project is the light-theme hue;\n--color-project-dark is the dark-theme hue, also used on terminal captures in both themes.\n--radius-base sets every corner but the pill and the circle.",
       "identity": true,
       "roles": {
         "color-project": "The project hue; `--color-accent` follows it",
         "color-project-dark": "The dark-theme hue and the terminal capture accent",
-        "font-ui": "Prose, h3 and below, application section headings, labels, and controls",
-        "font-mono": "Identity, documentation and product page titles and section headings, navigation rails, metadata, captions, code, identifiers, and keys"
+        "font-ui": "Prose, every heading, labels, and controls",
+        "font-mono": "Code, identifiers, keys, and terminal captures, and the identity layer's small marks: the ~/name header, metadata, step numbers, and the footer",
+        "radius-base": "The base corner: rows, actions, and fields take it, small marks half of it, and containers one and a half times it"
       },
       "tokens": {
         "color-project": null,
         "color-project-dark": null,
-        "font-ui": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
-        "font-mono": "\"IBM Plex Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace"
+        "font-ui": "\"Inter\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"Segoe UI\", system-ui, sans-serif",
+        "font-mono": "\"JetBrains Mono\", ui-monospace, \"SF Mono\", SFMono-Regular, Menlo, Consolas, monospace",
+        "radius-base": "8px"
       }
     },
     {
@@ -324,11 +326,11 @@
         "text-sm": "Secondary text and figure captions",
         "text-md": "Controls and dense application content",
         "text-lg": "Subheadings (h3 and below) and large controls",
-        "text-xl": "Documentation section heading, in mono",
+        "text-xl": "Documentation section heading",
         "text-2xl": "Largest application title",
-        "text-3xl": "Documentation title, in mono",
+        "text-3xl": "Documentation title",
         "text-reading": "Paragraphs and article text, with `--leading` and `--measure`",
-        "text-display": "Product page and tool home title, in mono",
+        "text-display": "Product page and tool home title",
         "text-display-sm": "The display title on phones",
         "leading-tight": "Headings, from the `tokens.css` base",
         "leading": "Body and reading text",
@@ -404,7 +406,7 @@
         "measure": "Bounds reading text",
         "page-max": "Documentation frame",
         "page-wide": "Product page frame",
-        "sidebar": "This page's sidebar"
+        "sidebar-width": "This page's sidebar"
       },
       "tokens": {
         "control-sm": "1.75rem",
@@ -415,13 +417,13 @@
         "measure": "68ch",
         "page-max": "960px",
         "page-wide": "1120px",
-        "sidebar": "224px"
+        "sidebar-width": "224px"
       }
     },
     {
       "id": "shape",
       "title": "Shape",
-      "note": "One radius per role, from small marks to floating panels.",
+      "note": "One radius per role, from small marks to floating panels. Every corner but the pill and the circle follows `--radius-base`.",
       "comment": "Shape",
       "roles": {
         "radius-inline": "Places and picked rows: navigation rows, tabs, list rows, menu rows, and breadcrumb links",
@@ -433,11 +435,11 @@
         "radius-circle": "A lone icon that acts on its own fill: icon-only buttons (primary, secondary, and danger), on a square box"
       },
       "tokens": {
-        "radius-inline": "8px",
-        "radius-control": "8px",
-        "radius-panel": "12px",
-        "radius-field": "8px",
-        "radius-mark": "4px",
+        "radius-inline": "{radius-base}",
+        "radius-control": "{radius-base}",
+        "radius-panel": "calc({radius-base} * 1.5)",
+        "radius-field": "{radius-base}",
+        "radius-mark": "calc({radius-base} * 0.5)",
         "radius-pill": "999px",
         "radius-circle": "999px"
       }

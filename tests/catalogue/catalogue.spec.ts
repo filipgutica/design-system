@@ -849,7 +849,11 @@ const shapeProblems = (page: Page) => page.evaluate(({ roles, concentric }) => {
     return value
   }
   const expected = [
-    ...Object.entries(roles).flatMap(([token, list]) => list.map((selector) => [selector, getComputedStyle(document.documentElement).getPropertyValue(token).trim()])),
+    // A role token can be a calc() of --radius-base, so it resolves through a probe as a length, as the corners do.
+    ...Object.entries(roles).flatMap(([token, list]) => {
+      const value = resolve(`var(${token})`, 'body')
+      return list.map((selector) => [selector, value])
+    }),
     ...concentric.flatMap(({ radius, container, selectors }) => {
       const value = resolve(radius, container)
       return selectors.map((selector) => [selector, value])
@@ -972,7 +976,14 @@ test.describe('rendered recipes', () => {
     const table = [...(await docText(page, 'DESIGN.md')).matchAll(/^\s*\| [^|]+ \| (Pill|Circle|\d+px) \| `(--radius-[\w-]+)` \|/gm)].map(([, shape, token]) => [token, shape])
     expect(table.map(([token]) => token).sort()).toEqual(Object.keys(shapeRoles).sort())
     await page.goto(url)
-    const values = await page.evaluate((tokens) => tokens.map((token) => getComputedStyle(document.documentElement).getPropertyValue(token).trim()), table.map(([token]) => token))
+    // Resolved as a length on a probe: a role token can be a calc() of --radius-base.
+    const values = await page.evaluate((tokens) => tokens.map((token) => {
+      const probe = document.body.appendChild(document.createElement('i'))
+      probe.style.borderRadius = `var(${token})`
+      const value = getComputedStyle(probe).borderTopLeftRadius
+      probe.remove()
+      return value
+    }), table.map(([token]) => token))
     expect(values).toEqual(table.map(([, shape]) => (shape === 'Pill' || shape === 'Circle' ? '999px' : shape)))
   })
 
@@ -1049,7 +1060,7 @@ test('the code block source is an 8px panel 4px inside a 12px frame', async ({ p
 
 // A segmented control lines up with the buttons beside it: at each size its track is a same-size button's height,
 // and the pressed option, which is its own thumb, sits as far from the track's top edge as from its bottom edge.
-// Its label sits centred in the option too, measured in IBM Plex, which the catalogue does not load itself.
+// Its label sits centred in the option too, measured in Inter, which the catalogue does not load itself.
 test.describe('segmented control alignment', () => {
   test.use({ viewport: { width: 1280, height: 900 } })
 
@@ -1063,10 +1074,10 @@ test.describe('segmented control alignment', () => {
       await page.goto(url)
       await page.addStyleTag({ url: new URL('../../fonts/fonts.css', import.meta.url).href })
       await page.evaluate(async () => {
-        await Promise.all(['400 1rem "IBM Plex Sans"', '500 1rem "IBM Plex Sans"'].map((font) => document.fonts.load(font)))
+        await Promise.all(['400 1rem "Inter"', '500 1rem "Inter"'].map((font) => document.fonts.load(font)))
         await document.fonts.ready
       })
-      expect(await page.evaluate(() => [...document.fonts].some((face) => face.family.includes('IBM Plex Sans') && face.status === 'loaded'))).toBe(true)
+      expect(await page.evaluate(() => [...document.fonts].some((face) => face.family.includes('Inter') && face.status === 'loaded'))).toBe(true)
       const [trackHeight, buttonHeight] = await Promise.all([page.locator(track).first(), page.locator(button).first()]
         .map((node) => node.evaluate((element) => element.getBoundingClientRect().height)))
       expect(Math.abs(trackHeight - buttonHeight), `track ${trackHeight}px, button ${buttonHeight}px`).toBeLessThan(0.5)

@@ -13,7 +13,7 @@ const hueOnly = () => ({
   dark: { $type: 'color', 'color-project': { $value: colour('#8aa8ff') } },
 })
 
-test('a theme file gives its name, note, hue, font stacks, and neutrals', () => {
+test('a theme file gives its name, note, hue, font stacks, base radius, and neutrals', () => {
   assert.deepEqual(parseTheme(hueOnly()), { problems: [], inputs: { name: 'Test', note: 'A test theme.', hue: { light: '#2b59d6', dark: '#8aa8ff' } } })
   const { problems, inputs } = parseTheme(read('github'))
   assert.deepEqual(problems, [])
@@ -25,6 +25,10 @@ test('a theme file gives its name, note, hue, font stacks, and neutrals', () => 
   const named = hueOnly()
   named['font-ui'] = { $type: 'fontFamily', $value: ['ACME "Display"', 'back\\slash', '123', 'sans-serif'] }
   assert.equal(parseTheme(named).inputs.fonts.ui, '"ACME \\"Display\\"", "back\\\\slash", "123", sans-serif')
+  // The base radius is a Design Tokens dimension, written as a CSS length.
+  const rounded = hueOnly()
+  rounded['radius-base'] = { $type: 'dimension', $value: { value: 0.375, unit: 'rem' } }
+  assert.equal(parseTheme(rounded).inputs.radius, '0.375rem')
   // A $type on the file reaches every group and token below it, as in the Design Tokens format.
   const rootTyped = hueOnly()
   rootTyped.$type = 'color'
@@ -48,6 +52,10 @@ test('a theme file the build cannot take stops with its problem', () => {
   assert.deepEqual(problemsWith((file) => { delete file.$extensions }), [`no $extensions["${THEME_EXTENSION}"].name`])
   assert.deepEqual(problemsWith((file) => { file['font-ui'] = { $type: 'fontFamily', $value: [] } }), ['font-ui is not a font name or a list of them'])
   assert.deepEqual(problemsWith((file) => { file['font-ui'] = { $type: 'fontFamily', $value: 'Bad\nName' } }), ['font-ui is not a font name or a list of them'])
+  assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'dimension', $value: { value: 8, unit: 'em' } } }), ['radius-base is not a px or rem length of 0 or more'])
+  assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'dimension', $value: { value: -2, unit: 'px' } } }), ['radius-base is not a px or rem length of 0 or more'])
+  assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'number', $value: 8 } }), ['radius-base is not a dimension token'])
+  assert.deepEqual(problemsWith((file) => { file['radius-base'] = { $type: 'dimension', $value: { value: 1, unit: 'rem' }, $ref: '#/other' } }), ['radius-base has $ref, which a theme file does not support'])
   // Structure the build does not resolve is a problem, not silently skipped.
   assert.deepEqual(problemsWith((file) => { file.light.$value = colour('#000000') }), ['light.$value is not supported in a theme file'])
   assert.deepEqual(problemsWith((file) => { file.light.$extends = '{dark}' }), ['light.$extends is not supported in a theme file'])
@@ -60,4 +68,12 @@ test('a theme file the build cannot take stops with its problem', () => {
   const partial = problemsWith((file) => { file.light['color-bg'] = { $value: colour('#ffffff') } })
   assert.equal(partial.length, 17)
   assert.ok(partial.includes('no dark.color-bg: neutrals are a whole set in both modes'))
+})
+
+test('a theme radius sets every corner that follows it, and leaves the pill and the circle', async () => {
+  const { applyTheme, resolveData } = await import('../theme-mapper/engine.js')
+  const { core } = await import('../theme-mapper/core.js')
+  const { light } = resolveData(applyTheme(core, { hue: { light: '#2b59d6', dark: '#8aa8ff' }, radius: '6px' }))
+  assert.deepEqual(['radius-base', 'radius-inline', 'radius-control', 'radius-field', 'radius-mark', 'radius-panel', 'radius-pill', 'radius-circle'].map((name) => light[name]),
+    ['6px', '6px', '6px', '6px', 'calc(6px * 0.5)', 'calc(6px * 1.5)', '999px', '999px'])
 })

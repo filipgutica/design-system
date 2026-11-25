@@ -869,3 +869,26 @@ test('no search input has a fixed width', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
   assert.deepEqual(pages.flatMap((page) => fixedSearchInputs(page, read(page))), [])
 })
+
+// Owner decision 2026-11-24: headings are --font-ui with no mark; mono stays for code, identifiers, keys, and captures.
+// It reads rules for h1 to h6 and for title classes, the selectors these pages give their headings, and any ## mark.
+const HEADING_SELECTOR = /(?:^|[\s>,(])h[1-6]\b|title\b|\.t-(?:section|display|doc-title)\b/
+const headingProblems = (file, html) => cssRules(html).flatMap(({ context, selector, body }) => [
+  ...(HEADING_SELECTOR.test(selector) && body.includes('var(--font-mono)') ? [`${file}: ${`${context} ${selector}`.trim()} sets mono on a heading`] : []),
+  ...(/content:\s*["']##/.test(body) ? [`${file}: ${`${context} ${selector}`.trim()} draws a ## mark`] : []),
+])
+
+test('the heading guard catches a mono heading and a ## mark', () => {
+  const planted = '<style>main h2 { font-family: var(--font-mono) } .page-title { font: 600 1rem var(--font-mono) } .x::before { content: "## " / "" } .y::before { content: \'##\' } code { font-family: var(--font-mono) }</style>'
+  assert.deepEqual(headingProblems('planted.html', planted), [
+    'planted.html: main h2 sets mono on a heading',
+    'planted.html: .page-title sets mono on a heading',
+    'planted.html: .x::before draws a ## mark',
+    'planted.html: .y::before draws a ## mark',
+  ])
+})
+
+test('no page or site page sets an h1 to h6 or title rule in mono, or draws a ## mark', () => {
+  const pages = readdirSync(dir).filter((file) => file.endsWith('.html')).map((page) => [page, read(page)])
+  assert.deepEqual([...pages, ...sitePages()].flatMap(([file, html]) => headingProblems(file, html)), [])
+})

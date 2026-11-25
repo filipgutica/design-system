@@ -16,6 +16,7 @@
     "./themes/*.css": "./dist/themes/*.css",
     "./themes/*.tokens.json": "./dist/themes/*.tokens.json",
     "./tokens.json": "./dist/tokens.json",
+    "./theme-inputs.json": "./dist/theme-inputs.json",
     "./theme-mapper": {
       "types": "./theme-mapper/index.d.ts",
       "default": "./theme-mapper/index.js"

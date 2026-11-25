@@ -15,9 +15,10 @@ export const EXPORT_USES = {
   './themes/*.css': 'A theme’s identity inputs, to load after <code>tokens.css</code>; the Themes page lists them',
   './themes/*.tokens.json': 'Each theme’s source as a W3C Design Tokens file, for design-token tools',
   './tokens.json': 'Every value per theme and mode, for tools and generators',
+  './theme-inputs.json': 'The tokens a theme may set, by kind, so a component library can test that its themes set no core token',
   './open-vsx': 'Experimental. <code>parseVsCodeTheme()</code> and <code>createOpenVsxThemeService()</code>: JSONC theme files and verified Open VSX imports, with includes resolved for the mapper',
-  './theme-mapper': 'Experimental. <code>mapVsCodeTheme()</code> and <code>themeVariables()</code>: a VS Code colour theme as theme inputs, for a theme picker',
-  './fonts.css': 'IBM Plex Sans and Mono, self-hosted',
+  './theme-mapper': 'Experimental. <code>mapVsCodeTheme()</code> and <code>themeVariables()</code>: a VS Code colour theme as theme inputs, for a theme picker; <code>checkTheme()</code>: the contrast checks every shipped theme passes',
+  './fonts.css': 'Inter and JetBrains Mono, self-hosted',
   './fonts/*': 'The font files',
   './language/*': 'The spec, decisions, catalogue, and templates',
   './package.json': 'Package metadata',
@@ -58,7 +59,7 @@ export const overviewPage = ({ pkg, version }) => {
 @import "${pkg.name}/tokens.css";
 
 .panel { background: var(--color-surface-raised); border-radius: var(--radius-panel); }` })}
-    <p>Without a bundler, link <code>fonts/fonts.css</code> and <code>language/tokens.css</code> from the package folder. Pages follow the reader’s system theme; set <code>data-theme="light"</code> or <code>"dark"</code> on <code>&lt;html&gt;</code> to choose one.</p>
+    <p>Without a bundler, link <code>fonts/fonts.css</code> and <code>language/tokens.css</code> from the package folder. Pages follow the reader’s system theme; set <code>data-theme="light"</code> or <code>"dark"</code> on <code>&lt;html&gt;</code> to choose one, or on any element below it, or a <code>.dark</code> class, to theme that part of the page.</p>
     <p>Copy component markup and styles from <a href="components.html">Components</a>.</p>
   </section>
 
@@ -130,8 +131,7 @@ export const Panel = ({ children }: { children: React.ReactNode }) => (
 const OVERVIEW_CSS = `
   .title-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
   .doc-section { display: grid; gap: var(--space-4); padding-top: var(--space-6); border-top: 1px solid var(--color-border-subtle); }
-  .doc-section > h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); }
-  .doc-section > h2::before { content: "## " / ""; color: var(--color-accent); }
+  .doc-section > h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-ui); }
   .doc-section > h3 { margin-top: var(--space-2); font-size: var(--text-lg); }
   .doc-section > p { max-width: var(--measure); font-size: var(--text-reading); line-height: var(--leading); }
   .paths { width: 100%; border-collapse: collapse; font-size: var(--text-md); }

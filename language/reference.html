@@ -12,7 +12,7 @@
   /* Other page formats use docs.html and product.html. This specimen shows an app. */
   /* App shell */
   /* The main pane scrolls; the sidebar stays full height. */
-  .shell { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); height: 100dvh; }
+  .shell { display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); height: 100dvh; }
   .sidebar { border-right: 1px solid var(--color-border-subtle); background: var(--color-surface); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-4); min-height: 0; }
   .workspace { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2); font-weight: var(--weight-semibold); }
   .workspace .mark { width: 20px; height: 20px; border-radius: var(--radius-inline); background: var(--color-text); color: var(--color-bg); display: grid; place-items: center; font-size: var(--text-xs); }
@@ -128,7 +128,7 @@
   .segmented[data-size="sm"] button { padding: 0 var(--space-2); }
   .segmented[data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
   /* Line height 1 comes after the font shorthand, which would reset it: the label then sits centred in the option. */
-  .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: calc(var(--item) - 2 * var(--inset)); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-control) - var(--inset)); background: transparent; color: var(--color-muted); font: inherit; line-height: 1; cursor: pointer; }
+  .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: calc(var(--item) - 2 * var(--inset)); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-control) - var(--inset)); background: transparent; color: var(--color-muted); font: inherit; line-height: normal; cursor: pointer; }
   .segmented[data-icon-only] button { width: calc(var(--item) - 2 * var(--inset)); padding: 0; }
   /* Icon-only: a pill track with round options, concentric with it. A px radius keeps the thumb a pill while it glides. */
   .segmented[data-icon-only] { border-radius: var(--radius-pill); }
@@ -379,14 +379,12 @@
   .value { font-family: var(--font-mono); color: var(--color-muted); overflow-wrap: anywhere; }
   .use { color: var(--color-muted); }
   .spec-sample { min-width: 0; overflow-wrap: anywhere; }
-  .t-display, .t-doc-title, .t-section { font-family: var(--font-mono); font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
+  .t-display, .t-doc-title, .t-section { font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
   .t-display { font-size: var(--text-display); }
   .t-doc-title { font-size: var(--text-3xl); }
   /* Application titles are sans, as the toolbar title is. */
   .t-app-title { font-size: var(--text-2xl); font-weight: var(--weight-semibold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
-  /* The ## mark is decorative: the empty alt text after the slash keeps screen readers from reading it. */
   .t-section { font-size: var(--text-xl); padding-top: var(--space-4); border-top: 1px solid var(--color-border-subtle); }
-  .t-section::before { content: "## " / ""; color: var(--color-accent); }
   .t-sub { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-tight); }
   .t-reading { font-size: var(--text-reading); line-height: var(--leading); max-width: var(--measure); }
   .t-secondary { font-size: var(--text-sm); color: var(--color-muted); }
@@ -426,7 +424,7 @@
 
 
   .mobile-only { display: none; }
-  /* The detail column collapses at main's own width (876px is a 1100px viewport minus --sidebar), not at a third viewport breakpoint. */
+  /* The detail column collapses at main's own width (876px is a 1100px viewport minus --sidebar-width), not at a third viewport breakpoint. */
   main { container-type: inline-size; }
   @container (max-width: 876px) {
     .content { grid-template-columns: 1fr; }
@@ -560,21 +558,21 @@
 
         <section class="foundation" id="typography" aria-labelledby="typography-title">
           <h3 id="typography-title">Typography</h3>
-          <p class="note">Mono carries identity and structure; sans carries prose and controls. <code>fonts.css</code> self-hosts IBM Plex. A standalone page without the font installed, such as this one, shows the system fallback.</p>
+          <p class="note">Sans carries prose, headings, and controls; mono carries code, identifiers, keys, and terminal captures. <code>fonts.css</code> self-hosts Inter and JetBrains Mono. A standalone page without the font installed, such as this one, shows the system fallback.</p>
 
           <h4>Families</h4>
           <ul class="specs">
-            <li class="spec" data-token="--font-mono"><div class="spec-meta"><code>--font-mono</code><span class="value"></span><span class="use">Identity, documentation and product page titles and section headings, navigation rails, metadata, captions, code, identifiers, and keys</span></div><p class="spec-sample" style="font-family:var(--font-mono);font-size:var(--text-xl)">~/filip-stack 0123456789</p></li>
-            <li class="spec" data-token="--font-ui"><div class="spec-meta"><code>--font-ui</code><span class="value"></span><span class="use">Prose, h3 and below, application section headings, labels, and controls</span></div><p class="spec-sample" style="font-family:var(--font-ui);font-size:var(--text-xl)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--font-mono"><div class="spec-meta"><code>--font-mono</code><span class="value"></span><span class="use">Code, identifiers, keys, and terminal captures, and the identity layer's small marks: the ~/name header, metadata, step numbers, and the footer</span></div><p class="spec-sample" style="font-family:var(--font-mono);font-size:var(--text-xl)">~/filip-stack 0123456789</p></li>
+            <li class="spec" data-token="--font-ui"><div class="spec-meta"><code>--font-ui</code><span class="value"></span><span class="use">Prose, every heading, labels, and controls</span></div><p class="spec-sample" style="font-family:var(--font-ui);font-size:var(--text-xl)">Quiet surfaces, clear hierarchy</p></li>
           </ul>
 
           <h4>Size scale</h4>
           <ul class="specs">
-            <li class="spec" data-token="--text-display"><div class="spec-meta"><code>--text-display</code><span class="value"></span><span class="use">Product page and tool home title, in mono</span></div><p class="spec-sample t-display">Terminal folio</p></li>
+            <li class="spec" data-token="--text-display"><div class="spec-meta"><code>--text-display</code><span class="value"></span><span class="use">Product page and tool home title</span></div><p class="spec-sample t-display">Terminal folio</p></li>
             <li class="spec" data-token="--text-display-sm"><div class="spec-meta"><code>--text-display-sm</code><span class="value"></span><span class="use">The display title on phones</span></div><p class="spec-sample t-display" style="font-size:var(--text-display-sm)">Terminal folio</p></li>
-            <li class="spec" data-token="--text-3xl"><div class="spec-meta"><code>--text-3xl</code><span class="value"></span><span class="use">Documentation title, in mono</span></div><p class="spec-sample t-doc-title">Design language</p></li>
+            <li class="spec" data-token="--text-3xl"><div class="spec-meta"><code>--text-3xl</code><span class="value"></span><span class="use">Documentation title</span></div><p class="spec-sample t-doc-title">Design language</p></li>
             <li class="spec" data-token="--text-2xl"><div class="spec-meta"><code>--text-2xl</code><span class="value"></span><span class="use">Largest application title</span></div><p class="spec-sample" style="font-size:var(--text-2xl)">Quiet surfaces, clear hierarchy</p></li>
-            <li class="spec" data-token="--text-xl"><div class="spec-meta"><code>--text-xl</code><span class="value"></span><span class="use">Documentation section heading, in mono</span></div><p class="spec-sample" style="font-size:var(--text-xl)">Quiet surfaces, clear hierarchy</p></li>
+            <li class="spec" data-token="--text-xl"><div class="spec-meta"><code>--text-xl</code><span class="value"></span><span class="use">Documentation section heading</span></div><p class="spec-sample" style="font-size:var(--text-xl)">Quiet surfaces, clear hierarchy</p></li>
             <li class="spec" data-token="--text-lg"><div class="spec-meta"><code>--text-lg</code><span class="value"></span><span class="use">Subheadings (h3 and below) and large controls</span></div><p class="spec-sample" style="font-size:var(--text-lg)">Quiet surfaces, clear hierarchy</p></li>
             <li class="spec" data-token="--text-reading"><div class="spec-meta"><code>--text-reading</code><span class="value"></span><span class="use">Paragraphs and article text, with <code>--leading</code> and <code>--measure</code></span></div><p class="spec-sample" style="font-size:var(--text-reading)">Quiet surfaces, clear hierarchy</p></li>
             <li class="spec" data-token="--text-md"><div class="spec-meta"><code>--text-md</code><span class="value"></span><span class="use">Controls and dense application content</span></div><p class="spec-sample" style="font-size:var(--text-md)">Quiet surfaces, clear hierarchy</p></li>
@@ -595,8 +593,8 @@
 
           <h4>Roles</h4>
           <ul class="specs">
-            <li class="spec"><div class="spec-meta"><span>Documentation title</span><code>--font-mono --text-3xl</code></div><p class="spec-sample t-doc-title">Design language</p></li>
-            <li class="spec"><div class="spec-meta"><span>Section heading</span><code>--font-mono --text-xl</code><span class="use">Documentation, CLI tool, article, and product pages: a <code>##</code> mark in <code>--color-accent</code> and a <code>--color-border-subtle</code> rule above</span></div><p class="spec-sample t-section">Typography</p></li>
+            <li class="spec"><div class="spec-meta"><span>Documentation title</span><code>--font-ui --text-3xl</code></div><p class="spec-sample t-doc-title">Design language</p></li>
+            <li class="spec"><div class="spec-meta"><span>Section heading</span><code>--font-ui --text-xl</code><span class="use">Documentation, CLI tool, article, and product pages: a <code>--color-border-subtle</code> rule above</span></div><p class="spec-sample t-section">Typography</p></li>
             <li class="spec"><div class="spec-meta"><span>Application title</span><code>--font-ui --text-2xl</code><span class="use">Or smaller; the toolbar title on this page uses <code>--text-md</code></span></div><p class="spec-sample t-app-title">Monitors</p></li>
             <li class="spec"><div class="spec-meta"><span>Application section heading</span><code>--font-ui --text-lg</code><span class="use">Up to <code>--text-xl</code>, or smaller in a dense panel. No mark and no rule</span></div><p class="spec-sample t-sub">Alerting monitors</p></li>
             <li class="spec"><div class="spec-meta"><span>Subheading (h3 and below)</span><code>--font-ui --text-lg</code></div><p class="spec-sample t-sub">Install the command line tool</p></li>
@@ -729,7 +727,7 @@
             <li class="spec" data-token="--measure"><div class="spec-meta"><code>--measure</code><span class="value"></span></div><span class="use">Bounds reading text</span></li>
             <li class="spec" data-token="--page-max"><div class="spec-meta"><code>--page-max</code><span class="value"></span></div><span class="use">Documentation frame</span></li>
             <li class="spec" data-token="--page-wide"><div class="spec-meta"><code>--page-wide</code><span class="value"></span></div><span class="use">Product page frame</span></li>
-            <li class="spec" data-token="--sidebar"><div class="spec-meta"><code>--sidebar</code><span class="value"></span></div><span class="use">This page's sidebar</span></li>
+            <li class="spec" data-token="--sidebar-width"><div class="spec-meta"><code>--sidebar-width</code><span class="value"></span></div><span class="use">This page's sidebar</span></li>
             <li class="spec" data-token="--row"><div class="spec-meta"><code>--row</code><span class="value"></span><span class="use">Navigation and list rows</span></div><i class="height-bar" style="height:var(--row)"></i></li>
           </ul>
 
@@ -746,6 +744,7 @@
           <h3 id="shape-title">Shape</h3>
           <p class="note">One 8px corner for rows, buttons, and fields, 12px for containers, 4px for small marks, and pills for state marks. Cards never take a pill.</p>
           <ul class="specs">
+            <li class="spec" data-token="--radius-base"><div class="spec-meta"><code>--radius-base</code><span class="value"></span><span class="use">The base corner: rows, actions, and fields take it, small marks half of it, and containers one and a half times it</span></div><i class="shape-box" style="border-radius:var(--radius-base)"></i></li>
             <li class="spec" data-token="--radius-inline"><div class="spec-meta"><code>--radius-inline</code><span class="value"></span><span class="use">Places and picked rows: navigation rows, tabs, list rows, menu rows, and breadcrumb links</span></div><i class="shape-box" style="border-radius:var(--radius-inline)"></i></li>
             <li class="spec" data-token="--radius-field"><div class="spec-meta"><code>--radius-field</code><span class="value"></span><span class="use">Typed fields, controls whose label wraps, and one-line controls that are not actions: inputs, selects, textareas, toggle cards, pager links, the project-menu trigger, the labelled contents trigger and its no-JavaScript summary, and the skip link</span></div><i class="shape-box" style="border-radius:var(--radius-field)"></i></li>
             <li class="spec" data-token="--radius-control"><div class="spec-meta"><code>--radius-control</code><span class="value"></span><span class="use">Rounded rectangles that act, or set a value in place with every option shown: buttons with a text label other than the labelled contents trigger, quiet actions other than the project-menu trigger, icon-only ones included, and text segmented controls; a segmented option takes this radius minus the track's 2px inset</span></div><i class="shape-box" style="border-radius:var(--radius-control)"></i></li>

@@ -227,7 +227,7 @@
   .segmented[data-size="sm"] button { padding: 0 var(--space-2); }
   .segmented[data-size="lg"] { --item: var(--control-lg); font-size: var(--text-lg); }
   /* Line height 1 comes after the font shorthand, which would reset it: the label then sits centred in the option. */
-  .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: calc(var(--item) - 2 * var(--inset)); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-control) - var(--inset)); background: transparent; color: var(--color-muted); font: inherit; line-height: 1; cursor: pointer; }
+  .segmented button { --depth: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: calc(var(--item) - 2 * var(--inset)); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-control) - var(--inset)); background: transparent; color: var(--color-muted); font: inherit; line-height: normal; cursor: pointer; }
   .segmented[data-icon-only] button { width: calc(var(--item) - 2 * var(--inset)); padding: 0; }
   /* Icon-only: a pill track with round options, concentric with it. A px radius keeps the thumb a pill while it glides. */
   .segmented[data-icon-only] { border-radius: var(--radius-pill); }
@@ -365,7 +365,7 @@
   .dialog-foot { justify-content: flex-end; gap: var(--space-2); border-top: 1px solid var(--color-border-subtle); background: var(--color-surface); }
   /* The close button is a quiet action; this sets its size only. */
   .close { flex: none; width: var(--control-md); min-height: var(--control-md); padding: 0; color: var(--color-muted); }
-  .drawer { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(calc(var(--sidebar) + var(--space-12)), 100%); height: 260px; overflow: hidden; padding: 0; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
+  .drawer { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(calc(var(--sidebar-width) + var(--space-12)), 100%); height: 260px; overflow: hidden; padding: 0; border: 1px solid transparent; background: var(--color-surface-raised); color: var(--color-text); box-shadow: var(--shadow-dialog); }
   dialog.drawer { position: fixed; inset: 0 auto 0 0; height: 100dvh; max-height: none; margin: 0; }
   dialog.drawer::backdrop { background: var(--color-overlay); }
   /* The page behind an open drawer does not scroll, through the slide out too. Hiding the root's overflow keeps the
@@ -767,9 +767,8 @@
   .site-links a { min-height: var(--control-md); }
 
   /* Page type and helpers */
-  .folio-h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); letter-spacing: var(--tracking-tight); }
-  .folio-h2::before { content: "## " / ""; color: var(--color-accent); }
-  .folio-display { font: var(--weight-semibold) var(--text-display) / 1.08 var(--font-mono); letter-spacing: var(--tracking-tight); overflow-wrap: anywhere; }
+  .section-title { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-ui); letter-spacing: var(--tracking-tight); }
+  .display-title { font: var(--weight-semibold) var(--text-display) / 1.08 var(--font-ui); letter-spacing: var(--tracking-tight); overflow-wrap: anywhere; }
   .steps { display: grid; gap: var(--space-5); max-width: var(--measure); margin: 0; padding: 0; list-style: none; counter-reset: step; }
   .steps li { position: relative; display: grid; gap: var(--space-1); padding-left: var(--space-12); counter-increment: step; }
   .steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: var(--space-8); font: var(--weight-semibold) var(--text-lg) / var(--leading-tight) var(--font-mono); color: var(--color-accent); text-align: right; }
@@ -866,7 +865,7 @@
   /* ---------- Catalogue page ---------- */
   /* One scroll offset for every in-page jump; sections set no scroll-margin-top. The location tracker reads the same value. */
   html { scroll-padding-top: var(--space-4); }
-  .frame { width: min(calc(var(--page-max) + var(--sidebar)), calc(100% - var(--space-12))); margin-inline: auto; }
+  .frame { width: min(calc(var(--page-max) + var(--sidebar-width)), calc(100% - var(--space-12))); margin-inline: auto; }
   /* Header: the identity, the design system's pages as a navigation strip, and the appearance control.
      On the site the identity is the project switcher. This package copy has no project registry, so it
      shows the site name as text, in the switcher's type, with a ~/ mark one character wide before it. */
@@ -880,16 +879,15 @@
   }
   /* Header links are navigation rows at the control height; they grow to --control-touch at tablet width. */
   .page-head .strip a { min-height: var(--control-md); }
-  .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); gap: var(--space-8); }
+  .layout { display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); gap: var(--space-8); }
   /* One column that may shrink below its content, so a long title or specimen cannot widen the page.
      A short page, such as one left by a find with no matches, keeps its rows at the top. */
   main { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: var(--space-12); min-width: 0; padding-block: var(--space-8) var(--space-16); }
   .intro { display: grid; gap: var(--space-3); }
-  .intro h1 { font: var(--weight-semibold) var(--text-3xl) / 1.08 var(--font-mono); letter-spacing: var(--tracking-tight); overflow-wrap: anywhere; }
+  .intro h1 { font: var(--weight-semibold) var(--text-3xl) / 1.08 var(--font-ui); letter-spacing: var(--tracking-tight); overflow-wrap: anywhere; }
   .intro p { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-reading); }
   .layer-head { display: grid; gap: var(--space-2); padding-top: var(--space-6); border-top: 1px solid var(--color-border-subtle); }
-  :is(.layer-head, .index) > h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-mono); }
-  :is(.layer-head, .index) > h2::before { content: "## " / ""; color: var(--color-accent); }
+  :is(.layer-head, .index) > h2 { font: var(--weight-semibold) var(--text-xl) / var(--leading-tight) var(--font-ui); }
   .layer-head p { max-width: var(--measure); color: var(--color-muted); }
   .component { display: grid; gap: var(--space-3); min-width: 0; }
   .component > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-3); }
@@ -1009,12 +1007,12 @@
     .pane-resize { display: none; }
     .crumbs a, .group-toggle { min-height: var(--control-touch); }
     .intro > .crumbs > ol { margin-block: calc((1lh - var(--control-touch)) / 2) calc((var(--control-touch) - 1lh) / 2); }
-    .folio-display { font-size: var(--text-display-sm); }
+    .display-title { font-size: var(--text-display-sm); }
   }
-  /* On the narrowest phones the strip clips a link. Rows with 6px side padding keep at least 16px of it in
+  /* On the narrowest phones the strip clips a link. Rows with 4px side padding keep at least 16px of it in
      view under the 24px fade, so the clip shows. The strip queries its own width, since only the strip changes. */
   @container pages (max-width: 340px) {
-    .page-head .strip a { padding-inline: 0.375rem; }
+    .page-head .strip a { padding-inline: var(--space-1); }
   }
   @media (max-width: 640px) {
     /* Phones: a dialog becomes a bottom sheet with rounded top corners. */
@@ -1851,11 +1849,11 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
 
   <section class="component" id="page-type-and-helpers" data-layer="Identity" aria-labelledby="page-type-title">
     <header><h3 id="page-type-title">Page type and helpers</h3><span class="badge">Identity</span><a href="components.md#page-type-and-helpers">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="page-type-and-helpers" aria-label="Copy link to Page type and helpers" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
-    <p class="purpose">Mono headings, steps, definitions, facts, and the footer.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use steps for a sequence the reader follows in order, definitions for terms with short meanings, and facts for short labels and values.</dd><dt>Don’t</dt><dd>The <code>##</code> mark on an application screen, or on h3 and lower.</dd></dl>
+    <p class="purpose">Headings, steps, definitions, facts, and the footer.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use steps for a sequence the reader follows in order, definitions for terms with short meanings, and facts for short labels and values.</dd><dt>Don’t</dt><dd>Mono, or a mark such as <code>##</code>, on a heading.</dd></dl>
     <div class="row"><h4>Headings</h4><div class="states">
-      <div class="state wide"><p class="folio-display">~/annoterm</p><span class="caption">Display title, mono</span></div>
-      <div class="state wide"><p class="folio-h2">Install</p><span class="caption">Section heading with its <code>##</code> mark</span></div>
+      <div class="state wide"><p class="display-title">Annotate the terminal</p><span class="caption">Display title</span></div>
+      <div class="state wide"><p class="section-title">Install</p><span class="caption">Section heading</span></div>
     </div></div>
     <div class="row"><h4>Steps</h4><div class="states">
       <div class="state wide"><ol class="steps"><li><h4>Install the CLI</h4><p>Homebrew installs the launcher.</p></li><li><h4>Apply host config</h4><p>It copies the guidance and the design system.</p></li></ol><span class="caption">Rest: two steps</span></div>

@@ -568,7 +568,7 @@ test('the drawer is a full-height layer on the left edge', async ({ page }) => {
       const { left, top, width: drawn, height } = element.getBoundingClientRect()
       return { left: Math.round(left), top: Math.round(top), width: Math.round(drawn), height: Math.round(height), radius: getComputedStyle(element).borderTopRightRadius }
     })
-    // min(--sidebar + 48px, 100vw - 48px), with --sidebar at 224px.
+    // min(--sidebar-width + 48px, 100vw - 48px), with --sidebar-width at 224px.
     expect(box).toEqual({ left: 0, top: 0, width: Math.min(224 + 48, width - 48), height: 700, radius: '0px' })
   }
 })

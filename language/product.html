@@ -13,7 +13,6 @@
 .header a { display: inline-flex; align-items: center; min-height: var(--control-md); font-size: var(--text-sm); }
 .hero { display: grid; gap: var(--space-8); padding-block: var(--space-12); }
 .copy { display: grid; justify-items: start; gap: var(--space-4); }
-h1, .workflow > h2 { font-family: var(--font-mono); }
 h1 { max-width: 18ch; font-size: var(--text-display); letter-spacing: var(--tracking-tight); }
 .lead { max-width: 56ch; font-size: var(--text-reading); color: var(--color-muted); }
 .actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-6); }
@@ -40,8 +39,6 @@ figure { margin: 0; min-width: 0; }
 figcaption { margin-top: var(--space-3); font-size: var(--text-sm); color: var(--color-muted); }
 .workflow { display: grid; gap: var(--space-6); padding-block: var(--space-12); border-top: 1px solid var(--color-border-subtle); }
 .workflow > h2 { max-width: 24ch; font-size: var(--text-3xl); }
-/* Page-level product sections take the decorative ## mark; headings inside the product view do not. */
-.workflow > h2::before { content: "## " / ""; color: var(--color-accent); }
 .workflow > p { max-width: var(--measure); color: var(--color-muted); font-size: var(--text-reading); }
 .evidence { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-8); align-items: start; }
 .checks { margin: 0; padding: var(--space-2) var(--space-6); list-style: none; font-size: var(--text-sm); }

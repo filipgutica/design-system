@@ -12,13 +12,21 @@
  */
 /** @typedef {{ light: string, dark: string }} ModePair */
 /**
- * One theme's inputs, for light and for dark. Fonts and neutrals stay core unless the theme names its own.
+ * One theme's inputs, for light and for dark. Fonts, the base radius, and neutrals stay core unless the theme
+ * names its own.
  * @typedef {object} ThemeInputs
  * @property {ModePair} hue The hue, `--color-project` in light and `--color-project-dark`.
  * @property {{ ui?: string, mono?: string }} [fonts] The two font stacks.
+ * @property {string} [radius] The base radius, `--radius-base`, as a CSS length.
  * @property {{ light: Record<string, string>, dark: Record<string, string> }} [neutrals] Every NEUTRALS token, per mode.
  * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [syntax] Syntax colours by SYNTAX_ROLES
  *   role, per mode. A role a theme leaves out stays core.
+ * @property {{ light?: Record<string, string>, dark?: Record<string, string> }} [textOnHue] The text on the hue's
+ *   fills, by TEXT_ON_HUE_TOKENS name, per mode, for a theme that sets its own. Each value is `#rrggbb`, `white`,
+ *   `black`, or a token reference such as `{color-bg}`; for example `{ light: { 'color-accent-text': '#ffffff' } }`.
+ *   A token a theme leaves out keeps its default: `color-accent-text` stays `{color-bg}`, which a pale hue can fail,
+ *   and the selected-fill text tokens take the first candidate that reaches 4.5:1, or the accent when none does.
+ *   Run checkTheme on the result.
  */
 /**
  * Every token's resolved value in light and in dark, as getComputedStyle reports it.
@@ -162,6 +170,34 @@ const TEXT_ON_FILL = {
 /** The selected-fill text tokens, which take their readable value from the theme. */
 export const TEXT_ON_FILL_TOKENS = Object.keys(TEXT_ON_FILL)
 const TEXT_CANDIDATES = ['{color-accent}', '{color-text}', 'black', 'white']
+/** The text on the hue's fills, which a theme may set: the primary label and the selected-fill text. */
+export const TEXT_ON_HUE_TOKENS = ['color-accent-text', ...TEXT_ON_FILL_TOKENS]
+
+/**
+ * The tokens a theme may set, by kind, without their leading dashes. Every other token is core, and a theme
+ * never overrides it: the identity group's hue pair, fonts, and base radius; the text on the hue's fills,
+ * which a theme sets when its hue cannot carry the default; the neutrals, as a whole set; and the syntax
+ * colours, which an imported theme sets.
+ * @param {TokenSource} data
+ * @returns {{ hue: string[], textOnHue: string[], fonts: string[], radius: string[], neutrals: string[], syntax: string[] }}
+ */
+export const themeInputNames = (data) => {
+  const identity = Object.keys(data.groups.find(({ identity: isIdentity }) => isIdentity)?.tokens ?? {})
+  /** @param {string} prefix */
+  const take = (prefix) => identity.filter((name) => name.startsWith(prefix))
+  const inputs = {
+    hue: take('color-'),
+    textOnHue: [...TEXT_ON_HUE_TOKENS],
+    fonts: take('font-'),
+    radius: take('radius-'),
+    neutrals: [...NEUTRALS],
+    syntax: SYNTAX_ROLES.map((role) => `color-syntax-${role}`),
+  }
+  const sorted = Object.values(inputs).flat()
+  const unsorted = identity.filter((name) => !sorted.includes(name))
+  if (unsorted.length > 0) throw new Error(`Identity tokens with no input kind: ${unsorted.join(', ')}`)
+  return inputs
+}
 
 // Sets each TEXT_ON_FILL token to its first candidate that reaches 4.5:1, per mode. When none does, the
 // accent stays, so the contrast tests fail on it rather than on a silently chosen colour.
@@ -188,8 +224,9 @@ const withReadableText = (data) => {
 }
 
 /**
- * The core tokens with one theme's inputs filled in. Core leaves the hue pair empty; its font stacks and
- * neutrals stay unless the theme names its own. Then each selected-fill text token takes its readable value.
+ * The core tokens with one theme's inputs filled in. Core leaves the hue pair empty; its font stacks, base
+ * radius, and neutrals stay unless the theme names its own. Then each selected-fill text token takes its readable value,
+ * and any text on the hue the theme sets replaces it.
  * @template {TokenSource} Data
  * @param {Data} core
  * @param {ThemeInputs} theme
@@ -205,6 +242,7 @@ export const applyTheme = (core, theme) => {
   identity['color-project-dark'] = theme.hue.dark
   if (theme.fonts?.ui) identity['font-ui'] = theme.fonts.ui
   if (theme.fonts?.mono) identity['font-mono'] = theme.fonts.mono
+  if (theme.radius) identity['radius-base'] = theme.radius
   const { neutrals } = theme
   if (neutrals) for (const name of NEUTRALS) groupOf(data, name).tokens[name] = [neutrals.light[name], neutrals.dark[name]]
   for (const role of SYNTAX_ROLES) {
@@ -214,7 +252,14 @@ export const applyTheme = (core, theme) => {
     const { tokens } = groupOf(data, name)
     tokens[name] = [light ?? valueFor(tokens, name, LIGHT), dark ?? valueFor(tokens, name, DARK)]
   }
-  return withReadableText(data)
+  withReadableText(data)
+  for (const name of TEXT_ON_HUE_TOKENS) {
+    const [light, dark] = [theme.textOnHue?.light?.[name], theme.textOnHue?.dark?.[name]]
+    if (light === undefined && dark === undefined) continue
+    const { tokens } = groupOf(data, name)
+    tokens[name] = [light ?? valueFor(tokens, name, LIGHT), dark ?? valueFor(tokens, name, DARK)]
+  }
+  return data
 }
 
 // The contrast checks, as data: each pair is an ink and the fill below it, as language/components.html draws

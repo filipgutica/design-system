@@ -1,0 +1,75 @@
+{
+  "$description": "The tokens a theme may set, without their leading dashes, by kind. Every other token in tokens.css is core: a theme or a component library never overrides it. Generated from tokens/core.json by scripts/build-tokens.mjs. Do not edit.",
+  "names": [
+    "color-project",
+    "color-project-dark",
+    "color-accent-text",
+    "color-nav-current-text",
+    "color-segmented-current-text",
+    "font-ui",
+    "font-mono",
+    "radius-base",
+    "color-bg",
+    "color-surface",
+    "color-surface-raised",
+    "color-surface-muted",
+    "color-row-hover",
+    "color-border-subtle",
+    "color-border",
+    "color-text",
+    "color-muted",
+    "color-syntax-keyword",
+    "color-syntax-string",
+    "color-syntax-number",
+    "color-syntax-comment",
+    "color-syntax-function",
+    "color-syntax-type",
+    "color-syntax-variable",
+    "color-syntax-operator",
+    "color-syntax-punctuation",
+    "color-syntax-tag",
+    "color-syntax-attribute"
+  ],
+  "groups": {
+    "hue": [
+      "color-project",
+      "color-project-dark"
+    ],
+    "textOnHue": [
+      "color-accent-text",
+      "color-nav-current-text",
+      "color-segmented-current-text"
+    ],
+    "fonts": [
+      "font-ui",
+      "font-mono"
+    ],
+    "radius": [
+      "radius-base"
+    ],
+    "neutrals": [
+      "color-bg",
+      "color-surface",
+      "color-surface-raised",
+      "color-surface-muted",
+      "color-row-hover",
+      "color-border-subtle",
+      "color-border",
+      "color-text",
+      "color-muted"
+    ],
+    "syntax": [
+      "color-syntax-keyword",
+      "color-syntax-string",
+      "color-syntax-number",
+      "color-syntax-comment",
+      "color-syntax-function",
+      "color-syntax-type",
+      "color-syntax-variable",
+      "color-syntax-operator",
+      "color-syntax-punctuation",
+      "color-syntax-tag",
+      "color-syntax-attribute"
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 // Emits every token file from tokens/core.json and the theme files in tokens/themes/, the only places
 // token values live. A theme file is a W3C Design Tokens file holding only its inputs: its name, a note
-// for the Themes page, its hue pair, and optionally its two font stacks and its neutrals (NEUTRALS, for
-// light and dark); parseTheme reads it. Every other token is core. The text on the selected fills is the first candidate in TEXT_CANDIDATES that reaches
+// for the Themes page, its hue pair, and optionally its two font stacks, its base radius, and its neutrals
+// (NEUTRALS, for light and dark); parseTheme reads it. Every other token is core. The text on the selected fills is the first candidate in TEXT_CANDIDATES that reaches
 // 4.5:1 in each mode, as their roles in core.json say.
 //
 //   node scripts/build-tokens.mjs           write every output
@@ -9,9 +9,11 @@
 //
 // The CSS has one variable per token. language/tokens.css carries the default theme; each
 // dist/themes/<id>.css sets what one theme changes from it, to load after it. Dark mode follows
-// prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it.
+// prefers-color-scheme unless data-theme="light"; data-theme="dark" forces it. data-theme on an element
+// below <html>, or a .dark class, themes that subtree.
 // dist/tokens.json and dist/tokens.js carry the values of every theme, resolved, for code, and
-// dist/themes/<id>.tokens.json is each theme file as written, for design-token tools.
+// dist/themes/<id>.tokens.json is each theme file as written, for design-token tools, and
+// dist/theme-inputs.json lists the tokens a theme may set.
 // theme-mapper/core.js carries the core tokens for the theme engine, and theme-mapper/*.d.ts its types,
 // generated from the JSDoc in theme-mapper/*.js, which the same step typechecks.
 // open-vsx/*.d.ts is generated and checked separately, with the web APIs its client needs.
@@ -22,7 +24,7 @@
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { DARK, LIGHT, NEUTRALS, applyTheme, flatTokens, reference, resolveData, valueFor } from '../theme-mapper/engine.js'
+import { DARK, LIGHT, NEUTRALS, applyTheme, flatTokens, reference, resolveData, themeInputNames, valueFor } from '../theme-mapper/engine.js'
 
 export const DEFAULT_THEME = 'graphite-indigo'
 export const THEME_FILE = '.tokens.json'
@@ -30,11 +32,12 @@ const SOURCE = `tokens/core.json and tokens/themes/${DEFAULT_THEME}${THEME_FILE}
 
 // A theme file is a W3C Design Tokens file (Format and Color modules 2025.10) holding only the theme's
 // inputs: a group per mode with the hue (`color-project`) and optionally the whole set of neutrals, and
-// optionally the two font stacks. The file's $description is the note for the Themes page; its name is in
+// optionally the two font stacks and the base radius. The file's $description is the note for the Themes page; its name is in
 // $extensions under this namespace.
 export const THEME_EXTENSION = 'io.github.filipgutica.design-system'
 const MODES = ['light', 'dark']
 const FONTS = { 'font-ui': 'ui', 'font-mono': 'mono' }
+const RADIUS = 'radius-base'
 
 // A colour token's value as #rrggbb, or the problem with it: the build takes opaque sRGB only, and a hex
 // fallback, when given, must agree with the components.
@@ -59,12 +62,17 @@ const isFontFamily = (value) => [value].flat().length > 0
   && [value].flat().every((name) => typeof name === 'string' && name && !/[\u0000-\u001f]/.test(name))
 
 const isObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value)
+// A dimension value ({ value, unit }) as a CSS length. The base radius takes px or rem, and no negative size.
+const isLength = (value) => isObject(value) && Object.keys(value).length === 2 && ['px', 'rem'].includes(value.unit)
+  && typeof value.value === 'number' && Number.isFinite(value.value) && value.value >= 0
+const cssLength = ({ value, unit }) => `${value}${unit}`
+
 // Properties the build ignores: they describe a token or group and change no value. Any other $ property,
 // such as $value on a group, $extends, or $ref, is a problem rather than silently skipped.
 const METADATA = ['$description', '$extensions', '$deprecated']
 const typeOf = (...layers) => layers.find((layer) => '$type' in layer)?.$type
 
-// A theme file's inputs, in the shape the build uses ({ name, note, hue, fonts?, neutrals? }), and its
+// A theme file's inputs, in the shape the build uses ({ name, note, hue, fonts?, radius?, neutrals? }), and its
 // problems: no name or note, a key a theme cannot set, a token of the wrong type, a colour the build
 // cannot take, a missing hue, or neutrals that are not the whole set in both modes. A token's $type is its
 // own, else its group's, else the file's.
@@ -74,7 +82,7 @@ export const parseTheme = (file) => {
   const name = file.$extensions?.[THEME_EXTENSION]?.name
   if (typeof name !== 'string' || !name) problems.push(`no $extensions["${THEME_EXTENSION}"].name`)
   if (typeof file.$description !== 'string' || !file.$description) problems.push('no $description')
-  for (const key of Object.keys(file)) if (![...METADATA, '$type', ...MODES, ...Object.keys(FONTS)].includes(key)) problems.push(`${key} is not a theme input`)
+  for (const key of Object.keys(file)) if (![...METADATA, '$type', ...MODES, ...Object.keys(FONTS), RADIUS].includes(key)) problems.push(`${key} is not a theme input`)
 
   const groups = Object.fromEntries(MODES.map((mode) => [mode, isObject(file[mode]) ? file[mode] : {}]))
   const colours = Object.fromEntries(MODES.map((mode) => {
@@ -112,12 +120,23 @@ export const parseTheme = (file) => {
     else fonts[font] = fontStack(file[token].$value)
   }
 
+  let radius
+  if (RADIUS in file) {
+    const unsupported = isObject(file[RADIUS]) ? Object.keys(file[RADIUS]).filter((key) => ![...METADATA, '$type', '$value'].includes(key)) : []
+    if (!isObject(file[RADIUS]) || !('$value' in file[RADIUS])) problems.push(`${RADIUS} is not a token`)
+    else if (unsupported.length > 0) problems.push(`${RADIUS} has ${unsupported.join(', ')}, which a theme file does not support`)
+    else if (typeOf(file[RADIUS], file) !== 'dimension') problems.push(`${RADIUS} is not a dimension token`)
+    else if (!isLength(file[RADIUS].$value)) problems.push(`${RADIUS} is not a px or rem length of 0 or more`)
+    else radius = cssLength(file[RADIUS].$value)
+  }
+
   const pick = (token) => Object.fromEntries(MODES.map((mode) => [mode, colours[mode][token]]))
   const inputs = {
     name,
     note: file.$description,
     hue: pick('color-project'),
     ...(Object.keys(fonts).length > 0 && { fonts }),
+    ...(radius !== undefined && { radius }),
     ...(hasNeutrals && { neutrals: Object.fromEntries(MODES.map((mode) => [mode, Object.fromEntries(NEUTRALS.map((token) => [token, colours[mode][token]]))])) }),
   }
   return { problems, inputs }
@@ -178,7 +197,7 @@ const standaloneHeader = `/*
  * DESIGN.md names these tokens; it never repeats their values.
  *
  * Two layers. The identity block at the top of :root is the theme's own: its hue
- * pair and fonts. This file carries the default theme. Another theme keeps this file
+ * pair, fonts, and base radius. This file carries the default theme. Another theme keeps this file
  * unchanged and loads its themes/<id>.css after it, on :root; that file may also set
  * the theme's neutrals. A new project can set the identity lines on :root in its own
  * stylesheet the same way. The dark blocks switch --color-project to
@@ -186,14 +205,21 @@ const standaloneHeader = `/*
  * --color-nav-current-text, and --color-segmented-current-text at 4.5:1 on the new hue
  * and override them when they fall short. A theme file sets the last two for you; its
  * hue must carry --color-accent-text itself, which the contrast tests check.
- * The terminal plate tokens also belong to the identity layer; every other line is core.
+ * The terminal plate tokens draw the identity layer's captures but stay core: a theme
+ * does not set them. dist/theme-inputs.json lists every token a theme may set.
  *
  * Standalone HTML: import or inline this file.
  * Inline visuals: inherit the host font and theme variables; see DESIGN.md.
  * Repos: map these names onto the repository's own token system.
  *
  * Theme states: bare :root is light. prefers-color-scheme picks dark unless
- * data-theme="light" is set. data-theme="dark" forces dark.
+ * data-theme="light" is set. data-theme="dark" forces dark. data-theme="dark" or
+ * "light" on any element below <html>, or a .dark class on <html> or below it,
+ * themes that subtree; the subtree blocks at the end redeclare what each mode
+ * changes, and the subtree takes its mode's text colour. data-theme="light" wins over
+ * .dark on one element. A theme written by hand repeats its light values on
+ * :root [data-theme="light"] and its dark values on the dark subtree block's selectors,
+ * so they hold in a subtree too. A theme file does this for you.
  */
 `
 
@@ -207,6 +233,8 @@ body { background: var(--color-bg); color: var(--color-text); }
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
+  /* A subtree theme takes its mode's text colour, as the body does; the page paints its background. */
+  :where(:root.dark, :root [data-theme="dark"], :root [data-theme="light"], :root .dark) { color: var(--color-text); }
   body {
     margin: 0;
     font: var(--weight-regular) var(--text-md) / var(--leading) var(--font-ui);
@@ -235,9 +263,46 @@ const standaloneResolver = (data) => {
 
 const standaloneNames = (data) => Object.keys(flatTokens(data))
 
+// Subtree themes: data-theme="dark" or "light" on any element below <html>, and a .dark class on <html> or
+// below it, theme that element's subtree. A custom property resolves on the element that declares it, so a
+// subtree block declares every token whose value differs between the modes and every token that refers to
+// one, directly or through others; tokens that are the same in both modes inherit. Each selector carries a
+// :root, so it outranks a theme's or a page's bare :root inputs, as the root dark rules do. On an element with
+// both, data-theme="light" wins over .dark; :not(:where()) keeps that exclusion from adding specificity.
+const SUBTREE = {
+  dark: [':root.dark:not(:where([data-theme="light"]))', ':root [data-theme="dark"]', ':root .dark:not(:where([data-theme="light"]))'],
+  light: [':root [data-theme="light"]'],
+}
+
+const subtreeNames = (data) => {
+  const tokens = flatTokens(data)
+  const memo = new Map()
+  const followsMode = (name) => {
+    if (!memo.has(name)) {
+      memo.set(name, false)
+      const [light, dark] = [LIGHT, DARK].map((mode) => valueFor(tokens, name, mode))
+      memo.set(name, light !== dark || [...`${light} ${dark}`.matchAll(reference)].some(([, target]) => followsMode(target)))
+    }
+    return memo.get(name)
+  }
+  return Object.keys(tokens).filter(followsMode)
+}
+
+const subtreeBlocks = (blocks, { scheme = false } = {}) => Object.entries(blocks)
+  .filter(([, declarations]) => declarations.length > 0)
+  .flatMap(([mode, declarations]) => [
+    '',
+    `${SUBTREE[mode].join(', ')} {`,
+    ...(scheme ? [`  color-scheme: ${mode};`] : []),
+    ...block('  ', declarations),
+    '}',
+  ])
+
 export const renderStandaloneTokens = (data) => {
   const resolve = standaloneResolver(data)
   const dark = darkOverrides(standaloneNames(data), resolve).map(([name, value]) => [`--${name}`, value])
+  const subtree = subtreeNames(data)
+  const subtreeIn = (mode) => subtree.map((name) => [`--${name}`, resolve(name, mode)])
 
   const groups = data.groups.map(({ comment: groupComment, notes = {}, tokens }) => [
     '',
@@ -267,6 +332,9 @@ export const renderStandaloneTokens = (data) => {
     ...block('  ', dark),
     '}',
     '',
+    comment('', 'Subtree themes: data-theme="dark" or "light" on an element below <html>, or a .dark class on <html> or\nbelow it, themes that subtree. Each block redeclares every token that differs between the modes or follows\none that does, so the tokens derived from them resolve again inside the subtree. The element paints its own\nbackground, such as background: var(--color-bg).'),
+    ...subtreeBlocks({ dark: subtreeIn(DARK), light: subtreeIn(LIGHT) }, { scheme: true }),
+    '',
     standaloneBase,
   ].join('\n')
 }
@@ -275,6 +343,8 @@ export const renderStandaloneTokens = (data) => {
 // token whose light value differs. tokens.css's dark blocks outrank a bare :root, so the theme's dark
 // blocks, with the same selectors, set each token whose dark value would otherwise come out wrong.
 // A hue-only theme needs none: tokens.css's dark blocks already switch to --color-project-dark.
+// Its subtree blocks, after those, set each token whose value in that mode differs from what tokens.css's
+// subtree blocks declare, such as the light hue and the neutrals.
 export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
   const resolve = standaloneResolver(data)
   const resolveDefault = standaloneResolver(defaultTheme.data)
@@ -284,6 +354,11 @@ export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
   const defaultDark = new Map(darkOverrides(names, resolveDefault))
   const seenInDark = (token) => defaultDark.get(token) ?? (root.includes(token) ? resolve(token, LIGHT) : resolveDefault(token, LIGHT))
   const dark = names.filter((token) => resolve(token, DARK) !== seenInDark(token)).map((token) => [`--${token}`, resolve(token, DARK)])
+  const defaultSubtree = new Set(subtreeNames(defaultTheme.data))
+  const subtree = new Set([...defaultSubtree, ...subtreeNames(data)])
+  const subtreeIn = (mode) => names
+    .filter((token) => subtree.has(token) && !(defaultSubtree.has(token) && resolve(token, mode) === resolveDefault(token, mode)))
+    .map((token) => [`--${token}`, resolve(token, mode)])
   return [
     `/* Generated from tokens/themes/${id}${THEME_FILE} by scripts/build-tokens.mjs in @filipgutica/design-system. Do not edit.`,
     ` * The ${name} theme for tokens.css. Load after tokens.css, on :root only: the tokens that follow the`,
@@ -305,8 +380,20 @@ export const renderStandaloneTheme = ({ id, name, data }, defaultTheme) => {
       ...block('  ', dark),
       '}',
     ]),
+    ...subtreeBlocks({ dark: subtreeIn(DARK), light: subtreeIn(LIGHT) }),
     '',
   ].join('\n')
+}
+
+// The names a theme may set, for a component library's test that it sets no core token. Generated, so it follows
+// the engine.
+export const renderThemeInputs = ({ data }) => {
+  const groups = themeInputNames(data)
+  return `${JSON.stringify({
+    $description: 'The tokens a theme may set, without their leading dashes, by kind. Every other token in tokens.css is core: a theme or a component library never overrides it. Generated from tokens/core.json by scripts/build-tokens.mjs. Do not edit.',
+    names: Object.values(groups).flat(),
+    groups,
+  }, null, 2)}\n`
 }
 
 // Standalone token values of every theme with every reference substituted, as getComputedStyle reports them.
@@ -393,6 +480,7 @@ export const outputs = (themes) => {
     ['dist/tokens.json', `${JSON.stringify(resolvedTokens(themes), null, 2)}\n`],
     ['dist/tokens.js', renderTokensJs(themes)],
     ['dist/tokens.d.ts', renderTokensDts(defaultTheme, themes)],
+    ['dist/theme-inputs.json', renderThemeInputs(defaultTheme)],
   ]
 }
 
