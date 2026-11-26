@@ -1,0 +1,27 @@
+name: PR title
+
+# A squash merge makes the PR title, plus " (#<number>)", the commit header that Release lints.
+# A title commitlint rejects there blocks the release, so lint it here, and again when it is edited.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Validate the squash commit header
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: printf '%s (#%s)\n' "$TITLE" "$NUMBER" | pnpm exec commitlint --verbose
