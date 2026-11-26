@@ -1137,6 +1137,39 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(alerts).toHaveLength(5)
       for (const { text, icon } of alerts) expect(icon).toBe(text)
     })
+
+    // Each expected system colour is read from a probe, as the Wrap lines check does.
+    test('the number field signs take the button text colour, and a disabled sign the disabled colour', async ({ page }) => {
+      await page.goto(url)
+      const signs = await page.locator('#nf-min').evaluate((input) => {
+        const system = (name: string) => {
+          const probe = document.body.appendChild(document.createElement('i'))
+          probe.style.color = name
+          const colour = getComputedStyle(probe).color
+          probe.remove()
+          return colour
+        }
+        const [down, up] = [...input.parentElement!.querySelectorAll('button')].map((button) => getComputedStyle(button.querySelector('.icon')!).color)
+        return { down, up, buttonText: system('ButtonText'), grayText: system('GrayText') }
+      })
+      expect(signs.up).toBe(signs.buttonText)
+      expect(signs.down).toBe(signs.grayText)
+    })
+
+    test('the combobox active option keeps a Highlight ring inside its edge', async ({ page }) => {
+      await page.goto(url)
+      const ring = await page.locator('#cb-open-list [data-active]').evaluate((option) => {
+        const probe = document.body.appendChild(document.createElement('i'))
+        probe.style.color = 'Highlight'
+        const highlight = getComputedStyle(probe).color
+        probe.remove()
+        const style = getComputedStyle(option)
+        return { highlight, colour: style.outlineColor, style: style.outlineStyle, offset: parseFloat(style.outlineOffset) }
+      })
+      expect(ring.colour).toBe(ring.highlight)
+      expect(ring.style).toBe('solid')
+      expect(ring.offset).toBeLessThan(0)
+    })
   })
 }
 
