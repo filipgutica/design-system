@@ -1213,7 +1213,15 @@ test.describe('live record fields', () => {
     // Committing a typed value keeps every digit; only a step rounds.
     await weight.fill('0.0000001')
     await weight.press('Tab')
+    await expect(weight).toHaveValue('0.0000001')
     await expect(weight).toHaveAttribute('aria-valuenow', '1e-7')
+    await expect(weight).toHaveAttribute('aria-valuetext', '0.0000001 kg')
+    // Past the digits the field can show, all three agree on what it shows.
+    await weight.fill('0.000000000000000000001')
+    await weight.press('Tab')
+    await expect(weight).toHaveValue('0')
+    await expect(weight).toHaveAttribute('aria-valuenow', '0')
+    await expect(weight).toHaveAttribute('aria-valuetext', '0 kg')
   })
 
   test('typing a number in range updates the value, its text, and both buttons; other text changes none', async ({ page }) => {

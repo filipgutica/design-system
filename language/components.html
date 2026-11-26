@@ -149,9 +149,10 @@
   .combobox [role="option"][aria-disabled="true"] { color: var(--color-muted); font-size: var(--text-sm); }
 
   /* Number field: a wrapper in the field recipe, as the search wrapper is, holding the decrease button, the
-     input, an optional unit, and the increase button. The wrapper carries the fill, edge, shadow, and focus, and
-     clips the square buttons, so their tint follows its inner corners. Each button spans the wrapper's 1px edges,
-     so its box is the control height square: 44px at tablet width. */
+     input, an optional unit, and the increase button. The wrapper carries the fill, edge, shadow, and focus. Each
+     button spans the wrapper's 1px edges, so its box is the control height square (44px at tablet width), and takes
+     the field's corners, so its tint meets the wrapper's own. The wrapper does not clip, because a clip would also
+     cut the buttons' tap area along the edge. */
   .number-field { --depth: var(--shadow-field); --field-height: var(--control-md); display: flex; width: 100%; height: var(--field-height); border: 1px solid var(--color-field-edge); border-radius: var(--radius-field); background: var(--color-field-bg); box-shadow: var(--depth); color: var(--color-text); font: var(--text-md) / 1.35 var(--font-ui); }
   .number-field[data-size="sm"] { --field-height: var(--control-sm); font-size: var(--text-sm); }
   .number-field[data-size="lg"] { --field-height: var(--control-lg); font-size: var(--text-lg); }
@@ -2317,7 +2318,8 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
       up.disabled = number >= max;
     };
     const set = (next) => {
-      const value = Math.min(max, Math.max(min, next));
+      // The value is what the field can show, so the text, aria-valuenow, and aria-valuetext always agree.
+      const value = readNumber(grouped.format(Math.min(max, Math.max(min, next))));
       input.value = grouped.format(value);
       reflect(value);
     };
