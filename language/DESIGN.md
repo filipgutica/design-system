@@ -109,7 +109,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
   Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. One documented exception: the tool-home hero splits at `@media (min-width: 1024px)`, with the title across the top, the lede on the left, and the install block and facts on the right. Below 1024px it stacks in source order. Pages add no viewport breakpoint beyond the table and the hero split. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.
 - Density: an application screen has one size for each place, not a range. In an application screen, buttons, fields, and segmented controls are `sm`, `--control-sm` tall (28px), the main action included: it stands out by its primary fill, not its size. Chips stay 24px, their own size. Rows in a table or list, such as the console's monitor list, and rail and navigation rows, are `--row` tall; their body text is `--text-sm` and their metadata `--text-xs`. Documentation and product pages keep the default `md`. At tablet width every touch target grows to `--control-touch`. The console in `reference.html` uses these sizes. This density is control size; how much a screen shows is [Minimal by default](#minimal-by-default).
-- [Navigation](#navigation) is a strip of 6 links or fewer, or a section rail that moves into a drawer at tablet width. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line. Keep wide code, tables, and charts scrolling inside their containers.
+- [Navigation](#navigation) is a strip of 6 links or fewer, or a section rail that moves into a drawer at tablet width. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line. A contents list beside the reading column is sticky, and at tablet width the labelled trigger opens it instead ([Navigation list](components.md#navigation-list)). Keep wide code, tables, and charts scrolling inside their containers.
 - Keep main headings, actions, and product evidence visible on load. Scrolling should reveal more content without being required to make existing content appear.
 
 ### Surfaces
@@ -221,7 +221,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
   | --- | --- | --- | --- |
   | Global | Which site? | Site header and project switcher | `aria-current="page"` on the registry row |
   | Local | Which page of this site? | Section rail, or a navigation strip of 6 links or fewer | `aria-current="page"`: the lifted fill |
-  | In-page | Where am I on this page? | Section rail rows that point to `#id` | `aria-current="location"`: the lifted fill in a rail, a pip in strips and contents lists |
+  | In-page | Where am I on this page? | Section rail rows, or a contents list's rows, that point to `#id` | `aria-current="location"`: the lifted fill in a rail, a pip in strips and contents lists |
   | Sequential | What comes next? | Pager | `rel="prev"` and `rel="next"` |
   | Path | How do I get back up? | Breadcrumbs above the page title, on every page below the site's home page; never in the header | The current page as text with `aria-current="page"` |
   | Find | Where is X? | Find field that filters the rail | A live match count |
