@@ -2294,10 +2294,12 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
   // The format keeps every fraction digit the value holds, so the field, aria-valuenow, and aria-valuetext agree.
   const grouped = new Intl.NumberFormat(undefined, { maximumFractionDigits: 20 });
   const [groupMark, decimalMark] = ['group', 'decimal'].map((type) => grouped.formatToParts(1000.5).find((part) => part.type === type)?.value ?? '');
+  const minusSign = (grouped.formatToParts(-1).find((part) => part.type === 'minusSign')?.value ?? '-').replace(/[\u061c\u200e\u200f]/g, '');
   const digits = new Map([...Array(10).keys()].map((digit) => [grouped.format(digit), String(digit)]));
   // Reads what the formatter writes: its group and decimal marks and its digits. Empty text is not a number.
   const readNumber = (text) => {
-    const plain = [...text.trim().replaceAll(groupMark, '').replace(decimalMark, '.')].map((char) => digits.get(char) ?? char).join('');
+    // Direction marks around a sign (as in ar-EG) are not part of the number.
+    const plain = [...text.trim().replace(/[\u061c\u200e\u200f]/g, '').replaceAll(groupMark, '').replace(decimalMark, '.').replace(minusSign, '-')].map((char) => digits.get(char) ?? char).join('');
     return plain ? Number(plain) : NaN;
   };
   document.querySelectorAll('[data-live-number]').forEach((field) => {

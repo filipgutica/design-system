@@ -1195,6 +1195,11 @@ for (const { locale, quantity, weight, quantityUp } of [
       await page.locator('#nf-live').press('ArrowUp')
       await expect(page.locator('#nf-live')).toHaveValue(quantityUp)
       await expect(page.locator('#nf-live')).toHaveAttribute('aria-valuenow', '1201')
+      // A negative number as the locale writes it, direction marks included, reads as a number and clamps to the minimum.
+      const minusOne = await page.evaluate(() => new Intl.NumberFormat().format(-1))
+      await page.locator('#nf-weight').fill(minusOne)
+      await page.locator('#nf-weight').press('Tab')
+      await expect(page.locator('#nf-weight')).toHaveAttribute('aria-valuenow', '0')
     })
   })
 }
