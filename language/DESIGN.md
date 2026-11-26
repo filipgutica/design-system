@@ -166,6 +166,7 @@ Each depth tier has one token. [`tokens.css`](tokens.css) holds every shadow val
 
 [`components.md`](components.md) specifies each component and [`components.html`](components.html) shows its states. These composition rules apply across them:
 
+- A component library may build several recipes as one component where they overlap in behaviour or markup, or where one component is simpler to use. A select that filters as the combobox does needs no prop to choose between them. A text input whose `type="number"` draws the number field uses the prop it already has. Each recipe still sets its own look and behaviour here; the library decides how to package them.
 - Build each control from the owning library's component or class, and style a link that acts as a button with the button's classes. A page adds layout only: size, spacing, and position. A local copy of a control drifts from the library, even when it uses the same tokens.
 - A page's own element rules, such as its heading, paragraph, and image type, go in `@layer base`, so a component's rules outrank them. An unlayered `h2` rule outranks every layered rule and restyles the title of a dialog, drawer, slideout, or viewer as a page heading.
 - One clearly primary action per visible decision group, filled with the hue. Other actions are secondary, ghost, or text buttons.
