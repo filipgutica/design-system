@@ -58,7 +58,7 @@ const specimenBoxes = (controls: Awaited<ReturnType<typeof renderedControls>>) =
   .filter(({ specimenSize }) => specimenSize)
   .map(({ label, height }) => ({ label, height }))
 
-for (const file of ['components.html', 'reference.html', 'product.html', 'docs.html']) {
+for (const file of ['components.html', 'reference.html', 'product.html', 'docs.html', 'guide.html']) {
   for (const width of [1280, 800, 375]) {
     test(`${file} renders control sizes at ${width}px`, async ({ page }) => {
       const touch = width <= 800

@@ -31,7 +31,7 @@ Choose the format before styling. A public product page and an application scree
 | --- | --- | --- |
 | Product page | Centered wide frame, compact top navigation, expressive heading, left-aligned copy | Product purpose, one primary action, real product image |
 | Documentation or CLI tool | Centered frame containing navigation and article; compact heading and readable prose | Setup command or the information needed for the task |
-| Lesson or long-form article | Documentation frame; prose at `--measure`, figures may use the full article width | The question the lesson answers, a short contents list, then the first idea |
+| Lesson or long-form article | Documentation frame; prose at `--measure`, figures may use the full article width | The question the lesson answers, then the first idea, with a contents list ("On this page") beside the column |
 | Application | Task-sized navigation and content panes; compact controls and rows | Working content and its relevant actions |
 | Inline visualization | Fit the conversation width and inherit the host appearance | The comparison, explanation, or interaction itself |
 
@@ -47,7 +47,8 @@ Center the **container**, not every sentence. Align header, content, images, and
 - `components.html`: every component in each of its states, in plain HTML and CSS on `tokens.css`. Copy component markup and styles from there.
 - `decisions.md`: the choices behind the components, and the options they replaced.
 - `reference.html`: an application example, and a Foundations catalogue (`#foundations`) of every token: type, color with contrast, spacing, shape, borders, elevation, focus, and motion.
-- `docs.html`: a balanced documentation shell and compact setup command.
+- `docs.html`: a balanced documentation shell and compact setup command, with a one-page site's "On this page" rail.
+- `guide.html`: a guide on a site with several pages: the page rail, and the sticky contents list beside the column, with its narrow-frame and phone forms.
 - `product.html`: a restrained product-page hierarchy with illustrative product evidence.
 - `DESIGN.md`: selection rules and acceptance criteria. It names tokens rather than repeating their values.
 
@@ -109,7 +110,7 @@ Controls use quiet depth and familiar shapes: borderless surfaces with one tight
 
   Use `@media (min-width: 801px)` only for a rule that applies to desktop alone. One documented exception: the tool-home hero splits at `@media (min-width: 1024px)`, with the title across the top, the lede on the left, and the install block and facts on the right. Below 1024px it stacks in source order. Pages add no viewport breakpoint beyond the table and the hero split. A pane that must collapse at its own width uses a container query, as the detail column in `reference.html` does.
 - Density: an application screen has one size for each place, not a range. In an application screen, buttons, fields, and segmented controls are `sm`, `--control-sm` tall (28px), the main action included: it stands out by its primary fill, not its size. Chips stay 24px, their own size. Rows in a table or list, such as the console's monitor list, and rail and navigation rows, are `--row` tall; their body text is `--text-sm` and their metadata `--text-xs`. Documentation and product pages keep the default `md`. At tablet width every touch target grows to `--control-touch`. The console in `reference.html` uses these sizes. This density is control size; how much a screen shows is [Minimal by default](#minimal-by-default).
-- [Navigation](#navigation) is a strip of 6 links or fewer, or a section rail that moves into a drawer at tablet width. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line. A contents list beside the reading column is sticky, and at tablet width the labelled trigger opens it instead ([Navigation list](components.md#navigation-list)). Keep wide code, tables, and charts scrolling inside their containers.
+- [Navigation](#navigation) is a strip of 6 links or fewer, or a section rail that moves into a drawer at tablet width. A sticky side rail taller than the window scrolls its link list, not the element that draws its divider, so an overlay scrollbar sits clear of the line. A contents list beside the reading column is sticky. When the frame is too narrow for it, a container query moves it into a closed disclosure before `main`, and at tablet width the labelled trigger opens it instead ([Navigation list](components.md#navigation-list)). Keep wide code, tables, and charts scrolling inside their containers.
 - Keep main headings, actions, and product evidence visible on load. Scrolling should reveal more content without being required to make existing content appear.
 
 ### Surfaces
