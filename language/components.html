@@ -152,7 +152,7 @@
      input, an optional unit, and the increase button. The wrapper carries the fill, edge, shadow, and focus, and
      clips the square buttons, so their tint follows its inner corners. Each button spans the wrapper's 1px edges,
      so its box is the control height square: 44px at tablet width. */
-  .number-field { --depth: var(--shadow-field); --field-height: var(--control-md); display: flex; width: 100%; height: var(--field-height); overflow: clip; border: 1px solid var(--color-field-edge); border-radius: var(--radius-field); background: var(--color-field-bg); box-shadow: var(--depth); color: var(--color-text); font: var(--text-md) / 1.35 var(--font-ui); }
+  .number-field { --depth: var(--shadow-field); --field-height: var(--control-md); display: flex; width: 100%; height: var(--field-height); border: 1px solid var(--color-field-edge); border-radius: var(--radius-field); background: var(--color-field-bg); box-shadow: var(--depth); color: var(--color-text); font: var(--text-md) / 1.35 var(--font-ui); }
   .number-field[data-size="sm"] { --field-height: var(--control-sm); font-size: var(--text-sm); }
   .number-field[data-size="lg"] { --field-height: var(--control-lg); font-size: var(--text-lg); }
   /* A zero width lets the input take the free space without its intrinsic width widening the field. */
@@ -160,7 +160,7 @@
   .number-field > input:has(+ .number-unit) { padding-inline-end: 0; }
   .number-unit { align-self: center; padding-inline: var(--space-1) var(--space-2); color: var(--color-muted); font-size: var(--text-sm); }
   /* :where keeps the quiet action's hover and press colours above this rest colour. */
-  .number-field > :where(.quiet-action) { flex: none; width: var(--field-height); margin-block: -1px; padding: 0; border: 0; border-radius: 0; color: var(--color-muted); }
+  .number-field > :where(.quiet-action) { flex: none; width: var(--field-height); margin-block: -1px; padding: 0; border: 0; border-radius: var(--radius-field); color: var(--color-muted); }
   .number-field > :where(.quiet-action:first-child) { margin-inline-start: -1px; }
   .number-field > :where(.quiet-action:last-child) { margin-inline-end: -1px; }
   .number-field:has(input[aria-invalid="true"]) { border-color: var(--color-error); }
@@ -2307,30 +2307,32 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
     const step = Number(input.dataset.step ?? 1);
     // The unit is aria-hidden, so the value text carries it.
     const unit = field.querySelector('.number-unit')?.textContent;
-    let value;
-    // Shows a number in range on the ARIA value, its text, and the buttons.
+    // The last number in range the field showed: the ARIA value, its text, the buttons, and the base of the next step.
+    let shown;
     const reflect = (number) => {
+      shown = number;
       input.setAttribute('aria-valuenow', String(number));
       if (unit) input.setAttribute('aria-valuetext', `${grouped.format(number)} ${unit}`);
       down.disabled = number <= min;
       up.disabled = number >= max;
     };
     const set = (next) => {
-      // Rounding to six places drops the binary error that a fractional step adds; a typed value keeps up to six.
-      value = Math.min(max, Math.max(min, Math.round(next * 1e6) / 1e6));
+      const value = Math.min(max, Math.max(min, next));
       input.value = grouped.format(value);
       reflect(value);
     };
-    // Typed text counts once it reads as a number; anything else keeps the last value.
+    // Typed text counts once it reads as a number; anything else keeps the last number shown.
     const typed = () => {
       const number = readNumber(input.value);
-      return Number.isFinite(number) ? number : value;
+      return Number.isFinite(number) ? number : shown;
     };
+    // Rounding a step to six places drops the binary error that a fractional step adds; a typed value keeps its digits.
+    const stepFrom = (by) => Math.round((typed() + by) * 1e6) / 1e6;
     // The markup's number, not its text: the text is in English, and the page may format in another locale.
     set(Number(input.getAttribute('aria-valuenow')));
     input.addEventListener('keydown', (e) => {
       const by = { ArrowUp: step, ArrowDown: -step }[e.key];
-      const to = by ? typed() + (e.shiftKey ? by * 10 : by) : { Home: min, End: max }[e.key];
+      const to = by ? stepFrom(e.shiftKey ? by * 10 : by) : { Home: min, End: max }[e.key];
       if (to === undefined) return;
       e.preventDefault();
       set(to);
@@ -2344,17 +2346,17 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
     [[down, -step], [up, step]].forEach(([button, by]) => {
       let timer;
       const stop = () => clearTimeout(timer);
-      const repeat = (delay) => { timer = setTimeout(() => { if (button.disabled) return; set(value + by); repeat(100); }, delay); };
+      const repeat = (delay) => { timer = setTimeout(() => { if (button.disabled) return; set(stepFrom(by)); repeat(100); }, delay); };
       // A press keeps focus where it is, steps once, and repeats while held.
       button.addEventListener('mousedown', (e) => e.preventDefault());
       button.addEventListener('pointerdown', (e) => {
         if (e.button !== 0) return;
-        set(typed() + by);
+        set(stepFrom(by));
         repeat(400);
       });
       ['pointerup', 'pointerleave', 'pointercancel'].forEach((type) => button.addEventListener(type, stop));
       // A screen reader activates the button with a click that has no press before it.
-      button.addEventListener('click', (e) => { if (e.detail === 0) set(typed() + by); });
+      button.addEventListener('click', (e) => { if (e.detail === 0) set(stepFrom(by)); });
     });
   });
 

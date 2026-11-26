@@ -933,7 +933,7 @@ const shapeRoles: Record<string, string[]> = {
   '--radius-mark': ['.check input:not([type="radio"])', '.key', '.mention'],
   // One-line controls that are not actions take the field corner: the select, the project-menu trigger,
   // the labelled contents trigger at rest and pressed, its no-JavaScript summary, and the skip link.
-  '--radius-field': ['.input', '.select', '.textarea', '.search', '.number-field', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
+  '--radius-field': ['.input', '.select', '.textarea', '.search', '.number-field', '.number-field > .quiet-action', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
   '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.stat', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist', '.menu-list', '.msg-tools', '.composer-box', '.tool-body', '.thread-demo'],
 }
 // Shapes that sit inside a rounded container are concentric with it: its radius minus the gap. Rows that sit
@@ -1210,6 +1210,10 @@ test.describe('live record fields', () => {
     await expect(weight).toHaveValue('3.1234')
     await expect(weight).toHaveAttribute('aria-valuenow', '3.1234')
     await expect(weight).toHaveAttribute('aria-valuetext', '3.1234 kg')
+    // Committing a typed value keeps every digit; only a step rounds.
+    await weight.fill('0.0000001')
+    await weight.press('Tab')
+    await expect(weight).toHaveAttribute('aria-valuenow', '1e-7')
   })
 
   test('typing a number in range updates the value, its text, and both buttons; other text changes none', async ({ page }) => {
@@ -1229,6 +1233,28 @@ test.describe('live record fields', () => {
       await expect(weight).toHaveAttribute('aria-valuetext', '1 kg')
       await expect(down).toBeEnabled()
       await expect(up).toBeEnabled()
+    }
+    // A step starts from the number the field last showed, not from the last committed one.
+    await weight.fill('0')
+    await weight.fill('abc')
+    await weight.press('ArrowUp')
+    await expect(weight).toHaveAttribute('aria-valuenow', '0.5')
+  })
+
+  test('each stepper takes clicks over the field edge it spans', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 900 })
+    await page.goto(`${url}#number-field`)
+    for (const [name, outer] of [['Decrease quantity', 'left'], ['Increase quantity', 'right']] as const) {
+      const button = page.locator('[data-live-number]').first().getByRole('button', { name })
+      await button.scrollIntoViewIfNeeded()
+      const missed = await button.evaluate((element, outer) => {
+        const box = element.getBoundingClientRect()
+        const [middleX, middleY] = [box.left + box.width / 2, box.top + box.height / 2]
+        // The outer side, top, and bottom lie on the field's 1px edge.
+        const points = [[outer === 'left' ? box.left + 0.5 : box.right - 0.5, middleY], [middleX, box.top + 0.5], [middleX, box.bottom - 0.5]]
+        return points.filter(([x, y]) => !element.contains(document.elementFromPoint(x, y)))
+      }, outer)
+      expect(missed, name).toEqual([])
     }
   })
 
