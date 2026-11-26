@@ -12,10 +12,10 @@ const current = (page: Page) => page.locator('#rail [aria-current="location"]')
 const controlHeights: Record<string, number> = { sm: 28, md: 32, lg: 36 }
 const touchHeight = 44
 
-// Measure compound controls at their visible boundary (the search wrapper and choice label).
+// Measure compound controls at their visible boundary (the search and number field wrappers and choice label).
 // Compact tool-call disclosures have their own recipe. The hover toolbar is hidden at touch widths.
 const controlTargets = [
-  '.btn', '.input', '.select', '.range', '.check', '.switch', '.toggle', '.search',
+  '.btn', '.input', '.select', '.range', '.check', '.switch', '.toggle', '.search', '.number-field',
   '.segmented', '.segmented > button', '.tab', '.radio-card', 'textarea',
   '[role="option"]', '.navlist a', '.crumbs a', '.group-toggle', '.chip[href]',
   '.overflow > button:not(.msg-tools *)', '.menu-list [role="menuitem"]', '.copy-link', '.page-head > .site-name',
@@ -864,7 +864,7 @@ const contrastPairs: Record<string, Pair> = {
   'every code block header label and Copy on the frame': { selector: '.code-head :is(b, .lang, .copy)', min: 4.5 },
   'every code block Copy at rest, in muted text': { selector: '.code .copy:not(.is-hover, [data-copied])', min: 4.5 },
   'every source line, line number, and syntax colour on its panel': { selector: '.code :is(.line, .ln, .k, .s, .n, .c)', min: 4.5 },
-  'every focused field edge, on its fill and on the surface around it': { selector: ':is(.input, .select, .textarea, .search).is-focus', edge: true, min: 3 },
+  'every focused field edge, on its fill and on the surface around it': { selector: ':is(.input, .select, .textarea, .search, .number-field).is-focus', edge: true, min: 3 },
 }
 // Each specimen's text (or edge) colour over the background colours stacked under it. Chromium computes
 // colours as rgb() or color(srgb …); anything else throws, so a pair cannot pass unread. The helper does not
@@ -920,7 +920,7 @@ const below = (measured: { name: string; ratio: number; unmeasured?: string }[],
 // The slider track and the select picker are engine pseudo-elements that computed styles cannot reach;
 // the node literal-radius guard covers them.
 const shapeRoles: Record<string, string[]> = {
-  '--radius-control': ['.btn:not(.rail-summary, .menu-glyph, [data-icon-only])', '.quiet-action:not(.projects > summary, .msg-tools .quiet-action)', '.segmented:not([data-icon-only])', '.chip'],
+  '--radius-control': ['.btn:not(.rail-summary, .menu-glyph, [data-icon-only])', '.quiet-action:not(.projects > summary, .msg-tools .quiet-action, .number-field > .quiet-action)', '.segmented:not([data-icon-only])', '.chip'],
   // A lone icon that acts on its own fill: an icon-only button, on a square box.
   '--radius-circle': ['.btn[data-icon-only]'],
   '--radius-pill': ['.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.progress', '.score .pips i', '.badge', '.navlist a[aria-current="location"]::before', '.segmented[data-icon-only]'],
@@ -929,8 +929,8 @@ const shapeRoles: Record<string, string[]> = {
   '--radius-mark': ['.check input:not([type="radio"])', '.key', '.mention'],
   // One-line controls that are not actions take the field corner: the select, the project-menu trigger,
   // the labelled contents trigger at rest and pressed, its no-JavaScript summary, and the skip link.
-  '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
-  '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist', '.menu-list', '.msg-tools', '.composer-box', '.tool-body', '.thread-demo'],
+  '--radius-field': ['.input', '.select', '.textarea', '.search', '.number-field', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
+  '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.stat', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist', '.menu-list', '.msg-tools', '.composer-box', '.tool-body', '.thread-demo'],
 }
 // Shapes that sit inside a rounded container are concentric with it: its radius minus the gap. Rows that sit
 // --space-1 inside a panel, and a code block's source panel; and a segmented option and its thumb, --inset inside its track.

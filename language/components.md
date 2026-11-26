@@ -21,9 +21,10 @@ The sections follow the catalogue's purpose groups, in this order. Each componen
 | --- | --- |
 | Actions | Button, quiet action, overflow menu, chip |
 | Selection | Checkbox and radio, radio card group, switch, toggle button, segmented control |
-| Inputs | Text input and textarea, select, field wrapper, slider |
+| Inputs | Text input and textarea, select, combobox, number field, field wrapper, slider |
 | Feedback and status | Progress, score, badge, alert |
 | Containers and overlays | Surface and card, figure, dialog, drawer, slideout |
+| Data display | Description list, stat tile |
 | Navigation | Navigation list, section rail, find field, breadcrumbs, pager, tabs, skip link, keyboard key |
 | Conversation | Message row, message group, hover toolbar, thread panel, composer, tool-call disclosure, mention |
 | Code and examples | Code block |
@@ -198,6 +199,32 @@ Layer: Core.
 - **Motion.** None: as for the input, and the picker opens at once.
 - **Forced colors.** The closed field as for the input, including the `Highlight` focus outline. The picker is native.
 
+## Combobox
+
+Layer: Core.
+
+- **Anatomy.** An editable `<input role="combobox">` in the [field](#text-input-and-textarea) recipe, with the [select](#select)'s chevron at the end, and a listbox in the select's picker recipe below it. Typing filters the options; the list keeps their order. When nothing matches, the list holds one row, "No matches", in `--text-sm` `--color-muted`, which cannot be chosen.
+- **States.** Rest, focus-visible (field focus), open, disabled, invalid, and invalid while focused. In the open list, pointer hover fills `--color-row-hover`; the active option, the one the arrow keys reach, takes the same fill and the inset focus ring, because DOM focus stays in the field. An `--color-accent` check marks the chosen option, as in the select.
+- **Do.** Use a combobox to choose one value from a long or growing list that the reader can name, such as a product, a location, or a supplier.
+- **Don't.** A combobox for about 15 options or fewer, which is a select, or a free-text field that only suggests values. On leaving the field, text that matches no option goes back to the chosen option's label.
+- **Keyboard and screen reader.** `aria-expanded`, `aria-controls` naming the listbox, and `aria-activedescendant` naming the active option. Typing opens the list and filters it. ArrowDown opens the list or moves down, ArrowUp moves up, Enter chooses the active option and closes the list, and Escape closes the list, then clears the text. Tab leaves the field and keeps the choice. The chevron is a button out of the Tab order (`tabindex="-1"`) that opens and closes the list. A visually hidden `role="status"` element announces the match count after a 500ms pause, as in the [find field](#find-field). A visible `<label>`.
+- **Motion.** None: the list opens, closes, and filters at once, as the select's picker does.
+- **Forced colors.** The field as for the input. The active option draws a `Highlight` outline inside its edge, and the chosen option's check draws in `CanvasText`.
+- **Touch.** At tablet width (`max-width: 800px`) the field and each option grow to `--control-touch`.
+
+## Number field
+
+Layer: Core.
+
+- **Anatomy.** A wrapper in the field recipe, which carries the fill, edge, shadow, and focus as the [search](#text-input-and-textarea) wrapper does. Inside it, left to right: a decrease button, the input, an optional unit, and an increase button. The input is `type="text"` with `inputmode="numeric"`, or `inputmode="decimal"` for a fraction, in tabular numbers and aligned to the end. The unit, such as "pcs" or "kg", is `--text-sm` `--color-muted` with `--space-1` before it. Each button is a square [quiet action](#quiet-action) the height of the control, with a 16px minus or plus in `--color-muted`, and no corners of its own: the wrapper clips it, so its tint follows the wrapper's inner corners (`--radius-field` minus 1px) on its outer side. The value shows with the locale's digit grouping, such as "1,200", and is written back in that form when the field loses focus.
+- **States.** Rest, focus-visible (field focus on the wrapper, through `:has(input:focus-visible)`), disabled, invalid, and invalid while focused. A button at its limit (`min` or `max`) is disabled. A button tints on hover and press as a quiet action does.
+- **Do.** Use a number field for an exact amount that the reader may change by a few steps, such as a quantity or a reorder point. Show the unit in the field, and set `min` and `max` when the amount has limits.
+- **Don't.** A number field for a code made of digits, such as a part number, an order number, or a postcode. Use a text input, because steps and digit grouping would change it. Don't use the native `type="number"`, which changes the value on a scroll and shows its own spinner.
+- **Keyboard and screen reader.** The input takes `role="spinbutton"` with `aria-valuenow`, and `aria-valuemin` and `aria-valuemax` when they are set, and a visible `<label>`. ArrowUp and ArrowDown change the value by one step, Shift with an arrow by ten steps, and Home and End jump to `min` and `max`. The buttons are out of the Tab order (`tabindex="-1"`), because the arrow keys do the same, and are named for their action with the label, such as "Increase quantity". A held button repeats its step after a 400ms pause.
+- **Motion.** None: the value changes at once.
+- **Forced colors.** The wrapper as for the input. The minus and plus draw in `ButtonText`, and a disabled button's sign draws in `GrayText`.
+- **Touch.** At tablet width (`max-width: 800px`) the field and each button grow to `--control-touch`.
+
 ## Field wrapper
 
 Layer: Core.
@@ -354,6 +381,30 @@ Layer: Core.
 - **Touch.** At tablet width (`max-width: 800px`) the close button and the footer's actions grow to `--control-touch`, as every control does.
 - **Motion.** As for the drawer, from its own edge: it slides in over `--duration` and out over `--duration-fast`, with `--ease-out`, while the overlay fades. Reduced motion shows and hides it at once.
 - **Forced colors.** As for the dialog: the shadow drops and the edge draws in the system colour.
+
+## Description list
+
+Layer: Core.
+
+- **Anatomy.** A `<dl>` of term and value pairs, each pair in a `<div>`. On a wide screen it is a two-column grid: the term column is as wide as its longest term, up to 12rem, and the value column takes the rest, with an `--space-4` column gap and an `--space-2` row gap. A term is `--text-sm` `--color-muted`; a value is `--text-md` `--color-text`, in tabular numbers, and may hold a link, a [badge](#badge), or a quiet copy action. Both align to the first line's baseline. A value that is not set reads "None" in `--color-muted`. In a narrow container (`max-width: 30rem` on the list's container), each term sits above its value with an `--space-1` gap, and the pairs keep the `--space-2` gap.
+- **States.** None: the list is static text. A link or an action inside a value keeps its own states.
+- **Do.** Use a description list for the details of one record, such as a product's location, supplier, and reorder point. Order the terms the way the reader checks them, most used first.
+- **Don't.** A description list to compare several records, which is a table, or a border or fill on each pair. Leave a pair out only when it never applies to the record; when it applies and is empty, write "None".
+- **Keyboard and screen reader.** Native `<dl>`, `<dt>`, and `<dd>`, so a screen reader reads each term with its value. A copy action is named for its value, such as "Copy location".
+- **Motion.** None: the list is static.
+- **Forced colors.** Terms and values take the system text colour. The list has no fill or edge to lose.
+
+## Stat tile
+
+Layer: Core.
+
+- **Anatomy.** A tile with `--color-surface` fill, a transparent 1px border, `--radius-panel`, and `--space-4` padding, holding, top to bottom: a label in `--text-sm` `--color-muted`; the value in `--text-2xl` semibold `--color-text`, tabular numbers, with an optional unit in `--text-sm` `--color-muted`; and an optional context line in `--text-sm` `--color-muted`, such as "8 below reorder point", or a [badge](#badge). Tiles sit in a grid with `repeat(auto-fit, minmax(12rem, 1fr))` and an `--space-4` gap, outside a card.
+- **States.** Rest. A tile that opens the records behind its number is a link: hover fills `--color-row-hover`, and focus-visible shows the focus ring.
+- **Do.** Use stat tiles for a few headline counts at the top of an overview, such as items in stock and items below their reorder point, each with a context line that says what the number means. Link a tile to the list of records it counts.
+- **Don't.** A border on each tile or a tile inside a card. Don't colour the value to show good or bad: a badge or the context line says it in words. Don't add a trend arrow or a sparkline without the period it compares.
+- **Keyboard and screen reader.** The label comes before the value in the DOM, so it is read first. A tile without a link is a `<div>` holding a `<dl>` with one `<dt>` and its `<dd>`s. A linked tile is one `<a>` whose name reads the label, the value, and the context line, such as "Below reorder point, 8 items".
+- **Motion.** A linked tile's fill changes over `--duration-fast` with `--ease-out`.
+- **Forced colors.** The fill drops, and the transparent border draws as the system edge, so each tile keeps its outline.
 
 ## Navigation list
 
