@@ -144,3 +144,14 @@ test('the first Tab shows the skip link, which moves focus to main past both lis
   await page.keyboard.press('Enter')
   await expect(page.locator('main')).toBeFocused()
 })
+
+test('without JavaScript the skip link still moves focus to main', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 800 }, javaScriptEnabled: false })
+  const page = await context.newPage()
+  await page.goto(url)
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.locator('main')).toBeFocused()
+  await context.close()
+})

@@ -152,7 +152,7 @@ footer { padding-block: var(--space-6); border-top: 1px solid var(--color-border
 <div class="contents">
   <details class="rail-details"><summary class="btn secondary rail-summary" data-size="lg">On this page</summary><div class="contents-list"><h2 class="group-label" id="contents-title">On this page</h2><nav class="navlist" aria-labelledby="contents-title"><a href="#question">The question</a><a href="#reader">Know the reader</a><a href="#first-step">Lead with the first step</a><a href="#examples">Show real examples</a><a href="#structure">Let the structure work</a><a href="#length">Keep it short</a><a href="#review">Review it cold</a><a href="#ship">Ship and maintain</a></nav></div></details>
 </div>
-<main id="main">
+<main id="main" tabindex="-1">
 <section id="question"><h1>Write a guide a reader can finish.</h1><p>A guide answers one question for one reader. The page rail holds the site's pages; the list beside this column holds this page's sections, and it stays in view while you read.</p></section>
 <section id="reader"><h2>Know the reader</h2><p>Name who arrives at the page and what they already know. A guide for a new contributor starts further back than one for a maintainer.</p><p>Write down the one task they came to finish, and cut what does not serve it.</p></section>
 <section id="first-step"><h2>Lead with the first step</h2><p>Put the first action near the top. A reader who can act at once keeps reading; one who meets background first often leaves.</p><p>Background that matters can follow the first step, in the section that needs it.</p></section>
@@ -259,12 +259,7 @@ trigger.addEventListener('click', (e) => {
   if (current) centre(drawerBody, current);
   if (e.detail > 0 || !current) drawerBody.focus({ preventScroll: true }); else current.focus({ preventScroll: true });
 });
-// The skip link moves focus to main, which takes tabindex="-1" only then.
-document.querySelector('.skip').addEventListener('click', () => {
-  const main = document.getElementById('main');
-  main.tabIndex = -1;
-  main.focus({ preventScroll: true });
-});
+
 // Every close slides the drawer out first; under reduced motion it closes at once. Following a link in the
 // drawer closes it and moves focus to the destination.
 let destination = null;
