@@ -253,12 +253,13 @@ place();
 // Beside the column a list is open. CSS decides where: there it hides the list's summary. WebKit shows no
 // closed disclosure's rows whatever the CSS, so the script opens the list, and closes it again when the
 // frame narrows. It changes a list only when that changes, so a reader's own choice stays until then.
+// Opening or closing a list resizes the observed frame, so it waits a frame to avoid a resize loop.
 const besideColumn = new Map();
-new ResizeObserver(() => document.querySelectorAll('.rail-details').forEach((details) => {
+new ResizeObserver(() => requestAnimationFrame(() => document.querySelectorAll('.rail-details').forEach((details) => {
   const beside = getComputedStyle(details.querySelector('summary')).display === 'none';
   if (besideColumn.get(details) !== beside) details.open = beside;
   besideColumn.set(details, beside);
-})).observe(document.querySelector('.layout'));
+}))).observe(document.querySelector('.layout'));
 // The drawer opens with the current section in view. A tap puts focus on its body, so no ring shows; a keyboard
 // open focuses the current section, where the ring shows the reader's place.
 trigger.addEventListener('click', (e) => {
