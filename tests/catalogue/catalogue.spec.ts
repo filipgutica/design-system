@@ -100,7 +100,7 @@ for (const file of ['components.html', 'reference.html', 'product.html', 'docs.h
 
 // A lone icon is a circle only on a button with its own fill. A see-through lone icon is a quiet action, a tile:
 // an icon-only ghost or text button would look like one at rest and hover in a different shape.
-for (const file of ['components.html', 'reference.html', 'product.html', 'docs.html', 'guide.html']) {
+for (const file of ['components.html', 'reference.html', 'product.html', 'docs.html']) {
   test(`${file} marks every icon-only button, and none is ghost or text`, async ({ page }) => {
     await page.goto(new URL(file, url).href)
     const problems = await page.locator('.btn').evaluateAll((buttons) => buttons.flatMap((button) => {

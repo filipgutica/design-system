@@ -67,6 +67,9 @@ dialog:is(.drawer, .slideout)::backdrop { background: var(--color-overlay); }
 :is(.drawer-head, .slideout-head) h4 { font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }
 :is(.drawer-body, .slideout-body) { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: var(--space-4); }
 .close { flex: none; width: var(--control-md); min-height: var(--control-md); padding: 0; color: var(--color-muted); }
+/* Skip link: components.html#skip-link, unchanged. */
+.skip { position: absolute; top: calc(-1 * var(--space-16)); left: var(--space-4); z-index: 10; padding: var(--space-2) var(--space-3); border: 1px solid transparent; border-radius: var(--radius-field); background: var(--color-surface-raised); box-shadow: var(--shadow-dialog); color: var(--color-text); }
+.skip:focus { top: var(--space-4); }
 /* Close is a quiet action: components.html#quiet-action, unchanged. */
 :where(.quiet-action) { display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: var(--radius-control); background: transparent; font: inherit; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
 .quiet-action.is-hover:where(:not(:disabled)) { color: var(--color-text); background: color-mix(in srgb, currentColor 6%, transparent); }
@@ -84,12 +87,15 @@ main { grid-area: main; min-width: 0; display: grid; gap: var(--space-12); paddi
 .contents { grid-area: contents; position: sticky; top: var(--space-4); align-self: start; display: flex; flex-direction: column; max-height: calc(100dvh - 2 * var(--space-4)); padding-block: var(--space-6) 0; }
 .contents > details { display: flex; flex-direction: column; min-height: 0; }
 .contents > details::details-content { display: flex; flex-direction: column; min-height: 0; }
+.contents-list { display: flex; flex-direction: column; min-height: 0; }
 .contents .navlist { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0.125rem; }
-.contents .group-label { margin: 0; }
+/* The heading sits outside the scrolling rows, so it stays put while they scroll. */
+.contents-list > .group-label { flex: none; margin: 0; padding: 0 var(--space-3) var(--space-1); color: var(--color-muted); font-size: var(--text-xs); font-weight: var(--weight-semibold); }
 /* Beside the column every list shows, so the summaries hide and each list stays open without the script. */
 :is(.pages, .contents) .rail-summary { display: none; }
 :is(.pages, .contents) > details::details-content { content-visibility: visible; }
-:is(.pages, .contents) > details:not([open]) > .navlist { display: grid; }
+.pages > details:not([open]) > .navlist { display: grid; }
+.contents > details:not([open]) > .contents-list { display: flex; }
 .phone-trigger { display: none; }
 section { display: grid; gap: var(--space-4); min-width: 0; }
 h1 { font-size: var(--text-3xl); max-width: 24ch; }
@@ -104,8 +110,8 @@ footer { padding-block: var(--space-6); border-top: 1px solid var(--color-border
   .contents { position: static; max-height: none; padding-block: var(--space-6) 0; }
   .contents .rail-summary { display: inline-flex; }
   .contents > details::details-content { content-visibility: revert; }
-  .contents > details:not([open]) > .navlist { display: none; }
-  .contents .group-label { display: none; }
+  .contents > details:not([open]) > .contents-list { display: none; }
+  .contents-list > .group-label { display: none; }
 }
 /* Tablet and phone: one column. With the script, one trigger opens the drawer that holds both lists; without
    it, each list is its own closed disclosure in place, the page rail first. */
@@ -127,13 +133,14 @@ footer { padding-block: var(--space-6); border-top: 1px solid var(--color-border
 /* In the drawer, the contents list comes first, then a rule, then the page rail. */
 .drawer .group-label { margin: 0; }
 .drawer .navlist { width: auto; }
-.drawer-body > nav + nav { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border-subtle); }
+.drawer-body > * + * { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border-subtle); }
 </style>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
   <symbol id="i-close" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
 </svg>
+<a class="skip" href="#main">Skip to content</a>
 <div class="frame">
 <header class="header"><a class="brand" href="guide.html">Guide example</a></header>
 <button class="btn secondary menu-glyph phone-trigger" type="button" data-size="lg" aria-haspopup="dialog">Documentation: Write a guide</button>
@@ -143,7 +150,7 @@ footer { padding-block: var(--space-6); border-top: 1px solid var(--color-border
   <details class="rail-details"><summary class="btn secondary rail-summary" data-size="lg">Documentation</summary><nav class="navlist" aria-labelledby="pages-title"><h2 class="group-label" id="pages-title">Documentation</h2><a href="docs.html">One-page docs</a><a href="guide.html" aria-current="page">Write a guide</a><a href="reference.html">Application</a><a href="product.html">Product page</a></nav></details>
 </div>
 <div class="contents">
-  <details class="rail-details"><summary class="btn secondary rail-summary" data-size="lg">On this page</summary><nav class="navlist" aria-labelledby="contents-title"><h2 class="group-label" id="contents-title">On this page</h2><a href="#question">The question</a><a href="#reader">Know the reader</a><a href="#first-step">Lead with the first step</a><a href="#examples">Show real examples</a><a href="#structure">Let the structure work</a><a href="#length">Keep it short</a><a href="#review">Review it cold</a><a href="#ship">Ship and maintain</a></nav></details>
+  <details class="rail-details"><summary class="btn secondary rail-summary" data-size="lg">On this page</summary><div class="contents-list"><h2 class="group-label" id="contents-title">On this page</h2><nav class="navlist" aria-labelledby="contents-title"><a href="#question">The question</a><a href="#reader">Know the reader</a><a href="#first-step">Lead with the first step</a><a href="#examples">Show real examples</a><a href="#structure">Let the structure work</a><a href="#length">Keep it short</a><a href="#review">Review it cold</a><a href="#ship">Ship and maintain</a></nav></div></details>
 </div>
 <main id="main">
 <section id="question"><h1>Write a guide a reader can finish.</h1><p>A guide answers one question for one reader. The page rail holds the site's pages; the list beside this column holds this page's sections, and it stays in view while you read.</p></section>
@@ -168,7 +175,8 @@ footer { padding-block: var(--space-6); border-top: 1px solid var(--color-border
 // last section once the page is scrolled to the end. After a jump the target stays current until the reader
 // scrolls away from where it landed. Without JavaScript the links still work; only the marker is missing.
 const root = document.documentElement;
-const contents = document.querySelector('.contents nav');
+const contentsList = document.querySelector('.contents-list');
+const contents = contentsList.querySelector('nav');
 const pages = document.querySelector('.pages nav');
 const contentsSummary = document.querySelector('.contents summary');
 const links = [...contents.querySelectorAll('a[href^="#"]')];
@@ -229,9 +237,9 @@ addEventListener('load', followHash, { once: true });
 
 // Tablet and phone, with the script: both lists move into one drawer, the contents list first, and one trigger,
 // named for the page rail and its current page, opens it. Moving back restores them beside the column.
-const homes = [[contents, contents.parentElement], [pages, pages.parentElement]];
+const homes = [[contentsList, contentsList.parentElement], [pages, pages.parentElement]];
 const place = () => {
-  if (phone.matches) drawerBody.append(contents, pages);
+  if (phone.matches) drawerBody.append(contentsList, pages);
   else {
     if (drawer.open) drawer.close();
     homes.forEach(([nav, home]) => home.append(nav));
@@ -241,14 +249,21 @@ const place = () => {
 root.dataset.enhanced = '';
 phone.addEventListener('change', place);
 place();
-// A tap opens the drawer with focus on its body, so no ring shows; a keyboard open focuses the current section.
-// Either way the drawer opens at its top, where the contents list is.
+// The drawer opens with the current section in view. A tap puts focus on its body, so no ring shows; a keyboard
+// open focuses the current section, where the ring shows the reader's place.
 trigger.addEventListener('click', (e) => {
   trigger.focus({ preventScroll: true });
   drawer.showModal();
-  drawerBody.scrollTop = 0;
   const current = contents.querySelector('[aria-current="location"]');
+  drawerBody.scrollTop = 0;
+  if (current) centre(drawerBody, current);
   if (e.detail > 0 || !current) drawerBody.focus({ preventScroll: true }); else current.focus({ preventScroll: true });
+});
+// The skip link moves focus to main, which takes tabindex="-1" only then.
+document.querySelector('.skip').addEventListener('click', () => {
+  const main = document.getElementById('main');
+  main.tabIndex = -1;
+  main.focus({ preventScroll: true });
 });
 // Every close slides the drawer out first; under reduced motion it closes at once. Following a link in the
 // drawer closes it and moves focus to the destination.
