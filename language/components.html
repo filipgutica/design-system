@@ -126,7 +126,8 @@
   .picker li { display: flex; align-items: center; min-height: var(--control-sm); padding: var(--space-2) var(--space-3); border-radius: calc(var(--radius-panel) - var(--space-1)); }
   .picker li.is-hover { background: var(--color-row-hover); }
   .picker li[aria-selected="true"] { background: var(--color-row-selected); }
-  .picker li[aria-selected="true"]::after { content: "✓"; margin-left: auto; color: var(--color-accent); }
+  /* The check is decorative: aria-selected carries the state, so the empty alternative text keeps it out of the name. */
+  .picker li[aria-selected="true"]::after { content: "✓" / ""; margin-left: auto; color: var(--color-accent); }
 
   /* Combobox: an editable field with the select's chevron, over a listbox in the picker recipe. Focus stays in
      the field: aria-activedescendant names the active option, which takes the hover fill and the inset ring.
@@ -149,7 +150,8 @@
 
   /* Number field: a wrapper in the field recipe, as the search wrapper is, holding the decrease button, the
      input, an optional unit, and the increase button. The wrapper carries the fill, edge, shadow, and focus, and
-     clips the square buttons, so their tint follows its inner corners. */
+     clips the square buttons, so their tint follows its inner corners. Each button spans the wrapper's 1px edges,
+     so its box is the control height square: 44px at tablet width. */
   .number-field { --depth: var(--shadow-field); --field-height: var(--control-md); display: flex; width: 100%; height: var(--field-height); overflow: clip; border: 1px solid var(--color-field-edge); border-radius: var(--radius-field); background: var(--color-field-bg); box-shadow: var(--depth); color: var(--color-text); font: var(--text-md) / 1.35 var(--font-ui); }
   .number-field[data-size="sm"] { --field-height: var(--control-sm); font-size: var(--text-sm); }
   .number-field[data-size="lg"] { --field-height: var(--control-lg); font-size: var(--text-lg); }
@@ -158,7 +160,9 @@
   .number-field > input:has(+ .number-unit) { padding-inline-end: 0; }
   .number-unit { align-self: center; padding-inline: var(--space-1) var(--space-2); color: var(--color-muted); font-size: var(--text-sm); }
   /* :where keeps the quiet action's hover and press colours above this rest colour. */
-  .number-field > :where(.quiet-action) { flex: none; width: calc(var(--field-height) - 2px); padding: 0; border: 0; border-radius: 0; color: var(--color-muted); }
+  .number-field > :where(.quiet-action) { flex: none; width: var(--field-height); margin-block: -1px; padding: 0; border: 0; border-radius: 0; color: var(--color-muted); }
+  .number-field > :where(.quiet-action:first-child) { margin-inline-start: -1px; }
+  .number-field > :where(.quiet-action:last-child) { margin-inline-end: -1px; }
   .number-field:has(input[aria-invalid="true"]) { border-color: var(--color-error); }
   .number-field:has(input:disabled) { background: var(--color-well); box-shadow: none; opacity: 0.58; cursor: not-allowed; }
   .number-field > input:disabled { cursor: not-allowed; }
@@ -387,7 +391,8 @@
      term sits above its value. */
   .description-list { display: grid; grid-template-columns: fit-content(12rem) minmax(0, 1fr); gap: var(--space-2) var(--space-4); margin: 0; }
   .description-list > div { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: first baseline; }
-  .description-list dt { color: var(--color-muted); font-size: var(--text-sm); }
+  /* A term wraps anywhere, so an unbroken term cannot push the fit-content(12rem) column past its cap. */
+  .description-list dt { color: var(--color-muted); font-size: var(--text-sm); overflow-wrap: anywhere; }
   .description-list dd { min-width: 0; margin: 0; color: var(--color-text); font-size: var(--text-md); font-variant-numeric: tabular-nums; }
   .description-list dd[data-empty] { color: var(--color-muted); }
   .description-list dd .quiet-action { width: var(--control-sm); height: var(--control-sm); margin-inline-start: var(--space-1); vertical-align: middle; color: var(--color-muted); }
@@ -1088,6 +1093,9 @@
     .input:not([data-specimen="size"] *), .select:not([data-specimen="size"] *), .range:not([data-specimen="size"] *) { height: var(--control-touch); }
     .search { height: var(--control-touch); }
     .combobox [role="option"] { min-height: var(--control-touch); }
+    /* The chevron is its own target, so it grows to a square; the text stops before it. */
+    .combobox-toggle { width: var(--control-touch); }
+    .combobox > .input { padding-inline-end: var(--control-touch); }
     .check:not([data-specimen="size"] *), .switch:not([data-specimen="size"] *), .toggle:not([data-specimen="size"] *) { min-height: var(--control-touch); }
     .copy-link { width: var(--control-touch); height: var(--control-touch); }
     /* Quiet actions in docs components: 32px on desktop, 44px here. */
@@ -1545,7 +1553,7 @@
   <section class="component" id="combobox" data-layer="Core" data-states="hover focus disabled invalid" aria-labelledby="combobox-title">
     <header><h3 id="combobox-title">Combobox</h3><span class="badge">Core</span><a href="components.md#combobox">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="combobox" aria-label="Copy link to Combobox" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Choose one value from a long list by typing to filter it.</p>
-    <dl class="guidance"><dt>Do</dt><dd>Use a combobox to choose one value from a long or growing list that the reader can name, such as a product, a location, or a supplier.</dd><dt>Don’t</dt><dd>A combobox for about 15 options or fewer, which is a select, or a free-text field that only suggests values. On leaving the field, text that matches no option goes back to the chosen option’s label.</dd></dl>
+    <dl class="guidance"><dt>Do</dt><dd>Use a combobox to choose one value from a long or growing list that the reader can name, such as a product, a location, or a supplier.</dd><dt>Don’t</dt><dd>A combobox for about 15 options or fewer, which is a select, or a free-text field that only suggests values. Typed text never chooses by itself: on leaving the field, it goes back to the chosen option’s label, even when it names another option.</dd></dl>
     <div class="row"><h4>Closed</h4><div class="states">
       <div class="state"><div class="field"><label class="field-label" for="cb-live">Product</label><div class="combobox" data-live-combobox><input class="input" id="cb-live" role="combobox" aria-expanded="false" aria-controls="cb-live-list" aria-autocomplete="list" autocomplete="off" value="Hex bolt M8"><button class="combobox-toggle" type="button" tabindex="-1" aria-label="Show products"></button><ul class="picker" id="cb-live-list" role="listbox" aria-label="Products" hidden><li role="option" id="cb-live-1" aria-selected="false">Anchor bolt M10</li><li role="option" id="cb-live-2" aria-selected="false">Cap screw M5</li><li role="option" id="cb-live-3" aria-selected="false">Carriage bolt M8</li><li role="option" id="cb-live-4" aria-selected="false">Cotter pin 3 mm</li><li role="option" id="cb-live-5" aria-selected="false">Eye bolt M8</li><li role="option" id="cb-live-6" aria-selected="false">Flat washer M6</li><li role="option" id="cb-live-7" aria-selected="false">Flat washer M8</li><li role="option" id="cb-live-8" aria-selected="false">Hex bolt M6</li><li role="option" id="cb-live-9" aria-selected="true">Hex bolt M8</li><li role="option" id="cb-live-10" aria-selected="false">Hex nut M6</li><li role="option" id="cb-live-11" aria-selected="false">Hex nut M8</li><li role="option" id="cb-live-12" aria-selected="false">Lock nut M6</li><li role="option" id="cb-live-13" aria-selected="false">Machine screw M4</li><li role="option" id="cb-live-14" aria-selected="false">Rivet 4 mm</li><li role="option" id="cb-live-15" aria-selected="false">Set screw M5</li><li role="option" id="cb-live-16" aria-selected="false">Spring washer M8</li><li role="option" id="cb-live-17" aria-selected="false">Threaded rod M10</li><li role="option" id="cb-live-18" aria-selected="false">Wing nut M8</li><li role="option" id="cb-live-none" aria-disabled="true" hidden>No matches</li></ul></div><p class="sr-only" role="status" id="cb-live-count"></p></div><span class="caption">Rest, live; type to filter, or press ArrowDown</span></div>
       <div class="state" inert><div class="field"><label class="field-label" for="cb-focus">Product</label><div class="combobox"><input class="input is-focus" id="cb-focus" role="combobox" aria-expanded="false" aria-autocomplete="list" autocomplete="off" value="Hex bolt M8"><button class="combobox-toggle" type="button" tabindex="-1" aria-label="Show products"></button></div></div><span class="caption">Focus visible</span></div>
@@ -1730,8 +1738,8 @@
     <p class="purpose">The details of one record as term and value pairs.</p>
     <dl class="guidance"><dt>Do</dt><dd>Use a description list for the details of one record, such as a product’s location, supplier, and reorder point. Order the terms the way the reader checks them, most used first.</dd><dt>Don’t</dt><dd>A description list to compare several records, which is a table, or a border or fill on each pair. Leave a pair out only when it never applies to the record; when it applies and is empty, write “None”.</dd></dl>
     <div class="row"><h4>Layouts</h4><div class="states">
-      <div class="state wide"><dl class="description-list"><div><dt>Location</dt><dd><span id="dl-wide-location">Aisle 4, bay 2</span><button class="quiet-action" type="button" data-copy="dl-wide-location" aria-label="Copy location"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></dd></div><div><dt>Supplier</dt><dd><a href="#description-list">Example Fasteners Ltd</a></dd></div><div><dt>In stock</dt><dd>1,284 pcs</dd></div><div><dt>Reorder point</dt><dd>200 pcs</dd></div><div><dt>Status</dt><dd><span class="badge success">In stock</span></dd></div><div><dt>Last counted</dt><dd data-empty>None</dd></div></dl><span class="caption">Wide container, live: the terms share one column; Copy, the link, and the badge sit in values, and Last counted is not set</span></div>
-      <div class="state narrow" inert><dl class="description-list"><div><dt>Location</dt><dd><span id="dl-narrow-location">Aisle 4, bay 2</span><button class="quiet-action" type="button" data-copy="dl-narrow-location" aria-label="Copy location"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></dd></div><div><dt>Supplier</dt><dd><a href="#description-list">Example Fasteners Ltd</a></dd></div><div><dt>In stock</dt><dd>1,284 pcs</dd></div><div><dt>Reorder point</dt><dd>200 pcs</dd></div><div><dt>Status</dt><dd><span class="badge success">In stock</span></dd></div><div><dt>Last counted</dt><dd data-empty>None</dd></div></dl><span class="caption">Container under 30rem: each term sits above its value</span></div>
+      <div class="state wide"><dl class="description-list"><div><dt>Location</dt><dd><span id="dl-wide-location">Aisle 4, bay 2</span><button class="quiet-action" type="button" data-copy="dl-wide-location" aria-label="Copy location"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></dd></div><div><dt>Supplier</dt><dd><a href="#description-list">Example supplier</a></dd></div><div><dt>In stock</dt><dd>1,284 pcs</dd></div><div><dt>Reorder point</dt><dd>200 pcs</dd></div><div><dt>Status</dt><dd><span class="badge success">In stock</span></dd></div><div><dt>Last counted</dt><dd data-empty>None</dd></div></dl><span class="caption">Wide container, live: the terms share one column; Copy, the link, and the badge sit in values, and Last counted is not set</span></div>
+      <div class="state narrow" inert><dl class="description-list"><div><dt>Location</dt><dd><span id="dl-narrow-location">Aisle 4, bay 2</span><button class="quiet-action" type="button" data-copy="dl-narrow-location" aria-label="Copy location"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></dd></div><div><dt>Supplier</dt><dd><a href="#description-list">Example supplier</a></dd></div><div><dt>In stock</dt><dd>1,284 pcs</dd></div><div><dt>Reorder point</dt><dd>200 pcs</dd></div><div><dt>Status</dt><dd><span class="badge success">In stock</span></dd></div><div><dt>Last counted</dt><dd data-empty>None</dd></div></dl><span class="caption">Container under 30rem: each term sits above its value</span></div>
     </div></div>
   </section>
 
@@ -2188,8 +2196,10 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
   }));
 
   // Combobox: typing opens the list and filters it, keeping the options' order. Focus stays in the field, and
-  // aria-activedescendant names the active option. Leaving the field keeps the choice: text that matches no option
-  // goes back to the chosen option's label. The match count is announced after a 500ms pause, as in Find.
+  // aria-activedescendant names the active option. Only Enter on the active option, or a click, chooses: leaving
+  // the field keeps the choice and puts its label back, even when the text names another option. The first Escape
+  // closes the list and puts the label back; the second clears the text and the choice. The match count is
+  // announced after a 500ms pause, as in Find.
   document.querySelectorAll('[data-live-combobox]').forEach((box) => {
     const input = box.querySelector('[role="combobox"]');
     const list = box.querySelector('[role="listbox"]');
@@ -2255,14 +2265,12 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
         choose(active());
         close();
       } else if (e.key === 'Escape') {
-        if (isOpen()) close(); else choose(null);
+        if (isOpen()) { close(); choose(chosen); } else choose(null);
       }
     });
     input.addEventListener('blur', () => {
       close();
-      const typed = input.value.trim().toLowerCase();
-      const match = options.find((option) => option.textContent.toLowerCase() === typed);
-      choose(match ?? chosen);
+      choose(chosen);
     });
     // A press on the list or the chevron keeps focus in the field.
     [list, toggle].forEach((part) => part.addEventListener('mousedown', (e) => e.preventDefault()));
@@ -2281,9 +2289,15 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
   // Number field: the arrow keys change the value by one step, Shift with an arrow by ten, and Home and End jump to
   // the limits. The value shows with the locale's digit grouping, written back when the field loses focus. A button
   // at a limit is disabled, and a held button repeats its step after a 400ms pause.
-  const grouped = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
+  // The format keeps every fraction digit the value holds, so the field, aria-valuenow, and aria-valuetext agree.
+  const grouped = new Intl.NumberFormat(undefined, { maximumFractionDigits: 20 });
   const [groupMark, decimalMark] = ['group', 'decimal'].map((type) => grouped.formatToParts(1000.5).find((part) => part.type === type)?.value ?? '');
-  const readNumber = (text) => Number(text.trim().replaceAll(groupMark, '').replace(decimalMark, '.'));
+  const digits = new Map([...Array(10).keys()].map((digit) => [grouped.format(digit), String(digit)]));
+  // Reads what the formatter writes: its group and decimal marks and its digits. Empty text is not a number.
+  const readNumber = (text) => {
+    const plain = [...text.trim().replaceAll(groupMark, '').replace(decimalMark, '.')].map((char) => digits.get(char) ?? char).join('');
+    return plain ? Number(plain) : NaN;
+  };
   document.querySelectorAll('[data-live-number]').forEach((field) => {
     const input = field.querySelector('[role="spinbutton"]');
     const [down, up] = field.querySelectorAll('button');
@@ -2293,21 +2307,26 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
     // The unit is aria-hidden, so the value text carries it.
     const unit = field.querySelector('.number-unit')?.textContent;
     let value;
+    // Shows a number in range on the ARIA value, its text, and the buttons.
+    const reflect = (number) => {
+      input.setAttribute('aria-valuenow', String(number));
+      if (unit) input.setAttribute('aria-valuetext', `${grouped.format(number)} ${unit}`);
+      down.disabled = number <= min;
+      up.disabled = number >= max;
+    };
     const set = (next) => {
-      // Rounding to six places drops the binary error that a fractional step adds; typed values keep their digits.
+      // Rounding to six places drops the binary error that a fractional step adds; a typed value keeps up to six.
       value = Math.min(max, Math.max(min, Math.round(next * 1e6) / 1e6));
       input.value = grouped.format(value);
-      input.setAttribute('aria-valuenow', String(value));
-      if (unit) input.setAttribute('aria-valuetext', `${input.value} ${unit}`);
-      down.disabled = value <= min;
-      up.disabled = value >= max;
+      reflect(value);
     };
     // Typed text counts once it reads as a number; anything else keeps the last value.
     const typed = () => {
       const number = readNumber(input.value);
-      return input.value.trim() && Number.isFinite(number) ? number : value;
+      return Number.isFinite(number) ? number : value;
     };
-    set(readNumber(input.value));
+    // The markup's number, not its text: the text is in English, and the page may format in another locale.
+    set(Number(input.getAttribute('aria-valuenow')));
     input.addEventListener('keydown', (e) => {
       const by = { ArrowUp: step, ArrowDown: -step }[e.key];
       const to = by ? typed() + (e.shiftKey ? by * 10 : by) : { Home: min, End: max }[e.key];
@@ -2315,7 +2334,11 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
       e.preventDefault();
       set(to);
     });
-    input.addEventListener('input', () => { if (Number.isFinite(readNumber(input.value))) input.setAttribute('aria-valuenow', String(typed())); });
+    // A typed number in range shows at once; other text changes nothing until the change event clamps it.
+    input.addEventListener('input', () => {
+      const number = readNumber(input.value);
+      if (number >= min && number <= max) reflect(number);
+    });
     input.addEventListener('change', () => set(typed()));
     [[down, -step], [up, step]].forEach(([button, by]) => {
       let timer;

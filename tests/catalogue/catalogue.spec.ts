@@ -20,6 +20,7 @@ const controlTargets = [
   '[role="option"]', '.navlist a', '.crumbs a', '.group-toggle', '.chip[href]',
   '.overflow > button:not(.msg-tools *)', '.menu-list [role="menuitem"]', '.copy-link', '.page-head > .site-name',
   '.header a', '.actions > a:not(.btn)', 'button.copy', '.close', '.full', '.projects > summary', '.wrap-toggle',
+  '.number-field > .quiet-action', '.combobox-toggle',
 ].join(', ')
 
 const renderedControls = (page: Page) => page.locator(`:is(${controlTargets}):visible`).evaluateAll((elements) => elements.map((element) => {
@@ -48,6 +49,8 @@ const renderedControls = (page: Page) => page.locator(`:is(${controlTargets}):vi
     iconOption: element.matches('.segmented[data-icon-only] > button'),
     iconButton: element.matches('.btn[data-icon-only]'),
     consoleSizedButton: element.matches('.btn[data-size]'),
+    // The number field steppers and the combobox chevron are separate targets inside a field.
+    touchSquare: element.matches('.number-field > .quiet-action, .combobox-toggle'),
   }
 }))
 
@@ -82,6 +85,7 @@ for (const file of ['components.html', 'reference.html', 'product.html', 'docs.h
         }
         // A round control is a circle only on a square box, at every size and on touch.
         if (control.iconOption || control.iconButton) expect.soft(control.width, label).toBeCloseTo(height, 1)
+        if (touch && control.touchSquare && !specimenSize) expect.soft(control.width, label).toBe(touchHeight)
         if (file === 'reference.html' && touch && (option || control.consoleSizedButton)) {
           expect.soft(control.width, label).toBeGreaterThanOrEqual(expected)
         }
@@ -1172,6 +1176,100 @@ for (const colorScheme of ['light', 'dark'] as const) {
     })
   })
 }
+
+// The live number fields and combobox in components.html. Each locale block checks that the page reads back
+// what its own formatter writes.
+for (const { locale, quantity, weight, quantityUp } of [
+  { locale: 'de-DE', quantity: '1.200', weight: '12,5', quantityUp: '1.201' },
+  { locale: 'ar-EG', quantity: '١٬٢٠٠', weight: '١٢٫٥', quantityUp: '١٬٢٠١' },
+]) {
+  test.describe(`number field in ${locale}`, () => {
+    test.use({ locale })
+
+    test('the seed values keep their numbers, and a step reads the shown digits', async ({ page }) => {
+      await page.goto(`${url}#number-field`)
+      await expect(page.locator('#nf-live')).toHaveValue(quantity)
+      await expect(page.locator('#nf-live')).toHaveAttribute('aria-valuenow', '1200')
+      await expect(page.locator('#nf-weight')).toHaveValue(weight)
+      await expect(page.locator('#nf-weight')).toHaveAttribute('aria-valuenow', '12.5')
+      await page.locator('#nf-live').press('ArrowUp')
+      await expect(page.locator('#nf-live')).toHaveValue(quantityUp)
+      await expect(page.locator('#nf-live')).toHaveAttribute('aria-valuenow', '1201')
+    })
+  })
+}
+
+test.describe('live record fields', () => {
+  test.use({ locale: 'en-US' })
+
+  test('a typed fraction keeps its digits in the field, the value, and the value text', async ({ page }) => {
+    await page.goto(`${url}#number-field`)
+    const weight = page.locator('#nf-weight')
+    await weight.fill('3.1234')
+    await weight.press('Tab')
+    await expect(weight).toHaveValue('3.1234')
+    await expect(weight).toHaveAttribute('aria-valuenow', '3.1234')
+    await expect(weight).toHaveAttribute('aria-valuetext', '3.1234 kg')
+  })
+
+  test('typing a number in range updates the value, its text, and both buttons; other text changes none', async ({ page }) => {
+    await page.goto(`${url}#number-field`)
+    const weight = page.locator('#nf-weight')
+    const [down, up] = [page.getByRole('button', { name: 'Decrease weight' }), page.getByRole('button', { name: 'Increase weight' })]
+    await weight.fill('0')
+    await expect(weight).toHaveAttribute('aria-valuenow', '0')
+    await expect(weight).toHaveAttribute('aria-valuetext', '0 kg')
+    await expect(down).toBeDisabled()
+    await expect(up).toBeEnabled()
+    for (const text of ['600', 'abc', '']) {
+      await weight.fill(text)
+      await expect(weight).toHaveAttribute('aria-valuenow', '0')
+      await expect(weight).toHaveAttribute('aria-valuetext', '0 kg')
+      await expect(down).toBeDisabled()
+      await expect(up).toBeEnabled()
+    }
+  })
+
+  test('leaving the combobox keeps the choice, even when the text names another option', async ({ page }) => {
+    await page.goto(`${url}#combobox`)
+    const input = page.locator('#cb-live')
+    await input.fill('Hex nut M6')
+    await input.press('Tab')
+    await expect(input).toHaveValue('Hex bolt M8')
+    await expect(page.locator('#cb-live-list [aria-selected="true"]')).toHaveText(['Hex bolt M8'])
+  })
+
+  test('the first Escape closes the list and puts the chosen label back; the second clears the text and the choice', async ({ page }) => {
+    await page.goto(`${url}#combobox`)
+    const input = page.locator('#cb-live')
+    await input.fill('nut')
+    await expect(input).toHaveAttribute('aria-expanded', 'true')
+    await input.press('Escape')
+    await expect(input).toHaveAttribute('aria-expanded', 'false')
+    await expect(input).toHaveValue('Hex bolt M8')
+    await input.press('Escape')
+    await expect(input).toHaveValue('')
+    await expect(page.locator('#cb-live-list [aria-selected="true"]')).toHaveCount(0)
+  })
+
+  test('the chosen option is named without its check, and the field autocompletes from a list', async ({ page }) => {
+    await page.goto(`${url}#combobox`)
+    const input = page.locator('#cb-live')
+    await expect(input).toHaveAttribute('aria-autocomplete', 'list')
+    await input.press('ArrowDown')
+    await expect(page.locator('#cb-live-list').getByRole('option', { name: 'Hex bolt M8', exact: true })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  // fit-content(12rem) caps the column only at a term's min-content width, so a term must be able to wrap anywhere.
+  test('an unbroken description list term keeps the term column at 12rem', async ({ page }) => {
+    await page.goto(`${url}#description-list`)
+    const width = await page.locator('#description-list .state.wide .description-list').evaluate((list) => {
+      list.querySelector('dt')!.textContent = 'Supplierreferencewithoutanyspaceinit'
+      return list.querySelector('dt')!.getBoundingClientRect().width
+    })
+    expect(width).toBeLessThanOrEqual(192)
+  })
+})
 
 // The code block is a frame that holds the header, with the source in a panel --space-1 inside it on the
 // other sides. A live example's source is flush with its frame and is left out.
