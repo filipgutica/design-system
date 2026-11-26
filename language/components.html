@@ -2265,7 +2265,8 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
         choose(active());
         close();
       } else if (e.key === 'Escape') {
-        if (isOpen()) { close(); choose(chosen); } else choose(null);
+        // Typed text left by a list the chevron closed counts as a first press too.
+        if (isOpen() || input.value !== (chosen?.textContent ?? '')) { close(); choose(chosen); } else choose(null);
       }
     });
     input.addEventListener('blur', () => {

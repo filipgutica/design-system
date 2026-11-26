@@ -1221,11 +1221,13 @@ test.describe('live record fields', () => {
     await expect(weight).toHaveAttribute('aria-valuetext', '0 kg')
     await expect(down).toBeDisabled()
     await expect(up).toBeEnabled()
+    await weight.fill('1')
+    await expect(down).toBeEnabled()
     for (const text of ['600', 'abc', '']) {
       await weight.fill(text)
-      await expect(weight).toHaveAttribute('aria-valuenow', '0')
-      await expect(weight).toHaveAttribute('aria-valuetext', '0 kg')
-      await expect(down).toBeDisabled()
+      await expect(weight).toHaveAttribute('aria-valuenow', '1')
+      await expect(weight).toHaveAttribute('aria-valuetext', '1 kg')
+      await expect(down).toBeEnabled()
       await expect(up).toBeEnabled()
     }
   })
@@ -1250,6 +1252,14 @@ test.describe('live record fields', () => {
     await input.press('Escape')
     await expect(input).toHaveValue('')
     await expect(page.locator('#cb-live-list [aria-selected="true"]')).toHaveCount(0)
+    // A list the chevron closed still leaves typed text, so the first Escape puts the label back.
+    await page.reload()
+    await input.fill('nut')
+    await page.locator('[data-live-combobox] .combobox-toggle').click()
+    await expect(input).toHaveAttribute('aria-expanded', 'false')
+    await input.press('Escape')
+    await expect(input).toHaveValue('Hex bolt M8')
+    await expect(page.locator('#cb-live-list [aria-selected="true"]')).toHaveText(['Hex bolt M8'])
   })
 
   test('the chosen option is named without its check, and the field autocompletes from a list', async ({ page }) => {
