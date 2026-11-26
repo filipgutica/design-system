@@ -206,10 +206,10 @@ const selectors = (list) => {
 // on its own with its @media context. Focus selectors are left out because each page lists its own
 // controls in one focus rule, by role. Each family names the pages that must copy it.
 const families = [
-  { name: 'button and quiet action', pattern: /^(?:a)?\.btn\b|^\.quiet-action\b|^:where\(\.quiet-action\)/, pages: ['reference.html', 'docs.html', 'product.html'] },
+  { name: 'button and quiet action', pattern: /^(?:a)?\.btn\b|^\.quiet-action\b|^:where\(\.quiet-action\)/, pages: ['reference.html', 'docs.html', 'guide.html', 'product.html'] },
   { name: 'segmented control', pattern: /^\.segmented\b/, pages: ['reference.html'] },
   { name: 'tabs', pattern: /^\.tab(?:list)?\b/, pages: ['reference.html'] },
-  { name: 'navigation row', pattern: /^\.navlist\b/, pages: ['docs.html', 'reference.html'] },
+  { name: 'navigation row', pattern: /^\.navlist\b/, pages: ['docs.html', 'guide.html', 'reference.html'] },
   { name: 'rail current section', pattern: /^:is\(\.rail, \.rail-specimen\)/, pages: ['docs.html'] },
   { name: 'checkbox and radio', pattern: /^\.check\b/, pages: ['reference.html'] },
   { name: 'badge', pattern: /^\.badge\b/, pages: ['reference.html'] },
@@ -243,7 +243,7 @@ const referenceTouchWidths = new Set([
 
 test('example pages copy the catalogue rules for the shared controls and components they use unchanged', () => {
   const catalogue = new Set(copiedStyles(read('components.html')).map(key))
-  for (const page of ['reference.html', 'docs.html', 'product.html']) {
+  for (const page of ['reference.html', 'docs.html', 'guide.html', 'product.html']) {
     const rules = copiedStyles(read(page))
     for (const { name, pattern, pages } of families) {
       const copied = rules.filter(({ selector }) => pattern.test(selector))
@@ -343,7 +343,7 @@ test('the state guard catches a rail page that drops the current-section recipe'
 })
 
 test('example pages copy the state rules of every component variant their markup uses', () => {
-  assert.deepEqual(['reference.html', 'docs.html', 'product.html'].flatMap((page) => missingStates(page, read(page))), [])
+  assert.deepEqual(['reference.html', 'docs.html', 'guide.html', 'product.html'].flatMap((page) => missingStates(page, read(page))), [])
 })
 
 // Viewport media queries use only the two named breakpoints, the desktop-only query, and the
