@@ -126,7 +126,49 @@
   .picker li { display: flex; align-items: center; min-height: var(--control-sm); padding: var(--space-2) var(--space-3); border-radius: calc(var(--radius-panel) - var(--space-1)); }
   .picker li.is-hover { background: var(--color-row-hover); }
   .picker li[aria-selected="true"] { background: var(--color-row-selected); }
-  .picker li[aria-selected="true"]::after { content: "✓"; margin-left: auto; color: var(--color-accent); }
+  /* The check is decorative: aria-selected carries the state, so the empty alternative text keeps it out of the name. */
+  .picker li[aria-selected="true"]::after { content: "✓" / ""; margin-left: auto; color: var(--color-accent); }
+
+  /* Combobox: an editable field with the select's chevron, over a listbox in the picker recipe. Focus stays in
+     the field: aria-activedescendant names the active option, which takes the hover fill and the inset ring.
+     Options are rows, --row tall. */
+  .combobox { position: relative; width: 100%; }
+  .combobox > .input { padding-inline-end: 1.75rem; }
+  /* The chevron is a button out of the Tab order, drawn as the styled select's corner. */
+  .combobox-toggle { position: absolute; top: 0; inset-inline-end: 0; height: var(--control-md); display: grid; place-items: center; width: 1.75rem; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--color-muted); }
+  .combobox-toggle::before { content: ""; width: var(--space-2); height: var(--space-2); border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); }
+  .combobox-toggle:disabled { opacity: 0.58; cursor: not-allowed; }
+  .combobox > .picker { position: absolute; z-index: 3; top: 100%; inset-inline-start: 0; width: 100%; max-height: min(20rem, 50dvh); overflow: auto; margin-top: var(--space-1); }
+  .combobox > .picker[hidden], .combobox [role="option"][hidden] { display: none; }
+  /* A pinned specimen draws the open list in the flow, so its row holds it. */
+  [inert] .combobox > .picker { position: static; }
+  .combobox [role="option"] { min-height: var(--row); padding-block: 0; }
+  .combobox [role="option"]:is(.is-hover, [data-active]) { background: var(--color-row-hover); }
+  @media (hover: hover) { .combobox [role="option"]:not([aria-disabled="true"]):hover { background: var(--color-row-hover); } }
+  .combobox [role="option"][data-active] { outline: var(--focus-width) solid var(--color-focus); outline-offset: calc(var(--focus-width) * -1); }
+  .combobox [role="option"][aria-disabled="true"] { color: var(--color-muted); font-size: var(--text-sm); }
+
+  /* Number field: a wrapper in the field recipe, as the search wrapper is, holding the decrease button, the
+     input, an optional unit, and the increase button. The wrapper carries the fill, edge, shadow, and focus. Each
+     button spans the wrapper's 1px edges, so its box is the control height square (44px at tablet width), and takes
+     the field's corners, so its tint meets the wrapper's own. The wrapper does not clip, because a clip would also
+     cut the buttons' tap area along the edge. */
+  .number-field { --depth: var(--shadow-field); --field-height: var(--control-md); display: flex; width: 100%; height: var(--field-height); border: 1px solid var(--color-field-edge); border-radius: var(--radius-field); background: var(--color-field-bg); box-shadow: var(--depth); color: var(--color-text); font: var(--text-md) / 1.35 var(--font-ui); }
+  .number-field[data-size="sm"] { --field-height: var(--control-sm); font-size: var(--text-sm); }
+  .number-field[data-size="lg"] { --field-height: var(--control-lg); font-size: var(--text-lg); }
+  /* A zero width lets the input take the free space without its intrinsic width widening the field. */
+  .number-field > input { flex: 1; width: 0; min-width: 0; padding: 0 var(--space-2); border: 0; outline: 0; background: transparent; color: inherit; font: inherit; font-variant-numeric: tabular-nums; text-align: end; }
+  .number-field > input:has(+ .number-unit) { padding-inline-end: 0; }
+  .number-unit { align-self: center; padding-inline: var(--space-1) var(--space-2); color: var(--color-muted); font-size: var(--text-sm); }
+  /* :where keeps the quiet action's hover and press colours above this rest colour. */
+  .number-field > :where(.quiet-action) { flex: none; width: var(--field-height); margin-block: -1px; padding: 0; border: 0; border-radius: var(--radius-field); color: var(--color-muted); }
+  .number-field > :where(.quiet-action:first-child) { margin-inline-start: -1px; }
+  .number-field > :where(.quiet-action:last-child) { margin-inline-end: -1px; }
+  .number-field:has(input[aria-invalid="true"]) { border-color: var(--color-error); }
+  .number-field:has(input:disabled) { background: var(--color-well); box-shadow: none; opacity: 0.58; cursor: not-allowed; }
+  .number-field > input:disabled { cursor: not-allowed; }
+  /* The wrapper already fades, so its disabled buttons do not fade again. */
+  .number-field:has(input:disabled) > .quiet-action:disabled { opacity: 1; }
 
   /* Overflow menu: a quiet-action trigger and a floating list of actions (the WAI-ARIA menu button pattern). */
   .overflow { position: relative; display: inline-flex; }
@@ -344,6 +386,34 @@
   .card-head h4 { font-size: var(--text-md); font-weight: var(--weight-medium); line-height: var(--leading); letter-spacing: 0; }
   .card-body { padding: 0 var(--space-4) var(--space-4); font-size: var(--text-sm); color: var(--color-muted); }
   .card-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3); margin-inline: var(--space-4); padding-block: var(--space-3); border-top: 1px solid var(--color-border-subtle); color: var(--color-muted); font-size: var(--text-sm); }
+
+  /* Description list: one record's details as term and value pairs, each pair in a div. Each pair is a subgrid
+     row, so the terms share one column as wide as the longest term, up to 12rem. In a container under 30rem each
+     term sits above its value. */
+  .description-list { display: grid; grid-template-columns: fit-content(12rem) minmax(0, 1fr); gap: var(--space-2) var(--space-4); margin: 0; }
+  .description-list > div { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: first baseline; }
+  /* A term wraps anywhere, so an unbroken term cannot push the fit-content(12rem) column past its cap. */
+  .description-list dt { color: var(--color-muted); font-size: var(--text-sm); overflow-wrap: anywhere; }
+  .description-list dd { min-width: 0; margin: 0; color: var(--color-text); font-size: var(--text-md); font-variant-numeric: tabular-nums; }
+  .description-list dd[data-empty] { color: var(--color-muted); }
+  .description-list dd .quiet-action { width: var(--control-sm); height: var(--control-sm); margin-inline-start: var(--space-1); vertical-align: middle; color: var(--color-muted); }
+  @container (max-width: 30rem) {
+    .description-list { grid-template-columns: minmax(0, 1fr); }
+    .description-list > div { row-gap: var(--space-1); }
+  }
+
+  /* Stat tile: a headline count on the surface fill, in a grid of tiles outside a card. The label comes first in
+     the DOM, and the value takes no status colour. A linked tile fills on hover and takes the focus ring. */
+  .stat-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--space-4); width: 100%; }
+  .stat, .stat > dl { display: grid; align-content: start; gap: var(--space-1); min-width: 0; margin: 0; }
+  .stat { padding: var(--space-4); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface); color: var(--color-text); text-decoration: none; }
+  .stat-label { color: var(--color-muted); font-size: var(--text-sm); }
+  .stat-value { margin: 0; font: var(--weight-semibold) var(--text-2xl) / var(--leading-tight) var(--font-ui); font-variant-numeric: tabular-nums; }
+  .stat-unit { color: var(--color-muted); font-size: var(--text-sm); font-weight: var(--weight-regular); }
+  .stat-context { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; color: var(--color-muted); font-size: var(--text-sm); }
+  a.stat { transition: background-color var(--duration-fast) var(--ease-out); }
+  a.stat.is-hover { background: var(--color-row-hover); }
+  @media (hover: hover) { a.stat:hover { background: var(--color-row-hover); } }
 
   /* Figure */
   .figure { display: grid; gap: var(--space-3); min-width: 0; margin: 0; }
@@ -816,7 +886,7 @@
   /* One ring for every role: --focus-width of --color-focus (the accent) with a --focus-offset gap and no
      glow, over the control's own raise or sink. The tokens.css base draws it on links; these rules pin
      it and move it to the visible part of composite controls. */
-  :is(.btn, .quiet-action, .check input, .segmented button, .toggle, .crumbs a, .chip, .tool > summary):is(:focus-visible, .is-focus),
+  :is(.btn, .quiet-action, .check input, .segmented button, .toggle, .crumbs a, .chip, .tool > summary, a.stat):is(:focus-visible, .is-focus),
   :is(.dialog, .drawer, .slideout):focus-visible,
   .switch:is(:focus-visible, .is-focus) .switch-track,
   .radio-card:has(input:is(:focus-visible, .is-focus)) { outline: var(--focus-width) solid var(--color-focus); outline-offset: var(--focus-offset); }
@@ -831,10 +901,13 @@
   .search:has(input[aria-invalid="true"]) { border-color: var(--color-error); }
   .search:has(input[aria-invalid="true"]):is(:has(input:focus-visible), .is-focus) { border-color: var(--color-error); box-shadow: var(--shadow-field-focus-invalid); }
   .search:has(input:disabled) { background: var(--color-well); box-shadow: none; opacity: 0.58; cursor: not-allowed; }
+  /* The number field wrapper takes the field focus in the same way, and the invalid edge and line through its input. */
+  .number-field:is(:has(input:focus-visible), .is-focus) { outline: none; border-color: var(--color-accent); box-shadow: var(--shadow-field-focus); }
+  .number-field:has(input[aria-invalid="true"]):is(:has(input:focus-visible), .is-focus) { border-color: var(--color-error); box-shadow: var(--shadow-field-focus-invalid); }
 
   @media (forced-colors: active) {
     /* The inset accent line drops, so a focused field draws the system ring just inside its edge. */
-    :is(.input, .select, .textarea):is(:focus-visible, .is-focus), .search:is(:has(input:focus-visible), .is-focus), .composer-box:is(:has(textarea:focus-visible), .is-focus) { outline: var(--focus-width) solid Highlight; outline-offset: -1px; }
+    :is(.input, .select, .textarea):is(:focus-visible, .is-focus), .search:is(:has(input:focus-visible), .is-focus), .number-field:is(:has(input:focus-visible), .is-focus), .composer-box:is(:has(textarea:focus-visible), .is-focus) { outline: var(--focus-width) solid Highlight; outline-offset: -1px; }
     /* The lifted fill drops, so the selected tab takes a system border; the padding absorbs it. */
     .tab[aria-selected="true"] { border: 2px solid Highlight; padding-inline: calc(var(--tab-pad) - 2px); }
     .tab[aria-selected="true"]::before { content: none; }
@@ -877,6 +950,12 @@
     /* WebKit draws the range on the track. The thumb inherits the opt-out, so it takes adjustment back. */
     .range::-webkit-slider-runnable-track { forced-color-adjust: none; background: linear-gradient(Highlight, Highlight) 0 / var(--value, 50%) 100% no-repeat, Canvas; }
     .range::-webkit-slider-thumb { forced-color-adjust: auto; }
+    /* The combobox's active option keeps an inset system ring, and the chosen option's check the system text colour. */
+    .combobox [role="option"][data-active] { outline: var(--focus-width) solid Highlight; outline-offset: calc(var(--focus-width) * -1); }
+    .combobox [role="option"][aria-selected="true"]::after { color: CanvasText; }
+    /* The number field's signs take the button text colour, and a button at its limit the disabled colour. */
+    .number-field > .quiet-action { color: ButtonText; }
+    .number-field > .quiet-action:disabled { color: GrayText; }
   }
 
   /* ---------- Catalogue page ---------- */
@@ -931,7 +1010,11 @@
   .caption { color: var(--color-muted); font-size: var(--text-xs); }
   .wide { flex-basis: 100%; }
   /* Fields fill their container; the catalogue gives each specimen a preferred width. */
-  .state > :is(.field, .input, .select, .textarea, .search) { width: 220px; }
+  .state > :is(.field, .input, .select, .textarea, .search, .number-field) { width: 220px; }
+  /* A description list stacks by its container's width, so its specimen is the container. The narrow specimen
+     is 20rem wide, under the 30rem query. */
+  .state:has(> .description-list) { container-type: inline-size; }
+  .state.narrow { flex: 0 1 20rem; }
   .state .pager { padding-top: 0; border-top: 0; }
   .rail-specimen { display: grid; gap: var(--space-3); width: 240px; }
   .phone-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); width: min(100%, 360px); padding-block: var(--space-2); border-bottom: 1px solid var(--color-text); }
@@ -1010,6 +1093,10 @@
     .segmented:not([data-specimen="size"] *) { --item: var(--control-touch); }
     .input:not([data-specimen="size"] *), .select:not([data-specimen="size"] *), .range:not([data-specimen="size"] *) { height: var(--control-touch); }
     .search { height: var(--control-touch); }
+    .combobox [role="option"] { min-height: var(--control-touch); }
+    /* The chevron is its own target, so it grows to a square; the text stops before it. */
+    .combobox-toggle { width: var(--control-touch); }
+    .combobox > .input { padding-inline-end: var(--control-touch); }
     .check:not([data-specimen="size"] *), .switch:not([data-specimen="size"] *), .toggle:not([data-specimen="size"] *) { min-height: var(--control-touch); }
     .copy-link { width: var(--control-touch); height: var(--control-touch); }
     /* Quiet actions in docs components: 32px on desktop, 44px here. */
@@ -1064,6 +1151,7 @@
   <symbol id="i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></symbol>
   <symbol id="i-close" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
   <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 16 16"><path d="M3.5 8h9"/></symbol>
   <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></symbol>
   <symbol id="i-wrap" viewBox="0 0 16 16"><path d="M2.5 4h11M2.5 8h9a2 2 0 0 1 0 4H8.5M10 10.5 8.5 12l1.5 1.5M2.5 12h3"/></symbol>
   <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></symbol>
@@ -1123,7 +1211,7 @@
     </div>
     <div class="navlist" role="group" aria-labelledby="rail-inputs">
       <span class="group-label" id="rail-inputs">Inputs</span>
-      <a href="#text-input-and-textarea" data-terms="text input and textarea inputs type a short value or a longer note. field textbox search form">Text input and textarea</a><a href="#select" data-terms="select inputs choose from a longer list. dropdown picker menu">Select</a><a href="#field-wrapper" data-terms="field wrapper inputs label, description, and error text around a field. label help error validation form">Field wrapper</a><a href="#slider" data-terms="slider inputs set a value in a range. range">Slider</a>
+      <a href="#text-input-and-textarea" data-terms="text input and textarea inputs type a short value or a longer note. field textbox search form">Text input and textarea</a><a href="#select" data-terms="select inputs choose from a longer list. dropdown picker menu">Select</a><a href="#combobox" data-terms="combobox inputs choose one value from a long list by typing to filter it. autocomplete typeahead search select">Combobox</a><a href="#number-field" data-terms="number field inputs enter an exact amount, with steps and a unit. stepper spinbutton quantity numeric">Number field</a><a href="#field-wrapper" data-terms="field wrapper inputs label, description, and error text around a field. label help error validation form">Field wrapper</a><a href="#slider" data-terms="slider inputs set a value in a range. range">Slider</a>
     </div>
     <div class="navlist" role="group" aria-labelledby="rail-feedback">
       <span class="group-label" id="rail-feedback">Feedback and status</span>
@@ -1132,6 +1220,10 @@
     <div class="navlist" role="group" aria-labelledby="rail-containers">
       <span class="group-label" id="rail-containers">Containers and overlays</span>
       <a href="#surface-and-card" data-terms="surface and card containers and overlays panels and cards for parallel, comparable content. panel box tile">Surface and card</a><a href="#figure" data-terms="figure containers and overlays an image or diagram with a caption. image screenshot caption">Figure</a><a href="#dialog" data-terms="dialog containers and overlays a modal task that needs an answer before the page continues. modal popup sheet confirm">Dialog</a><a href="#drawer" data-terms="drawer containers and overlays navigation in a panel from the leading edge, such as phone navigation. off-canvas sidebar menu">Drawer</a><a href="#slideout" data-terms="slideout containers and overlays a modal panel from an edge for filters and secondary detail. sheet side panel flyout filters">Slideout</a>
+    </div>
+    <div class="navlist" role="group" aria-labelledby="rail-data-display">
+      <span class="group-label" id="rail-data-display">Data display</span>
+      <a href="#description-list" data-terms="description list data display the details of one record as term and value pairs. dl key value details properties">Description list</a><a href="#stat-tile" data-terms="stat tile data display a headline count with its label and context. kpi metric number summary dashboard">Stat tile</a>
     </div>
     <div class="navlist" role="group" aria-labelledby="rail-navigation">
       <span class="group-label" id="rail-navigation">Navigation</span>
@@ -1172,9 +1264,10 @@
     <div class="index-grid">
       <div><h3><a href="#group-actions">Actions</a></h3><ul><li><a href="#button">Button</a><span>The main action control: primary, secondary, ghost, danger, and text.</span></li><li><a href="#quiet-action">Quiet action</a><span>A small transparent action inside a component, such as Copy or Close.</span></li><li><a href="#overflow-menu">Overflow menu</a><span>Two or more secondary actions behind a More button.</span></li><li><a href="#chip">Chip</a><span>A small suggestion that fills in a composer or opens a screen.</span></li></ul></div>
       <div><h3><a href="#group-selection">Selection</a></h3><ul><li><a href="#checkbox-and-radio">Checkbox and radio</a><span>Pick several options, or one from a short list.</span></li><li><a href="#radio-card-group">Radio card group</a><span>Pick one option that needs a description.</span></li><li><a href="#switch">Switch</a><span>Turn a setting on or off at once.</span></li><li><a href="#toggle-button">Toggle button</a><span>A labelled card that latches on, with a switch inside.</span></li><li><a href="#segmented-control">Segmented control</a><span>Two to five short options that apply at once.</span></li></ul></div>
-      <div><h3><a href="#group-inputs">Inputs</a></h3><ul><li><a href="#text-input-and-textarea">Text input and textarea</a><span>Type a short value or a longer note.</span></li><li><a href="#select">Select</a><span>Choose from a longer list.</span></li><li><a href="#field-wrapper">Field wrapper</a><span>Label, description, and error text around a field.</span></li><li><a href="#slider">Slider</a><span>Set a value in a range.</span></li></ul></div>
+      <div><h3><a href="#group-inputs">Inputs</a></h3><ul><li><a href="#text-input-and-textarea">Text input and textarea</a><span>Type a short value or a longer note.</span></li><li><a href="#select">Select</a><span>Choose from a longer list.</span></li><li><a href="#combobox">Combobox</a><span>Choose one value from a long list by typing to filter it.</span></li><li><a href="#number-field">Number field</a><span>Enter an exact amount, with steps and a unit.</span></li><li><a href="#field-wrapper">Field wrapper</a><span>Label, description, and error text around a field.</span></li><li><a href="#slider">Slider</a><span>Set a value in a range.</span></li></ul></div>
       <div><h3><a href="#group-feedback">Feedback and status</a></h3><ul><li><a href="#progress">Progress</a><span>Show how far a task has got.</span></li><li><a href="#score">Score</a><span>Show a value out of a maximum.</span></li><li><a href="#badge">Badge</a><span>A short status label.</span></li><li><a href="#alert">Alert</a><span>A real caveat or status message in the page.</span></li></ul></div>
       <div><h3><a href="#group-containers">Containers and overlays</a></h3><ul><li><a href="#surface-and-card">Surface and card</a><span>Panels and cards for parallel, comparable content.</span></li><li><a href="#figure">Figure</a><span>An image or diagram with a caption.</span></li><li><a href="#dialog">Dialog</a><span>A modal task that needs an answer before the page continues.</span></li><li><a href="#drawer">Drawer</a><span>Navigation in a panel from the leading edge, such as phone navigation.</span></li><li><a href="#slideout">Slideout</a><span>A modal panel from an edge for filters and secondary detail.</span></li></ul></div>
+      <div><h3><a href="#group-data-display">Data display</a></h3><ul><li><a href="#description-list">Description list</a><span>The details of one record as term and value pairs.</span></li><li><a href="#stat-tile">Stat tile</a><span>A headline count with its label and context.</span></li></ul></div>
       <div><h3><a href="#group-navigation">Navigation</a></h3><ul><li><a href="#navigation-list">Navigation list</a><span>Rows of links with current page and current location.</span></li><li><a href="#section-rail">Section rail</a><span>A sticky list of sections that moves into a drawer on phones.</span></li><li><a href="#find-field">Find field</a><span>Filter a navigation list as you type.</span></li><li><a href="#breadcrumbs">Breadcrumbs</a><span>The path from the site to this page.</span></li><li><a href="#pager">Pager</a><span>Previous and next pages in a sequence.</span></li><li><a href="#tabs">Tabs</a><span>Switch panels about one object, without leaving the page.</span></li><li><a href="#skip-link">Skip link</a><span>Jump past the header to the content.</span></li><li><a href="#keyboard-key">Keyboard key</a><span>Show a key or shortcut in text.</span></li></ul></div>
       <div><h3><a href="#group-conversation">Conversation</a></h3><ul><li><a href="#message-row">Message row</a><span>One message: avatar, author, time, and body, with no bubble.</span></li><li><a href="#message-group">Message group</a><span>Consecutive messages by one author under one avatar.</span></li><li><a href="#hover-toolbar">Hover toolbar</a><span>Quick actions on a message, shown on hover or focus.</span></li><li><a href="#thread-panel">Thread panel</a><span>A resizable side pane with a message and its replies.</span></li><li><a href="#composer">Composer</a><span>One growing field with an inline send button.</span></li><li><a href="#tool-call-disclosure">Tool-call disclosure</a><span>A collapsed one-line summary of tool output or a handoff note.</span></li><li><a href="#mention">Mention</a><span>An inline @name in a message.</span></li></ul></div>
       <div><h3><a href="#group-code">Code and examples</a></h3><ul><li><a href="#code-block">Code block</a><span>Source code with an optional header and Copy, and a live example above it.</span></li></ul></div>
@@ -1458,6 +1551,45 @@
     </div></div>
   </section>
 
+  <section class="component" id="combobox" data-layer="Core" data-states="hover focus disabled invalid" aria-labelledby="combobox-title">
+    <header><h3 id="combobox-title">Combobox</h3><span class="badge">Core</span><a href="components.md#combobox">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="combobox" aria-label="Copy link to Combobox" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
+    <p class="purpose">Choose one value from a long list by typing to filter it.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a combobox to choose one value from a long or growing list that the reader can name, such as a product, a location, or a supplier.</dd><dt>Don’t</dt><dd>A combobox for about 15 options or fewer, which is a select, or a free-text field that only suggests values. Typed text never chooses by itself: on leaving the field, it goes back to the chosen option’s label, even when it names another option.</dd></dl>
+    <div class="row"><h4>Closed</h4><div class="states">
+      <div class="state"><div class="field"><label class="field-label" for="cb-live">Product</label><div class="combobox" data-live-combobox><input class="input" id="cb-live" role="combobox" aria-expanded="false" aria-controls="cb-live-list" aria-autocomplete="list" autocomplete="off" value="Hex bolt M8"><button class="combobox-toggle" type="button" tabindex="-1" aria-label="Show products"></button><ul class="picker" id="cb-live-list" role="listbox" aria-label="Products" hidden><li role="option" id="cb-live-1" aria-selected="false">Anchor bolt M10</li><li role="option" id="cb-live-2" aria-selected="false">Cap screw M5</li><li role="option" id="cb-live-3" aria-selected="false">Carriage bolt M8</li><li role="option" id="cb-live-4" aria-selected="false">Cotter pin 3 mm</li><li role="option" id="cb-live-5" aria-selected="false">Eye bolt M8</li><li role="option" id="cb-live-6" aria-selected="false">Flat washer M6</li><li role="option" id="cb-live-7" aria-selected="false">Flat washer M8</li><li role="option" id="cb-live-8" aria-selected="false">Hex bolt M6</li><li role="option" id="cb-live-9" aria-selected="true">Hex bolt M8</li><li role="option" id="cb-live-10" aria-selected="false">Hex nut M6</li><li role="option" id="cb-live-11" aria-selected="false">Hex nut M8</li><li role="option" id="cb-live-12" aria-selected="false">Lock nut M6</li><li role="option" id="cb-live-13" aria-selected="false">Machine screw M4</li><li role="option" id="cb-live-14" aria-selected="false">Rivet 4 mm</li><li role="option" id="cb-live-15" aria-selected="false">Set screw M5</li><li role="option" id="cb-live-16" aria-selected="false">Spring washer M8</li><li role="option" id="cb-live-17" aria-selected="false">Threaded rod M10</li><li role="option" id="cb-live-18" aria-selected="false">Wing nut M8</li><li role="option" id="cb-live-none" aria-disabled="true" hidden>No matches</li></ul></div><p class="sr-only" role="status" id="cb-live-count"></p></div><span class="caption">Rest, live; type to filter, or press ArrowDown</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="cb-focus">Product</label><div class="combobox"><input class="input is-focus" id="cb-focus" role="combobox" aria-expanded="false" aria-autocomplete="list" autocomplete="off" value="Hex bolt M8"><button class="combobox-toggle" type="button" tabindex="-1" aria-label="Show products"></button></div></div><span class="caption">Focus visible</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="cb-disabled">Product</label><div class="combobox"><input class="input" id="cb-disabled" role="combobox" aria-expanded="false" aria-autocomplete="list" autocomplete="off" value="Hex bolt M8" disabled><button class="combobox-toggle" type="button" tabindex="-1" aria-label="Show products" disabled></button></div></div><span class="caption">Disabled</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="cb-invalid">Product</label><div class="combobox"><input class="input" id="cb-invalid" role="combobox" aria-expanded="false" aria-autocomplete="list" autocomplete="off" value="" aria-invalid="true" aria-errormessage="cb-invalid-error"><button class="combobox-toggle" type="button" tabindex="-1" aria-label="Show products"></button></div><p class="field-error" id="cb-invalid-error">Choose a product.</p></div><span class="caption">Invalid</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="cb-invalid-focus">Product</label><div class="combobox"><input class="input is-focus" id="cb-invalid-focus" role="combobox" aria-expanded="false" aria-autocomplete="list" autocomplete="off" value="" aria-invalid="true" aria-errormessage="cb-invalid-focus-error"><button class="combobox-toggle" type="button" tabindex="-1" aria-label="Show products"></button></div><p class="field-error" id="cb-invalid-focus-error">Choose a product.</p></div><span class="caption">Invalid, focus visible</span></div>
+    </div></div>
+    <div class="row"><h4>Open</h4><div class="states">
+      <div class="state" inert><div class="field"><label class="field-label" for="cb-open">Product</label><div class="combobox"><input class="input is-focus" id="cb-open" role="combobox" aria-expanded="true" aria-controls="cb-open-list" aria-autocomplete="list" autocomplete="off" value="bolt" aria-activedescendant="cb-open-3"><button class="combobox-toggle" type="button" tabindex="-1" aria-label="Hide products"></button><ul class="picker" id="cb-open-list" role="listbox" aria-label="Products"><li role="option" id="cb-open-1" aria-selected="false" class="is-hover">Anchor bolt M10</li><li role="option" id="cb-open-2" aria-selected="false">Carriage bolt M8</li><li role="option" id="cb-open-3" aria-selected="false" data-active>Eye bolt M8</li><li role="option" id="cb-open-4" aria-selected="false">Hex bolt M6</li><li role="option" id="cb-open-5" aria-selected="true">Hex bolt M8</li></ul></div></div><span class="caption">Filtered by “bolt”: hover on Anchor bolt M10, Eye bolt M8 active, Hex bolt M8 chosen</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="cb-empty">Product</label><div class="combobox"><input class="input is-focus" id="cb-empty" role="combobox" aria-expanded="true" aria-controls="cb-empty-list" aria-autocomplete="list" autocomplete="off" value="spacer"><button class="combobox-toggle" type="button" tabindex="-1" aria-label="Hide products"></button><ul class="picker" id="cb-empty-list" role="listbox" aria-label="Products"><li role="option" id="cb-empty-none" aria-disabled="true">No matches</li></ul></div></div><span class="caption">No matches</span></div>
+    </div></div>
+  </section>
+
+  <section class="component" id="number-field" data-layer="Core" data-states="hover pressed focus disabled invalid" aria-labelledby="number-field-title">
+    <header><h3 id="number-field-title">Number field</h3><span class="badge">Core</span><a href="components.md#number-field">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="number-field" aria-label="Copy link to Number field" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
+    <p class="purpose">Enter an exact amount, with steps and a unit.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a number field for an exact amount that the reader may change by a few steps, such as a quantity or a reorder point. Show the unit in the field, and set <code>min</code> and <code>max</code> when the amount has limits.</dd><dt>Don’t</dt><dd>A number field for a code made of digits, such as a part number, an order number, or a postcode. Use a text input, because steps and digit grouping would change it. Don’t use the native <code>type="number"</code>, which changes the value on a scroll and shows its own spinner.</dd></dl>
+    <div class="row"><h4>States</h4><div class="states">
+      <div class="state"><div class="field"><label class="field-label" for="nf-live">Quantity</label><div class="number-field" data-live-number><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-live" type="text" inputmode="numeric" role="spinbutton" aria-valuetext="1,200 pcs" aria-valuenow="1200" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="1,200"><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action" type="button" tabindex="-1" aria-label="Increase quantity"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div></div><span class="caption">Rest, live; the arrow keys, Home, End, and the buttons change it</span></div>
+      <div class="state"><div class="field"><label class="field-label" for="nf-weight">Weight</label><div class="number-field" data-live-number><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease weight"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-weight" type="text" inputmode="decimal" role="spinbutton" aria-valuetext="12.5 kg" aria-valuenow="12.5" aria-valuemin="0" aria-valuemax="500" data-step="0.5" autocomplete="off" value="12.5"><span class="number-unit" aria-hidden="true">kg</span><button class="quiet-action" type="button" tabindex="-1" aria-label="Increase weight"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div></div><span class="caption">Rest, live; a fraction, in steps of 0.5</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="nf-focus">Quantity</label><div class="number-field is-focus"><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-focus" type="text" inputmode="numeric" role="spinbutton" aria-valuetext="1,200 pcs" aria-valuenow="1200" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="1,200"><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action" type="button" tabindex="-1" aria-label="Increase quantity"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div></div><span class="caption">Focus visible</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="nf-hover">Quantity</label><div class="number-field"><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-hover" type="text" inputmode="numeric" role="spinbutton" aria-valuetext="1,200 pcs" aria-valuenow="1200" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="1,200"><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action is-hover" type="button" tabindex="-1" aria-label="Increase quantity"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div></div><span class="caption">Hover on Increase</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="nf-pressed">Quantity</label><div class="number-field"><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-pressed" type="text" inputmode="numeric" role="spinbutton" aria-valuetext="1,200 pcs" aria-valuenow="1200" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="1,200"><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action is-active" type="button" tabindex="-1" aria-label="Increase quantity"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div></div><span class="caption">Pressed Increase</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="nf-min">Quantity</label><div class="number-field"><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity" disabled><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-min" type="text" inputmode="numeric" role="spinbutton" aria-valuetext="0 pcs" aria-valuenow="0" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="0"><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action" type="button" tabindex="-1" aria-label="Increase quantity"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div></div><span class="caption">At the minimum: Decrease is disabled</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="nf-disabled">Quantity</label><div class="number-field"><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity" disabled><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-disabled" type="text" inputmode="numeric" role="spinbutton" aria-valuetext="1,200 pcs" aria-valuenow="1200" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="1,200" disabled><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action" type="button" tabindex="-1" aria-label="Increase quantity" disabled><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div></div><span class="caption">Disabled</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="nf-invalid">Quantity</label><div class="number-field"><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-invalid" type="text" inputmode="numeric" role="spinbutton" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="" aria-invalid="true" aria-errormessage="nf-invalid-error"><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action" type="button" tabindex="-1" aria-label="Increase quantity"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div><p class="field-error" id="nf-invalid-error">Enter a quantity.</p></div><span class="caption">Invalid</span></div>
+      <div class="state" inert><div class="field"><label class="field-label" for="nf-invalid-focus">Quantity</label><div class="number-field is-focus"><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-invalid-focus" type="text" inputmode="numeric" role="spinbutton" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="" aria-invalid="true" aria-errormessage="nf-invalid-focus-error"><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action" type="button" tabindex="-1" aria-label="Increase quantity"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div><p class="field-error" id="nf-invalid-focus-error">Enter a quantity.</p></div><span class="caption">Invalid, focus visible</span></div>
+    </div></div>
+    <div class="row"><h4>Sizes</h4><div class="states">
+      <div class="state" inert data-specimen="size"><div class="number-field" data-size="sm"><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-sm" type="text" inputmode="numeric" role="spinbutton" aria-valuetext="24 pcs" aria-valuenow="24" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="24" aria-label="Small quantity"><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action" type="button" tabindex="-1" aria-label="Increase quantity"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div><span class="caption">sm</span></div>
+      <div class="state" inert data-specimen="size"><div class="number-field" data-size="md"><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-md" type="text" inputmode="numeric" role="spinbutton" aria-valuetext="24 pcs" aria-valuenow="24" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="24" aria-label="Medium quantity"><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action" type="button" tabindex="-1" aria-label="Increase quantity"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div><span class="caption">md</span></div>
+      <div class="state" inert data-specimen="size"><div class="number-field" data-size="lg"><button class="quiet-action" type="button" tabindex="-1" aria-label="Decrease quantity"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button><input id="nf-lg" type="text" inputmode="numeric" role="spinbutton" aria-valuetext="24 pcs" aria-valuenow="24" aria-valuemin="0" aria-valuemax="9999" autocomplete="off" value="24" aria-label="Large quantity"><span class="number-unit" aria-hidden="true">pcs</span><button class="quiet-action" type="button" tabindex="-1" aria-label="Increase quantity"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button></div><span class="caption">lg</span></div>
+    </div></div>
+  </section>
+
   <section class="component" id="field-wrapper" data-layer="Core" data-states="invalid" aria-labelledby="fieldw-title">
     <header><h3 id="fieldw-title">Field wrapper</h3><span class="badge">Core</span><a href="components.md#field-wrapper">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="field-wrapper" aria-label="Copy link to Field wrapper" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
     <p class="purpose">Label, description, and error text around a field.</p>
@@ -1594,6 +1726,32 @@
     </div></div>
     <div class="row"><h4>In place</h4><div class="states">
       <div class="state wide" inert><div class="slideout" role="dialog" aria-labelledby="so-static-title"><div class="slideout-head"><h4 id="so-static-title">Filters</h4><button class="quiet-action close" type="button" aria-label="Close filters"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="slideout-body"><fieldset class="filters"><legend class="field-label">Status</legend><label class="check"><input type="checkbox" checked>Alerting</label><label class="check"><input type="checkbox" checked>Warning</label><label class="check"><input type="checkbox">Healthy</label></fieldset></div><div class="slideout-foot"><button class="btn secondary" type="button">Reset</button><button class="btn" type="button">Apply</button></div></div><span class="caption">Open, pinned: header, body, and footer</span></div>
+    </div></div>
+  </section>
+
+  <section class="layer-head" id="group-data-display" aria-labelledby="group-data-display-title">
+    <h2 id="group-data-display-title">Data display</h2>
+    <p>Show the details and headline counts of records.</p>
+  </section>
+
+  <section class="component" id="description-list" data-layer="Core" aria-labelledby="description-list-title">
+    <header><h3 id="description-list-title">Description list</h3><span class="badge">Core</span><a href="components.md#description-list">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="description-list" aria-label="Copy link to Description list" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
+    <p class="purpose">The details of one record as term and value pairs.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use a description list for the details of one record, such as a product’s location, supplier, and reorder point. Order the terms the way the reader checks them, most used first.</dd><dt>Don’t</dt><dd>A description list to compare several records, which is a table, or a border or fill on each pair. Leave a pair out only when it never applies to the record; when it applies and is empty, write “None”.</dd></dl>
+    <div class="row"><h4>Layouts</h4><div class="states">
+      <div class="state wide"><dl class="description-list"><div><dt>Location</dt><dd><span id="dl-wide-location">Aisle 4, bay 2</span><button class="quiet-action" type="button" data-copy="dl-wide-location" aria-label="Copy location"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></dd></div><div><dt>Supplier</dt><dd><a href="#description-list">Example supplier</a></dd></div><div><dt>In stock</dt><dd>1,284 pcs</dd></div><div><dt>Reorder point</dt><dd>200 pcs</dd></div><div><dt>Status</dt><dd><span class="badge success">In stock</span></dd></div><div><dt>Last counted</dt><dd data-empty>None</dd></div></dl><span class="caption">Wide container, live: the terms share one column; Copy, the link, and the badge sit in values, and Last counted is not set</span></div>
+      <div class="state narrow" inert><dl class="description-list"><div><dt>Location</dt><dd><span id="dl-narrow-location">Aisle 4, bay 2</span><button class="quiet-action" type="button" data-copy="dl-narrow-location" aria-label="Copy location"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></dd></div><div><dt>Supplier</dt><dd><a href="#description-list">Example supplier</a></dd></div><div><dt>In stock</dt><dd>1,284 pcs</dd></div><div><dt>Reorder point</dt><dd>200 pcs</dd></div><div><dt>Status</dt><dd><span class="badge success">In stock</span></dd></div><div><dt>Last counted</dt><dd data-empty>None</dd></div></dl><span class="caption">Container under 30rem: each term sits above its value</span></div>
+    </div></div>
+  </section>
+
+  <section class="component" id="stat-tile" data-layer="Core" data-states="hover focus" aria-labelledby="stat-tile-title">
+    <header><h3 id="stat-tile-title">Stat tile</h3><span class="badge">Core</span><a href="components.md#stat-tile">Spec</a><button class="quiet-action copy-link" type="button" data-copy-link="stat-tile" aria-label="Copy link to Stat tile" title="Copy link"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg></button></header>
+    <p class="purpose">A headline count with its label and context.</p>
+    <dl class="guidance"><dt>Do</dt><dd>Use stat tiles for a few headline counts at the top of an overview, such as items in stock and items below their reorder point, each with a context line that says what the number means. Link a tile to the list of records it counts.</dd><dt>Don’t</dt><dd>A border on each tile or a tile inside a card. Don’t colour the value to show good or bad: a badge or the context line says it in words. Don’t add a trend arrow or a sparkline without the period it compares.</dd></dl>
+    <div class="row"><h4>Tiles</h4><div class="states">
+      <div class="state wide"><div class="stat-tiles"><div class="stat"><dl><dt class="stat-label">In stock</dt><dd class="stat-value">1,284 <span class="stat-unit">items</span></dd><dd class="stat-context">Across 3 locations</dd></dl></div><a class="stat" href="#stat-tile"><span class="stat-label">Below reorder point</span><span class="sr-only">, </span><span class="stat-value">8 <span class="stat-unit">items</span></span><span class="sr-only">, </span><span class="stat-context">3 have no open order</span></a><div class="stat"><dl><dt class="stat-label">Open orders</dt><dd class="stat-value">5</dd><dd class="stat-context"><span class="badge warning">2 late</span>3 arrive this week</dd></dl></div></div><span class="caption">Rest, live: Below reorder point is a link; Open orders says it in a badge</span></div>
+      <div class="state" inert><a class="stat is-hover" href="#stat-tile"><span class="stat-label">Below reorder point</span><span class="sr-only">, </span><span class="stat-value">8 <span class="stat-unit">items</span></span><span class="sr-only">, </span><span class="stat-context">3 have no open order</span></a><span class="caption">Linked tile, hover</span></div>
+      <div class="state" inert><a class="stat is-focus" href="#stat-tile"><span class="stat-label">Below reorder point</span><span class="sr-only">, </span><span class="stat-value">8 <span class="stat-unit">items</span></span><span class="sr-only">, </span><span class="stat-context">3 have no open order</span></a><span class="caption">Linked tile, focus visible</span></div>
     </div></div>
   </section>
 
@@ -1925,8 +2083,11 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
       <tr data-for="segmented-control"><th scope="row"><a href="#segmented-control">Segmented control</a></th><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td></tr>
       <tr data-for="text-input-and-textarea"><th scope="row"><a href="#text-input-and-textarea">Text input and textarea</a></th><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td></tr>
       <tr data-for="select"><th scope="row"><a href="#select">Select</a></th><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td></tr>
+      <tr data-for="combobox"><th scope="row"><a href="#combobox">Combobox</a></th><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td></tr>
+      <tr data-for="number-field"><th scope="row"><a href="#number-field">Number field</a></th><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td></tr>
       <tr data-for="field-wrapper"><th scope="row"><a href="#field-wrapper">Field wrapper</a></th><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td></tr>
       <tr data-for="slider"><th scope="row"><a href="#slider">Slider</a></th><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td></tr>
+      <tr data-for="stat-tile"><th scope="row"><a href="#stat-tile">Stat tile</a></th><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td></tr>
       <tr data-for="navigation-list"><th scope="row"><a href="#navigation-list">Navigation list</a></th><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td></tr>
       <tr data-for="tabs"><th scope="row"><a href="#tabs">Tabs</a></th><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td></tr>
       <tr data-for="message-row"><th scope="row"><a href="#message-row">Message row</a></th><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span aria-hidden="true">●</span><span class="sr-only">Yes</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td><td><span class="none" aria-hidden="true">–</span><span class="sr-only">No</span></td></tr>
@@ -2034,6 +2195,174 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
     const value = document.querySelector(`output[for="${r.id}"]`);
     if (value) value.value = `${r.value}%`;
   }));
+
+  // Combobox: typing opens the list and filters it, keeping the options' order. Focus stays in the field, and
+  // aria-activedescendant names the active option. Only Enter on the active option, or a click, chooses: leaving
+  // the field keeps the choice and puts its label back, even when the text names another option. The first Escape
+  // closes the list and puts the label back; the second clears the text and the choice. The match count is
+  // announced after a 500ms pause, as in Find.
+  document.querySelectorAll('[data-live-combobox]').forEach((box) => {
+    const input = box.querySelector('[role="combobox"]');
+    const list = box.querySelector('[role="listbox"]');
+    const toggle = box.querySelector('.combobox-toggle');
+    const options = [...list.querySelectorAll('[role="option"]:not([aria-disabled="true"])')];
+    const none = list.querySelector('[role="option"][aria-disabled="true"]');
+    const count = box.parentElement.querySelector('[role="status"]');
+    let chosen = options.find((option) => option.getAttribute('aria-selected') === 'true') ?? null;
+    let announce;
+    const isOpen = () => !list.hidden;
+    const active = () => options.find((option) => option.hasAttribute('data-active'));
+    const setActive = (target) => {
+      options.forEach((option) => option.toggleAttribute('data-active', option === target));
+      if (!target) { input.removeAttribute('aria-activedescendant'); return; }
+      input.setAttribute('aria-activedescendant', target.id);
+      target.scrollIntoView({ block: 'nearest' });
+    };
+    // Shows the options that contain the query. Opening on the chosen label shows every option.
+    const filter = (query) => {
+      const words = query.trim().toLowerCase();
+      options.forEach((option) => { option.hidden = !option.textContent.toLowerCase().includes(words); });
+      const shown = options.filter((option) => !option.hidden).length;
+      none.hidden = shown > 0;
+      clearTimeout(announce);
+      announce = setTimeout(() => { count.textContent = shown ? `${shown} ${shown === 1 ? 'match' : 'matches'}` : 'No matches'; }, 500);
+    };
+    const open = (query = input.value === chosen?.textContent ? '' : input.value) => {
+      filter(query);
+      list.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', 'Hide products');
+    };
+    const close = () => {
+      setActive(null);
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Show products');
+      clearTimeout(announce);
+      count.textContent = '';
+    };
+    const choose = (option) => {
+      chosen = option;
+      options.forEach((each) => each.setAttribute('aria-selected', String(each === option)));
+      input.value = option?.textContent ?? '';
+    };
+    // Moves the active option by one among the shown options, and stops at either end.
+    const move = (by) => {
+      const shown = options.filter((option) => !option.hidden);
+      if (!shown.length) return;
+      const at = shown.indexOf(active());
+      setActive(shown[at < 0 ? (by > 0 ? 0 : shown.length - 1) : Math.min(Math.max(at + by, 0), shown.length - 1)]);
+    };
+    input.addEventListener('input', () => { setActive(null); open(input.value); });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (isOpen()) move(1); else open();
+      } else if (e.key === 'ArrowUp' && isOpen()) {
+        e.preventDefault();
+        move(-1);
+      } else if (e.key === 'Enter' && isOpen() && active()) {
+        e.preventDefault();
+        choose(active());
+        close();
+      } else if (e.key === 'Escape') {
+        // Typed text left by a list the chevron closed counts as a first press too.
+        if (isOpen() || input.value !== (chosen?.textContent ?? '')) { close(); choose(chosen); } else choose(null);
+      }
+    });
+    input.addEventListener('blur', () => {
+      close();
+      choose(chosen);
+    });
+    // A press on the list or the chevron keeps focus in the field.
+    [list, toggle].forEach((part) => part.addEventListener('mousedown', (e) => e.preventDefault()));
+    list.addEventListener('click', (e) => {
+      const option = e.target.closest('[role="option"]:not([aria-disabled="true"])');
+      if (!option) return;
+      choose(option);
+      close();
+    });
+    toggle.addEventListener('click', () => {
+      input.focus();
+      if (isOpen()) close(); else open();
+    });
+  });
+
+  // Number field: the arrow keys change the value by one step, Shift with an arrow by ten, and Home and End jump to
+  // the limits. The value shows with the locale's digit grouping, written back when the field loses focus. A button
+  // at a limit is disabled, and a held button repeats its step after a 400ms pause.
+  // The format keeps every fraction digit the value holds, so the field, aria-valuenow, and aria-valuetext agree.
+  const grouped = new Intl.NumberFormat(undefined, { maximumFractionDigits: 20 });
+  const [groupMark, decimalMark] = ['group', 'decimal'].map((type) => grouped.formatToParts(1000.5).find((part) => part.type === type)?.value ?? '');
+  const minusSign = (grouped.formatToParts(-1).find((part) => part.type === 'minusSign')?.value ?? '-').replace(/[\u061c\u200e\u200f]/g, '');
+  const digits = new Map([...Array(10).keys()].map((digit) => [grouped.format(digit), String(digit)]));
+  // Reads what the formatter writes: its group and decimal marks and its digits. Empty text is not a number.
+  const readNumber = (text) => {
+    // Direction marks around a sign (as in ar-EG) are not part of the number.
+    const plain = [...text.trim().replace(/[\u061c\u200e\u200f]/g, '').replaceAll(groupMark, '').replace(decimalMark, '.').replace(minusSign, '-')].map((char) => digits.get(char) ?? char).join('');
+    return plain ? Number(plain) : NaN;
+  };
+  document.querySelectorAll('[data-live-number]').forEach((field) => {
+    const input = field.querySelector('[role="spinbutton"]');
+    const [down, up] = field.querySelectorAll('button');
+    const min = Number(input.getAttribute('aria-valuemin'));
+    const max = Number(input.getAttribute('aria-valuemax'));
+    const step = Number(input.dataset.step ?? 1);
+    // The unit is aria-hidden, so the value text carries it.
+    const unit = field.querySelector('.number-unit')?.textContent;
+    // The last number in range the field showed: the ARIA value, its text, the buttons, and the base of the next step.
+    let shown;
+    const reflect = (number) => {
+      shown = number;
+      input.setAttribute('aria-valuenow', String(number));
+      if (unit) input.setAttribute('aria-valuetext', `${grouped.format(number)} ${unit}`);
+      down.disabled = number <= min;
+      up.disabled = number >= max;
+    };
+    const set = (next) => {
+      // The value is what the field can show, so the text, aria-valuenow, and aria-valuetext always agree.
+      const value = readNumber(grouped.format(Math.min(max, Math.max(min, next))));
+      input.value = grouped.format(value);
+      reflect(value);
+    };
+    // Typed text counts once it reads as a number; anything else keeps the last number shown.
+    const typed = () => {
+      const number = readNumber(input.value);
+      return Number.isFinite(number) ? number : shown;
+    };
+    // Rounding a step to six places drops the binary error that a fractional step adds; a typed value keeps its digits.
+    const stepFrom = (by) => Math.round((typed() + by) * 1e6) / 1e6;
+    // The markup's number, not its text: the text is in English, and the page may format in another locale.
+    set(Number(input.getAttribute('aria-valuenow')));
+    input.addEventListener('keydown', (e) => {
+      const by = { ArrowUp: step, ArrowDown: -step }[e.key];
+      const to = by ? stepFrom(e.shiftKey ? by * 10 : by) : { Home: min, End: max }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      set(to);
+    });
+    // A typed number in range shows at once; other text changes nothing until the change event clamps it.
+    input.addEventListener('input', () => {
+      const number = readNumber(input.value);
+      if (number >= min && number <= max) reflect(number);
+    });
+    input.addEventListener('change', () => set(typed()));
+    [[down, -step], [up, step]].forEach(([button, by]) => {
+      let timer;
+      const stop = () => clearTimeout(timer);
+      const repeat = (delay) => { timer = setTimeout(() => { if (button.disabled) return; set(stepFrom(by)); repeat(100); }, delay); };
+      // A press keeps focus where it is, steps once, and repeats while held.
+      button.addEventListener('mousedown', (e) => e.preventDefault());
+      button.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        set(stepFrom(by));
+        repeat(400);
+      });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach((type) => button.addEventListener(type, stop));
+      // A screen reader activates the button with a click that has no press before it.
+      button.addEventListener('click', (e) => { if (e.detail === 0) set(stepFrom(by)); });
+    });
+  });
 
   // A list that scrolls sideways names its clipped ends in data-clip, so CSS fades only those edges. An
   // edge with 12px or less hidden is not faded, because the fade would cover more than it hides. A focused

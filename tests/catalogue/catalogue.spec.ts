@@ -12,14 +12,15 @@ const current = (page: Page) => page.locator('#rail [aria-current="location"]')
 const controlHeights: Record<string, number> = { sm: 28, md: 32, lg: 36 }
 const touchHeight = 44
 
-// Measure compound controls at their visible boundary (the search wrapper and choice label).
+// Measure compound controls at their visible boundary (the search and number field wrappers and choice label).
 // Compact tool-call disclosures have their own recipe. The hover toolbar is hidden at touch widths.
 const controlTargets = [
-  '.btn', '.input', '.select', '.range', '.check', '.switch', '.toggle', '.search',
+  '.btn', '.input', '.select', '.range', '.check', '.switch', '.toggle', '.search', '.number-field',
   '.segmented', '.segmented > button', '.tab', '.radio-card', 'textarea',
   '[role="option"]', '.navlist a', '.crumbs a', '.group-toggle', '.chip[href]',
   '.overflow > button:not(.msg-tools *)', '.menu-list [role="menuitem"]', '.copy-link', '.page-head > .site-name',
   '.header a', '.actions > a:not(.btn)', 'button.copy', '.close', '.full', '.projects > summary', '.wrap-toggle',
+  '.number-field > .quiet-action', '.combobox-toggle',
 ].join(', ')
 
 const renderedControls = (page: Page) => page.locator(`:is(${controlTargets}):visible`).evaluateAll((elements) => elements.map((element) => {
@@ -48,6 +49,8 @@ const renderedControls = (page: Page) => page.locator(`:is(${controlTargets}):vi
     iconOption: element.matches('.segmented[data-icon-only] > button'),
     iconButton: element.matches('.btn[data-icon-only]'),
     consoleSizedButton: element.matches('.btn[data-size]'),
+    // The number field steppers and the combobox chevron are separate targets inside a field.
+    touchSquare: element.matches('.number-field > .quiet-action, .combobox-toggle'),
   }
 }))
 
@@ -82,6 +85,7 @@ for (const file of ['components.html', 'reference.html', 'product.html', 'docs.h
         }
         // A round control is a circle only on a square box, at every size and on touch.
         if (control.iconOption || control.iconButton) expect.soft(control.width, label).toBeCloseTo(height, 1)
+        if (touch && control.touchSquare && !specimenSize) expect.soft(control.width, label).toBe(touchHeight)
         if (file === 'reference.html' && touch && (option || control.consoleSizedButton)) {
           expect.soft(control.width, label).toBeGreaterThanOrEqual(expected)
         }
@@ -864,7 +868,7 @@ const contrastPairs: Record<string, Pair> = {
   'every code block header label and Copy on the frame': { selector: '.code-head :is(b, .lang, .copy)', min: 4.5 },
   'every code block Copy at rest, in muted text': { selector: '.code .copy:not(.is-hover, [data-copied])', min: 4.5 },
   'every source line, line number, and syntax colour on its panel': { selector: '.code :is(.line, .ln, .k, .s, .n, .c)', min: 4.5 },
-  'every focused field edge, on its fill and on the surface around it': { selector: ':is(.input, .select, .textarea, .search).is-focus', edge: true, min: 3 },
+  'every focused field edge, on its fill and on the surface around it': { selector: ':is(.input, .select, .textarea, .search, .number-field).is-focus', edge: true, min: 3 },
 }
 // Each specimen's text (or edge) colour over the background colours stacked under it. Chromium computes
 // colours as rgb() or color(srgb …); anything else throws, so a pair cannot pass unread. The helper does not
@@ -920,7 +924,7 @@ const below = (measured: { name: string; ratio: number; unmeasured?: string }[],
 // The slider track and the select picker are engine pseudo-elements that computed styles cannot reach;
 // the node literal-radius guard covers them.
 const shapeRoles: Record<string, string[]> = {
-  '--radius-control': ['.btn:not(.rail-summary, .menu-glyph, [data-icon-only])', '.quiet-action:not(.projects > summary, .msg-tools .quiet-action)', '.segmented:not([data-icon-only])', '.chip'],
+  '--radius-control': ['.btn:not(.rail-summary, .menu-glyph, [data-icon-only])', '.quiet-action:not(.projects > summary, .msg-tools .quiet-action, .number-field > .quiet-action)', '.segmented:not([data-icon-only])', '.chip'],
   // A lone icon that acts on its own fill: an icon-only button, on a square box.
   '--radius-circle': ['.btn[data-icon-only]'],
   '--radius-pill': ['.switch-track', '.toggle-track', '.switch-track::after', '.toggle-track::after', '.progress', '.score .pips i', '.badge', '.navlist a[aria-current="location"]::before', '.segmented[data-icon-only]'],
@@ -929,8 +933,8 @@ const shapeRoles: Record<string, string[]> = {
   '--radius-mark': ['.check input:not([type="radio"])', '.key', '.mention'],
   // One-line controls that are not actions take the field corner: the select, the project-menu trigger,
   // the labelled contents trigger at rest and pressed, its no-JavaScript summary, and the skip link.
-  '--radius-field': ['.input', '.select', '.textarea', '.search', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
-  '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist', '.menu-list', '.msg-tools', '.composer-box', '.tool-body', '.thread-demo'],
+  '--radius-field': ['.input', '.select', '.textarea', '.search', '.number-field', '.number-field > .quiet-action', '.toggle', '.pager a', '.projects > summary', '.menu-glyph', '.rail-summary', '.skip'],
+  '--radius-panel': ['.picker', '.radio-card', '.alert', '.surface', '.card', '.stat', '.figure-plate', '.dialog', '.code:not(.example > .code)', '.example', '.capture', '.projects .navlist', '.menu-list', '.msg-tools', '.composer-box', '.tool-body', '.thread-demo'],
 }
 // Shapes that sit inside a rounded container are concentric with it: its radius minus the gap. Rows that sit
 // --space-1 inside a panel, and a code block's source panel; and a segmented option and its thumb, --inset inside its track.
@@ -1137,8 +1141,184 @@ for (const colorScheme of ['light', 'dark'] as const) {
       expect(alerts).toHaveLength(5)
       for (const { text, icon } of alerts) expect(icon).toBe(text)
     })
+
+    // Each expected system colour is read from a probe, as the Wrap lines check does.
+    test('the number field signs take the button text colour, and a disabled sign the disabled colour', async ({ page }) => {
+      await page.goto(url)
+      const signs = await page.locator('#nf-min').evaluate((input) => {
+        const system = (name: string) => {
+          const probe = document.body.appendChild(document.createElement('i'))
+          probe.style.color = name
+          const colour = getComputedStyle(probe).color
+          probe.remove()
+          return colour
+        }
+        const [down, up] = [...input.parentElement!.querySelectorAll('button')].map((button) => getComputedStyle(button.querySelector('.icon')!).color)
+        return { down, up, buttonText: system('ButtonText'), grayText: system('GrayText') }
+      })
+      expect(signs.up).toBe(signs.buttonText)
+      expect(signs.down).toBe(signs.grayText)
+    })
+
+    test('the combobox active option keeps a Highlight ring inside its edge', async ({ page }) => {
+      await page.goto(url)
+      const ring = await page.locator('#cb-open-list [data-active]').evaluate((option) => {
+        const probe = document.body.appendChild(document.createElement('i'))
+        probe.style.color = 'Highlight'
+        const highlight = getComputedStyle(probe).color
+        probe.remove()
+        const style = getComputedStyle(option)
+        return { highlight, colour: style.outlineColor, style: style.outlineStyle, offset: parseFloat(style.outlineOffset) }
+      })
+      expect(ring.colour).toBe(ring.highlight)
+      expect(ring.style).toBe('solid')
+      expect(ring.offset).toBeLessThan(0)
+    })
   })
 }
+
+// The live number fields and combobox in components.html. Each locale block checks that the page reads back
+// what its own formatter writes.
+for (const { locale, quantity, weight, quantityUp } of [
+  { locale: 'de-DE', quantity: '1.200', weight: '12,5', quantityUp: '1.201' },
+  { locale: 'ar-EG', quantity: '١٬٢٠٠', weight: '١٢٫٥', quantityUp: '١٬٢٠١' },
+]) {
+  test.describe(`number field in ${locale}`, () => {
+    test.use({ locale })
+
+    test('the seed values keep their numbers, and a step reads the shown digits', async ({ page }) => {
+      await page.goto(`${url}#number-field`)
+      await expect(page.locator('#nf-live')).toHaveValue(quantity)
+      await expect(page.locator('#nf-live')).toHaveAttribute('aria-valuenow', '1200')
+      await expect(page.locator('#nf-weight')).toHaveValue(weight)
+      await expect(page.locator('#nf-weight')).toHaveAttribute('aria-valuenow', '12.5')
+      await page.locator('#nf-live').press('ArrowUp')
+      await expect(page.locator('#nf-live')).toHaveValue(quantityUp)
+      await expect(page.locator('#nf-live')).toHaveAttribute('aria-valuenow', '1201')
+      // A negative number as the locale writes it, direction marks included, reads as a number and clamps to the minimum.
+      const minusOne = await page.evaluate(() => new Intl.NumberFormat().format(-1))
+      await page.locator('#nf-weight').fill(minusOne)
+      await page.locator('#nf-weight').press('Tab')
+      await expect(page.locator('#nf-weight')).toHaveAttribute('aria-valuenow', '0')
+    })
+  })
+}
+
+test.describe('live record fields', () => {
+  test.use({ locale: 'en-US' })
+
+  test('a typed fraction keeps its digits in the field, the value, and the value text', async ({ page }) => {
+    await page.goto(`${url}#number-field`)
+    const weight = page.locator('#nf-weight')
+    await weight.fill('3.1234')
+    await weight.press('Tab')
+    await expect(weight).toHaveValue('3.1234')
+    await expect(weight).toHaveAttribute('aria-valuenow', '3.1234')
+    await expect(weight).toHaveAttribute('aria-valuetext', '3.1234 kg')
+    // Committing a typed value keeps every digit; only a step rounds.
+    await weight.fill('0.0000001')
+    await weight.press('Tab')
+    await expect(weight).toHaveValue('0.0000001')
+    await expect(weight).toHaveAttribute('aria-valuenow', '1e-7')
+    await expect(weight).toHaveAttribute('aria-valuetext', '0.0000001 kg')
+    // Past the digits the field can show, all three agree on what it shows.
+    await weight.fill('0.000000000000000000001')
+    await weight.press('Tab')
+    await expect(weight).toHaveValue('0')
+    await expect(weight).toHaveAttribute('aria-valuenow', '0')
+    await expect(weight).toHaveAttribute('aria-valuetext', '0 kg')
+  })
+
+  test('typing a number in range updates the value, its text, and both buttons; other text changes none', async ({ page }) => {
+    await page.goto(`${url}#number-field`)
+    const weight = page.locator('#nf-weight')
+    const [down, up] = [page.getByRole('button', { name: 'Decrease weight' }), page.getByRole('button', { name: 'Increase weight' })]
+    await weight.fill('0')
+    await expect(weight).toHaveAttribute('aria-valuenow', '0')
+    await expect(weight).toHaveAttribute('aria-valuetext', '0 kg')
+    await expect(down).toBeDisabled()
+    await expect(up).toBeEnabled()
+    await weight.fill('1')
+    await expect(down).toBeEnabled()
+    for (const text of ['600', 'abc', '']) {
+      await weight.fill(text)
+      await expect(weight).toHaveAttribute('aria-valuenow', '1')
+      await expect(weight).toHaveAttribute('aria-valuetext', '1 kg')
+      await expect(down).toBeEnabled()
+      await expect(up).toBeEnabled()
+    }
+    // A step starts from the number the field last showed, not from the last committed one.
+    await weight.fill('0')
+    await weight.fill('abc')
+    await weight.press('ArrowUp')
+    await expect(weight).toHaveAttribute('aria-valuenow', '0.5')
+  })
+
+  test('each stepper takes clicks over the field edge it spans', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 900 })
+    await page.goto(`${url}#number-field`)
+    for (const [name, outer] of [['Decrease quantity', 'left'], ['Increase quantity', 'right']] as const) {
+      const button = page.locator('[data-live-number]').first().getByRole('button', { name })
+      await button.scrollIntoViewIfNeeded()
+      const missed = await button.evaluate((element, outer) => {
+        const box = element.getBoundingClientRect()
+        const [middleX, middleY] = [box.left + box.width / 2, box.top + box.height / 2]
+        // The outer side, top, and bottom lie on the field's 1px edge.
+        const points = [[outer === 'left' ? box.left + 0.5 : box.right - 0.5, middleY], [middleX, box.top + 0.5], [middleX, box.bottom - 0.5]]
+        return points.filter(([x, y]) => !element.contains(document.elementFromPoint(x, y)))
+      }, outer)
+      expect(missed, name).toEqual([])
+    }
+  })
+
+  test('leaving the combobox keeps the choice, even when the text names another option', async ({ page }) => {
+    await page.goto(`${url}#combobox`)
+    const input = page.locator('#cb-live')
+    await input.fill('Hex nut M6')
+    await input.press('Tab')
+    await expect(input).toHaveValue('Hex bolt M8')
+    await expect(page.locator('#cb-live-list [aria-selected="true"]')).toHaveText(['Hex bolt M8'])
+  })
+
+  test('the first Escape closes the list and puts the chosen label back; the second clears the text and the choice', async ({ page }) => {
+    await page.goto(`${url}#combobox`)
+    const input = page.locator('#cb-live')
+    await input.fill('nut')
+    await expect(input).toHaveAttribute('aria-expanded', 'true')
+    await input.press('Escape')
+    await expect(input).toHaveAttribute('aria-expanded', 'false')
+    await expect(input).toHaveValue('Hex bolt M8')
+    await input.press('Escape')
+    await expect(input).toHaveValue('')
+    await expect(page.locator('#cb-live-list [aria-selected="true"]')).toHaveCount(0)
+    // A list the chevron closed still leaves typed text, so the first Escape puts the label back.
+    await page.reload()
+    await input.fill('nut')
+    await page.locator('[data-live-combobox] .combobox-toggle').click()
+    await expect(input).toHaveAttribute('aria-expanded', 'false')
+    await input.press('Escape')
+    await expect(input).toHaveValue('Hex bolt M8')
+    await expect(page.locator('#cb-live-list [aria-selected="true"]')).toHaveText(['Hex bolt M8'])
+  })
+
+  test('the chosen option is named without its check, and the field autocompletes from a list', async ({ page }) => {
+    await page.goto(`${url}#combobox`)
+    const input = page.locator('#cb-live')
+    await expect(input).toHaveAttribute('aria-autocomplete', 'list')
+    await input.press('ArrowDown')
+    await expect(page.locator('#cb-live-list').getByRole('option', { name: 'Hex bolt M8', exact: true })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  // fit-content(12rem) caps the column only at a term's min-content width, so a term must be able to wrap anywhere.
+  test('an unbroken description list term keeps the term column at 12rem', async ({ page }) => {
+    await page.goto(`${url}#description-list`)
+    const width = await page.locator('#description-list .state.wide .description-list').evaluate((list) => {
+      list.querySelector('dt')!.textContent = 'Supplierreferencewithoutanyspaceinit'
+      return list.querySelector('dt')!.getBoundingClientRect().width
+    })
+    expect(width).toBeLessThanOrEqual(192)
+  })
+})
 
 // The code block is a frame that holds the header, with the source in a panel --space-1 inside it on the
 // other sides. A live example's source is flush with its frame and is left out.

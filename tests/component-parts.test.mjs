@@ -37,7 +37,7 @@ const html = read('language/components.html')
 const md = read('language/components.md')
 
 test('every component section has every part, or says None with a reason', () => {
-  assert.equal(catalogueIds(html).length, 42)
+  assert.equal(catalogueIds(html).length, 46)
   assert.deepEqual(partProblems(md, catalogueIds(html)), [])
 })
 

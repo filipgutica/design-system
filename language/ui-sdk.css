@@ -154,7 +154,7 @@
   /* The check carries the state, because the selected fill equals the list's. It sits on the item, so a list
      without SelectItemIndicator still shows it. */
   [data-slot="select-item"][data-selected] { background: var(--color-row-selected); }
-  [data-slot="select-item"][data-selected]::after { content: "✓"; margin-left: auto; color: var(--color-accent); }
+  [data-slot="select-item"][data-selected]::after { content: "✓" / ""; margin-left: auto; color: var(--color-accent); }
   [data-slot="select-item-indicator"] { display: none; }
   @media (hover: hover) {
     [data-slot="select-item"][data-highlighted]:not([data-disabled]) { background: var(--color-row-hover); }
