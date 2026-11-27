@@ -861,6 +861,8 @@ const contrastPairs: Record<string, Pair> = {
   'every enabled danger button label': { selector: '.btn.danger:not(:disabled)', min: 4.5 },
   'every danger menu item': { selector: '.menu-list [role="menuitem"].danger', min: 4.5 },
   'every status badge label': { selector: '.badge:is(.success, .warning, .danger, .info)', min: 4.5 },
+  'every message tag and resolution note, on its row': { selector: '.msg-head .tag', min: 4.5 },
+  'the Agent badge on a selected message': { selector: '.msg[aria-current="true"] .msg-head .badge', min: 4.5 },
   'every enabled toggle card label and description': { selector: '.toggle:not(:disabled) :is(.toggle-text, .toggle-text small)', min: 4.5 },
   'every selected segmented label on its thumb': { selector: '.segmented button[aria-pressed="true"]:not(:disabled)', fillPseudo: '::before', min: 4.5 },
   'shell command text on the code well': { selector: '.code.command .line', min: 4.5 },
@@ -1414,6 +1416,36 @@ test.describe('conversation keyboard', () => {
     await field.fill('こんにちは')
     await field.dispatchEvent('keydown', { key: 'Enter', isComposing: true, bubbles: true, cancelable: true })
     await expect(field).toHaveValue('こんにちは')
+  })
+
+  test('at phone width a long URL wraps inside its message, and the thread header keeps its channel name and rings clear of its rule', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 900 })
+    await page.goto(url)
+    const pageWidth = () => page.evaluate(() => document.documentElement.scrollWidth)
+    const before = await pageWidth()
+    await page.locator('#message-row .msg-body p').first().evaluate((p) => { p.textContent = `https://example.com/${'a'.repeat(200)}` })
+    expect(await pageWidth()).toBe(before)
+    expect(before).toBeLessThanOrEqual(375)
+    const head = page.locator(`${liveThread} .pane-head`)
+    // The title takes the first row whole, so the channel name is not cut short.
+    expect(await head.locator('h4 span').evaluate((name) => name.scrollWidth <= name.clientWidth)).toBe(true)
+    // A focus ring reaches --focus-offset plus --focus-width (5px) outside Resolve, and must stop above the 1px rule.
+    const [box, button] = await Promise.all([head.boundingBox(), head.getByRole('button', { name: 'Resolve' }).boundingBox()])
+    expect(box!.y + box!.height - 1 - (button!.y + button!.height)).toBeGreaterThanOrEqual(5)
+  })
+
+  test('in forced colors the resolution check and the tag dot take the system text colour', async ({ browser }) => {
+    const context = await browser.newContext({ forcedColors: 'active', viewport: { width: 1280, height: 900 } })
+    const page = await context.newPage()
+    await page.goto(url)
+    const colours = await page.locator('#message-row').evaluate((section) => ({
+      text: getComputedStyle(section.querySelector('.msg-head .author')!).color,
+      check: getComputedStyle(section.querySelector('.tag.resolved .icon')!).color,
+      dot: getComputedStyle(section.querySelector('.tag:not(.resolved)')!, '::before').backgroundColor,
+    }))
+    expect(colours.check).toBe(colours.text)
+    expect(colours.dot).toBe(colours.text)
+    await context.close()
   })
 
   test('Resolve marks the thread done, ends its replies with the resolution, and moves focus to the pane heading', async ({ page }) => {
