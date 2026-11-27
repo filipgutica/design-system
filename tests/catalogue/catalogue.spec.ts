@@ -1460,6 +1460,29 @@ test.describe('conversation keyboard', () => {
     await expect(pane.locator('.pane-body .msg').last().locator('.tag')).toHaveText('Resolved the thread')
     await expect(pane.locator('.pane-body .tag:not(.resolved)')).toHaveCount(0)
     await expect(pane.locator('.composer-hint')).toContainText('A reply reopens the thread.')
+    // One reply list drives both counts, the pane's and the channel root's.
+    const rootCount = page.locator(`${liveThread} > .stream .msg[aria-current="true"] .msg-links`)
+    await expect(pane.locator('.reply-count')).toHaveText('3 replies')
+    await expect(rootCount).toHaveText('3 replies')
+    // A reply reopens the thread: the Done badge leaves, Resolve comes back, and the hint returns.
+    await pane.locator('textarea').fill('Reopening: wrap needs another look.')
+    await pane.locator('textarea').press('Enter')
+    await expect(pane.locator('.pane-head .badge')).toBeHidden()
+    await expect(pane.getByRole('button', { name: 'Resolve' })).toBeVisible()
+    await expect(pane.getByRole('status')).toHaveText('Thread reopened')
+    await expect(pane.locator('.composer-hint')).not.toContainText('reopens')
+    await expect(pane.locator('.pane-body .msg').last()).toContainText('Reopening: wrap needs another look.')
+    await expect(pane.locator('.reply-count')).toHaveText('4 replies')
+    await expect(rootCount).toHaveText('4 replies')
+  })
+
+  test('in a pane of fixed height the body scrolls and the composer stays in the pane', async ({ page }) => {
+    await page.goto(url)
+    const pane = page.locator(`${liveThread} .thread-pane`)
+    await pane.evaluate((node) => { (node as HTMLElement).style.height = '20rem' })
+    const [paneBox, composerBox] = await Promise.all([pane.boundingBox(), pane.locator('.composer').boundingBox()])
+    expect(composerBox!.y + composerBox!.height).toBeLessThanOrEqual(paneBox!.y + paneBox!.height + 0.5)
+    expect(await pane.locator('.pane-body').evaluate((body) => body.scrollHeight > body.clientHeight)).toBe(true)
   })
 
   test('the hover toolbar shows on focus within, and Left and Right Arrow move a single Tab stop', async ({ page }) => {

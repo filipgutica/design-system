@@ -20,7 +20,8 @@
 /* ---------- Alert ---------- */
 /* A caveat or status the reader needs before acting: a soft tint of its tone, with the icon in the tone. */
 .alert { display: flex; align-items: flex-start; gap: var(--space-3); max-width: var(--measure); padding: var(--space-3) var(--space-4); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface); color: var(--color-text); font-size: var(--text-sm); }
-.alert .icon { margin-top: 0.125rem; color: var(--color-muted); }
+/* The icon is a 16px line icon from the page's SVG sprite. Its size and stroke are set here, so the alert needs no page icon class. */
+.alert .icon { flex: none; width: 16px; height: 16px; margin-top: 0.125rem; color: var(--color-muted); stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .alert.success { background: var(--color-success-surface); } .alert.success .icon { color: var(--color-success); }
 .alert.warning { background: var(--color-warning-surface); } .alert.warning .icon { color: var(--color-warning); }
 .alert.danger { background: var(--color-error-surface); } .alert.danger .icon { color: var(--color-error); }

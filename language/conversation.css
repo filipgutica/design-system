@@ -40,7 +40,8 @@
 .tag:not(.resolved)::before { content: ""; flex: none; align-self: center; width: 6px; height: 6px; border-radius: 50%; background: var(--tone); }
 /* The resolution note: the post that resolves a thread, by its author. A check leads "Resolved"; "Dropped" has none. */
 .tag.resolved { color: var(--color-muted); font-weight: var(--weight-regular); }
-.tag.resolved .icon { align-self: center; width: 14px; height: 14px; color: var(--color-success); }
+/* The check is a line icon from the page's SVG sprite. Its size and stroke are set here, so the note needs no page icon class. */
+.tag.resolved .icon { flex: none; align-self: center; width: 14px; height: 14px; color: var(--color-success); stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 /* The Agent badge keeps its own fill on the selected row, whose tint nearly matches the neutral badge in light. */
 .msg[aria-current="true"] .msg-head .badge { background: var(--color-surface-raised); }
 .msg-body { max-width: var(--measure); overflow-wrap: anywhere; }
@@ -100,7 +101,8 @@
 /* The title takes the room the state badge, Resolve, and More leave, and a long channel name ends in an ellipsis. */
 .pane-head h4 { display: flex; flex: 1; align-items: baseline; gap: var(--space-2); min-width: 0; font-size: var(--text-md); letter-spacing: 0; }
 .pane-head h4 span { min-width: 0; overflow: hidden; color: var(--color-muted); font-size: var(--text-sm); font-weight: var(--weight-regular); text-overflow: ellipsis; white-space: nowrap; }
-.pane-body { flex: 1; padding: var(--space-5) var(--space-2) var(--space-3); }
+/* The body scrolls inside the pane's column, so long replies never push the composer out of a pane of fixed height. */
+.pane-body { flex: 1; min-height: 0; overflow: auto; padding: var(--space-5) var(--space-2) var(--space-3); }
 .reply-count { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-3) 0 var(--space-2); color: var(--color-muted); font-size: var(--text-xs); }
 .reply-count::after { content: ""; flex: 1; border-top: 1px solid var(--color-border-subtle); }
 .thread-pane > .composer { padding: 0 var(--space-3) var(--space-3); }
