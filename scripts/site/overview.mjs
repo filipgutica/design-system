@@ -21,7 +21,7 @@ export const EXPORT_USES = {
   './theme-builder': '<code>themeCss()</code>: a theme file (W3C Design Tokens) as the CSS to load after <code>tokens.css</code>, the same CSS the shipped themes come from; <code>parseTheme()</code> lists a file’s problems',
   './fonts.css': 'Inter and JetBrains Mono, self-hosted',
   './fonts/*': 'The font files',
-  './language/*': 'The spec, decisions, catalogue, and templates',
+  './language/*': 'The spec, decisions, catalogue, and templates, and two stylesheets to load after <code>tokens.css</code>: <code>language/feedback.css</code>, the badge and the alert, and <code>language/conversation.css</code>, the conversation components',
   './package.json': 'Package metadata',
 }
 

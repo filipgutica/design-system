@@ -30,7 +30,7 @@ const read = (path) => readFileSync(`${root}${path}`, 'utf8')
 const readJson = (path) => JSON.parse(read(path))
 
 /** The language files and folders the site serves as they ship, beside the generated pages. */
-export const COPIED = ['tokens.css', 'reference.html', 'docs.html', 'guide.html', 'product.html', 'DESIGN.md', 'components.md', 'decisions.md', 'visualizations.md', 'visualizations']
+export const COPIED = ['tokens.css', 'feedback.css', 'conversation.css', 'reference.html', 'docs.html', 'guide.html', 'product.html', 'DESIGN.md', 'components.md', 'decisions.md', 'visualizations.md', 'visualizations']
 
 /**
  * The latest release, from the ds-v* tags; the v* tags are the earlier version series. A checkout

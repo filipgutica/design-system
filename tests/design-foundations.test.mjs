@@ -7,6 +7,8 @@ import PROJECTS from './fixtures/projects.json' with { type: 'json' }
 
 const dir = new URL('../language/', import.meta.url)
 const read = (file) => readFileSync(new URL(file, dir), 'utf8')
+// Stylesheets the pages link, read as a page's <style>, so every page guard covers their rules too.
+const linkedSheets = ['feedback.css', 'conversation.css'].map((file) => [file, `<style>${read(file)}</style>`])
 
 test('the foundations catalogue shows every token that tokens.css defines', () => {
   const lightRoot = read('tokens.css').match(/^:root \{([\s\S]*?)^\}/m)[1]
@@ -155,7 +157,7 @@ test('the radius guard catches a literal corner in a rule, an inline style, a lo
 
 test('no page or the report stylesheet writes a literal corner radius', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
-  const sources = [...pages.map((page) => [page, read(page)]), ['visualizations/report.css', `<style>${read('visualizations/report.css')}</style>`]]
+  const sources = [...pages.map((page) => [page, read(page)]), ...linkedSheets, ['visualizations/report.css', `<style>${read('visualizations/report.css')}</style>`]]
   assert.deepEqual(sources.flatMap(([file, html]) => radiusLiterals(file, html)), [])
 })
 
@@ -242,7 +244,8 @@ const referenceTouchWidths = new Set([
 ])
 
 test('example pages copy the catalogue rules for the shared controls and components they use unchanged', () => {
-  const catalogue = new Set(copiedStyles(read('components.html')).map(key))
+  // The catalogue's rules include the stylesheets it links, such as feedback.css for the badge and the alert.
+  const catalogue = new Set([read('components.html'), ...linkedSheets.map(([, html]) => html)].flatMap(copiedStyles).map(key))
   for (const page of ['reference.html', 'docs.html', 'guide.html', 'product.html']) {
     const rules = copiedStyles(read(page))
     for (const { name, pattern, pages } of families) {
@@ -361,7 +364,7 @@ test('the breakpoint guard catches an unnamed viewport breakpoint in spaced or m
 })
 
 test('pages and the report stylesheet use only the named breakpoints', () => {
-  const files = [...readdirSync(dir).filter((file) => file.endsWith('.html')), 'visualizations/report.css']
+  const files = [...readdirSync(dir).filter((file) => file.endsWith('.html')), 'feedback.css', 'conversation.css', 'visualizations/report.css']
   assert.deepEqual(files.flatMap((file) => offBreakpoints(file, read(file))), [])
 })
 
@@ -403,7 +406,7 @@ test('the depth guard reads every style block and both inline quote forms', () =
 test('pages take depth from tokens.css: no literal shadow outside a focus ring or divider', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
   assert.ok(pages.includes('components.html') && pages.includes('reference.html'))
-  assert.deepEqual(pages.flatMap((page) => shadowLiterals(page, read(page))), [])
+  assert.deepEqual([...pages.map((page) => [page, read(page)]), ...linkedSheets].flatMap(([file, html]) => shadowLiterals(file, html)), [])
 })
 
 // Focus is one accent ring for every role, written from tokens. An outline that draws is
@@ -438,7 +441,7 @@ test('the focus guard catches a per-role ring colour or a hand-written ring, set
 
 test('every focus ring is the one accent ring: no per-role ring colour or hand-written ring on any page or in tokens.css', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
-  const sources = [...pages.map((page) => [page, read(page)]), ['tokens.css', `<style>${read('tokens.css')}</style>`]]
+  const sources = [...pages.map((page) => [page, read(page)]), ...linkedSheets, ['tokens.css', `<style>${read('tokens.css')}</style>`]]
   assert.deepEqual(sources.flatMap(([file, html]) => focusColourDrift(file, html)), [])
 })
 
@@ -473,6 +476,7 @@ test('type, spacing, and control sizes are rem on every page, in tokens.css, and
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
   const sources = [
     ...pages.map((page) => [page, read(page)]),
+    ...linkedSheets,
     ...['tokens.css', 'visualizations/report.css'].map((file) => [file, `<style>${read(file)}</style>`]),
   ]
   assert.deepEqual(sources.flatMap(([file, html]) => pxSizes(file, html)), [])
@@ -494,7 +498,7 @@ test('the selection-bar guard catches an inset leading-edge bar', () => {
 
 test('no page marks a selected row with an inset accent bar', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
-  assert.deepEqual(pages.flatMap((page) => selectionBars(page, read(page))), [])
+  assert.deepEqual([...pages.map((page) => [page, read(page)]), ...linkedSheets].flatMap(([file, html]) => selectionBars(file, html)), [])
 })
 
 // Colour comes from tokens.css. A page or the report stylesheet writes no hex, colour function, or named
@@ -601,7 +605,7 @@ test('the raw-colour guard catches hex, colour functions, named colours, SVG col
 
 test('no page or the report stylesheet writes a raw colour outside tokens.css', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
-  const sources = [...pages.map((page) => [page, read(page)]), ['visualizations/report.css', `<style>${read('visualizations/report.css')}</style>`]]
+  const sources = [...pages.map((page) => [page, read(page)]), ...linkedSheets, ['visualizations/report.css', `<style>${read('visualizations/report.css')}</style>`]]
   assert.deepEqual(sources.flatMap(([file, html]) => rawColours(file, html)), [])
 })
 
@@ -640,7 +644,7 @@ test('the hover guard catches a hover rule that reaches a disabled button, input
 
 test('no hover rule on any page reaches a disabled control', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
-  assert.deepEqual(pages.flatMap((page) => hoverOnDisabled(page, read(page))), [])
+  assert.deepEqual([...pages.map((page) => [page, read(page)]), ...linkedSheets].flatMap(([file, html]) => hoverOnDisabled(file, html)), [])
 })
 
 // A touch screen keeps :hover on the last element tapped, so a hover fill would stay behind after a
@@ -693,7 +697,7 @@ test('the sticky-hover guard reads the CSS that the site scripts add to a genera
 
 test('every painting hover rule on every page waits for a pointer that can hover', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
-  assert.deepEqual(pages.flatMap((page) => stickyHover(page, read(page))), [])
+  assert.deepEqual([...pages.map((page) => [page, read(page)]), ...linkedSheets].flatMap(([file, html]) => stickyHover(file, html)), [])
   assert.deepEqual(sitePages().flatMap(([file, html]) => stickyHover(`site/${file}`, html)), [])
 })
 
@@ -867,7 +871,7 @@ test('the search-width guard catches a fixed-width search input', () => {
 
 test('no search input has a fixed width', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html'))
-  assert.deepEqual(pages.flatMap((page) => fixedSearchInputs(page, read(page))), [])
+  assert.deepEqual([...pages.map((page) => [page, read(page)]), ...linkedSheets].flatMap(([file, html]) => fixedSearchInputs(file, html)), [])
 })
 
 // Owner decision 2026-11-24: headings are --font-ui with no mark; mono stays for code, identifiers, keys, and captures.
@@ -890,5 +894,5 @@ test('the heading guard catches a mono heading and a ## mark', () => {
 
 test('no page or site page sets an h1 to h6 or title rule in mono, or draws a ## mark', () => {
   const pages = readdirSync(dir).filter((file) => file.endsWith('.html')).map((page) => [page, read(page)])
-  assert.deepEqual([...pages, ...sitePages()].flatMap(([file, html]) => headingProblems(file, html)), [])
+  assert.deepEqual([...pages, ...linkedSheets, ...sitePages()].flatMap(([file, html]) => headingProblems(file, html)), [])
 })
