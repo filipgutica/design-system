@@ -8,7 +8,7 @@ import PROJECTS from './fixtures/projects.json' with { type: 'json' }
 const dir = new URL('../language/', import.meta.url)
 const read = (file) => readFileSync(new URL(file, dir), 'utf8')
 // Stylesheets the pages link, read as a page's <style>, so every page guard covers their rules too.
-const linkedSheets = ['conversation.css'].map((file) => [file, `<style>${read(file)}</style>`])
+const linkedSheets = ['feedback.css', 'conversation.css'].map((file) => [file, `<style>${read(file)}</style>`])
 
 test('the foundations catalogue shows every token that tokens.css defines', () => {
   const lightRoot = read('tokens.css').match(/^:root \{([\s\S]*?)^\}/m)[1]
@@ -244,7 +244,8 @@ const referenceTouchWidths = new Set([
 ])
 
 test('example pages copy the catalogue rules for the shared controls and components they use unchanged', () => {
-  const catalogue = new Set(copiedStyles(read('components.html')).map(key))
+  // The catalogue's rules include the stylesheets it links, such as feedback.css for the badge and the alert.
+  const catalogue = new Set([read('components.html'), ...linkedSheets.map(([, html]) => html)].flatMap(copiedStyles).map(key))
   for (const page of ['reference.html', 'docs.html', 'guide.html', 'product.html']) {
     const rules = copiedStyles(read(page))
     for (const { name, pattern, pages } of families) {
@@ -363,7 +364,7 @@ test('the breakpoint guard catches an unnamed viewport breakpoint in spaced or m
 })
 
 test('pages and the report stylesheet use only the named breakpoints', () => {
-  const files = [...readdirSync(dir).filter((file) => file.endsWith('.html')), 'conversation.css', 'visualizations/report.css']
+  const files = [...readdirSync(dir).filter((file) => file.endsWith('.html')), 'feedback.css', 'conversation.css', 'visualizations/report.css']
   assert.deepEqual(files.flatMap((file) => offBreakpoints(file, read(file))), [])
 })
 

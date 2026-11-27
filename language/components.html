@@ -8,7 +8,8 @@
   /*
    * Component catalogue. Plain HTML and CSS on tokens.css; no framework or build step.
    * components.md specifies each component; copy markup and styles from here. The conversation
-   * components' rules live in conversation.css, which this page links after this stylesheet.
+   * components' rules live in conversation.css, and the badge's and alert's in feedback.css; this page
+   * links both after this stylesheet.
    *
    * Pinned states: the first specimen in each row is live. The others pin one state so it
    * renders without a pointer or keyboard: .is-hover, .is-active (pressed), and .is-focus
@@ -361,22 +362,7 @@
   .tabpanel { padding-top: var(--space-3); font-size: var(--text-sm); color: var(--color-muted); }
   .tabs-heading { margin-bottom: var(--space-1); color: var(--color-text); font-size: var(--text-md); font-weight: var(--weight-medium); letter-spacing: 0; }
 
-  /* Badge */
-  .badge { display: inline-flex; align-items: center; gap: var(--space-1); width: fit-content; padding: 0.125rem 0.375rem; border: 1px solid transparent; border-radius: var(--radius-pill); background: var(--color-surface-muted); color: var(--color-muted); font: var(--weight-medium) var(--text-xs) / 1.25 var(--font-ui); white-space: nowrap; }
-  .badge:is(.success, .warning, .danger, .info) { background: color-mix(in srgb, var(--tone) 22%, var(--color-surface-raised)); color: light-dark(color-mix(in srgb, var(--tone) 75%, var(--color-status-ink)), color-mix(in srgb, var(--tone) 85%, var(--color-status-ink))); }
-  .badge:is(.success, .warning, .danger, .info)::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-  .badge.success { --tone: var(--color-success); }
-  .badge.warning { --tone: var(--color-warning); }
-  .badge.danger { --tone: var(--color-error); }
-  .badge.info { --tone: var(--color-info); }
-
-  /* Alert */
-  .alert { display: flex; align-items: flex-start; gap: var(--space-3); max-width: var(--measure); padding: var(--space-3) var(--space-4); border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface); color: var(--color-text); font-size: var(--text-sm); }
-  .alert .icon { margin-top: 0.125rem; color: var(--color-muted); }
-  .alert.success { background: var(--color-success-surface); } .alert.success .icon { color: var(--color-success); }
-  .alert.warning { background: var(--color-warning-surface); } .alert.warning .icon { color: var(--color-warning); }
-  .alert.danger { background: var(--color-error-surface); } .alert.danger .icon { color: var(--color-error); }
-  .alert.info { background: var(--color-info-surface); } .alert.info .icon { color: var(--color-info); }
+  /* Badge and alert: feedback.css draws them, and this page links it after this stylesheet. */
 
   /* Surface and card */
   .surface, .card { min-width: 0; border: 1px solid transparent; border-radius: var(--radius-panel); background: var(--color-surface-raised); box-shadow: var(--shadow-surface); }
@@ -871,10 +857,6 @@
     /* A rail's current section has no pip, so it takes the current page's system border. */
     :is(.rail, .rail-specimen) a[aria-current="location"] { border-inline-start: 2px solid Highlight; padding-inline-start: calc(var(--space-3) - 2px); }
     .key { border-color: CanvasText; }
-    /* The tone dot is a fill, so it opts out of adjustment and takes the label's system colour. */
-    .badge:is(.success, .warning, .danger, .info)::before { forced-color-adjust: none; background: CanvasText; }
-    /* An SVG keeps the colour it sets, so the status icon takes the system text colour. */
-    .alert .icon, .alert:is(.success, .warning, .danger, .info) .icon { color: CanvasText; }
     .coverage td { color: CanvasText; }
     /* Value marks: only the mark opts out of adjustment and redraws in the system highlight. */
     .progress > span, .score .pips i.on { forced-color-adjust: none; border-color: Highlight; background: Highlight; }
@@ -1075,6 +1057,7 @@
     .cmdlist td:last-child { grid-column: 2; grid-row: 1 / span 2; }
   }
 </style>
+<link rel="stylesheet" href="feedback.css">
 <link rel="stylesheet" href="conversation.css">
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">

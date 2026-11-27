@@ -7,8 +7,9 @@
  * page's @layer base element rules and any layered component stylesheet, such as ui-sdk.css.
  *
  * The parts these components hold come from their own components, which this file does not draw: the
- * badge (the Agent mark and the thread's state), the button (Resolve and the send button), the quiet
- * action and the overflow menu (the hover toolbar and More), the field error, and the alert.
+ * badge (the Agent mark and the thread's state) and the alert from feedback.css, the button (Resolve and
+ * the send button) and the field error from ui-sdk.css or the catalogue, and the quiet action and the
+ * overflow menu (the hover toolbar and More) from the catalogue or ui-sdk's Menu.
  */
 
 /* ---------- Message row and message group ---------- */

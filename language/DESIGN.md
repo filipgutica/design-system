@@ -46,6 +46,7 @@ Center the **container**, not every sentence. Align header, content, images, and
 - `components.md`: one spec for each component, with anatomy, states, Do and Don't lines, keyboard and screen-reader behavior, motion, and forced colors. Read it for any component work.
 - `components.html`: every component in each of its states, in plain HTML and CSS on `tokens.css`. Copy component markup and styles from there.
 - `conversation.css`: the conversation components' styles (message row and group, hover toolbar, thread panel, composer, tool-call disclosure, and mention). `components.html` links it, so it is their one source. Load it after `tokens.css`, unlayered, as the catalogue does; the parts these components hold, such as the badge and the button, come from their own components.
+- `feedback.css`: the badge's and the alert's styles, with their status tones. `components.html` links it, so it is their one source; ui-sdk has no badge or alert part. Load it after `tokens.css`, unlayered.
 - `decisions.md`: the choices behind the components, and the options they replaced.
 - `reference.html`: an application example, and a Foundations catalogue (`#foundations`) of every token: type, color with contrast, spacing, shape, borders, elevation, focus, and motion.
 - `docs.html`: a balanced documentation shell and compact setup command, with a one-page site's "On this page" rail.
@@ -57,7 +58,7 @@ Token names depend on where the page runs. This file uses the `tokens.css` names
 
 | Context | Variable names to write |
 | --- | --- |
-| Standalone HTML | The `tokens.css` names. Import or inline `tokens.css`, and copy component styles from `components.html`; link `conversation.css` for the conversation components. |
+| Standalone HTML | The `tokens.css` names. Import or inline `tokens.css`, and copy component styles from `components.html`; link `feedback.css` for the badge and alert and `conversation.css` for the conversation components. |
 | Site on a component library built on this design language | The `tokens.css` names that the library declares. The library's own documentation lists any it lacks and any helper behaviour. |
 | Other repository | That repository's own tokens and components, matched to these roles by meaning. |
 | Inline visual | The host's supplied CSS variables and font, with no separate page shell. |
