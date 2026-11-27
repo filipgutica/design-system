@@ -1465,13 +1465,16 @@ test.describe('conversation keyboard', () => {
     await expect(pane.locator('.reply-count')).toHaveText('3 replies')
     await expect(rootCount).toHaveText('3 replies')
     // A reply reopens the thread: the Done badge leaves, Resolve comes back, and the hint returns.
-    await pane.locator('textarea').fill('Reopening: wrap needs another look.')
+    await pane.locator('textarea').fill('Reopening: wrap needs another look.\nSecond line.')
     await pane.locator('textarea').press('Enter')
     await expect(pane.locator('.pane-head .badge')).toBeHidden()
     await expect(pane.getByRole('button', { name: 'Resolve' })).toBeVisible()
     await expect(pane.getByRole('status')).toHaveText('Thread reopened')
     await expect(pane.locator('.composer-hint')).not.toContainText('reopens')
     await expect(pane.locator('.pane-body .msg').last()).toContainText('Reopening: wrap needs another look.')
+    // A multiline reply keeps its line break.
+    await expect(pane.locator('.pane-body .msg').last().locator('.msg-body p br')).toHaveCount(1)
+    expect(await pane.locator('.pane-body .msg').last().locator('.msg-body p').innerText()).toBe('Reopening: wrap needs another look.\nSecond line.')
     await expect(pane.locator('.reply-count')).toHaveText('4 replies')
     await expect(rootCount).toHaveText('4 replies')
   })

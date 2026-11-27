@@ -2633,7 +2633,9 @@ I’ll open a ticket for it.</textarea><button class="btn" type="button" data-si
     });
     pane.querySelector('.composer').addEventListener('send', (e) => {
       add('reply');
-      replies.lastElementChild.querySelector('.msg-body p').textContent = e.detail;
+      // Plain text: each line break in the reply becomes a <br>, so a multiline reply keeps its lines.
+      const body = replies.lastElementChild.querySelector('.msg-body p');
+      body.replaceChildren(...e.detail.split('\n').flatMap((line, i) => (i ? [document.createElement('br'), line] : [line])));
       answer();
       count();
       badge.hidden = true;
