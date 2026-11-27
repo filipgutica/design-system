@@ -1388,8 +1388,43 @@ test.describe('segmented control alignment', () => {
 
 // The hover toolbar is one Tab stop with arrow keys between its buttons; the thread panel's handle is a separator
 // that the arrow keys resize from 20rem to 40rem. Neither shows on a touch-width screen.
+// The thread panel's live demo; the resolved specimen beside it is inert.
+const liveThread = '#thread-panel .state:not([inert]) > .thread-demo'
+
 test.describe('conversation keyboard', () => {
   test.use({ viewport: { width: 1280, height: 900 } })
+
+  test('the composer sends on Enter and keeps the field, starts a new line on Shift+Enter, and sends no blank text', async ({ page }) => {
+    await page.goto(url)
+    const field = page.locator('#cmp-live')
+    await field.focus()
+    await page.keyboard.press('Enter')
+    await expect(field).toHaveValue('')
+    await field.pressSequentially('   ')
+    await page.keyboard.press('Enter')
+    await expect(field).toHaveValue('   ')
+    await field.fill('Scroll for now.')
+    await page.keyboard.press('Shift+Enter')
+    await field.pressSequentially('Wrap later.')
+    await expect(field).toHaveValue('Scroll for now.\nWrap later.')
+    await page.keyboard.press('Enter')
+    await expect(field).toHaveValue('')
+    await expect(field).toBeFocused()
+  })
+
+  test('Resolve marks the thread done, ends its replies with the resolution, and moves focus to the pane heading', async ({ page }) => {
+    await page.goto(url)
+    const pane = page.locator(`${liveThread} .thread-pane`)
+    await expect(pane.locator('.pane-head .badge')).toHaveText('Needs you')
+    await pane.getByRole('button', { name: 'Resolve' }).click()
+    await expect(pane.locator('.pane-head .badge')).toHaveText('Done')
+    await expect(pane.getByRole('button', { name: 'Resolve' })).toHaveCount(0)
+    await expect(pane.locator('.pane-head h4')).toBeFocused()
+    await expect(pane.getByRole('status')).toHaveText('Thread resolved')
+    await expect(pane.locator('.pane-body .msg').last().locator('.tag')).toHaveText('Resolved the thread')
+    await expect(pane.locator('.pane-body .tag:not(.resolved)')).toHaveCount(0)
+    await expect(pane.locator('.composer-hint')).toContainText('A reply reopens the thread.')
+  })
 
   test('the hover toolbar shows on focus within, and Left and Right Arrow move a single Tab stop', async ({ page }) => {
     await page.goto(url)
@@ -1412,8 +1447,8 @@ test.describe('conversation keyboard', () => {
 
   test('the thread handle widens the pane with Left Arrow and stops where the channel keeps 16rem, or at 40rem', async ({ page }) => {
     await page.goto(url)
-    const handle = page.locator('#thread-panel .thread-demo .pane-resize')
-    const pane = page.locator('#thread-panel .thread-demo .thread-pane')
+    const handle = page.locator(`${liveThread} .pane-resize`)
+    const pane = page.locator(`${liveThread} .thread-pane`)
     const rem = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))
     const width = () => pane.evaluate((node) => node.getBoundingClientRect().width)
     expect(Math.round(await width())).toBe(26 * rem)
@@ -1422,7 +1457,7 @@ test.describe('conversation keyboard', () => {
     await expect(handle).toHaveAttribute('aria-valuenow', '27')
     expect(Math.round(await width())).toBe(27 * rem)
     for (let i = 0; i < 20; i += 1) await page.keyboard.press('ArrowLeft')
-    const frameRem = await page.locator('#thread-panel .thread-demo').evaluate((node) => node.getBoundingClientRect().width) / rem
+    const frameRem = await page.locator(liveThread).evaluate((node) => node.getBoundingClientRect().width) / rem
     const max = Math.max(20, Math.min(40, Math.floor(frameRem - 16)))
     await expect(handle).toHaveAttribute('aria-valuemax', String(max))
     await expect(handle).toHaveAttribute('aria-valuenow', String(max))
@@ -1434,7 +1469,7 @@ test.describe('conversation keyboard', () => {
   })
 
   test('a desktop frame too narrow for both panes stacks them; a wide one keeps the channel at least 16rem', async ({ page }) => {
-    const layout = () => page.locator('#thread-panel .thread-demo').evaluate((frame) => {
+    const layout = () => page.locator(liveThread).evaluate((frame) => {
       const [stream, pane] = [frame.querySelector('.stream')!, frame.querySelector('.thread-pane')!].map((node) => node.getBoundingClientRect())
       return { stacked: pane.top > stream.top, channel: stream.width, handle: getComputedStyle(frame.querySelector('.pane-resize')!).display }
     })
@@ -1461,8 +1496,8 @@ test.describe('conversation keyboard', () => {
     await page.setViewportSize({ width: 720, height: 900 })
     await page.goto(url)
     await expect(page.locator('#hover-toolbar .msg-tools').first()).toBeHidden()
-    await expect(page.locator('#thread-panel .thread-demo .pane-resize')).toBeHidden()
-    const [frame, pane] = await Promise.all(['.thread-demo', '.thread-demo .thread-pane'].map((selector) => page.locator(`#thread-panel ${selector}`).evaluate((node) => node.getBoundingClientRect().width)))
+    await expect(page.locator(`${liveThread} .pane-resize`)).toBeHidden()
+    const [frame, pane] = await Promise.all(['', ' .thread-pane'].map((selector) => page.locator(`${liveThread}${selector}`).evaluate((node) => node.getBoundingClientRect().width)))
     expect(Math.abs(frame - 2 - pane)).toBeLessThan(0.5)
   })
 })
