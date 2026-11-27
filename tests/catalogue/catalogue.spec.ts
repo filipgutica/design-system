@@ -1410,6 +1410,10 @@ test.describe('conversation keyboard', () => {
     await page.keyboard.press('Enter')
     await expect(field).toHaveValue('')
     await expect(field).toBeFocused()
+    // Enter that ends an input method's composition belongs to the input method.
+    await field.fill('こんにちは')
+    await field.dispatchEvent('keydown', { key: 'Enter', isComposing: true, bubbles: true, cancelable: true })
+    await expect(field).toHaveValue('こんにちは')
   })
 
   test('Resolve marks the thread done, ends its replies with the resolution, and moves focus to the pane heading', async ({ page }) => {
